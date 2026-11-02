@@ -31,6 +31,7 @@ class PresenceGuard:
 
     def __init__(self):
         self.resume_delay = 10  # seconds after a player left before the hunt resumes
+        self.allowed_names = set()
         self.allowed = set()  # captured targets never hold the bot
         # REDE-70: each kind of presence can be set not to hold the bot (alerts still happen).
         self.hold_players = self.hold_disguised = self.hold_hidden = True
@@ -46,6 +47,8 @@ class PresenceGuard:
         self.hidden = {}
         self.positions = {}
         self.last_seen_cells = {}  # kept after removal: a hiding character is cleared first
+        self.names = {}
+        self.outside_since = {}
         self.players = set()
         self.departures = {}  # identity -> {'left_at', 'position', 'reason', 'far'}
 
@@ -58,6 +61,8 @@ class PresenceGuard:
             identity = event.get('entity_id')
             if identity is None or identity == player_id or not is_player_id(identity):
                 continue
+            if kind == 'name' and event.get('name'):
+                self.names[identity] = event['name'].strip().casefold()
             if 'position' in event:
                 self.positions[identity] = event.get('destination') or event['position']
                 self.last_seen_cells[identity] = self.positions[identity]
@@ -107,31 +112,47 @@ class PresenceGuard:
         else:
             self.hidden.pop(identity, None)
 
+    def ignored(self, identity):
+        return identity in self.allowed or self.names.get(identity) in self.allowed_names
+
     def reason(self, player_position, now):
+        # A visible actor may walk beyond the radius without a removal packet.
+        for identity in self.players:
+            position = self.positions.get(identity)
+            if position is not None and player_position is not None and math.dist(position, player_position) > self.VIEW_RANGE:
+                self.outside_since.setdefault(identity, now)
+            else:
+                self.outside_since.pop(identity, None)
+
         self.hidden = {i: h for i, h in self.hidden.items() if now-h['seen_at'] <= self.HIDDEN_HOLD}
         for identity, species in self.disguised.items():
-            if identity in self.allowed or not self.hold_disguised:
+            if self.ignored(identity) or not self.hold_disguised:
                 continue
             position = self.positions.get(identity)
             if position is None or player_position is None or math.dist(position, player_position) <= self.VIEW_RANGE:
                 return f'personagem {identity} disfarcado de monstro (sprite {species}) no campo de visao'
         for identity, hidden in self.hidden.items():
-            if identity in self.allowed or not self.hold_hidden:
+            if self.ignored(identity) or not self.hold_hidden:
                 continue
             kind = '@hide/invisivel' if hidden['option'] & OPTION_INVISIBLE else 'escondido/furtivo'
             remaining = round(self.HIDDEN_HOLD-(now-hidden['seen_at']))
             return f'personagem {identity} {kind} por perto; retomada em ate {remaining} s sem novos sinais'
-        for identity in sorted(self.players-self.allowed) if self.hold_players else ():
+        for identity in sorted(self.players) if self.hold_players else ():
+            if self.ignored(identity):
+                continue
             position = self.positions.get(identity)
             if position is None or player_position is None or math.dist(position, player_position) <= self.VIEW_RANGE:
                 return f'jogador {identity} no campo de visao'
+            left = self.resume_delay-(now-self.outside_since.get(identity, now))
+            if left > 0:
+                return f'jogador {identity} afastado; retomada em {left:.0f} s'
         for identity, gone in sorted(self.departures.items()):
-            wait = self.resume_delay if gone['far'] else max(self.resume_delay, self.NEAR_DEPARTURE_HOLD)
+            wait = self.resume_delay
             left = wait-(now-gone['left_at'])
             if left <= 0:
                 del self.departures[identity]
                 continue
-            if identity in self.allowed or not self.hold_players:
+            if self.ignored(identity) or not self.hold_players:
                 continue
             how = {self.REMOVE_LOGOUT: 'deslogou', self.REMOVE_TELEPORT: 'teleportou'}.get(gone['reason'])
             how = how or ('foi para longe' if gone['far'] else 'sumiu perto (pode estar escondido)')

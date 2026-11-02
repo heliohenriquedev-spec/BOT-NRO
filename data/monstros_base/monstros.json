@@ -1,8 +1,16 @@
 {
+ "1010": {
+  "species_id": 1010,
+  "maps": {
+   "areia": 3
+  },
+  "walk_speed_ms": 500,
+  "captured_sprite": true
+ },
  "1039": {
   "species_id": 1039,
   "maps": {
-   "tur_dun03": 22
+   "tur_dun03": 47
   },
   "walk_speed_ms": 200,
   "name": "Monstro Marinho",
@@ -12,7 +20,7 @@
  "1041": {
   "species_id": 1041,
   "maps": {
-   "tur_dun02": 53
+   "tur_dun02": 71
   },
   "walk_speed_ms": 300,
   "name": "Grande Esquilo",
@@ -22,10 +30,20 @@
  "1062": {
   "species_id": 1062,
   "maps": {
-   "areia": 2
+   "areia": 3
   },
   "walk_speed_ms": 500,
   "captured_sprite": true
+ },
+ "1177": {
+  "species_id": 1177,
+  "maps": {
+   "yuno_fild11": 2
+  },
+  "walk_speed_ms": 150,
+  "captured_sprite": true,
+  "name": "Doki",
+  "max_hp": 980100
  },
  "1210": {
   "species_id": 1210,
@@ -36,18 +54,28 @@
  "1212": {
   "species_id": 1212,
   "maps": {
-   "kakashi": 7,
-   "moc_fild01": 9
+   "kakashi": 11,
+   "moc_fild01": 12
   },
   "walk_speed_ms": 350,
   "captured_sprite": true,
   "name": "Akino",
   "max_hp": 50
  },
+ "1315": {
+  "species_id": 1315,
+  "maps": {
+   "yuno_fild11": 12
+  },
+  "walk_speed_ms": 155,
+  "captured_sprite": true,
+  "name": "Ninkame",
+  "max_hp": 1200000
+ },
  "1601": {
   "species_id": 1601,
   "maps": {
-   "tur_dun02": 89
+   "tur_dun02": 122
   },
   "walk_speed_ms": 250,
   "name": "Tartaruga",
@@ -57,36 +85,59 @@
  "1634": {
   "species_id": 1634,
   "maps": {
-   "areia": 2
+   "areia": 4,
+   "yuno_fild11": 5
   },
-  "walk_speed_ms": 500,
-  "captured_sprite": true
+  "walk_speed_ms": 170,
+  "captured_sprite": true,
+  "name": "Jounin",
+  "max_hp": 1300000
  },
  "1656": {
   "species_id": 1656,
   "maps": {
-   "cmd_fild09": 20
+   "cmd_fild09": 111
   },
   "walk_speed_ms": 100,
   "captured_sprite": true,
   "name": "Genin",
   "max_hp": 12000
  },
+ "1772": {
+  "species_id": 1772,
+  "maps": {
+   "kakashi": 2
+  },
+  "walk_speed_ms": 150,
+  "captured_sprite": true,
+  "name": "Barra Mal",
+  "max_hp": 2000000
+ },
  "1783": {
   "species_id": 1783,
   "maps": {
-   "kakashi": 14,
-   "moc_fild01": 24
+   "kakashi": 21,
+   "moc_fild01": 34
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,
   "name": "Filhote de Katsuyu",
   "max_hp": 70
  },
+ "1790": {
+  "species_id": 1790,
+  "maps": {
+   "cmd_fild09": 1
+  },
+  "walk_speed_ms": 150,
+  "captured_sprite": true,
+  "name": "Boa Hancock",
+  "max_hp": 2000000
+ },
  "1917": {
   "species_id": 1917,
   "maps": {
-   "tur_dun03": 2
+   "tur_dun03": 4
   },
   "walk_speed_ms": 400,
   "captured_sprite": true,

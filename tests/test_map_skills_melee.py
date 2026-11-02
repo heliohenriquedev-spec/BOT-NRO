@@ -88,15 +88,14 @@ def test_running_away_goes_around_a_wall():
     assert math.dist(retreat['destination'], [12, 20]) > 2
 
 
-def test_with_basic_attacks_a_close_target_is_attacked_hand_to_hand():
+def test_basic_attacks_do_not_override_ranged_spacing():
     hunt = PacketHunt()
     hunt.start()
-    far = hunt.plan(hunt_state([10, 10], [15, 10]), 0)
-    assert far['kind'] == 'move' and math.dist(far['destination'], [15, 10]) < 5  # REDE-84: walks up to it
-    hunt.pending = None
-    hunt.target = None
+    assert hunt.plan(hunt_state([10, 10], [15, 10]), 0) is None
     close = hunt.plan(hunt_state([10, 10], [12, 10]), 1)
-    assert close == {'kind': 'attack', 'target_id': 20}
+    assert close['purpose'] == 'keep_distance'
+    distance = math.dist(close['destination'], [12, 10])
+    assert 2 < distance <= 6
 
 
 def test_basic_attack_waits_while_a_skill_in_reach_is_about_to_be_ready():
@@ -126,7 +125,7 @@ def test_basic_attacks_take_a_turn_after_each_skill_only_when_enabled(tmp_path):
 def test_an_unanswered_basic_attack_does_not_hold_the_next_one_for_long():
     hunt = PacketHunt()
     hunt.start()
-    action = hunt.plan(hunt_state([10, 10], [11, 10]), 0)
+    action = hunt.plan(hunt_state([10, 10], [11, 10], engagement=2), 0)
     assert action['kind'] == 'attack'
     hunt.sent(action, 0)
     assert hunt.pending['deadline'] <= PacketHunt.ATTACK_RESPONSE_TIMEOUT

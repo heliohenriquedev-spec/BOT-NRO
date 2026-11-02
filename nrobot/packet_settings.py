@@ -25,6 +25,7 @@ HOTKEYS = {name: code for name, code in (
     + [(f'Num {i}', 0x60+i) for i in range(10)])}
 DEFAULTS.update(hotkey_hunt='Home', hotkey_minimap='End', sit_on_players=False, resume_delay=10,
                 limit_target_failures=True, defer_failed_targets=True, skill_burst=False, skill_burst_interval=.05)
+DEFAULTS.update(allowed_players=[])
 THROWS_TOKEN = 'throws'
 
 
@@ -42,6 +43,10 @@ def validate(data):
     if not isinstance(data, dict):
         raise ValueError('Configuração deve ser um objeto')
     result = {**DEFAULTS, **data}
+    names = result['allowed_players']
+    if not isinstance(names, list) or len(names) > 200 or any(not isinstance(n, str) or not n.strip() or len(n.strip()) > 64 for n in names):
+        raise ValueError('Lista de jogadores permitidos inv?lida')
+    result['allowed_players'] = list(dict.fromkeys(n.strip() for n in names))
     ids = result['species']
     from .map_monsters import monster_assets
     from .presence_guard import monster_sprite

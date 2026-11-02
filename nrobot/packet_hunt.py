@@ -129,7 +129,7 @@ class PacketHunt:
         best = None
         for turn in (0, 45, -45, 90, -90, 135, -135, 180):
             angle = base+math.radians(turn)
-            for cells in (5, 4, 3, 2, 1):
+            for cells in (4, 3, 2, 1):
                 destination = [round(player[0]+math.cos(angle)*cells), round(player[1]+math.sin(angle)*cells)]
                 if destination == list(player):
                     continue
@@ -137,12 +137,14 @@ class PacketHunt:
                                                                     if self.patrol else 5):
                     continue
                 distance = math.dist(destination, monster)
+                if distance > combat_range or (collision is not None and not collision.line_clear(destination, monster)):
+                    continue
                 if distance <= length:
                     continue  # not away from it
                 score = -abs(distance-want)  # as close as possible to the wanted distance
                 if best is None or score > best[0]:
                     best = (score, destination)
-                break  # longest free step in this direction found
+                # Evaluate shorter steps too: they can preserve shooting range.
             if best is not None and best[0] > -1:
                 break  # a good spot straight away: no need to turn
         if best is None:
@@ -432,10 +434,13 @@ class PacketHunt:
                        and state['player_sp'] >= metadata.get('sp_cost', 65535))
         combat_range = state.get('engagement_range', min(6, metadata['range']) if wants_skill else 2)
         closest = min(math.dist(player, point) for point in range_positions)
-        melee = self.auto_attacks and not wants_skill  # the old Kunai-only mode keeps its range
+        melee = self.auto_attacks and not wants_skill and combat_range <= 2  # the old Kunai-only mode keeps its range
         if melee:
             combat_range = self.MELEE_RANGE  # go hand to hand: basic attacks between the skills
-        elif not self.auto_attacks and combat_range >= 3 and closest < combat_range-self.KITE_MARGIN:
+        # The configured rotation supplies engagement_range and handles shooting while
+        # retreating. The legacy Kunai planner must reach its cast/response checks first;
+        # otherwise a nearby target always produces a walk instead of a ready skill.
+        elif (not wants_skill or not self.auto_attacks) and combat_range >= 3 and closest < combat_range-self.KITE_MARGIN:
             retreat = self.step_back(player, actual_position, combat_range, collision, walk_speed_ms)
             if retreat is not None:
                 return retreat

@@ -25,7 +25,8 @@ def test_disguised_character_holds_until_it_leaves_view():
     guard.observe([decode(appearance_22c(2003137, 1037))], 2000001, 0)
     assert 'disfarcado' in guard.reason([10, 20], 0)
     guard.observe([{'kind': 'move', 'entity_id': 2003137, 'position': [10, 20], 'destination': [40, 20]}], 2000001, 1)
-    assert guard.reason([10, 20], 1) is None  # walked beyond view range
+    assert guard.reason([10, 20], 1)  # countdown starts on leaving the radius
+    assert guard.reason([10, 20], 12) is None
     guard.observe([{'kind': 'move', 'entity_id': 2003137, 'position': [40, 20], 'destination': [15, 20]}], 2000001, 2)
     assert guard.reason([10, 20], 2)
     guard.observe([{'kind': 'remove', 'entity_id': 2003137}], 2000001, 3, own_position=[10, 20])
@@ -40,7 +41,7 @@ def test_any_nearby_character_holds_but_own_character_is_ignored():
     guard.observe([decode(appearance_22c(2003137, 26))], 2000001, 0)
     reason = guard.reason([10, 20], 0)
     assert 'jogador 2003137' in reason and 'disfarcado' not in reason
-    assert guard.reason([40, 20], 0) is None  # beyond view range
+    assert guard.reason([40, 20], 0)  # waits configured delay beyond radius
     guard.observe([{'kind': 'remove', 'entity_id': 2003137, 'reason': 2}], 2000001, 1, own_position=[10, 20])
     assert 'deslogou' in guard.reason([10, 20], 1)  # REDE-82: waits the resume delay
     assert guard.reason([10, 20], 1+guard.resume_delay+.1) is None
@@ -180,3 +181,23 @@ def test_player_ignored_when_pausing_on_players_is_off():
     guard.observe([decode(appearance_22c(2003137, 26)), {'kind': 'remove', 'entity_id': 2003137, 'reason': 2}], 1, 0,
                   own_position=[10, 20])
     assert guard.reason([10, 20], 1) is None
+
+
+def test_allowed_name_skips_all_presence_holds_without_ignoring_others():
+    guard = PresenceGuard()
+    guard.allowed_names = {'amigo'}
+    guard.observe([decode(appearance_22c(2003137, 1037, 0x40)),
+                   {'kind': 'name', 'entity_id': 2003137, 'name': 'AmIgO'}], 1, 0)
+    assert guard.reason([10, 20], 0) is None
+    guard.observe([decode(appearance_22c(2003138, 26))], 1, 1)
+    assert '2003138' in guard.reason([10, 20], 1)
+
+
+def test_near_removal_uses_configured_delay_and_does_not_restart_countdown():
+    guard = PresenceGuard()
+    guard.resume_delay = 12
+    guard.observe([decode(appearance_22c(2003137, 26)),
+                   {'kind': 'remove', 'entity_id': 2003137, 'reason': 0}], 1, 0, [10, 20])
+    assert guard.reason([10, 20], 11)
+    assert guard.reason([10, 20], 12.1) is None
+    assert guard.reason([10, 20], 13) is None

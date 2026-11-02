@@ -245,6 +245,8 @@ class SessionRelay:
         self.presence.hold_disguised = settings['pause_on_disguised']
         self.presence.hold_hidden = settings['pause_on_hidden']
         self.presence.resume_delay = settings['resume_delay']
+        self.presence.allowed_names = {n.casefold() for n in settings['allowed_players']}
+        self.presence.names.update({i: n.strip().casefold() for i, n in self.player_names.items() if n})
         from .packet_settings import HOTKEYS
         self.hunt_key, self.hunt_key_name = HOTKEYS[settings['hotkey_hunt']], settings['hotkey_hunt']
         self.sit_on_players = settings['sit_on_players']
@@ -1204,7 +1206,9 @@ class SessionRelay:
         if reason is None:
             if self.presence_hold is not None:
                 if self.sitting:
-                    await self.send_body_action(STAND)
+                    if not await self.send_body_action(STAND):
+                        self.presence_hold = 'aguardando conexao pronta para levantar e retomar'
+                        return True
                     self.sitting = False
                     if self.hunt is not None:
                         self.hunt.ready_at = max(self.hunt.ready_at, time.monotonic()+.6)  # time to stand up
@@ -1335,7 +1339,7 @@ class SessionRelay:
                     raise HuntTargetChanged('Mapa da rota ficou indisponível')
                 elif (not 1 <= max(abs(destination[i]-player[i]) for i in (0, 1)) <= (self.hunt.patrol.max_step if is_patrol else 4)
                       or not all(1 <= n <= 1022 for n in destination)
-                      or (not is_patrol and math.dist(destination, entity.destination or target)
+                      or (not is_patrol and action.get('purpose') != 'keep_distance' and math.dist(destination, entity.destination or target)
                           >= math.dist(player, entity.destination or target))):
                     raise HuntTargetChanged('Passo inválido ou alvo mudou de direção')
                 payload = move(*destination)

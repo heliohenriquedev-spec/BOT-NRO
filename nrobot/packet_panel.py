@@ -221,9 +221,11 @@ class PacketPanel(QMainWindow):
         resume_row.addWidget(self.resume_delay)
         resume_row.addWidget(QLabel('depois que o jogador sair da tela'), 1)
         presence_layout.addLayout(resume_row)
-        for line in ('Pelos pacotes do mapa: conta como saída se deslogou, teleportou ou andou além de 18 células.',
-                     'Se sumiu perto (pode estar escondido), a espera é de pelo menos 60 s.'):
-            presence_layout.addWidget(QLabel(line))
+        presence_layout.addWidget(QLabel('Jogadores permitidos: um nome por linha. N?o pausam a ca?a.'))
+        self.allowed_players = QPlainTextEdit()
+        self.allowed_players.setMaximumHeight(95)
+        self.allowed_players.setPlaceholderText('Nome exato do personagem')
+        presence_layout.addWidget(self.allowed_players)
         presence_layout.addWidget(QLabel('Os alertas em vermelho no Diagnóstico aparecem sempre.'))
         form.insertRow(form.rowCount()-1, presence_box)
         self.advanced = QCheckBox('Combinar habilidades configuradas e buffs por intervalos individuais')
@@ -289,6 +291,7 @@ class PacketPanel(QMainWindow):
         self.hotkey_minimap.setCurrentText(settings['hotkey_minimap'])
         self.sit_on_players.setChecked(settings['sit_on_players'])
         self.resume_delay.setValue(settings['resume_delay'])
+        self.allowed_players.setPlainText('\n'.join(settings['allowed_players']))
         self.limit_failures.setChecked(settings['limit_target_failures'])
         self.defer_failed.setChecked(settings['defer_failed_targets'])
         self.skill_burst.setChecked(settings['skill_burst'])
@@ -321,6 +324,7 @@ class PacketPanel(QMainWindow):
                 'pause_on_players': self.pause_players.isChecked(), 'pause_on_disguised': self.pause_disguised.isChecked(),
                 'pause_on_hidden': self.pause_hidden.isChecked(), 'fast_offensives': self.fast_offensives.isChecked(),
                 'hotkey_hunt': self.hotkey_hunt.currentText(), 'hotkey_minimap': self.hotkey_minimap.currentText(),
+                'allowed_players': [n.strip() for n in self.allowed_players.toPlainText().splitlines() if n.strip()],
                 'sit_on_players': self.sit_on_players.isChecked(), 'resume_delay': self.resume_delay.value(),
                 'limit_target_failures': self.limit_failures.isChecked(),
                 'defer_failed_targets': self.defer_failed.isChecked(),
@@ -625,6 +629,7 @@ class PacketPanel(QMainWindow):
         self.save_timer.setSingleShot(True)
         self.save_timer.setInterval(800)
         self.save_timer.timeout.connect(self.autosave)
+        self.allowed_players.textChanged.connect(self.schedule_save)
         self.targets.changed.connect(self.schedule_save)
         for combo in (self.hotkey_hunt, self.hotkey_minimap):
             combo.currentTextChanged.connect(self.schedule_save)

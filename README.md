@@ -65,3 +65,22 @@ instalado vê a versão nova na próxima vez que abrir o painel.
 
 O arquivo `nrobot/grf_header.py` adapta código do [rAthena](https://github.com/rathena/rathena),
 distribuído sob a licença em `third_party/rathena/LICENCE`.
+
+
+### Ajustes locais de presenca e distancia (2026-11-02)
+
+Em Configuracao, a lista de jogadores permitidos aceita um nome exato por linha,
+sem diferenciar maiusculas/minusculas. A excecao passa a valer quando o servidor
+informa o nome; outros jogadores continuam pausando normalmente. A lista e salva
+com as configuracoes do painel.
+
+A retomada por presenca usa o intervalo configurado depois da saida do raio de
+visao ou remocao do jogador. Uma nova aproximacao reinicia a espera. Sinais explicitos
+de invisibilidade continuam usando a retencao propria de furtividade. Pausas manuais
+nao sao desfeitas automaticamente. Se o comando de levantar nao puder ser enviado,
+o bot aguarda e tenta novamente antes de liberar a caca.
+
+Com habilidades ofensivas de longo alcance habilitadas e utilizaveis, o movimento
+mantem distancia mesmo com ataques basicos ligados. O recuo respeita colisao,
+linha de visao e alcance; ataques basicos continuam limitados ao proprio alcance.
+Estas alteracoes exigem reiniciar o painel e reconectar o personagem ao relay.

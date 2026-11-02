@@ -111,3 +111,24 @@ def test_failure_rules_can_be_switched_off(tmp_path):
     assert relay.rotation.attempts > 1000 and relay.rotation.defer == .3
     relay.apply_settings({**DEFAULTS, 'species': [1037]})
     assert relay.hunt.SKILL_ATTEMPTS == DEFAULTS['skill_attempts'] and relay.rotation.defer == DEFAULTS['target_defer']
+
+
+def test_resuming_retries_stand_if_native_stream_is_incomplete(tmp_path):
+    from nrobot.packet_hunt import PacketHunt
+    from nrobot.session_relay import SessionRelay
+    relay = SessionRelay('127.0.0.1', folder=tmp_path, allow_commands=True)
+    relay.hunt = PacketHunt()
+    relay.hunt.start()
+    relay.presence_hold = 'player near'
+    relay.sitting = True
+    assert asyncio.run(relay.update_presence_hold())
+    assert relay.sitting and relay.presence_hold
+    relay.upstream = Writer()
+    assert not asyncio.run(relay.update_presence_hold())
+    assert not relay.sitting and relay.presence_hold is None
+
+
+def test_allowed_names_settings_roundtrip():
+    assert validate({'allowed_players': [' Amigo ', 'Amigo']})['allowed_players'] == ['Amigo']
+    with pytest.raises(ValueError):
+        validate({'allowed_players': 'Amigo'})

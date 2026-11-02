@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.11",
- "published_at": "2026-11-02T19:03:04",
- "notes": "Ataques basicos",
+ "version": "2026.11.02.12",
+ "published_at": "2026-11-02T19:42:14",
+ "notes": "Bot",
  "files": [
   ".gitattributes",
   ".gitignore",
@@ -14,15 +14,20 @@
   "data/catalogo/catalogo.json",
   "data/mapas/LEIA-ME.txt",
   "data/monstros_base/monstros.json",
+  "data/monstros_base/sprites/1010.png",
   "data/monstros_base/sprites/1039.png",
   "data/monstros_base/sprites/1041.png",
   "data/monstros_base/sprites/1062.png",
+  "data/monstros_base/sprites/1177.png",
   "data/monstros_base/sprites/1210.png",
   "data/monstros_base/sprites/1212.png",
+  "data/monstros_base/sprites/1315.png",
   "data/monstros_base/sprites/1601.png",
   "data/monstros_base/sprites/1634.png",
   "data/monstros_base/sprites/1656.png",
+  "data/monstros_base/sprites/1772.png",
   "data/monstros_base/sprites/1783.png",
+  "data/monstros_base/sprites/1790.png",
   "data/monstros_base/sprites/1917.png",
   "data/monstros_base/sprites/20571.png",
   "data/monstros_base/sprites/20619.png",
@@ -295,5 +300,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "9f85df246f38"
+ "files_digest": "2176cb4fab29"
 }
