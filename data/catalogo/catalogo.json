@@ -1,0 +1,8849 @@
+{
+ "monstros": {
+  "MD_GIANT_OCTOPUS": {
+   "sprite": "MD_GIANT_OCTOPUS",
+   "nome": "md_giant_octopus",
+   "tem_sprite": true
+  },
+  "HODE": {
+   "sprite": "HODE",
+   "nome": "Hode",
+   "tem_sprite": true
+  },
+  "KHALITZBURG": {
+   "sprite": "KHALITZBURG",
+   "nome": "Khalitzburg",
+   "tem_sprite": true
+  },
+  "ELDER_WILOW": {
+   "sprite": "ELDER_WILOW",
+   "nome": "Salgueiro Ancião",
+   "tem_sprite": false
+  },
+  "ALIZA": {
+   "sprite": "ALIZA",
+   "nome": "Aliza",
+   "tem_sprite": false
+  },
+  "ANCIENT_TREE": {
+   "sprite": "ANCIENT_TREE",
+   "nome": "ancient_tree",
+   "tem_sprite": false
+  },
+  "ANDRE": {
+   "sprite": "ANDRE",
+   "nome": "Andre",
+   "tem_sprite": false
+  },
+  "ANT_EGG": {
+   "sprite": "ANT_EGG",
+   "nome": "Ovo de Andre",
+   "tem_sprite": false
+  },
+  "ANTONIO": {
+   "sprite": "ANTONIO",
+   "nome": "antonio",
+   "tem_sprite": false
+  },
+  "ARCHANGELING": {
+   "sprite": "ARCHANGELING",
+   "nome": "ArchAngeling",
+   "tem_sprite": false
+  },
+  "ARCHDAM": {
+   "sprite": "ARCHDAM",
+   "nome": "Archdam",
+   "tem_sprite": false
+  },
+  "ARMAIA": {
+   "sprite": "ARMAIA",
+   "nome": "Armeyer Dinze",
+   "tem_sprite": false
+  },
+  "ASSULTER": {
+   "sprite": "ASSULTER",
+   "nome": "Agressor",
+   "tem_sprite": false
+  },
+  "AUNOE": {
+   "sprite": "AUNOE",
+   "nome": "Aunoe",
+   "tem_sprite": false
+  },
+  "BAPHOMET": {
+   "sprite": "BAPHOMET",
+   "nome": "Bafomé",
+   "tem_sprite": false
+  },
+  "BATHORY": {
+   "sprite": "BATHORY",
+   "nome": "Bathory",
+   "tem_sprite": false
+  },
+  "BIGFOOT": {
+   "sprite": "BIGFOOT",
+   "nome": "Pé-Grande",
+   "tem_sprite": false
+  },
+  "BLACK_MUSHROOM": {
+   "sprite": "BLACK_MUSHROOM",
+   "nome": "Cogumelo Negro",
+   "tem_sprite": false
+  },
+  "BON_GUN": {
+   "sprite": "BON_GUN",
+   "nome": "Bongun",
+   "tem_sprite": false
+  },
+  "C_TOWER_MANAGER": {
+   "sprite": "C_TOWER_MANAGER",
+   "nome": "Gerente",
+   "tem_sprite": false
+  },
+  "CARAT": {
+   "sprite": "CARAT",
+   "nome": "Carat",
+   "tem_sprite": false
+  },
+  "CHEPET": {
+   "sprite": "CHEPET",
+   "nome": "Chepet",
+   "tem_sprite": false
+  },
+  "CIVIL_SERVANT": {
+   "sprite": "CIVIL_SERVANT",
+   "nome": "Mao Guai",
+   "tem_sprite": false
+  },
+  "CLOCK": {
+   "sprite": "CLOCK",
+   "nome": "Relógio",
+   "tem_sprite": false
+  },
+  "CONSTANT": {
+   "sprite": "CONSTANT",
+   "nome": "Constant",
+   "tem_sprite": false
+  },
+  "COOKIE": {
+   "sprite": "COOKIE",
+   "nome": "Cookie",
+   "tem_sprite": false
+  },
+  "CRUISER": {
+   "sprite": "CRUISER",
+   "nome": "Soldadinho de Chumbo",
+   "tem_sprite": false
+  },
+  "CRYSTAL_1": {
+   "sprite": "CRYSTAL_1",
+   "nome": "crystal_1",
+   "tem_sprite": false
+  },
+  "CRYSTAL_2": {
+   "sprite": "CRYSTAL_2",
+   "nome": "crystal_2",
+   "tem_sprite": false
+  },
+  "CRYSTAL_3": {
+   "sprite": "CRYSTAL_3",
+   "nome": "crystal_3",
+   "tem_sprite": false
+  },
+  "CRYSTAL_4": {
+   "sprite": "CRYSTAL_4",
+   "nome": "crystal_4",
+   "tem_sprite": false
+  },
+  "DARK_FRAME": {
+   "sprite": "DARK_FRAME",
+   "nome": "Moldura Maldita",
+   "tem_sprite": false
+  },
+  "DARK_SNAKE_LORD": {
+   "sprite": "DARK_SNAKE_LORD",
+   "nome": "Serpente Suprema",
+   "tem_sprite": false
+  },
+  "DEATHWORD": {
+   "sprite": "DEATHWORD",
+   "nome": "Palavra Morta",
+   "tem_sprite": false
+  },
+  "DELETER": {
+   "sprite": "DELETER",
+   "nome": "Exterminador",
+   "tem_sprite": false
+  },
+  "DENIRO": {
+   "sprite": "DENIRO",
+   "nome": "Deniro",
+   "tem_sprite": false
+  },
+  "DESERT_WOLF": {
+   "sprite": "DESERT_WOLF",
+   "nome": "Lobo do Deserto",
+   "tem_sprite": false
+  },
+  "DEVIACE": {
+   "sprite": "DEVIACE",
+   "nome": "Deviace",
+   "tem_sprite": false
+  },
+  "DEVILING": {
+   "sprite": "DEVILING",
+   "nome": "Deviling",
+   "tem_sprite": false
+  },
+  "DEVIRUCHI": {
+   "sprite": "DEVIRUCHI",
+   "nome": "Deviruchi",
+   "tem_sprite": false
+  },
+  "DIABOLIC": {
+   "sprite": "DIABOLIC",
+   "nome": "Diabolik",
+   "tem_sprite": false
+  },
+  "DIMIK": {
+   "sprite": "DIMIK",
+   "nome": "dimik",
+   "tem_sprite": false
+  },
+  "DRAGON_FLY": {
+   "sprite": "DRAGON_FLY",
+   "nome": "Libélula",
+   "tem_sprite": false
+  },
+  "DROPS": {
+   "sprite": "DROPS",
+   "nome": "Drops",
+   "tem_sprite": false
+  },
+  "DROSERA": {
+   "sprite": "DROSERA",
+   "nome": "Drosera",
+   "tem_sprite": false
+  },
+  "DRYAD": {
+   "sprite": "DRYAD",
+   "nome": "Dríade",
+   "tem_sprite": false
+  },
+  "ECHIO": {
+   "sprite": "ECHIO",
+   "nome": "Echio",
+   "tem_sprite": false
+  },
+  "ECLIPSE_P": {
+   "sprite": "ECLIPSE_P",
+   "nome": "eclipse_p",
+   "tem_sprite": false
+  },
+  "EREMES": {
+   "sprite": "EREMES",
+   "nome": "Eremes Guile",
+   "tem_sprite": false
+  },
+  "EVENT_BAPHO": {
+   "sprite": "EVENT_BAPHO",
+   "nome": "event_bapho",
+   "tem_sprite": false
+  },
+  "FAKE_ANGEL": {
+   "sprite": "FAKE_ANGEL",
+   "nome": "Anjo Fajuto",
+   "tem_sprite": false
+  },
+  "GALION": {
+   "sprite": "GALION",
+   "nome": "Galion",
+   "tem_sprite": false
+  },
+  "GHOUL": {
+   "sprite": "GHOUL",
+   "nome": "Carniçal",
+   "tem_sprite": false
+  },
+  "GLOOMUNDERNIGHT": {
+   "sprite": "GLOOMUNDERNIGHT",
+   "nome": "Pesar Noturno",
+   "tem_sprite": false
+  },
+  "GOAT": {
+   "sprite": "GOAT",
+   "nome": "Bode",
+   "tem_sprite": false
+  },
+  "GOLDEN_BUG": {
+   "sprite": "GOLDEN_BUG",
+   "nome": "Besouro-Ladrão Dourado",
+   "tem_sprite": false
+  },
+  "GOLDEN_SAVAGE": {
+   "sprite": "GOLDEN_SAVAGE",
+   "nome": "golden_savage",
+   "tem_sprite": false
+  },
+  "GOLEM": {
+   "sprite": "GOLEM",
+   "nome": "Golem",
+   "tem_sprite": false
+  },
+  "GRIZZLY": {
+   "sprite": "GRIZZLY",
+   "nome": "Grizzly",
+   "tem_sprite": false
+  },
+  "HARWORD": {
+   "sprite": "HARWORD",
+   "nome": "Harword Alteisen",
+   "tem_sprite": false
+  },
+  "HODREMLIN": {
+   "sprite": "HODREMLIN",
+   "nome": "Hodremlin",
+   "tem_sprite": false
+  },
+  "ICE_TITAN": {
+   "sprite": "ICE_TITAN",
+   "nome": "Titã de Gelo",
+   "tem_sprite": false
+  },
+  "ICEICLE": {
+   "sprite": "ICEICLE",
+   "nome": "Estalactite",
+   "tem_sprite": false
+  },
+  "IRON_FIST": {
+   "sprite": "IRON_FIST",
+   "nome": "iron_fist",
+   "tem_sprite": false
+  },
+  "ISILLA": {
+   "sprite": "ISILLA",
+   "nome": "Isilla",
+   "tem_sprite": false
+  },
+  "ISIS": {
+   "sprite": "ISIS",
+   "nome": "Isis",
+   "tem_sprite": false
+  },
+  "KAVAC": {
+   "sprite": "KAVAC",
+   "nome": "Kavach Icarus",
+   "tem_sprite": false
+  },
+  "MARIN": {
+   "sprite": "MARIN",
+   "nome": "Marin",
+   "tem_sprite": false
+  },
+  "MOLE": {
+   "sprite": "MOLE",
+   "nome": "Holden",
+   "tem_sprite": false
+  },
+  "MONEMUS": {
+   "sprite": "MONEMUS",
+   "nome": "monemus",
+   "tem_sprite": false
+  },
+  "MUKA": {
+   "sprite": "MUKA",
+   "nome": "Muka",
+   "tem_sprite": false
+  },
+  "MUMMY": {
+   "sprite": "MUMMY",
+   "nome": "Múmia",
+   "tem_sprite": false
+  },
+  "OBSERVATION": {
+   "sprite": "OBSERVATION",
+   "nome": "Dama da Guarda",
+   "tem_sprite": false
+  },
+  "ORK_WARRIOR": {
+   "sprite": "ORK_WARRIOR",
+   "nome": "Guerreiro Orc",
+   "tem_sprite": false
+  },
+  "PECO_EGG": {
+   "sprite": "PECO_EGG",
+   "nome": "peco_egg",
+   "tem_sprite": false
+  },
+  "PECOPECO": {
+   "sprite": "PECOPECO",
+   "nome": "PecoPeco",
+   "tem_sprite": false
+  },
+  "PENOMENA": {
+   "sprite": "PENOMENA",
+   "nome": "Penomena",
+   "tem_sprite": false
+  },
+  "PETIT": {
+   "sprite": "PETIT",
+   "nome": "Petite",
+   "tem_sprite": false
+  },
+  "PICKY": {
+   "sprite": "PICKY",
+   "nome": "Picky",
+   "tem_sprite": false
+  },
+  "POISON_TOAD": {
+   "sprite": "POISON_TOAD",
+   "nome": "Sapo Venenoso",
+   "tem_sprite": false
+  },
+  "POPORING": {
+   "sprite": "POPORING",
+   "nome": "Poporing",
+   "tem_sprite": false
+  },
+  "PORING": {
+   "sprite": "PORING",
+   "nome": "Poring",
+   "tem_sprite": false
+  },
+  "PORING_": {
+   "sprite": "PORING_",
+   "nome": "poring_",
+   "tem_sprite": false
+  },
+  "POTON_CANON": {
+   "sprite": "POTON_CANON",
+   "nome": "poton_canon",
+   "tem_sprite": false
+  },
+  "POTON_CANON_1": {
+   "sprite": "POTON_CANON_1",
+   "nome": "poton_canon_1",
+   "tem_sprite": false
+  },
+  "POTON_CANON_2": {
+   "sprite": "POTON_CANON_2",
+   "nome": "poton_canon_2",
+   "tem_sprite": false
+  },
+  "POTON_CANON_3": {
+   "sprite": "POTON_CANON_3",
+   "nome": "poton_canon_3",
+   "tem_sprite": false
+  },
+  "RAFFLESIA": {
+   "sprite": "RAFFLESIA",
+   "nome": "Rafflesia",
+   "tem_sprite": false
+  },
+  "RETRIBUTION": {
+   "sprite": "RETRIBUTION",
+   "nome": "Baronesa da Retribuição",
+   "tem_sprite": false
+  },
+  "ROWEEN": {
+   "sprite": "ROWEEN",
+   "nome": "Roween",
+   "tem_sprite": false
+  },
+  "RYBIO": {
+   "sprite": "RYBIO",
+   "nome": "Rybio",
+   "tem_sprite": false
+  },
+  "SALAMANDER": {
+   "sprite": "SALAMANDER",
+   "nome": "Salamandra",
+   "tem_sprite": false
+  },
+  "SEAHORES": {
+   "sprite": "SEAHORES",
+   "nome": "seahores",
+   "tem_sprite": false
+  },
+  "SEYREN": {
+   "sprite": "SEYREN",
+   "nome": "Seyren Windsor",
+   "tem_sprite": false
+  },
+  "SHELTER": {
+   "sprite": "SHELTER",
+   "nome": "Senhora do Abrigo",
+   "tem_sprite": false
+  },
+  "SMOKIE": {
+   "sprite": "SMOKIE",
+   "nome": "Fumacento",
+   "tem_sprite": false
+  },
+  "SOLACE": {
+   "sprite": "SOLACE",
+   "nome": "Senhora do Conforto",
+   "tem_sprite": false
+  },
+  "SPORE": {
+   "sprite": "SPORE",
+   "nome": "Esporo",
+   "tem_sprite": false
+  },
+  "STAPO": {
+   "sprite": "STAPO",
+   "nome": "Stapo",
+   "tem_sprite": false
+  },
+  "TENGU": {
+   "sprite": "TENGU",
+   "nome": "Tengu",
+   "tem_sprite": false
+  },
+  "THA_ODIUM": {
+   "sprite": "THA_ODIUM",
+   "nome": "Odium de Thanatos",
+   "tem_sprite": false
+  },
+  "THIEF_BUG_EGG": {
+   "sprite": "THIEF_BUG_EGG",
+   "nome": "Ovo de Besouro-Ladrão",
+   "tem_sprite": false
+  },
+  "TOAD": {
+   "sprite": "TOAD",
+   "nome": "Sapo-Cururu",
+   "tem_sprite": false
+  },
+  "VOCAL": {
+   "sprite": "VOCAL",
+   "nome": "Vocal",
+   "tem_sprite": false
+  },
+  "VORIT": {
+   "sprite": "VORIT",
+   "nome": "vorit",
+   "tem_sprite": false
+  },
+  "WILOW": {
+   "sprite": "WILOW",
+   "nome": "Salgueiro",
+   "tem_sprite": false
+  },
+  "WOOTAN_SHOOTER": {
+   "sprite": "WOOTAN_SHOOTER",
+   "nome": "Artilheiro Wootan",
+   "tem_sprite": false
+  },
+  "YOYO": {
+   "sprite": "YOYO",
+   "nome": "Yoyo",
+   "tem_sprite": false
+  },
+  "ZENORC": {
+   "sprite": "ZENORC",
+   "nome": "Zenorc",
+   "tem_sprite": false
+  },
+  "SAVAGE_BABE": {
+   "sprite": "SAVAGE_BABE",
+   "nome": "Bebê Selvagem",
+   "tem_sprite": true
+  },
+  "JAKK": {
+   "sprite": "JAKK",
+   "nome": "Jakk",
+   "tem_sprite": true
+  },
+  "G_ASSULTER": {
+   "sprite": "G_ASSULTER",
+   "nome": "g_assulter",
+   "tem_sprite": true
+  },
+  "NERAID": {
+   "sprite": "NERAID",
+   "nome": "Nereida",
+   "tem_sprite": true
+  },
+  "DEMON_PUNGUS": {
+   "sprite": "DEMON_PUNGUS",
+   "nome": "Pungus",
+   "tem_sprite": true
+  },
+  "XMAS_SMOKEY_GIFT": {
+   "sprite": "XMAS_SMOKEY_GIFT",
+   "nome": "xmas_smokey_gift",
+   "tem_sprite": true
+  },
+  "ARGIOPE": {
+   "sprite": "ARGIOPE",
+   "nome": "Argiope",
+   "tem_sprite": true
+  },
+  "NECROMANCER": {
+   "sprite": "NECROMANCER",
+   "nome": "Necromante",
+   "tem_sprite": true
+  },
+  "RAYDRIC": {
+   "sprite": "RAYDRIC",
+   "nome": "Raydric",
+   "tem_sprite": true
+  },
+  "DRAINLIAR": {
+   "sprite": "DRAINLIAR",
+   "nome": "Drainliar",
+   "tem_sprite": true
+  },
+  "COBALT_MINERAL": {
+   "sprite": "COBALT_MINERAL",
+   "nome": "Cobalto",
+   "tem_sprite": true
+  },
+  "G_MUMMY": {
+   "sprite": "G_MUMMY",
+   "nome": "g_mummy",
+   "tem_sprite": true
+  },
+  "SHINING_PLANT": {
+   "sprite": "SHINING_PLANT",
+   "nome": "Planta Brilhante",
+   "tem_sprite": true
+  },
+  "ANACONDAQ": {
+   "sprite": "ANACONDAQ",
+   "nome": "Anaconda",
+   "tem_sprite": true
+  },
+  "PHARAOH": {
+   "sprite": "PHARAOH",
+   "nome": "Faraó",
+   "tem_sprite": true
+  },
+  "CHOCHO": {
+   "sprite": "CHOCHO",
+   "nome": "chocho",
+   "tem_sprite": true
+  },
+  "FARMILIAR": {
+   "sprite": "FARMILIAR",
+   "nome": "Farmiliar",
+   "tem_sprite": true
+  },
+  "FIREPIT": {
+   "sprite": "FIREPIT",
+   "nome": "Fosso de Fogo",
+   "tem_sprite": true
+  },
+  "DARK_ILLUSION": {
+   "sprite": "DARK_ILLUSION",
+   "nome": "Ilusão das Trevas",
+   "tem_sprite": true
+  },
+  "LUNATIC": {
+   "sprite": "LUNATIC",
+   "nome": "Lunático",
+   "tem_sprite": true
+  },
+  "GOBLIN_1": {
+   "sprite": "GOBLIN_1",
+   "nome": "Goblin",
+   "tem_sprite": true
+  },
+  "GOBLIN_2": {
+   "sprite": "GOBLIN_2",
+   "nome": "goblin_2",
+   "tem_sprite": true
+  },
+  "GOBLIN_3": {
+   "sprite": "GOBLIN_3",
+   "nome": "goblin_3",
+   "tem_sprite": true
+  },
+  "GOBLIN_4": {
+   "sprite": "GOBLIN_4",
+   "nome": "goblin_4",
+   "tem_sprite": true
+  },
+  "GOBLIN_ARCHER": {
+   "sprite": "GOBLIN_ARCHER",
+   "nome": "Goblin Arqueiro",
+   "tem_sprite": true
+  },
+  "GOBLIN_5": {
+   "sprite": "GOBLIN_5",
+   "nome": "goblin_5",
+   "tem_sprite": true
+  },
+  "ORC_SKELETON": {
+   "sprite": "ORC_SKELETON",
+   "nome": "Orc Esqueleto",
+   "tem_sprite": true
+  },
+  "SIORAVA": {
+   "sprite": "SIORAVA",
+   "nome": "Siorava",
+   "tem_sprite": true
+  },
+  "ILL_ZOMBIE_C": {
+   "sprite": "ILL_ZOMBIE_C",
+   "nome": "Morto-Vivo",
+   "tem_sprite": true
+  },
+  "FULBUK": {
+   "sprite": "FULBUK",
+   "nome": "Besouro Rola Brasa",
+   "tem_sprite": true
+  },
+  "EVIL_CLOUD_HERMIT": {
+   "sprite": "EVIL_CLOUD_HERMIT",
+   "nome": "Ermitão Maligno",
+   "tem_sprite": true
+  },
+  "JOKER": {
+   "sprite": "JOKER",
+   "nome": "Coringa",
+   "tem_sprite": true
+  },
+  "KOBOLD_ARCHER": {
+   "sprite": "KOBOLD_ARCHER",
+   "nome": "Kobold Arqueiro",
+   "tem_sprite": true
+  },
+  "RAGGED_ZOMBIE": {
+   "sprite": "RAGGED_ZOMBIE",
+   "nome": "Zumbi Dilacerado",
+   "tem_sprite": true
+  },
+  "M_GAMEMASTER": {
+   "sprite": "M_GAMEMASTER",
+   "nome": "m_gamemaster",
+   "tem_sprite": true
+  },
+  "HORN_SCARABA2_EGG": {
+   "sprite": "HORN_SCARABA2_EGG",
+   "nome": "Ovo de Chifres Duplos",
+   "tem_sprite": true
+  },
+  "MYSTCASE": {
+   "sprite": "MYSTCASE",
+   "nome": "Presente",
+   "tem_sprite": true
+  },
+  "THIEF_BUG_MALE": {
+   "sprite": "THIEF_BUG_MALE",
+   "nome": "thief_bug_male",
+   "tem_sprite": true
+  },
+  "APOCALIPS_H": {
+   "sprite": "APOCALIPS_H",
+   "nome": "Vesper",
+   "tem_sprite": true
+  },
+  "PINGUICULA": {
+   "sprite": "PINGUICULA",
+   "nome": "Pinguicula",
+   "tem_sprite": true
+  },
+  "GOPINICH": {
+   "sprite": "GOPINICH",
+   "nome": "Gorynych",
+   "tem_sprite": true
+  },
+  "TRI_JOINT": {
+   "sprite": "TRI_JOINT",
+   "nome": "Trilobita",
+   "tem_sprite": true
+  },
+  "DRACO": {
+   "sprite": "DRACO",
+   "nome": "Draco",
+   "tem_sprite": true
+  },
+  "DOPPELGANGER": {
+   "sprite": "DOPPELGANGER",
+   "nome": "Doppelganger",
+   "tem_sprite": true
+  },
+  "SUCCUBUS": {
+   "sprite": "SUCCUBUS",
+   "nome": "Succubus",
+   "tem_sprite": true
+  },
+  "L_DANCER": {
+   "sprite": "L_DANCER",
+   "nome": "Odalisca",
+   "tem_sprite": true
+  },
+  "SHECIL": {
+   "sprite": "SHECIL",
+   "nome": "Cecil Damon",
+   "tem_sprite": true
+  },
+  "SEEKER": {
+   "sprite": "SEEKER",
+   "nome": "Rastreador",
+   "tem_sprite": true
+  },
+  "BACSOJIN_": {
+   "sprite": "BACSOJIN_",
+   "nome": "Lady Branca",
+   "tem_sprite": true
+  },
+  "MYST": {
+   "sprite": "MYST",
+   "nome": "Névoa",
+   "tem_sprite": true
+  },
+  "LIVE_PEACH_TREE": {
+   "sprite": "LIVE_PEACH_TREE",
+   "nome": "Pessegueira Encantada",
+   "tem_sprite": true
+  },
+  "TRISTAN_3RD": {
+   "sprite": "TRISTAN_3RD",
+   "nome": "tristan_3rd",
+   "tem_sprite": true
+  },
+  "SONIA": {
+   "sprite": "SONIA",
+   "nome": "Sonia",
+   "tem_sprite": true
+  },
+  "ANCIENT_MUMMY": {
+   "sprite": "ANCIENT_MUMMY",
+   "nome": "Múmia Anciã",
+   "tem_sprite": true
+  },
+  "POM_SPIDER": {
+   "sprite": "POM_SPIDER",
+   "nome": "Aranha Pom",
+   "tem_sprite": true
+  },
+  "DRACULA": {
+   "sprite": "DRACULA",
+   "nome": "Drácula",
+   "tem_sprite": true
+  },
+  "RED_MUSHROOM": {
+   "sprite": "RED_MUSHROOM",
+   "nome": "Cogumelo Vermelho",
+   "tem_sprite": true
+  },
+  "WISH_MAIDEN": {
+   "sprite": "WISH_MAIDEN",
+   "nome": "wish_maiden",
+   "tem_sprite": true
+  },
+  "WOODEN_GOLEM": {
+   "sprite": "WOODEN_GOLEM",
+   "nome": "Golem de Madeira",
+   "tem_sprite": true
+  },
+  "KNIGHT_OF_WINDSTORM": {
+   "sprite": "KNIGHT_OF_WINDSTORM",
+   "nome": "Cavaleiro da Tempestade",
+   "tem_sprite": true
+  },
+  "DOKEBI": {
+   "sprite": "DOKEBI",
+   "nome": "Dokebi",
+   "tem_sprite": true
+  },
+  "N_MINOROUS": {
+   "sprite": "N_MINOROUS",
+   "nome": "Minorous Pesadelo",
+   "tem_sprite": true
+  },
+  "EL_VENTUS_L": {
+   "sprite": "EL_VENTUS_L",
+   "nome": "el_ventus_l",
+   "tem_sprite": true
+  },
+  "EL_VENTUS_M": {
+   "sprite": "EL_VENTUS_M",
+   "nome": "el_ventus_m",
+   "tem_sprite": true
+  },
+  "EL_VENTUS_S": {
+   "sprite": "EL_VENTUS_S",
+   "nome": "el_ventus_s",
+   "tem_sprite": true
+  },
+  "BLOODY_MURDERER": {
+   "sprite": "BLOODY_MURDERER",
+   "nome": "Serial Killer",
+   "tem_sprite": true
+  },
+  "SAND_MAN": {
+   "sprite": "SAND_MAN",
+   "nome": "Arenoso",
+   "tem_sprite": true
+  },
+  "BANSHEE_MASTER": {
+   "sprite": "BANSHEE_MASTER",
+   "nome": "Senhora das Banshees",
+   "tem_sprite": true
+  },
+  "DISGUISE": {
+   "sprite": "DISGUISE",
+   "nome": "Mascarado",
+   "tem_sprite": true
+  },
+  "L_RAWREL": {
+   "sprite": "L_RAWREL",
+   "nome": "Sábio",
+   "tem_sprite": true
+  },
+  "BREEZE": {
+   "sprite": "BREEZE",
+   "nome": "Breeze",
+   "tem_sprite": true
+  },
+  "ILL_GHOUL": {
+   "sprite": "ILL_GHOUL",
+   "nome": "Carniçal Ilusional",
+   "tem_sprite": true
+  },
+  "LAVA_GOLEM": {
+   "sprite": "LAVA_GOLEM",
+   "nome": "Golem de Lava",
+   "tem_sprite": true
+  },
+  "PARUS": {
+   "sprite": "PARUS",
+   "nome": "parus",
+   "tem_sprite": true
+  },
+  "KAPHA": {
+   "sprite": "KAPHA",
+   "nome": "Kapha",
+   "tem_sprite": true
+  },
+  "KNIGHT_OF_ABYSS": {
+   "sprite": "KNIGHT_OF_ABYSS",
+   "nome": "Cavaleiro do Abismo",
+   "tem_sprite": true
+  },
+  "PARASITE_BULLET": {
+   "sprite": "PARASITE_BULLET",
+   "nome": "parasite_bullet",
+   "tem_sprite": true
+  },
+  "HEADLESS_MULE": {
+   "sprite": "HEADLESS_MULE",
+   "nome": "Mula Sem Cabeça",
+   "tem_sprite": true
+  },
+  "THIEF_BUG_LARVA": {
+   "sprite": "THIEF_BUG_LARVA",
+   "nome": "thief_bug_larva",
+   "tem_sprite": true
+  },
+  "DR_SPORE": {
+   "sprite": "DR_SPORE",
+   "nome": "Esporo de Água Doce",
+   "tem_sprite": true
+  },
+  "ILL_ZOMBIE": {
+   "sprite": "ILL_ZOMBIE",
+   "nome": "Zumbi Ilusional",
+   "tem_sprite": true
+  },
+  "GLASS_PLATE": {
+   "sprite": "GLASS_PLATE",
+   "nome": "Prato Luxuoso",
+   "tem_sprite": true
+  },
+  "FALLINGBISHOP": {
+   "sprite": "FALLINGBISHOP",
+   "nome": "Bispo Decadente",
+   "tem_sprite": true
+  },
+  "GULLINBURSTI": {
+   "sprite": "GULLINBURSTI",
+   "nome": "Gullinbursti",
+   "tem_sprite": true
+  },
+  "APOCALIPS": {
+   "sprite": "APOCALIPS",
+   "nome": "Apocalipse",
+   "tem_sprite": true
+  },
+  "LORA": {
+   "sprite": "LORA",
+   "nome": "Guerreira Laura",
+   "tem_sprite": true
+  },
+  "DRAKE": {
+   "sprite": "DRAKE",
+   "nome": "Drake",
+   "tem_sprite": true
+  },
+  "LOLI_RURI": {
+   "sprite": "LOLI_RURI",
+   "nome": "Loli Ruri",
+   "tem_sprite": true
+  },
+  "XMAS_LUNATIC": {
+   "sprite": "XMAS_LUNATIC",
+   "nome": "xmas_lunatic",
+   "tem_sprite": true
+  },
+  "TURTLE": {
+   "sprite": "TURTLE",
+   "nome": "turtle",
+   "tem_sprite": true
+  },
+  "SCORPION": {
+   "sprite": "SCORPION",
+   "nome": "Escorpião",
+   "tem_sprite": true
+  },
+  "VENATU_1": {
+   "sprite": "VENATU_1",
+   "nome": "Venatu",
+   "tem_sprite": true
+  },
+  "VENATU_2": {
+   "sprite": "VENATU_2",
+   "nome": "venatu_2",
+   "tem_sprite": true
+  },
+  "VENATU_3": {
+   "sprite": "VENATU_3",
+   "nome": "venatu_3",
+   "tem_sprite": true
+  },
+  "VENATU_4": {
+   "sprite": "VENATU_4",
+   "nome": "juperos_01",
+   "tem_sprite": true
+  },
+  "TIYANAK": {
+   "sprite": "TIYANAK",
+   "nome": "Tiyanak",
+   "tem_sprite": true
+  },
+  "HORN_SCARABA_EGG": {
+   "sprite": "HORN_SCARABA_EGG",
+   "nome": "Ovo de Scaraba Chifre",
+   "tem_sprite": true
+  },
+  "IARA": {
+   "sprite": "IARA",
+   "nome": "Iara",
+   "tem_sprite": true
+  },
+  "DUNEYRR": {
+   "sprite": "DUNEYRR",
+   "nome": "Duneyrr",
+   "tem_sprite": true
+  },
+  "TIKBALANG": {
+   "sprite": "TIKBALANG",
+   "nome": "Tikbalang",
+   "tem_sprite": true
+  },
+  "KUKRE": {
+   "sprite": "KUKRE",
+   "nome": "Kukre",
+   "tem_sprite": true
+  },
+  "I_ANTLER_SCARABA_EGG": {
+   "sprite": "I_ANTLER_SCARABA_EGG",
+   "nome": "i_antler_scaraba_egg",
+   "tem_sprite": true
+  },
+  "ORC_ARCHER": {
+   "sprite": "ORC_ARCHER",
+   "nome": "Orc Arqueiro",
+   "tem_sprite": true
+  },
+  "ORC_LADY": {
+   "sprite": "ORC_LADY",
+   "nome": "Senhora Orc",
+   "tem_sprite": true
+  },
+  "SCR_MT_ROBOTS": {
+   "sprite": "SCR_MT_ROBOTS",
+   "nome": "Robô de Sucata",
+   "tem_sprite": true
+  },
+  "ALPHOCCIO": {
+   "sprite": "ALPHOCCIO",
+   "nome": "Alphoccio Basil",
+   "tem_sprite": true
+  },
+  "THA_DOLOR": {
+   "sprite": "THA_DOLOR",
+   "nome": "Pesar de Thanatos",
+   "tem_sprite": true
+  },
+  "SIROMA": {
+   "sprite": "SIROMA",
+   "nome": "Siroma",
+   "tem_sprite": true
+  },
+  "G_SPRING_RABBIT": {
+   "sprite": "G_SPRING_RABBIT",
+   "nome": "g_spring_rabbit",
+   "tem_sprite": true
+  },
+  "LES": {
+   "sprite": "LES",
+   "nome": "Les",
+   "tem_sprite": true
+  },
+  "PLASMA_B": {
+   "sprite": "PLASMA_B",
+   "nome": "Plasma",
+   "tem_sprite": true
+  },
+  "EVENT_RICECAKE": {
+   "sprite": "EVENT_RICECAKE",
+   "nome": "event_ricecake",
+   "tem_sprite": true
+  },
+  "PLASMA_G": {
+   "sprite": "PLASMA_G",
+   "nome": "plasma_g",
+   "tem_sprite": true
+  },
+  "PLASMA_P": {
+   "sprite": "PLASMA_P",
+   "nome": "plasma_p",
+   "tem_sprite": true
+  },
+  "PLASMA_R": {
+   "sprite": "PLASMA_R",
+   "nome": "plasma_r",
+   "tem_sprite": true
+  },
+  "BEHOLDER": {
+   "sprite": "BEHOLDER",
+   "nome": "Beholder",
+   "tem_sprite": true
+  },
+  "KRAKEN": {
+   "sprite": "KRAKEN",
+   "nome": "Kraken",
+   "tem_sprite": true
+  },
+  "PLASMA_Y": {
+   "sprite": "PLASMA_Y",
+   "nome": "plasma_y",
+   "tem_sprite": true
+  },
+  "BLOODY_KNIGHT": {
+   "sprite": "BLOODY_KNIGHT",
+   "nome": "Cavaleiro Sanguinário",
+   "tem_sprite": true
+  },
+  "GARM_BABY": {
+   "sprite": "GARM_BABY",
+   "nome": "Filhote Hatii",
+   "tem_sprite": true
+  },
+  "FANAT": {
+   "sprite": "FANAT",
+   "nome": "Fanat",
+   "tem_sprite": true
+  },
+  "YELL_FLOWER": {
+   "sprite": "YELL_FLOWER",
+   "nome": "yell_flower",
+   "tem_sprite": true
+  },
+  "I_HORN_SCARABA": {
+   "sprite": "I_HORN_SCARABA",
+   "nome": "i_horn_scaraba",
+   "tem_sprite": true
+  },
+  "PICKY_": {
+   "sprite": "PICKY_",
+   "nome": "picky_",
+   "tem_sprite": true
+  },
+  "OWL_BARON": {
+   "sprite": "OWL_BARON",
+   "nome": "Barão Coruja",
+   "tem_sprite": true
+  },
+  "CAT_O_NINE_TAIL": {
+   "sprite": "CAT_O_NINE_TAIL",
+   "nome": "Gato de Nove Caudas",
+   "tem_sprite": true
+  },
+  "INCREASE_SOIL": {
+   "sprite": "INCREASE_SOIL",
+   "nome": "Mi Gao",
+   "tem_sprite": true
+  },
+  "BUTOIJO": {
+   "sprite": "BUTOIJO",
+   "nome": "Butoijo",
+   "tem_sprite": true
+  },
+  "MEDUSA": {
+   "sprite": "MEDUSA",
+   "nome": "Medusa",
+   "tem_sprite": true
+  },
+  "TAFFY": {
+   "sprite": "TAFFY",
+   "nome": "Tappy",
+   "tem_sprite": true
+  },
+  "THA_DESPERO": {
+   "sprite": "THA_DESPERO",
+   "nome": "Despero de Thanatos",
+   "tem_sprite": true
+  },
+  "BARRICADE": {
+   "sprite": "BARRICADE",
+   "nome": "barricade",
+   "tem_sprite": true
+  },
+  "TIRFING": {
+   "sprite": "TIRFING",
+   "nome": "Tirfing",
+   "tem_sprite": true
+  },
+  "MARDUK": {
+   "sprite": "MARDUK",
+   "nome": "Marduk",
+   "tem_sprite": true
+  },
+  "NIGHTMARE_TERROR": {
+   "sprite": "NIGHTMARE_TERROR",
+   "nome": "Pesadelo Sombrio",
+   "tem_sprite": true
+  },
+  "PASANA": {
+   "sprite": "PASANA",
+   "nome": "Pasana",
+   "tem_sprite": true
+  },
+  "BLUE_PLANT": {
+   "sprite": "BLUE_PLANT",
+   "nome": "Planta Azul",
+   "tem_sprite": true
+  },
+  "HELL_POODLE": {
+   "sprite": "HELL_POODLE",
+   "nome": "Cão Infernal",
+   "tem_sprite": true
+  },
+  "KILLER_MANTIS": {
+   "sprite": "KILLER_MANTIS",
+   "nome": "Mantis Assassino",
+   "tem_sprite": true
+  },
+  "MANTIS": {
+   "sprite": "MANTIS",
+   "nome": "Louva-a-Deus",
+   "tem_sprite": true
+  },
+  "PHYLLA": {
+   "sprite": "PHYLLA",
+   "nome": "phylla",
+   "tem_sprite": true
+  },
+  "PIRATE_SKEL": {
+   "sprite": "PIRATE_SKEL",
+   "nome": "Esqueleto Pirata",
+   "tem_sprite": true
+  },
+  "GAJOMART": {
+   "sprite": "GAJOMART",
+   "nome": "Gajomart",
+   "tem_sprite": true
+  },
+  "OSIRIS": {
+   "sprite": "OSIRIS",
+   "nome": "Osíris",
+   "tem_sprite": true
+  },
+  "GRAND_PECO": {
+   "sprite": "GRAND_PECO",
+   "nome": "Grand Peco",
+   "tem_sprite": true
+  },
+  "PETAL": {
+   "sprite": "PETAL",
+   "nome": "Petal",
+   "tem_sprite": true
+  },
+  "E_VADON_X": {
+   "sprite": "E_VADON_X",
+   "nome": "e_vadon_x",
+   "tem_sprite": true
+  },
+  "L_SHECIL": {
+   "sprite": "L_SHECIL",
+   "nome": "Caçadora",
+   "tem_sprite": true
+  },
+  "DRAGON_EGG": {
+   "sprite": "DRAGON_EGG",
+   "nome": "Ovo de Dragão",
+   "tem_sprite": true
+  },
+  "SOLIDER": {
+   "sprite": "SOLIDER",
+   "nome": "Solidificador",
+   "tem_sprite": true
+  },
+  "KIEL_": {
+   "sprite": "KIEL_",
+   "nome": "Kiel-D-01",
+   "tem_sprite": true
+  },
+  "ZAKUDAM": {
+   "sprite": "ZAKUDAM",
+   "nome": "Zakudam",
+   "tem_sprite": true
+  },
+  "WOLF": {
+   "sprite": "WOLF",
+   "nome": "Lobo",
+   "tem_sprite": true
+  },
+  "GIBBET": {
+   "sprite": "GIBBET",
+   "nome": "Árvore Maldita",
+   "tem_sprite": true
+  },
+  "ANTLER_SCARABA": {
+   "sprite": "ANTLER_SCARABA",
+   "nome": "Scaraba Galhado",
+   "tem_sprite": true
+  },
+  "FREEZER": {
+   "sprite": "FREEZER",
+   "nome": "Congelador",
+   "tem_sprite": true
+  },
+  "DRACO_EGG": {
+   "sprite": "DRACO_EGG",
+   "nome": "Ovo de Draco",
+   "tem_sprite": true
+  },
+  "WASTE_STOVE": {
+   "sprite": "WASTE_STOVE",
+   "nome": "Fornalha Velha",
+   "tem_sprite": true
+  },
+  "MAGALETA": {
+   "sprite": "MAGALETA",
+   "nome": "Margaretha Sorin",
+   "tem_sprite": true
+  },
+  "STING": {
+   "sprite": "STING",
+   "nome": "Sting",
+   "tem_sprite": true
+  },
+  "BAKONAWA": {
+   "sprite": "BAKONAWA",
+   "nome": "bakonawa",
+   "tem_sprite": true
+  },
+  "BYORGUE": {
+   "sprite": "BYORGUE",
+   "nome": "Byorgue",
+   "tem_sprite": true
+  },
+  "SOHEE": {
+   "sprite": "SOHEE",
+   "nome": "Sohee",
+   "tem_sprite": true
+  },
+  "ELVIRA": {
+   "sprite": "ELVIRA",
+   "nome": "Elvira",
+   "tem_sprite": true
+  },
+  "VIOLY": {
+   "sprite": "VIOLY",
+   "nome": "Violinista",
+   "tem_sprite": true
+  },
+  "STROUF": {
+   "sprite": "STROUF",
+   "nome": "Strouf",
+   "tem_sprite": true
+  },
+  "BEHOLDER_MASTER": {
+   "sprite": "BEHOLDER_MASTER",
+   "nome": "Mestre Beholder",
+   "tem_sprite": true
+  },
+  "WATERMELON": {
+   "sprite": "WATERMELON",
+   "nome": "watermelon",
+   "tem_sprite": true
+  },
+  "FERUS": {
+   "sprite": "FERUS",
+   "nome": "Ferus",
+   "tem_sprite": true
+  },
+  "GOBLIN_LEADER": {
+   "sprite": "GOBLIN_LEADER",
+   "nome": "Líder Goblin",
+   "tem_sprite": true
+  },
+  "PITMAN": {
+   "sprite": "PITMAN",
+   "nome": "Mineiros",
+   "tem_sprite": true
+  },
+  "MINI_DEMON": {
+   "sprite": "MINI_DEMON",
+   "nome": "Diabinho",
+   "tem_sprite": true
+  },
+  "THA_MAERO": {
+   "sprite": "THA_MAERO",
+   "nome": "Maero de Thanatos",
+   "tem_sprite": true
+  },
+  "WICKED_NYMPH": {
+   "sprite": "WICKED_NYMPH",
+   "nome": "Ninfa Perversa",
+   "tem_sprite": true
+  },
+  "HILLSRION": {
+   "sprite": "HILLSRION",
+   "nome": "Leão da Montanha",
+   "tem_sprite": true
+  },
+  "KOBOLD_LEADER": {
+   "sprite": "KOBOLD_LEADER",
+   "nome": "Líder Kobold",
+   "tem_sprite": true
+  },
+  "ALICEL": {
+   "sprite": "ALICEL",
+   "nome": "Alicel",
+   "tem_sprite": true
+  },
+  "LITTLE_PORING": {
+   "sprite": "LITTLE_PORING",
+   "nome": "Bebê Poring",
+   "tem_sprite": true
+  },
+  "NYDHOG_MEMORY1_1": {
+   "sprite": "NYDHOG_MEMORY1_1",
+   "nome": "nydhog_memory1_1",
+   "tem_sprite": true
+  },
+  "NYDHOG_MEMORY1_2": {
+   "sprite": "NYDHOG_MEMORY1_2",
+   "nome": "nydhog_memory1_2",
+   "tem_sprite": true
+  },
+  "EL_AQUA_L": {
+   "sprite": "EL_AQUA_L",
+   "nome": "el_aqua_l",
+   "tem_sprite": true
+  },
+  "DRILLER": {
+   "sprite": "DRILLER",
+   "nome": "Furador",
+   "tem_sprite": true
+  },
+  "EL_AQUA_M": {
+   "sprite": "EL_AQUA_M",
+   "nome": "el_aqua_m",
+   "tem_sprite": true
+  },
+  "L_ARMAIA": {
+   "sprite": "L_ARMAIA",
+   "nome": "Alquimista",
+   "tem_sprite": true
+  },
+  "EL_AQUA_S": {
+   "sprite": "EL_AQUA_S",
+   "nome": "el_aqua_s",
+   "tem_sprite": true
+  },
+  "SNAKE": {
+   "sprite": "SNAKE",
+   "nome": "Jiboia",
+   "tem_sprite": true
+  },
+  "UZHAS": {
+   "sprite": "UZHAS",
+   "nome": "Kikimora",
+   "tem_sprite": true
+  },
+  "GEOGRAPHER": {
+   "sprite": "GEOGRAPHER",
+   "nome": "Planta Carnívora",
+   "tem_sprite": true
+  },
+  "ANCIENT_WORM": {
+   "sprite": "ANCIENT_WORM",
+   "nome": "Verme Ancião",
+   "tem_sprite": true
+  },
+  "RIDEWORD": {
+   "sprite": "RIDEWORD",
+   "nome": "Rideword",
+   "tem_sprite": true
+  },
+  "FIRE_SAND_MAN": {
+   "sprite": "FIRE_SAND_MAN",
+   "nome": "Arenoso de Fogo",
+   "tem_sprite": true
+  },
+  "FIRE_CONDOR": {
+   "sprite": "FIRE_CONDOR",
+   "nome": "Condor de Fogo",
+   "tem_sprite": true
+  },
+  "RAYDRIC_ARCHER": {
+   "sprite": "RAYDRIC_ARCHER",
+   "nome": "Raydric Arqueiro",
+   "tem_sprite": true
+  },
+  "SASQUATCH": {
+   "sprite": "SASQUATCH",
+   "nome": "Sasquatch",
+   "tem_sprite": true
+  },
+  "WANDER_MAN": {
+   "sprite": "WANDER_MAN",
+   "nome": "Andarilho",
+   "tem_sprite": true
+  },
+  "DR_EGGRING": {
+   "sprite": "DR_EGGRING",
+   "nome": "Omeleting",
+   "tem_sprite": true
+  },
+  "ILL_FURY_HERO": {
+   "sprite": "ILL_FURY_HERO",
+   "nome": "Aventureiro",
+   "tem_sprite": true
+  },
+  "ILL_BON_GUN": {
+   "sprite": "ILL_BON_GUN",
+   "nome": "Bongun Ressentido",
+   "tem_sprite": true
+  },
+  "KIEL": {
+   "sprite": "KIEL",
+   "nome": "kiel",
+   "tem_sprite": true
+  },
+  "SKEL_PRISONER": {
+   "sprite": "SKEL_PRISONER",
+   "nome": "Esqueleto Prisioneiro",
+   "tem_sprite": true
+  },
+  "BAPHOMET_": {
+   "sprite": "BAPHOMET_",
+   "nome": "Bafomé Jr.",
+   "tem_sprite": true
+  },
+  "YELLOW_PLANT": {
+   "sprite": "YELLOW_PLANT",
+   "nome": "Planta Amarela",
+   "tem_sprite": true
+  },
+  "ZEROM": {
+   "sprite": "ZEROM",
+   "nome": "Zerom",
+   "tem_sprite": true
+  },
+  "ALARM": {
+   "sprite": "ALARM",
+   "nome": "Alarme",
+   "tem_sprite": true
+  },
+  "SEE_OTTER": {
+   "sprite": "SEE_OTTER",
+   "nome": "Lontra",
+   "tem_sprite": true
+  },
+  "FROZENWOLF": {
+   "sprite": "FROZENWOLF",
+   "nome": "Lobo de Gelo",
+   "tem_sprite": true
+  },
+  "STAINER": {
+   "sprite": "STAINER",
+   "nome": "Percevejo",
+   "tem_sprite": true
+  },
+  "MAJORUROS": {
+   "sprite": "MAJORUROS",
+   "nome": "Majoruros",
+   "tem_sprite": true
+  },
+  "GARM": {
+   "sprite": "GARM",
+   "nome": "Hatii",
+   "tem_sprite": true
+  },
+  "ARCLOUSE": {
+   "sprite": "ARCLOUSE",
+   "nome": "Arclouse",
+   "tem_sprite": true
+  },
+  "I_RAKE_SCARABA": {
+   "sprite": "I_RAKE_SCARABA",
+   "nome": "i_rake_scaraba",
+   "tem_sprite": true
+  },
+  "L_HARWORD": {
+   "sprite": "L_HARWORD",
+   "nome": "Ferreiro",
+   "tem_sprite": true
+  },
+  "TURTLE_GENERAL": {
+   "sprite": "TURTLE_GENERAL",
+   "nome": "General Tartaruga",
+   "tem_sprite": true
+  },
+  "BOTARING": {
+   "sprite": "BOTARING",
+   "nome": "botaring",
+   "tem_sprite": true
+  },
+  "KOBOLT_LEADER": {
+   "sprite": "KOBOLT_LEADER",
+   "nome": "kobolt_leader",
+   "tem_sprite": true
+  },
+  "DANCING_DRAGON": {
+   "sprite": "DANCING_DRAGON",
+   "nome": "Zhu Po Long",
+   "tem_sprite": true
+  },
+  "POT_DOFLE": {
+   "sprite": "POT_DOFLE",
+   "nome": "Dofle",
+   "tem_sprite": true
+  },
+  "NOVUS": {
+   "sprite": "NOVUS",
+   "nome": "Novus",
+   "tem_sprite": true
+  },
+  "ANGRA_MANTIS": {
+   "sprite": "ANGRA_MANTIS",
+   "nome": "Louva-a-deus Angra",
+   "tem_sprite": true
+  },
+  "JAKK_XMAS": {
+   "sprite": "JAKK_XMAS",
+   "nome": "jakk_xmas",
+   "tem_sprite": true
+  },
+  "CHUNG_E": {
+   "sprite": "CHUNG_E",
+   "nome": "chung_e",
+   "tem_sprite": true
+  },
+  "POISON_SPORE": {
+   "sprite": "POISON_SPORE",
+   "nome": "Esporo Venenoso",
+   "tem_sprite": true
+  },
+  "SKEGGIOLD": {
+   "sprite": "SKEGGIOLD",
+   "nome": "Skeggiold",
+   "tem_sprite": true
+  },
+  "EL_TERA_L": {
+   "sprite": "EL_TERA_L",
+   "nome": "el_tera_l",
+   "tem_sprite": true
+  },
+  "EL_TERA_M": {
+   "sprite": "EL_TERA_M",
+   "nome": "el_tera_m",
+   "tem_sprite": true
+  },
+  "LICHTERN_B": {
+   "sprite": "LICHTERN_B",
+   "nome": "Lichtern Laguz",
+   "tem_sprite": true
+  },
+  "IMP": {
+   "sprite": "IMP",
+   "nome": "Imp",
+   "tem_sprite": true
+  },
+  "NINE_TAIL": {
+   "sprite": "NINE_TAIL",
+   "nome": "Nove Caudas",
+   "tem_sprite": true
+  },
+  "LICHTERN_G": {
+   "sprite": "LICHTERN_G",
+   "nome": "Lichtern Inguz",
+   "tem_sprite": true
+  },
+  "EL_TERA_S": {
+   "sprite": "EL_TERA_S",
+   "nome": "el_tera_s",
+   "tem_sprite": true
+  },
+  "MIYABI_NINGYO": {
+   "sprite": "MIYABI_NINGYO",
+   "nome": "Miyabi Ningyo",
+   "tem_sprite": true
+  },
+  "B_SUPERNOVICE": {
+   "sprite": "B_SUPERNOVICE",
+   "nome": "Superaprendiz",
+   "tem_sprite": true
+  },
+  "L_KATRINN": {
+   "sprite": "L_KATRINN",
+   "nome": "Bruxa",
+   "tem_sprite": true
+  },
+  "LICHTERN_R": {
+   "sprite": "LICHTERN_R",
+   "nome": "Lichtern Kenaz",
+   "tem_sprite": true
+  },
+  "LICHTERN_Y": {
+   "sprite": "LICHTERN_Y",
+   "nome": "Lichtern Anzus",
+   "tem_sprite": true
+  },
+  "8W_SOLDIER": {
+   "sprite": "8W_SOLDIER",
+   "nome": "8w_soldier",
+   "tem_sprite": true
+  },
+  "HUNTER_FLY": {
+   "sprite": "HUNTER_FLY",
+   "nome": "Mosca Caçadora",
+   "tem_sprite": true
+  },
+  "SAGEWORM": {
+   "sprite": "SAGEWORM",
+   "nome": "Verme Sábio",
+   "tem_sprite": true
+  },
+  "RUDO": {
+   "sprite": "RUDO",
+   "nome": "Rudo",
+   "tem_sprite": true
+  },
+  "DR_MANDRAGORA": {
+   "sprite": "DR_MANDRAGORA",
+   "nome": "Mandrágora da Selva",
+   "tem_sprite": true
+  },
+  "FIRE_FRILLDORA": {
+   "sprite": "FIRE_FRILLDORA",
+   "nome": "Frilldora de Fogo",
+   "tem_sprite": true
+  },
+  "HORNET": {
+   "sprite": "HORNET",
+   "nome": "Zangão",
+   "tem_sprite": true
+  },
+  "ILL_MUNAK": {
+   "sprite": "ILL_MUNAK",
+   "nome": "Munak Ressentida",
+   "tem_sprite": true
+  },
+  "ASTER": {
+   "sprite": "ASTER",
+   "nome": "Estrela do Mar",
+   "tem_sprite": true
+  },
+  "WEAK_SKEL_SOLDIER": {
+   "sprite": "WEAK_SKEL_SOLDIER",
+   "nome": "Soldado Frágil",
+   "tem_sprite": true
+  },
+  "TAMRUAN": {
+   "sprite": "TAMRUAN",
+   "nome": "Tamruan",
+   "tem_sprite": true
+  },
+  "TACNU": {
+   "sprite": "TACNU",
+   "nome": "tacnu",
+   "tem_sprite": true
+  },
+  "MARINE_SPHERE": {
+   "sprite": "MARINE_SPHERE",
+   "nome": "Esfera Marinha",
+   "tem_sprite": true
+  },
+  "INJUSTICE": {
+   "sprite": "INJUSTICE",
+   "nome": "Injustiçado",
+   "tem_sprite": true
+  },
+  "THANATOS": {
+   "sprite": "THANATOS",
+   "nome": "thanatos",
+   "tem_sprite": true
+  },
+  "SKEL_WORKER": {
+   "sprite": "SKEL_WORKER",
+   "nome": "Esqueleto Operário",
+   "tem_sprite": true
+  },
+  "KATRINN": {
+   "sprite": "KATRINN",
+   "nome": "Kathryne Keyron",
+   "tem_sprite": true
+  },
+  "NOVUS_": {
+   "sprite": "NOVUS_",
+   "nome": "novus_",
+   "tem_sprite": true
+  },
+  "STEAM_GOBLIN": {
+   "sprite": "STEAM_GOBLIN",
+   "nome": "Goblin a Vapor",
+   "tem_sprite": true
+  },
+  "MIME_MONKEY": {
+   "sprite": "MIME_MONKEY",
+   "nome": "mime_monkey",
+   "tem_sprite": true
+  },
+  "DARK_SHADOW": {
+   "sprite": "DARK_SHADOW",
+   "nome": "dark_shadow",
+   "tem_sprite": true
+  },
+  "WRAITH_DEAD": {
+   "sprite": "WRAITH_DEAD",
+   "nome": "Aparição",
+   "tem_sprite": true
+  },
+  "HYDRA": {
+   "sprite": "HYDRA",
+   "nome": "Hidra",
+   "tem_sprite": true
+  },
+  "COELACANTH_H": {
+   "sprite": "COELACANTH_H",
+   "nome": "coelacanth_h",
+   "tem_sprite": true
+  },
+  "COELACANTH_N": {
+   "sprite": "COELACANTH_N",
+   "nome": "coelacanth_n",
+   "tem_sprite": true
+  },
+  "HYDRO": {
+   "sprite": "HYDRO",
+   "nome": "Hydrolancer",
+   "tem_sprite": true
+  },
+  "PINGUICULA_D": {
+   "sprite": "PINGUICULA_D",
+   "nome": "Pinguicula Sombria",
+   "tem_sprite": true
+  },
+  "BOITATA": {
+   "sprite": "BOITATA",
+   "nome": "Boitatá",
+   "tem_sprite": true
+  },
+  "GIOIA": {
+   "sprite": "GIOIA",
+   "nome": "Gioia",
+   "tem_sprite": true
+  },
+  "MATYR": {
+   "sprite": "MATYR",
+   "nome": "Matyr",
+   "tem_sprite": true
+  },
+  "EXPLOSION": {
+   "sprite": "EXPLOSION",
+   "nome": "Estrondo",
+   "tem_sprite": true
+  },
+  "EXPLORATION_ROVER": {
+   "sprite": "EXPLORATION_ROVER",
+   "nome": "Robô Explorador",
+   "tem_sprite": true
+  },
+  "EVIL_DRUID": {
+   "sprite": "EVIL_DRUID",
+   "nome": "Druida Maligno",
+   "tem_sprite": true
+  },
+  "PEACH_TREE_BULLET": {
+   "sprite": "PEACH_TREE_BULLET",
+   "nome": "peach_tree_bullet",
+   "tem_sprite": true
+  },
+  "HORN_SCARABA": {
+   "sprite": "HORN_SCARABA",
+   "nome": "Scaraba Chifre",
+   "tem_sprite": true
+  },
+  "WATCHER": {
+   "sprite": "WATCHER",
+   "nome": "Observador",
+   "tem_sprite": true
+  },
+  "MINERAL": {
+   "sprite": "MINERAL",
+   "nome": "Mineral",
+   "tem_sprite": true
+  },
+  "EP16_2_MATTER_KIMERA": {
+   "sprite": "EP16_2_MATTER_KIMERA",
+   "nome": "Quimera Disforme",
+   "tem_sprite": true
+  },
+  "RSX_0806": {
+   "sprite": "RSX_0806",
+   "nome": "RSX-0806",
+   "tem_sprite": true
+  },
+  "GREATEST_GENERAL": {
+   "sprite": "GREATEST_GENERAL",
+   "nome": "Guardião da Floresta",
+   "tem_sprite": true
+  },
+  "MUTANT_DRAGON": {
+   "sprite": "MUTANT_DRAGON",
+   "nome": "Dragão Mutante",
+   "tem_sprite": true
+  },
+  "REQUIEM": {
+   "sprite": "REQUIEM",
+   "nome": "Réquiem",
+   "tem_sprite": true
+  },
+  "PIAMETTE": {
+   "sprite": "PIAMETTE",
+   "nome": "piamette",
+   "tem_sprite": true
+  },
+  "BAPHOMET_I": {
+   "sprite": "BAPHOMET_I",
+   "nome": "baphomet_i",
+   "tem_sprite": true
+  },
+  "MOONLIGHT": {
+   "sprite": "MOONLIGHT",
+   "nome": "Flor do Luar",
+   "tem_sprite": true
+  },
+  "THIEF_BUG_FEMALE": {
+   "sprite": "THIEF_BUG_FEMALE",
+   "nome": "thief_bug_female",
+   "tem_sprite": true
+  },
+  "I_ANTLER_SCARABA": {
+   "sprite": "I_ANTLER_SCARABA",
+   "nome": "i_antler_scaraba",
+   "tem_sprite": true
+  },
+  "PETIT_": {
+   "sprite": "PETIT_",
+   "nome": "Petite Voador",
+   "tem_sprite": true
+  },
+  "AMON_RA": {
+   "sprite": "AMON_RA",
+   "nome": "Amon Ra",
+   "tem_sprite": true
+  },
+  "CENTIPEDE": {
+   "sprite": "CENTIPEDE",
+   "nome": "Centopéia",
+   "tem_sprite": true
+  },
+  "E_ANGRY_MIMIC": {
+   "sprite": "E_ANGRY_MIMIC",
+   "nome": "Mímico Enfurecido",
+   "tem_sprite": true
+  },
+  "DR_RODA_FROG": {
+   "sprite": "DR_RODA_FROG",
+   "nome": "Sapo de Rodda Doce",
+   "tem_sprite": true
+  },
+  "ILL_SOLIDER": {
+   "sprite": "ILL_SOLIDER",
+   "nome": "Solidificador Ominoso",
+   "tem_sprite": true
+  },
+  "CORNUS": {
+   "sprite": "CORNUS",
+   "nome": "Cornus",
+   "tem_sprite": true
+  },
+  "GREEN_PLANT": {
+   "sprite": "GREEN_PLANT",
+   "nome": "Planta Verde",
+   "tem_sprite": true
+  },
+  "HEAVY_METALING": {
+   "sprite": "HEAVY_METALING",
+   "nome": "Metaling Pesado",
+   "tem_sprite": true
+  },
+  "L_MAGALETA": {
+   "sprite": "L_MAGALETA",
+   "nome": "Sacerdotisa",
+   "tem_sprite": true
+  },
+  "SWORD_FISH": {
+   "sprite": "SWORD_FISH",
+   "nome": "Peixe-Espada",
+   "tem_sprite": true
+  },
+  "WAKWAK": {
+   "sprite": "WAKWAK",
+   "nome": "Wakwak",
+   "tem_sprite": true
+  },
+  "AGAV": {
+   "sprite": "AGAV",
+   "nome": "Agav",
+   "tem_sprite": true
+  },
+  "HARPY": {
+   "sprite": "HARPY",
+   "nome": "Harpia",
+   "tem_sprite": true
+  },
+  "ILL_ASSULTER": {
+   "sprite": "ILL_ASSULTER",
+   "nome": "Agressor Ominoso",
+   "tem_sprite": true
+  },
+  "ANOLIAN": {
+   "sprite": "ANOLIAN",
+   "nome": "Anolian",
+   "tem_sprite": true
+  },
+  "FLAME_SKULL": {
+   "sprite": "FLAME_SKULL",
+   "nome": "Crânio Flamejante",
+   "tem_sprite": true
+  },
+  "ILL_FREEZER": {
+   "sprite": "ILL_FREEZER",
+   "nome": "Congelador Ominoso",
+   "tem_sprite": true
+  },
+  "VANBERK": {
+   "sprite": "VANBERK",
+   "nome": "Vanberk",
+   "tem_sprite": true
+  },
+  "AMBERNITE": {
+   "sprite": "AMBERNITE",
+   "nome": "Ambernite",
+   "tem_sprite": true
+  },
+  "IFRIT": {
+   "sprite": "IFRIT",
+   "nome": "Ifrit",
+   "tem_sprite": true
+  },
+  "BACSOJIN": {
+   "sprite": "BACSOJIN",
+   "nome": "bacsojin",
+   "tem_sprite": true
+  },
+  "ILL_NIGHTMARE": {
+   "sprite": "ILL_NIGHTMARE",
+   "nome": "Doce Pesadelo",
+   "tem_sprite": true
+  },
+  "RANDEL": {
+   "sprite": "RANDEL",
+   "nome": "Randel Lawrence",
+   "tem_sprite": true
+  },
+  "RED_ERUMA": {
+   "sprite": "RED_ERUMA",
+   "nome": "Eruma Vermelho",
+   "tem_sprite": true
+  },
+  "CENERE": {
+   "sprite": "CENERE",
+   "nome": "Cenere",
+   "tem_sprite": true
+  },
+  "SOLDIER_PIERE": {
+   "sprite": "SOLDIER_PIERE",
+   "nome": "soldier_piere",
+   "tem_sprite": true
+  },
+  "MINOROUS": {
+   "sprite": "MINOROUS",
+   "nome": "Minorous",
+   "tem_sprite": true
+  },
+  "HORN": {
+   "sprite": "HORN",
+   "nome": "Besouro-Chifre",
+   "tem_sprite": true
+  },
+  "ZOMBIE": {
+   "sprite": "ZOMBIE",
+   "nome": "Zumbi",
+   "tem_sprite": true
+  },
+  "SKEL_SOLDIER": {
+   "sprite": "SKEL_SOLDIER",
+   "nome": "skel_soldier",
+   "tem_sprite": true
+  },
+  "PERMETER": {
+   "sprite": "PERMETER",
+   "nome": "Batedor",
+   "tem_sprite": true
+  },
+  "STEEL_CHOCHO": {
+   "sprite": "STEEL_CHOCHO",
+   "nome": "steel_chocho",
+   "tem_sprite": true
+  },
+  "WERE_WOLF": {
+   "sprite": "WERE_WOLF",
+   "nome": "were_wolf",
+   "tem_sprite": true
+  },
+  "DR_FABRE": {
+   "sprite": "DR_FABRE",
+   "nome": "Fabre Gramíneo",
+   "tem_sprite": true
+  },
+  "BANGUNGOT": {
+   "sprite": "BANGUNGOT",
+   "nome": "bangungot",
+   "tem_sprite": true
+  },
+  "HILL_WIND_1": {
+   "sprite": "HILL_WIND_1",
+   "nome": "Vento da Colina",
+   "tem_sprite": true
+  },
+  "QUEEN_SCARABA": {
+   "sprite": "QUEEN_SCARABA",
+   "nome": "Rainha Scaraba",
+   "tem_sprite": true
+  },
+  "NIHILITY_ZEM": {
+   "sprite": "NIHILITY_ZEM",
+   "nome": "nihility_zem",
+   "tem_sprite": true
+  },
+  "G_BACSOJIN": {
+   "sprite": "G_BACSOJIN",
+   "nome": "g_bacsojin",
+   "tem_sprite": true
+  },
+  "KRABEN": {
+   "sprite": "KRABEN",
+   "nome": "Kraben",
+   "tem_sprite": true
+  },
+  "VENOMOUS": {
+   "sprite": "VENOMOUS",
+   "nome": "Nuvem Venenosa",
+   "tem_sprite": true
+  },
+  "I_QUEEN_SCARABA": {
+   "sprite": "I_QUEEN_SCARABA",
+   "nome": "i_queen_scaraba",
+   "tem_sprite": true
+  },
+  "SEDORA": {
+   "sprite": "SEDORA",
+   "nome": "Sedora",
+   "tem_sprite": true
+  },
+  "DR_BIG_EGGRING": {
+   "sprite": "DR_BIG_EGGRING",
+   "nome": "Gemaring",
+   "tem_sprite": true
+  },
+  "ECLIPSE": {
+   "sprite": "ECLIPSE",
+   "nome": "Eclipse",
+   "tem_sprite": true
+  },
+  "LORD_OF_DEATH": {
+   "sprite": "LORD_OF_DEATH",
+   "nome": "lord_of_death",
+   "tem_sprite": true
+  },
+  "RATA": {
+   "sprite": "RATA",
+   "nome": "Ratatosk",
+   "tem_sprite": true
+  },
+  "KADES": {
+   "sprite": "KADES",
+   "nome": "Guardião Morto Kades",
+   "tem_sprite": true
+  },
+  "ANOPHELES": {
+   "sprite": "ANOPHELES",
+   "nome": "Anopheles",
+   "tem_sprite": true
+  },
+  "BANSHEE": {
+   "sprite": "BANSHEE",
+   "nome": "Banshee",
+   "tem_sprite": true
+  },
+  "DAEHYON": {
+   "sprite": "DAEHYON",
+   "nome": "General Daehyun",
+   "tem_sprite": true
+  },
+  "VAGABOND_WOLF": {
+   "sprite": "VAGABOND_WOLF",
+   "nome": "Lobo Errante",
+   "tem_sprite": true
+  },
+  "WORM_TAIL": {
+   "sprite": "WORM_TAIL",
+   "nome": "Rabo de Verme",
+   "tem_sprite": true
+  },
+  "MANGKUKULAM": {
+   "sprite": "MANGKUKULAM",
+   "nome": "Mangkukulam",
+   "tem_sprite": true
+  },
+  "STEM_WORM": {
+   "sprite": "STEM_WORM",
+   "nome": "Talo de Verme",
+   "tem_sprite": true
+  },
+  "KIND_OF_BEETLE": {
+   "sprite": "KIND_OF_BEETLE",
+   "nome": "Encouraçado",
+   "tem_sprite": true
+  },
+  "MAGMARING": {
+   "sprite": "MAGMARING",
+   "nome": "Magmaring",
+   "tem_sprite": true
+  },
+  "MARIONETTE": {
+   "sprite": "MARIONETTE",
+   "nome": "Marionete",
+   "tem_sprite": true
+  },
+  "I_RAKE_SCARABA_EGG": {
+   "sprite": "I_RAKE_SCARABA_EGG",
+   "nome": "i_rake_scaraba_egg",
+   "tem_sprite": true
+  },
+  "ORC_LORD": {
+   "sprite": "ORC_LORD",
+   "nome": "Senhor dos Orcs",
+   "tem_sprite": true
+  },
+  "ZHERLTHSH": {
+   "sprite": "ZHERLTHSH",
+   "nome": "Jirtas",
+   "tem_sprite": true
+  },
+  "MD_OCTOPUS": {
+   "sprite": "MD_OCTOPUS",
+   "nome": "md_octopus",
+   "tem_sprite": true
+  },
+  "I_HORN_SCARABA2_EGG": {
+   "sprite": "I_HORN_SCARABA2_EGG",
+   "nome": "i_horn_scaraba2_egg",
+   "tem_sprite": true
+  },
+  "G_ENTWEIHEN": {
+   "sprite": "G_ENTWEIHEN",
+   "nome": "g_entweihen",
+   "tem_sprite": true
+  },
+  "DANDELION": {
+   "sprite": "DANDELION",
+   "nome": "dandelion",
+   "tem_sprite": true
+  },
+  "MD_OCTOPUS_LEG": {
+   "sprite": "MD_OCTOPUS_LEG",
+   "nome": "md_octopus_leg",
+   "tem_sprite": true
+  },
+  "METALLER": {
+   "sprite": "METALLER",
+   "nome": "Metaller",
+   "tem_sprite": true
+  },
+  "DR_HORNET": {
+   "sprite": "DR_HORNET",
+   "nome": "Zangão Selvagem",
+   "tem_sprite": true
+  },
+  "ANTIQUE_BOOK": {
+   "sprite": "ANTIQUE_BOOK",
+   "nome": "Antigo Livro Danificado",
+   "tem_sprite": true
+  },
+  "SKELETON_GENERAL": {
+   "sprite": "SKELETON_GENERAL",
+   "nome": "Esqueleto General",
+   "tem_sprite": true
+  },
+  "S_EMPEL_1": {
+   "sprite": "S_EMPEL_1",
+   "nome": "s_empel_1",
+   "tem_sprite": true
+  },
+  "S_EMPEL_2": {
+   "sprite": "S_EMPEL_2",
+   "nome": "s_empel_2",
+   "tem_sprite": true
+  },
+  "TATACHO": {
+   "sprite": "TATACHO",
+   "nome": "Tatacho",
+   "tem_sprite": true
+  },
+  "NEPENTHES": {
+   "sprite": "NEPENTHES",
+   "nome": "Nepenthes",
+   "tem_sprite": true
+  },
+  "MIMIC": {
+   "sprite": "MIMIC",
+   "nome": "Mímico",
+   "tem_sprite": true
+  },
+  "SOIL": {
+   "sprite": "SOIL",
+   "nome": "soil",
+   "tem_sprite": true
+  },
+  "CHIMERA": {
+   "sprite": "CHIMERA",
+   "nome": "Quimera",
+   "tem_sprite": true
+  },
+  "LEIB_OLMAI": {
+   "sprite": "LEIB_OLMAI",
+   "nome": "Leib Olmai",
+   "tem_sprite": true
+  },
+  "FIRE_GOLEM": {
+   "sprite": "FIRE_GOLEM",
+   "nome": "Golem de Fogo",
+   "tem_sprite": true
+  },
+  "HORN_SCARABA2": {
+   "sprite": "HORN_SCARABA2",
+   "nome": "Scaraba Chifres Duplos",
+   "tem_sprite": true
+  },
+  "FRILLDORA": {
+   "sprite": "FRILLDORA",
+   "nome": "Frilldora",
+   "tem_sprite": true
+  },
+  "INCUBUS": {
+   "sprite": "INCUBUS",
+   "nome": "Incubus",
+   "tem_sprite": true
+  },
+  "L_EREMES": {
+   "sprite": "L_EREMES",
+   "nome": "Mercenário",
+   "tem_sprite": true
+  },
+  "WILD_ROSE": {
+   "sprite": "WILD_ROSE",
+   "nome": "Rosa Selvagem",
+   "tem_sprite": true
+  },
+  "I_HORN_SCARABA2": {
+   "sprite": "I_HORN_SCARABA2",
+   "nome": "i_horn_scaraba2",
+   "tem_sprite": true
+  },
+  "MEGALITH": {
+   "sprite": "MEGALITH",
+   "nome": "Megalith",
+   "tem_sprite": true
+  },
+  "RAKE_SCARABA": {
+   "sprite": "RAKE_SCARABA",
+   "nome": "Scaraba Ancinho",
+   "tem_sprite": true
+  },
+  "MANANANGGAL": {
+   "sprite": "MANANANGGAL",
+   "nome": "Manananggal",
+   "tem_sprite": true
+  },
+  "HARDROCK_MOMMOTH": {
+   "sprite": "HARDROCK_MOMMOTH",
+   "nome": "Mamute Rochoso",
+   "tem_sprite": true
+  },
+  "FRUS": {
+   "sprite": "FRUS",
+   "nome": "Frus",
+   "tem_sprite": true
+  },
+  "NOXIOUS": {
+   "sprite": "NOXIOUS",
+   "nome": "Nuvem Tóxica",
+   "tem_sprite": true
+  },
+  "EDDGA": {
+   "sprite": "EDDGA",
+   "nome": "Eddga",
+   "tem_sprite": true
+  },
+  "WOOTAN_FIGHTER": {
+   "sprite": "WOOTAN_FIGHTER",
+   "nome": "Guerreiro Wootan",
+   "tem_sprite": true
+  },
+  "ROCK": {
+   "sprite": "ROCK",
+   "nome": "rock",
+   "tem_sprite": true
+  },
+  "BANASPATY": {
+   "sprite": "BANASPATY",
+   "nome": "Banaspaty",
+   "tem_sprite": true
+  },
+  "CORNUTUS": {
+   "sprite": "CORNUTUS",
+   "nome": "Cornutus",
+   "tem_sprite": true
+  },
+  "EXECUTIONER": {
+   "sprite": "EXECUTIONER",
+   "nome": "Executor",
+   "tem_sprite": true
+  },
+  "N_ANCIENT_MUMMY": {
+   "sprite": "N_ANCIENT_MUMMY",
+   "nome": "Múmia Anciã Pesadelo",
+   "tem_sprite": true
+  },
+  "SPRING_RABBIT": {
+   "sprite": "SPRING_RABBIT",
+   "nome": "Coelho",
+   "tem_sprite": true
+  },
+  "MERMAN": {
+   "sprite": "MERMAN",
+   "nome": "Tritão",
+   "tem_sprite": true
+  },
+  "GALAPAGO": {
+   "sprite": "GALAPAGO",
+   "nome": "Pingu",
+   "tem_sprite": true
+  },
+  "LEAF_CAT": {
+   "sprite": "LEAF_CAT",
+   "nome": "Gato de Folha",
+   "tem_sprite": true
+  },
+  "WHIKEBAIN": {
+   "sprite": "WHIKEBAIN",
+   "nome": "Wickebine Tres",
+   "tem_sprite": true
+  },
+  "ROTAR_ZAIRO": {
+   "sprite": "ROTAR_ZAIRO",
+   "nome": "Giro-Goblin",
+   "tem_sprite": true
+  },
+  "ILL_DRAINLIAR": {
+   "sprite": "ILL_DRAINLIAR",
+   "nome": "Mattiliar",
+   "tem_sprite": true
+  },
+  "PIERE": {
+   "sprite": "PIERE",
+   "nome": "Piere",
+   "tem_sprite": true
+  },
+  "OBEAUNE": {
+   "sprite": "OBEAUNE",
+   "nome": "Obeaune",
+   "tem_sprite": true
+  },
+  "N_MIMIC": {
+   "sprite": "N_MIMIC",
+   "nome": "Mímico Pesadelo",
+   "tem_sprite": true
+  },
+  "VENATU": {
+   "sprite": "VENATU",
+   "nome": "venatu",
+   "tem_sprite": true
+  },
+  "ENTWEIHEN": {
+   "sprite": "ENTWEIHEN",
+   "nome": "entweihen",
+   "tem_sprite": true
+  },
+  "ALICE": {
+   "sprite": "ALICE",
+   "nome": "Alice",
+   "tem_sprite": true
+  },
+  "GIANT_HORNET": {
+   "sprite": "GIANT_HORNET",
+   "nome": "giant_hornet",
+   "tem_sprite": true
+  },
+  "ZOMBIE_GUARD": {
+   "sprite": "ZOMBIE_GUARD",
+   "nome": "Zumbi da Guarda",
+   "tem_sprite": true
+  },
+  "CRAB": {
+   "sprite": "CRAB",
+   "nome": "Caranguejo",
+   "tem_sprite": true
+  },
+  "VADON": {
+   "sprite": "VADON",
+   "nome": "Vadon",
+   "tem_sprite": true
+  },
+  "SKELETON": {
+   "sprite": "SKELETON",
+   "nome": "Esqueleto",
+   "tem_sprite": true
+  },
+  "MANDRAGORA": {
+   "sprite": "MANDRAGORA",
+   "nome": "Mandrágora",
+   "tem_sprite": true
+  },
+  "BLUE_FLOWER": {
+   "sprite": "BLUE_FLOWER",
+   "nome": "blue_flower",
+   "tem_sprite": true
+  },
+  "TAO_GUNKA": {
+   "sprite": "TAO_GUNKA",
+   "nome": "Tao Gunka",
+   "tem_sprite": true
+  },
+  "MOBSTER": {
+   "sprite": "MOBSTER",
+   "nome": "Yakuza",
+   "tem_sprite": true
+  },
+  "QUVE": {
+   "sprite": "QUVE",
+   "nome": "Quve",
+   "tem_sprite": true
+  },
+  "ENGKANTO": {
+   "sprite": "ENGKANTO",
+   "nome": "Engkanto",
+   "tem_sprite": true
+  },
+  "ILL_HEATER": {
+   "sprite": "ILL_HEATER",
+   "nome": "Aquecedor Ominoso",
+   "tem_sprite": true
+  },
+  "CHOCO": {
+   "sprite": "CHOCO",
+   "nome": "Choco",
+   "tem_sprite": true
+  },
+  "GOBLINE_XMAS": {
+   "sprite": "GOBLINE_XMAS",
+   "nome": "gobline_xmas",
+   "tem_sprite": true
+  },
+  "DARK_PRIEST": {
+   "sprite": "DARK_PRIEST",
+   "nome": "Sacerdote Maldito",
+   "tem_sprite": true
+  },
+  "PUNK": {
+   "sprite": "PUNK",
+   "nome": "Punk",
+   "tem_sprite": true
+  },
+  "OWL_DUKE": {
+   "sprite": "OWL_DUKE",
+   "nome": "Duque Coruja",
+   "tem_sprite": true
+  },
+  "ILL_ARCHER_SKELETON": {
+   "sprite": "ILL_ARCHER_SKELETON",
+   "nome": "Arqueiro Cruel",
+   "tem_sprite": true
+  },
+  "OBJ_A2": {
+   "sprite": "OBJ_A2",
+   "nome": "obj_a2",
+   "tem_sprite": true
+  },
+  "DULLAHAN": {
+   "sprite": "DULLAHAN",
+   "nome": "Dullahan",
+   "tem_sprite": true
+  },
+  "PHEN": {
+   "sprite": "PHEN",
+   "nome": "Fen",
+   "tem_sprite": true
+  },
+  "CHEN": {
+   "sprite": "CHEN",
+   "nome": "Chen Liu",
+   "tem_sprite": true
+  },
+  "SHELLFISH": {
+   "sprite": "SHELLFISH",
+   "nome": "Molusco",
+   "tem_sprite": true
+  },
+  "OBJ_B2": {
+   "sprite": "OBJ_B2",
+   "nome": "obj_b2",
+   "tem_sprite": true
+  },
+  "BOILED_RICE": {
+   "sprite": "BOILED_RICE",
+   "nome": "boiled_rice",
+   "tem_sprite": true
+  },
+  "ZOMBIE_H": {
+   "sprite": "ZOMBIE_H",
+   "nome": "Zumbi Fedorento",
+   "tem_sprite": true
+  },
+  "GREEN_IGUANA": {
+   "sprite": "GREEN_IGUANA",
+   "nome": "Grove",
+   "tem_sprite": true
+  },
+  "PUPA": {
+   "sprite": "PUPA",
+   "nome": "Pupa",
+   "tem_sprite": true
+  },
+  "ARGOS": {
+   "sprite": "ARGOS",
+   "nome": "Argos",
+   "tem_sprite": true
+  },
+  "ACIDUS": {
+   "sprite": "ACIDUS",
+   "nome": "Acidus",
+   "tem_sprite": true
+  },
+  "THIEF_BUG": {
+   "sprite": "THIEF_BUG",
+   "nome": "Besouro-Ladrão",
+   "tem_sprite": true
+  },
+  "EXCAVATOR_ROBOT": {
+   "sprite": "EXCAVATOR_ROBOT",
+   "nome": "Robô Escavador",
+   "tem_sprite": true
+  },
+  "EP16_2_VENOM_KIMERA": {
+   "sprite": "EP16_2_VENOM_KIMERA",
+   "nome": "Quimera Venenosa",
+   "tem_sprite": true
+  },
+  "BLAZZER": {
+   "sprite": "BLAZZER",
+   "nome": "Labareda",
+   "tem_sprite": true
+  },
+  "OBSIDIAN": {
+   "sprite": "OBSIDIAN",
+   "nome": "Obsidiana",
+   "tem_sprite": true
+  },
+  "FAITHFUL_MANAGER": {
+   "sprite": "FAITHFUL_MANAGER",
+   "nome": "Gerente de Bifröst",
+   "tem_sprite": true
+  },
+  "CREMY_FEAR": {
+   "sprite": "CREMY_FEAR",
+   "nome": "Creamy Ameaçador",
+   "tem_sprite": true
+  },
+  "GERTIE": {
+   "sprite": "GERTIE",
+   "nome": "Gertie We",
+   "tem_sprite": true
+  },
+  "HIGH_ORC": {
+   "sprite": "HIGH_ORC",
+   "nome": "Grand Orc",
+   "tem_sprite": true
+  },
+  "MARINA": {
+   "sprite": "MARINA",
+   "nome": "Marina",
+   "tem_sprite": true
+  },
+  "DESERT_WOLF_B": {
+   "sprite": "DESERT_WOLF_B",
+   "nome": "Filhote de Lobo",
+   "tem_sprite": true
+  },
+  "SKEL_ARCHER": {
+   "sprite": "SKEL_ARCHER",
+   "nome": "skel_archer",
+   "tem_sprite": true
+  },
+  "EVENT_GOURD": {
+   "sprite": "EVENT_GOURD",
+   "nome": "event_gourd",
+   "tem_sprite": true
+  },
+  "SHINOBI": {
+   "sprite": "SHINOBI",
+   "nome": "Shinobi",
+   "tem_sprite": true
+  },
+  "ALNOLDI": {
+   "sprite": "ALNOLDI",
+   "nome": "Rafflesia Alnoldi",
+   "tem_sprite": true
+  },
+  "G_ZOMBIE": {
+   "sprite": "G_ZOMBIE",
+   "nome": "g_zombie",
+   "tem_sprite": true
+  },
+  "AM_MUT": {
+   "sprite": "AM_MUT",
+   "nome": "Am Mut",
+   "tem_sprite": true
+  },
+  "SWITCH": {
+   "sprite": "SWITCH",
+   "nome": "switch",
+   "tem_sprite": true
+  },
+  "POURING": {
+   "sprite": "POURING",
+   "nome": "pouring",
+   "tem_sprite": true
+  },
+  "REPAIR_ROBOT_T": {
+   "sprite": "REPAIR_ROBOT_T",
+   "nome": "Robô Reparador Turbo",
+   "tem_sprite": true
+  },
+  "ORC_ZOMBIE": {
+   "sprite": "ORC_ZOMBIE",
+   "nome": "Orc Zumbi",
+   "tem_sprite": true
+  },
+  "GHOUL_H": {
+   "sprite": "GHOUL_H",
+   "nome": "Carniçal Fedorento",
+   "tem_sprite": true
+  },
+  "PARASITE": {
+   "sprite": "PARASITE",
+   "nome": "Parasita",
+   "tem_sprite": true
+  },
+  "CENTIPEDE_LARVA": {
+   "sprite": "CENTIPEDE_LARVA",
+   "nome": "Larva de Centopéia",
+   "tem_sprite": true
+  },
+  "GIEARTH": {
+   "sprite": "GIEARTH",
+   "nome": "Gierath",
+   "tem_sprite": true
+  },
+  "DR_BASILISK1": {
+   "sprite": "DR_BASILISK1",
+   "nome": "Basilisco Guarda",
+   "tem_sprite": true
+  },
+  "DR_BASILISK2": {
+   "sprite": "DR_BASILISK2",
+   "nome": "Basilisco Guerreiro",
+   "tem_sprite": true
+  },
+  "DR_BASILISK3": {
+   "sprite": "DR_BASILISK3",
+   "nome": "Basilisco General",
+   "tem_sprite": true
+  },
+  "STONE_SHOOTER": {
+   "sprite": "STONE_SHOOTER",
+   "nome": "Atirador de Pedras",
+   "tem_sprite": true
+  },
+  "EL_AGNI_L": {
+   "sprite": "EL_AGNI_L",
+   "nome": "el_agni_l",
+   "tem_sprite": true
+  },
+  "EL_AGNI_M": {
+   "sprite": "EL_AGNI_M",
+   "nome": "el_agni_m",
+   "tem_sprite": true
+  },
+  "MIMING": {
+   "sprite": "MIMING",
+   "nome": "Plagiador",
+   "tem_sprite": true
+  },
+  "EL_AGNI_S": {
+   "sprite": "EL_AGNI_S",
+   "nome": "el_agni_s",
+   "tem_sprite": true
+  },
+  "MYSTELTAINN": {
+   "sprite": "MYSTELTAINN",
+   "nome": "Mysteltainn",
+   "tem_sprite": true
+  },
+  "AMISTR": {
+   "sprite": "AMISTR",
+   "nome": "amistr",
+   "tem_sprite": true
+  },
+  "CONDOR": {
+   "sprite": "CONDOR",
+   "nome": "Condor",
+   "tem_sprite": true
+  },
+  "CREEPER": {
+   "sprite": "CREEPER",
+   "nome": "creeper",
+   "tem_sprite": true
+  },
+  "WHISPER": {
+   "sprite": "WHISPER",
+   "nome": "Sussurro",
+   "tem_sprite": true
+  },
+  "NAGA": {
+   "sprite": "NAGA",
+   "nome": "Naga",
+   "tem_sprite": true
+  },
+  "L_WHIKEBAIN": {
+   "sprite": "L_WHIKEBAIN",
+   "nome": "Arruaceira",
+   "tem_sprite": true
+  },
+  "NAGHT_SIEGER": {
+   "sprite": "NAGHT_SIEGER",
+   "nome": "naght_sieger",
+   "tem_sprite": true
+  },
+  "KTULLANUX": {
+   "sprite": "KTULLANUX",
+   "nome": "ktullanux",
+   "tem_sprite": true
+  },
+  "DEAD_PLANKTON": {
+   "sprite": "DEAD_PLANKTON",
+   "nome": "Plâncton Morto",
+   "tem_sprite": true
+  },
+  "MASTERING": {
+   "sprite": "MASTERING",
+   "nome": "Mastering",
+   "tem_sprite": true
+  },
+  "TENDRILRION": {
+   "sprite": "TENDRILRION",
+   "nome": "Leão de Vinhas",
+   "tem_sprite": true
+  },
+  "N_MUMMY": {
+   "sprite": "N_MUMMY",
+   "nome": "Múmia Pesadelo",
+   "tem_sprite": true
+  },
+  "METALING": {
+   "sprite": "METALING",
+   "nome": "Metaling",
+   "tem_sprite": true
+  },
+  "ALIOT": {
+   "sprite": "ALIOT",
+   "nome": "Aliot",
+   "tem_sprite": true
+  },
+  "OBJ_FLAG_A": {
+   "sprite": "OBJ_FLAG_A",
+   "nome": "obj_flag_a",
+   "tem_sprite": true
+  },
+  "SOHEON": {
+   "sprite": "SOHEON",
+   "nome": "Samurai Soheon",
+   "tem_sprite": true
+  },
+  "OBJ_FLAG_B": {
+   "sprite": "OBJ_FLAG_B",
+   "nome": "obj_flag_b",
+   "tem_sprite": true
+  },
+  "DUSTINESS": {
+   "sprite": "DUSTINESS",
+   "nome": "Poeira",
+   "tem_sprite": true
+  },
+  "LITTLE_FATUM": {
+   "sprite": "LITTLE_FATUM",
+   "nome": "Pequeno Fatum",
+   "tem_sprite": true
+  },
+  "ANGELING": {
+   "sprite": "ANGELING",
+   "nome": "Angeling",
+   "tem_sprite": true
+  },
+  "GRYPHON": {
+   "sprite": "GRYPHON",
+   "nome": "Grifo",
+   "tem_sprite": true
+  },
+  "CENERE_G": {
+   "sprite": "CENERE_G",
+   "nome": "Fumaça Verde",
+   "tem_sprite": true
+  },
+  "MENBLATT": {
+   "sprite": "MENBLATT",
+   "nome": "Menblatt",
+   "tem_sprite": true
+  },
+  "DOKEBI_": {
+   "sprite": "DOKEBI_",
+   "nome": "dokebi_",
+   "tem_sprite": true
+  },
+  "COCO": {
+   "sprite": "COCO",
+   "nome": "Koko",
+   "tem_sprite": true
+  },
+  "GIG": {
+   "sprite": "GIG",
+   "nome": "Ferrão",
+   "tem_sprite": true
+  },
+  "RODA_FROG": {
+   "sprite": "RODA_FROG",
+   "nome": "Sapo de Rodda",
+   "tem_sprite": true
+  },
+  "KING_DRAMOH": {
+   "sprite": "KING_DRAMOH",
+   "nome": "Dramoh Rei",
+   "tem_sprite": true
+  },
+  "LUCIOLA_VESPA": {
+   "sprite": "LUCIOLA_VESPA",
+   "nome": "Vespa Vagalume",
+   "tem_sprite": true
+  },
+  "N_VORIT": {
+   "sprite": "N_VORIT",
+   "nome": "n_vorit",
+   "tem_sprite": true
+  },
+  "CRAMP": {
+   "sprite": "CRAMP",
+   "nome": "Cãibra",
+   "tem_sprite": true
+  },
+  "ZIPPER_BEAR": {
+   "sprite": "ZIPPER_BEAR",
+   "nome": "Zipper",
+   "tem_sprite": true
+  },
+  "BRADIUM_GOLEM": {
+   "sprite": "BRADIUM_GOLEM",
+   "nome": "Golem de Bradium",
+   "tem_sprite": true
+  },
+  "LI_ME_MANG_RYANG": {
+   "sprite": "LI_ME_MANG_RYANG",
+   "nome": "Jing Guai",
+   "tem_sprite": true
+  },
+  "GARGOYLE": {
+   "sprite": "GARGOYLE",
+   "nome": "Gárgula",
+   "tem_sprite": true
+  },
+  "HELL_APOCALIPS": {
+   "sprite": "HELL_APOCALIPS",
+   "nome": "Apocalipse Infernal",
+   "tem_sprite": true
+  },
+  "RECON_ROBOT": {
+   "sprite": "RECON_ROBOT",
+   "nome": "Robô de Reconhecimento",
+   "tem_sprite": true
+  },
+  "BEELZEBUB_": {
+   "sprite": "BEELZEBUB_",
+   "nome": "beelzebub_",
+   "tem_sprite": true
+  },
+  "MOROCC": {
+   "sprite": "MOROCC",
+   "nome": "morocc",
+   "tem_sprite": true
+  },
+  "REPAIR_ROBOT": {
+   "sprite": "REPAIR_ROBOT",
+   "nome": "Robô Reparador",
+   "tem_sprite": true
+  },
+  "CARAMEL": {
+   "sprite": "CARAMEL",
+   "nome": "Caramelo",
+   "tem_sprite": true
+  },
+  "FABRE": {
+   "sprite": "FABRE",
+   "nome": "Fabre",
+   "tem_sprite": true
+  },
+  "PYURIEL": {
+   "sprite": "PYURIEL",
+   "nome": "Pyuriel Furiosa",
+   "tem_sprite": true
+  },
+  "L_YGNIZEM": {
+   "sprite": "L_YGNIZEM",
+   "nome": "Templária",
+   "tem_sprite": true
+  },
+  "F_GAMEMASTER": {
+   "sprite": "F_GAMEMASTER",
+   "nome": "f_gamemaster",
+   "tem_sprite": true
+  },
+  "MARSE": {
+   "sprite": "MARSE",
+   "nome": "Marte",
+   "tem_sprite": true
+  },
+  "SIDE_WINDER": {
+   "sprite": "SIDE_WINDER",
+   "nome": "Sorrateiro",
+   "tem_sprite": true
+  },
+  "SKEGGIOLD_": {
+   "sprite": "SKEGGIOLD_",
+   "nome": "skeggiold_",
+   "tem_sprite": true
+  },
+  "WOOD_GOBLIN": {
+   "sprite": "WOOD_GOBLIN",
+   "nome": "Leshij",
+   "tem_sprite": true
+  },
+  "ANTLER_SCARABA_EGG": {
+   "sprite": "ANTLER_SCARABA_EGG",
+   "nome": "Ovo de Scaraba Galhado",
+   "tem_sprite": true
+  },
+  "WHITE_PLANT": {
+   "sprite": "WHITE_PLANT",
+   "nome": "Planta Branca",
+   "tem_sprite": true
+  },
+  "HORONG": {
+   "sprite": "HORONG",
+   "nome": "Horong",
+   "tem_sprite": true
+  },
+  "DETALE": {
+   "sprite": "DETALE",
+   "nome": "Detardeurus",
+   "tem_sprite": true
+  },
+  "WIND_GHOST": {
+   "sprite": "WIND_GHOST",
+   "nome": "Xamã do Vento",
+   "tem_sprite": true
+  },
+  "PHENDARK": {
+   "sprite": "PHENDARK",
+   "nome": "Fendark",
+   "tem_sprite": true
+  },
+  "COOKIE_XMAS": {
+   "sprite": "COOKIE_XMAS",
+   "nome": "cookie_xmas",
+   "tem_sprite": true
+  },
+  "ILL_BLACK_MUSHROOM": {
+   "sprite": "ILL_BLACK_MUSHROOM",
+   "nome": "Cogumelo Brilhante",
+   "tem_sprite": true
+  },
+  "YGNIZEM": {
+   "sprite": "YGNIZEM",
+   "nome": "Egnigem Cenia",
+   "tem_sprite": true
+  },
+  "GEMINI": {
+   "sprite": "GEMINI",
+   "nome": "Gemini-S58",
+   "tem_sprite": true
+  },
+  "SROPHO": {
+   "sprite": "SROPHO",
+   "nome": "Sropho",
+   "tem_sprite": true
+  },
+  "ZOMBIE_MASTER": {
+   "sprite": "ZOMBIE_MASTER",
+   "nome": "Zumbi Mestre",
+   "tem_sprite": true
+  },
+  "AQUA_ELEMENTAL": {
+   "sprite": "AQUA_ELEMENTAL",
+   "nome": "Elemental da Água",
+   "tem_sprite": true
+  },
+  "BRILIGHT": {
+   "sprite": "BRILIGHT",
+   "nome": "Escaravelho",
+   "tem_sprite": true
+  },
+  "ANTIQUE_FIRELOCK": {
+   "sprite": "ANTIQUE_FIRELOCK",
+   "nome": "Zumbi Atirador",
+   "tem_sprite": true
+  },
+  "HILL_WIND": {
+   "sprite": "HILL_WIND",
+   "nome": "hill_wind",
+   "tem_sprite": true
+  },
+  "LADY_TANEE": {
+   "sprite": "LADY_TANEE",
+   "nome": "Lady Tanee",
+   "tem_sprite": true
+  },
+  "RICE_CAKE_BOY": {
+   "sprite": "RICE_CAKE_BOY",
+   "nome": "Pirralho",
+   "tem_sprite": true
+  },
+  "ROCKER": {
+   "sprite": "ROCKER",
+   "nome": "Rocker",
+   "tem_sprite": true
+  },
+  "MUSCIPULAR": {
+   "sprite": "MUSCIPULAR",
+   "nome": "Muscipular",
+   "tem_sprite": true
+  },
+  "JEJELING": {
+   "sprite": "JEJELING",
+   "nome": "Jejeling",
+   "tem_sprite": true
+  },
+  "RAGGLER": {
+   "sprite": "RAGGLER",
+   "nome": "Raggler",
+   "tem_sprite": true
+  },
+  "ATROS": {
+   "sprite": "ATROS",
+   "nome": "atros",
+   "tem_sprite": true
+  },
+  "MISTRESS": {
+   "sprite": "MISTRESS",
+   "nome": "Abelha-Rainha",
+   "tem_sprite": true
+  },
+  "EP16_2_HUMAN_KIMERA": {
+   "sprite": "EP16_2_HUMAN_KIMERA",
+   "nome": "Quimera Humana",
+   "tem_sprite": true
+  },
+  "ALLIGATOR": {
+   "sprite": "ALLIGATOR",
+   "nome": "Crocodilo",
+   "tem_sprite": true
+  },
+  "ILL_SOHEE": {
+   "sprite": "ILL_SOHEE",
+   "nome": "Sohee Maldita",
+   "tem_sprite": true
+  },
+  "GAZETI": {
+   "sprite": "GAZETI",
+   "nome": "Gazeti",
+   "tem_sprite": true
+  },
+  "FLORA": {
+   "sprite": "FLORA",
+   "nome": "Flora",
+   "tem_sprite": true
+  },
+  "RAKE_SCARABA_EGG": {
+   "sprite": "RAKE_SCARABA_EGG",
+   "nome": "Ovo de Scaraba Ancinho",
+   "tem_sprite": true
+  },
+  "INCANTATION_SAMURAI": {
+   "sprite": "INCANTATION_SAMURAI",
+   "nome": "Samurai Encarnado",
+   "tem_sprite": true
+  },
+  "WILD_GINSENG": {
+   "sprite": "WILD_GINSENG",
+   "nome": "Ginseng Selvagem",
+   "tem_sprite": true
+  },
+  "UNGOLIANT": {
+   "sprite": "UNGOLIANT",
+   "nome": "Ungoliant",
+   "tem_sprite": true
+  },
+  "EP17_1_R4885_BESTIA": {
+   "sprite": "EP17_1_R4885_BESTIA",
+   "nome": "R48-85-BESTIA",
+   "tem_sprite": true
+  },
+  "L_SEYREN": {
+   "sprite": "L_SEYREN",
+   "nome": "Cavaleiro",
+   "tem_sprite": true
+  },
+  "BOMBPORING": {
+   "sprite": "BOMBPORING",
+   "nome": "bombporing",
+   "tem_sprite": true
+  },
+  "DARK_LORD": {
+   "sprite": "DARK_LORD",
+   "nome": "Senhor das Trevas",
+   "tem_sprite": true
+  },
+  "KUBLIN": {
+   "sprite": "KUBLIN",
+   "nome": "kublin",
+   "tem_sprite": true
+  },
+  "GOLDPORING": {
+   "sprite": "GOLDPORING",
+   "nome": "goldporing",
+   "tem_sprite": true
+  },
+  "DIMIK_1": {
+   "sprite": "DIMIK_1",
+   "nome": "Dimik",
+   "tem_sprite": true
+  },
+  "DIMIK_2": {
+   "sprite": "DIMIK_2",
+   "nome": "dimik_2",
+   "tem_sprite": true
+  },
+  "DIMIK_3": {
+   "sprite": "DIMIK_3",
+   "nome": "dimik_3",
+   "tem_sprite": true
+  },
+  "DIMIK_4": {
+   "sprite": "DIMIK_4",
+   "nome": "dimik_4",
+   "tem_sprite": true
+  },
+  "CREAMY": {
+   "sprite": "CREAMY",
+   "nome": "Creamy",
+   "tem_sprite": true
+  },
+  "STONE_SHOOTER_BULLET": {
+   "sprite": "STONE_SHOOTER_BULLET",
+   "nome": "stone_shooter_bullet",
+   "tem_sprite": true
+  },
+  "MEGALODON": {
+   "sprite": "MEGALODON",
+   "nome": "Megalodon",
+   "tem_sprite": true
+  },
+  "LUDE": {
+   "sprite": "LUDE",
+   "nome": "Lude",
+   "tem_sprite": true
+  },
+  "MAYA_PUPLE": {
+   "sprite": "MAYA_PUPLE",
+   "nome": "Maya Macho",
+   "tem_sprite": true
+  },
+  "PORCELLIO": {
+   "sprite": "PORCELLIO",
+   "nome": "Porcellio",
+   "tem_sprite": true
+  },
+  "ORC_XMAS": {
+   "sprite": "ORC_XMAS",
+   "nome": "orc_xmas",
+   "tem_sprite": true
+  },
+  "MUNAK": {
+   "sprite": "MUNAK",
+   "nome": "Munak",
+   "tem_sprite": true
+  },
+  "EREND": {
+   "sprite": "EREND",
+   "nome": "Errende Ebecee",
+   "tem_sprite": true
+  },
+  "BUNGISNGIS": {
+   "sprite": "BUNGISNGIS",
+   "nome": "Bungisngis",
+   "tem_sprite": true
+  },
+  "HYLOZOIST": {
+   "sprite": "HYLOZOIST",
+   "nome": "Poltergeist",
+   "tem_sprite": true
+  },
+  "L_EREND": {
+   "sprite": "L_EREND",
+   "nome": "Monge",
+   "tem_sprite": true
+  },
+  "EM_DEVILING": {
+   "sprite": "EM_DEVILING",
+   "nome": "em_deviling",
+   "tem_sprite": true
+  },
+  "IMMOTAL_CORPS": {
+   "sprite": "IMMOTAL_CORPS",
+   "nome": "Legionário Imortal",
+   "tem_sprite": true
+  },
+  "PEST": {
+   "sprite": "PEST",
+   "nome": "Peste",
+   "tem_sprite": true
+  },
+  "CRYSTAL_H": {
+   "sprite": "CRYSTAL_H",
+   "nome": "crystal_h",
+   "tem_sprite": true
+  },
+  "CRYSTAL_L": {
+   "sprite": "CRYSTAL_L",
+   "nome": "crystal_l",
+   "tem_sprite": true
+  },
+  "THICKET": {
+   "sprite": "THICKET",
+   "nome": "thicket",
+   "tem_sprite": true
+  },
+  "MARC": {
+   "sprite": "MARC",
+   "nome": "Cavalo-Marinho",
+   "tem_sprite": true
+  },
+  "RHYNCHO": {
+   "sprite": "RHYNCHO",
+   "nome": "rhyncho",
+   "tem_sprite": true
+  },
+  "WILD_RIDER": {
+   "sprite": "WILD_RIDER",
+   "nome": "Montaria Selvagem",
+   "tem_sprite": true
+  },
+  "S_NYDHOG": {
+   "sprite": "S_NYDHOG",
+   "nome": "s_nydhog",
+   "tem_sprite": true
+  },
+  "TRENTINI": {
+   "sprite": "TRENTINI",
+   "nome": "Trentini",
+   "tem_sprite": true
+  },
+  "B_NOVICE": {
+   "sprite": "B_NOVICE",
+   "nome": "Aprendiz",
+   "tem_sprite": true
+  },
+  "MAVKA": {
+   "sprite": "MAVKA",
+   "nome": "Mavka",
+   "tem_sprite": true
+  },
+  "KRAKEN_LEG": {
+   "sprite": "KRAKEN_LEG",
+   "nome": "kraken_leg",
+   "tem_sprite": true
+  },
+  "DR_POM_SPIDER": {
+   "sprite": "DR_POM_SPIDER",
+   "nome": "Aranha Pomar",
+   "tem_sprite": true
+  },
+  "L_KAVAC": {
+   "sprite": "L_KAVAC",
+   "nome": "Bardo",
+   "tem_sprite": true
+  },
+  "ZOMBIE_SLAUGHTER": {
+   "sprite": "ZOMBIE_SLAUGHTER",
+   "nome": "Massacre",
+   "tem_sprite": true
+  },
+  "WEAK_SKELETON": {
+   "sprite": "WEAK_SKELETON",
+   "nome": "Esqueleto Frágil",
+   "tem_sprite": true
+  },
+  "I_HORN_SCARABA_EGG": {
+   "sprite": "I_HORN_SCARABA_EGG",
+   "nome": "dic_dun03",
+   "tem_sprite": true
+  },
+  "ILL_NINE_TAIL": {
+   "sprite": "ILL_NINE_TAIL",
+   "nome": "Raposa Raivosa",
+   "tem_sprite": true
+  },
+  "DELETER_": {
+   "sprite": "DELETER_",
+   "nome": "Deletério",
+   "tem_sprite": true
+  },
+  "EXPLORATION_ROVER_T": {
+   "sprite": "EXPLORATION_ROVER_T",
+   "nome": "Robô Explorador Turbo",
+   "tem_sprite": true
+  },
+  "RANDGRIS": {
+   "sprite": "RANDGRIS",
+   "nome": "Valquíria Randgris",
+   "tem_sprite": true
+  },
+  "BUWAYA": {
+   "sprite": "BUWAYA",
+   "nome": "buwaya",
+   "tem_sprite": true
+  },
+  "XMAS_SMOKEY_SOCK": {
+   "sprite": "XMAS_SMOKEY_SOCK",
+   "nome": "xmas_smokey_sock",
+   "tem_sprite": true
+  },
+  "VAVAYAGA": {
+   "sprite": "VAVAYAGA",
+   "nome": "Baba-Yaga",
+   "tem_sprite": true
+  },
+  "FUR_SEAL": {
+   "sprite": "FUR_SEAL",
+   "nome": "Foca",
+   "tem_sprite": true
+  },
+  "SOLDIER_DENIRO": {
+   "sprite": "SOLDIER_DENIRO",
+   "nome": "soldier_deniro",
+   "tem_sprite": true
+  },
+  "GHOSTRING": {
+   "sprite": "GHOSTRING",
+   "nome": "Ghostring",
+   "tem_sprite": true
+  },
+  "TAROU": {
+   "sprite": "TAROU",
+   "nome": "Tarou",
+   "tem_sprite": true
+  },
+  "GINSENG_BULLET": {
+   "sprite": "GINSENG_BULLET",
+   "nome": "ginseng_bullet",
+   "tem_sprite": true
+  },
+  "GIANT_SPIDER": {
+   "sprite": "GIANT_SPIDER",
+   "nome": "Aranha Gigante",
+   "tem_sprite": true
+  },
+  "EM_ANGELING": {
+   "sprite": "EM_ANGELING",
+   "nome": "em_angeling",
+   "tem_sprite": true
+  },
+  "ILL_PERMETER": {
+   "sprite": "ILL_PERMETER",
+   "nome": "Batedor Ominoso",
+   "tem_sprite": true
+  },
+  "MD_SEAWEED": {
+   "sprite": "MD_SEAWEED",
+   "nome": "md_seaweed",
+   "tem_sprite": true
+  },
+  "DOLOMEDES": {
+   "sprite": "DOLOMEDES",
+   "nome": "Dolomedes",
+   "tem_sprite": true
+  },
+  "KARAKASA": {
+   "sprite": "KARAKASA",
+   "nome": "Karakasa",
+   "tem_sprite": true
+  },
+  "CURUPIRA": {
+   "sprite": "CURUPIRA",
+   "nome": "Curupira",
+   "tem_sprite": true
+  },
+  "WRAITH": {
+   "sprite": "WRAITH",
+   "nome": "Alma Penada",
+   "tem_sprite": true
+  },
+  "G_RANDGRIS": {
+   "sprite": "G_RANDGRIS",
+   "nome": "Valquíria",
+   "tem_sprite": true
+  },
+  "GIANT_HONET": {
+   "sprite": "GIANT_HONET",
+   "nome": "Zangão Gigante",
+   "tem_sprite": true
+  },
+  "THE_PAPER": {
+   "sprite": "THE_PAPER",
+   "nome": "Papel",
+   "tem_sprite": true
+  },
+  "MARTIN": {
+   "sprite": "MARTIN",
+   "nome": "Martin",
+   "tem_sprite": true
+  },
+  "ELDER": {
+   "sprite": "ELDER",
+   "nome": "Ancião",
+   "tem_sprite": true
+  },
+  "SLEEPER": {
+   "sprite": "SLEEPER",
+   "nome": "Rochoso",
+   "tem_sprite": true
+  },
+  "RED_PLANT": {
+   "sprite": "RED_PLANT",
+   "nome": "Planta Vermelha",
+   "tem_sprite": true
+  },
+  "PLANKTON": {
+   "sprite": "PLANKTON",
+   "nome": "Plâncton",
+   "tem_sprite": true
+  },
+  "GARDEN_WATCHER": {
+   "sprite": "GARDEN_WATCHER",
+   "nome": "Vigia",
+   "tem_sprite": true
+  },
+  "MAYA": {
+   "sprite": "MAYA",
+   "nome": "Maya",
+   "tem_sprite": true
+  },
+  "REMOVAL": {
+   "sprite": "REMOVAL",
+   "nome": "Remover",
+   "tem_sprite": true
+  },
+  "ACIDUS_": {
+   "sprite": "ACIDUS_",
+   "nome": "acidus_",
+   "tem_sprite": true
+  },
+  "VITATA": {
+   "sprite": "VITATA",
+   "nome": "Vitata",
+   "tem_sprite": true
+  },
+  "DR_LUNATIC": {
+   "sprite": "DR_LUNATIC",
+   "nome": "Lunático Folhado",
+   "tem_sprite": true
+  },
+  "KAHO": {
+   "sprite": "KAHO",
+   "nome": "Kaho",
+   "tem_sprite": true
+  },
+  "NIGHTMARE": {
+   "sprite": "NIGHTMARE",
+   "nome": "Pesadelo",
+   "tem_sprite": true
+  },
+  "DR_DESERT_WOLF_B": {
+   "sprite": "DR_DESERT_WOLF_B",
+   "nome": "Filhote de Lobo Caçador",
+   "tem_sprite": true
+  },
+  "ORC_BABY": {
+   "sprite": "ORC_BABY",
+   "nome": "Filhote de Orc",
+   "tem_sprite": true
+  },
+  "HEATER": {
+   "sprite": "HEATER",
+   "nome": "Aquecedor",
+   "tem_sprite": true
+  },
+  "ORK_HERO": {
+   "sprite": "ORK_HERO",
+   "nome": "Orc Herói",
+   "tem_sprite": true
+  },
+  "MAGNOLIA": {
+   "sprite": "MAGNOLIA",
+   "nome": "Magnólia",
+   "tem_sprite": true
+  },
+  "SOLDIER_ANDRE": {
+   "sprite": "SOLDIER_ANDRE",
+   "nome": "soldier_andre",
+   "tem_sprite": true
+  },
+  "JAGUAR": {
+   "sprite": "JAGUAR",
+   "nome": "Espírito da Terra",
+   "tem_sprite": true
+  },
+  "EGGYRA": {
+   "sprite": "EGGYRA",
+   "nome": "Eggyra",
+   "tem_sprite": true
+  },
+  "RAPTICE": {
+   "sprite": "RAPTICE",
+   "nome": "raptice",
+   "tem_sprite": true
+  },
+  "KOBOLD_1": {
+   "sprite": "KOBOLD_1",
+   "nome": "Kobold",
+   "tem_sprite": true
+  },
+  "KOBOLD_2": {
+   "sprite": "KOBOLD_2",
+   "nome": "kobold_2",
+   "tem_sprite": true
+  },
+  "KOBOLD_3": {
+   "sprite": "KOBOLD_3",
+   "nome": "kobold_3",
+   "tem_sprite": true
+  },
+  "KOBOLD_4": {
+   "sprite": "KOBOLD_4",
+   "nome": "kobold_4",
+   "tem_sprite": true
+  },
+  "KOBOLD_5": {
+   "sprite": "KOBOLD_5",
+   "nome": "kobold_5",
+   "tem_sprite": true
+  },
+  "BABY_LEOPARD": {
+   "sprite": "BABY_LEOPARD",
+   "nome": "Filhote de Leopardo",
+   "tem_sprite": true
+  },
+  "CATERPILLAR": {
+   "sprite": "CATERPILLAR",
+   "nome": "Lagarta",
+   "tem_sprite": true
+  },
+  "PIRANHA": {
+   "sprite": "PIRANHA",
+   "nome": "Espírito da Água",
+   "tem_sprite": true
+  },
+  "HYEGUN": {
+   "sprite": "HYEGUN",
+   "nome": "Yao Jun",
+   "tem_sprite": true
+  },
+  "PHREEONI": {
+   "sprite": "PHREEONI",
+   "nome": "Freeoni",
+   "tem_sprite": true
+  },
+  "RED_FLOWER": {
+   "sprite": "RED_FLOWER",
+   "nome": "red_flower",
+   "tem_sprite": true
+  },
+  "COMODO": {
+   "sprite": "COMODO",
+   "nome": "Comodo",
+   "tem_sprite": true
+  },
+  "THARA_FROG": {
+   "sprite": "THARA_FROG",
+   "nome": "Sapo de Thara",
+   "tem_sprite": true
+  },
+  "SAVAGE": {
+   "sprite": "SAVAGE",
+   "nome": "Selvagem",
+   "tem_sprite": true
+  },
+  "TEDDY_BEAR": {
+   "sprite": "TEDDY_BEAR",
+   "nome": "Ursinho",
+   "tem_sprite": true
+  },
+  "RAWREL": {
+   "sprite": "RAWREL",
+   "nome": "Laurell Weinder",
+   "tem_sprite": true
+  },
+  "LOST_DRAGON": {
+   "sprite": "LOST_DRAGON",
+   "nome": "lost_dragon",
+   "tem_sprite": true
+  },
+  "E_RSX_0805": {
+   "sprite": "E_RSX_0805",
+   "nome": "e_rsx_0805",
+   "tem_sprite": true
+  },
+  "STALACTIC_GOLEM": {
+   "sprite": "STALACTIC_GOLEM",
+   "nome": "Golem Estalactítico",
+   "tem_sprite": true
+  },
+  "BLOOD_BUTTERFLY": {
+   "sprite": "BLOOD_BUTTERFLY",
+   "nome": "Borboleta Sanguinária",
+   "tem_sprite": true
+  },
+  "N_ARCLOUSE": {
+   "sprite": "N_ARCLOUSE",
+   "nome": "Arclouse Pesadelo",
+   "tem_sprite": true
+  },
+  "MOROCC_1": {
+   "sprite": "MOROCC_1",
+   "nome": "Sombra da Inveja",
+   "tem_sprite": true
+  },
+  "MOROCC_2": {
+   "sprite": "MOROCC_2",
+   "nome": "Sombra da Gula",
+   "tem_sprite": true
+  },
+  "FLAMEL": {
+   "sprite": "FLAMEL",
+   "nome": "Flamer Emul",
+   "tem_sprite": true
+  },
+  "MOROCC_3": {
+   "sprite": "MOROCC_3",
+   "nome": "Sombra da Vaidade",
+   "tem_sprite": true
+  },
+  "MOROCC_4": {
+   "sprite": "MOROCC_4",
+   "nome": "Sombra da Ira",
+   "tem_sprite": true
+  },
+  "ANCIENT_MIMIC": {
+   "sprite": "ANCIENT_MIMIC",
+   "nome": "Mímico Antigo",
+   "tem_sprite": true
+  },
+  "TOUCAN": {
+   "sprite": "TOUCAN",
+   "nome": "Espírito do Vento",
+   "tem_sprite": true
+  },
+  "GREMLIN": {
+   "sprite": "GREMLIN",
+   "nome": "Gremlin",
+   "tem_sprite": true
+  },
+  "OBJ_NEUTRAL": {
+   "sprite": "OBJ_NEUTRAL",
+   "nome": "obj_neutral",
+   "tem_sprite": true
+  },
+  "OBJ_A": {
+   "sprite": "OBJ_A",
+   "nome": "obj_a",
+   "tem_sprite": true
+  },
+  "OBJ_B": {
+   "sprite": "OBJ_B",
+   "nome": "obj_b",
+   "tem_sprite": true
+  },
+  "CELIA": {
+   "sprite": "CELIA",
+   "nome": "Celia Alde",
+   "tem_sprite": true
+  },
+  "CENDRAWASIH": {
+   "sprite": "CENDRAWASIH",
+   "nome": "Cendrawasih",
+   "tem_sprite": true
+  },
+  "KNOCKER": {
+   "sprite": "KNOCKER",
+   "nome": "Golpeador",
+   "tem_sprite": true
+  },
+  "LEAK": {
+   "sprite": "LEAK",
+   "nome": "Leak",
+   "tem_sprite": true
+  },
+  "SKOGUL": {
+   "sprite": "SKOGUL",
+   "nome": "Skogul",
+   "tem_sprite": true
+  },
+  "ZOMBIE_PRISONER": {
+   "sprite": "ZOMBIE_PRISONER",
+   "nome": "Zumbi Prisioneiro",
+   "tem_sprite": true
+  },
+  "ANUBIS": {
+   "sprite": "ANUBIS",
+   "nome": "Anubis",
+   "tem_sprite": true
+  },
+  "GARDEN_KEEPER": {
+   "sprite": "GARDEN_KEEPER",
+   "nome": "Guardião",
+   "tem_sprite": true
+  },
+  "SNOWIER": {
+   "sprite": "SNOWIER",
+   "nome": "Yeti",
+   "tem_sprite": true
+  },
+  "WHISPER_BOSS": {
+   "sprite": "WHISPER_BOSS",
+   "nome": "Cochicho",
+   "tem_sprite": true
+  },
+  "FERUS_": {
+   "sprite": "FERUS_",
+   "nome": "ferus_",
+   "tem_sprite": true
+  },
+  "N_AMON_RA": {
+   "sprite": "N_AMON_RA",
+   "nome": "Amon Ra Pesadelo",
+   "tem_sprite": true
+  },
+  "PANZER_GOBLIN": {
+   "sprite": "PANZER_GOBLIN",
+   "nome": "Panzer Goblin",
+   "tem_sprite": true
+  },
+  "SOCCER_BALL": {
+   "sprite": "SOCCER_BALL",
+   "nome": "soccer_ball",
+   "tem_sprite": true
+  },
+  "DRAGON_TAIL": {
+   "sprite": "DRAGON_TAIL",
+   "nome": "Lavadeira",
+   "tem_sprite": true
+  },
+  "KASA": {
+   "sprite": "KASA",
+   "nome": "Kasa",
+   "tem_sprite": true
+  },
+  "E_MINOROUS": {
+   "sprite": "E_MINOROUS",
+   "nome": "e_minorous",
+   "tem_sprite": true
+  }
+ },
+ "por_mapa": {
+  "abbey01": [
+   "GHOUL",
+   "RAGGED_ZOMBIE",
+   "BANSHEE",
+   "ZOMBIE_SLAUGHTER",
+   "FLAME_SKULL",
+   "HELL_POODLE"
+  ],
+  "abbey02": [
+   "NECROMANCER",
+   "FALLINGBISHOP"
+  ],
+  "abbey03": [],
+  "abyss_01": [
+   "NOVUS",
+   "DRAGON_EGG",
+   "MIMIC",
+   "ANCIENT_MIMIC",
+   "PENOMENA",
+   "FERUS"
+  ],
+  "abyss_02": [
+   "ACIDUS"
+  ],
+  "abyss_03": [
+   "HYDRO",
+   "DETALE"
+  ],
+  "alde_dun01": [
+   "DRAINLIAR",
+   "ARCLOUSE"
+  ],
+  "alde_dun02": [
+   "BRILIGHT",
+   "ORC_ARCHER",
+   "HIGH_ORC"
+  ],
+  "alde_dun03": [
+   "CRAMP"
+  ],
+  "alde_dun04": [
+   "BATHORY",
+   "WHISPER",
+   "JOKER"
+  ],
+  "ama_dun01": [
+   "ANTIQUE_FIRELOCK",
+   "MIYABI_NINGYO",
+   "SHINOBI"
+  ],
+  "ama_dun02": [
+   "THE_PAPER",
+   "POISON_TOAD",
+   "HORONG"
+  ],
+  "ama_dun03": [
+   "TENGU",
+   "INCANTATION_SAMURAI"
+  ],
+  "ama_fild01": [
+   "BIGFOOT",
+   "KARAKASA",
+   "KAPHA",
+   "HYDRA"
+  ],
+  "anthell01": [
+   "GIEARTH",
+   "ANT_EGG",
+   "DENIRO",
+   "VITATA",
+   "ANDRE",
+   "FARMILIAR",
+   "PIERE"
+  ],
+  "anthell02": [
+   "MAYA"
+  ],
+  "arug_dun01": [
+   "BANSHEE_MASTER",
+   "BEHOLDER_MASTER",
+   "FANAT",
+   "AUNOE"
+  ],
+  "ayo_dun01": [
+   "LEAF_CAT",
+   "KRABEN"
+  ],
+  "ayo_dun02": [
+   "TAMRUAN",
+   "LADY_TANEE"
+  ],
+  "ayo_fild01": [
+   "SMOKIE",
+   "COCO",
+   "YOYO"
+  ],
+  "ayo_fild02": [],
+  "beach_dun": [
+   "NERAID",
+   "MERMAN",
+   "MEDUSA",
+   "PEST",
+   "TAO_GUNKA"
+  ],
+  "beach_dun2": [
+   "MEGALITH",
+   "STALACTIC_GOLEM",
+   "TRI_JOINT"
+  ],
+  "beach_dun3": [
+   "MEGALODON",
+   "THARA_FROG"
+  ],
+  "bif_fild01": [
+   "LUCIOLA_VESPA",
+   "CORNUS",
+   "MIMING",
+   "LITTLE_FATUM",
+   "ANGRA_MANTIS",
+   "POM_SPIDER"
+  ],
+  "bif_fild02": [],
+  "bra_dun01": [
+   "PIRANHA",
+   "IARA",
+   "BLACK_MUSHROOM",
+   "MARINA",
+   "KUKRE",
+   "PLANKTON"
+  ],
+  "bra_dun02": [
+   "SHINING_PLANT",
+   "BOITATA"
+  ],
+  "bra_fild01": [
+   "CURUPIRA",
+   "DOKEBI",
+   "SAVAGE",
+   "HEADLESS_MULE",
+   "RED_MUSHROOM",
+   "JAGUAR",
+   "TOUCAN"
+  ],
+  "brasilis": [],
+  "c_tower1": [
+   "RIDEWORD",
+   "C_TOWER_MANAGER",
+   "PUNK"
+  ],
+  "c_tower2": [
+   "ELDER",
+   "CLOCK"
+  ],
+  "c_tower3": [
+   "ALARM"
+  ],
+  "c_tower4": [
+   "OWL_DUKE"
+  ],
+  "cmd_fild01": [
+   "GREEN_IGUANA",
+   "FLORA"
+  ],
+  "cmd_fild02": [
+   "ASTER",
+   "FUR_SEAL",
+   "GALAPAGO",
+   "SHELLFISH",
+   "CRAB",
+   "MOBSTER"
+  ],
+  "cmd_fild03": [
+   "ALLIGATOR",
+   "MUTANT_DRAGON",
+   "TOAD"
+  ],
+  "cmd_fild04": [
+   "SEE_OTTER"
+  ],
+  "cmd_fild06": [
+   "METALLER",
+   "GOLEM"
+  ],
+  "cmd_fild07": [
+   "RAGGLER"
+  ],
+  "cmd_fild09": [],
+  "dew_dun01": [
+   "COMODO",
+   "ANCIENT_WORM",
+   "GULLINBURSTI",
+   "LEAK"
+  ],
+  "dew_dun02": [
+   "BANASPATY",
+   "GAJOMART",
+   "AM_MUT",
+   "BUTOIJO"
+  ],
+  "dew_fild01": [
+   "ALNOLDI",
+   "ARGIOPE",
+   "CENDRAWASIH"
+  ],
+  "dic_dun01": [
+   "HORN_SCARABA",
+   "HORN_SCARABA2",
+   "HORN_SCARABA_EGG",
+   "HORN_SCARABA2_EGG"
+  ],
+  "dic_dun02": [
+   "ANTLER_SCARABA",
+   "RAKE_SCARABA",
+   "ANTLER_SCARABA_EGG",
+   "RAKE_SCARABA_EGG",
+   "QUEEN_SCARABA",
+   "I_HORN_SCARABA_EGG"
+  ],
+  "dic_fild01": [
+   "CENTIPEDE",
+   "CENTIPEDE_LARVA",
+   "TATACHO",
+   "DOLOMEDES"
+  ],
+  "dic_fild02": [
+   "BRADIUM_GOLEM"
+  ],
+  "ecl_fild01": [
+   "MENBLATT",
+   "PETAL"
+  ],
+  "ecl_tdun01": [
+   "CENERE",
+   "ANTIQUE_BOOK",
+   "LICHTERN_B",
+   "LICHTERN_Y"
+  ],
+  "ecl_tdun02": [
+   "LICHTERN_R"
+  ],
+  "ecl_tdun03": [
+   "LICHTERN_G",
+   "FAITHFUL_MANAGER"
+  ],
+  "ein_dun01": [
+   "WASTE_STOVE",
+   "NOXIOUS",
+   "VENOMOUS",
+   "PORCELLIO",
+   "PITMAN",
+   "UNGOLIANT"
+  ],
+  "ein_dun02": [
+   "TEDDY_BEAR",
+   "MINERAL",
+   "OBSIDIAN",
+   "RSX_0806"
+  ],
+  "ein_fild02": [],
+  "ein_fild03": [],
+  "ein_fild04": [
+   "DEMON_PUNGUS"
+  ],
+  "ein_fild05": [],
+  "ein_fild06": [
+   "MOLE",
+   "METALING"
+  ],
+  "ein_fild07": [],
+  "ein_fild08": [],
+  "ein_fild09": [],
+  "gef_d01_i": [
+   "ILL_BLACK_MUSHROOM",
+   "ILL_GHOUL",
+   "ILL_NIGHTMARE",
+   "ILL_DRAINLIAR",
+   "ILL_ZOMBIE",
+   "ILL_ZOMBIE_C",
+   "BLUE_PLANT",
+   "WHITE_PLANT"
+  ],
+  "gef_dun00": [
+   "YELLOW_PLANT",
+   "RED_PLANT",
+   "GREEN_PLANT",
+   "POISON_SPORE",
+   "POPORING",
+   "HUNTER_FLY"
+  ],
+  "gef_dun01": [
+   "NIGHTMARE",
+   "JAKK",
+   "ZOMBIE",
+   "DRACULA"
+  ],
+  "gef_dun02": [
+   "DEVIRUCHI",
+   "MARIONETTE",
+   "DOPPELGANGER"
+  ],
+  "gef_dun03": [
+   "WRAITH_DEAD",
+   "WRAITH",
+   "WIND_GHOST"
+  ],
+  "gef_fild00": [
+   "PORING",
+   "FABRE"
+  ],
+  "gef_fild01": [
+   "RODA_FROG",
+   "AMBERNITE"
+  ],
+  "gef_fild02": [
+   "HORN",
+   "ELDER_WILOW"
+  ],
+  "gef_fild03": [
+   "ORC_BABY",
+   "ORK_WARRIOR",
+   "ORC_LADY",
+   "ORK_HERO"
+  ],
+  "gef_fild04": [
+   "MANDRAGORA",
+   "LUNATIC"
+  ],
+  "gef_fild05": [
+   "THIEF_BUG_EGG",
+   "THIEF_BUG",
+   "STAINER",
+   "CREAMY"
+  ],
+  "gef_fild06": [
+   "PETIT",
+   "MANTIS",
+   "SIDE_WINDER"
+  ],
+  "gef_fild07": [
+   "PUPA"
+  ],
+  "gef_fild08": [
+   "PETIT_"
+  ],
+  "gef_fild09": [],
+  "gef_fild10": [
+   "ORC_LORD"
+  ],
+  "gef_fild11": [
+   "GOBLIN_1",
+   "GOBLIN_LEADER"
+  ],
+  "gefenia01": [
+   "MINI_DEMON",
+   "VIOLY",
+   "SUCCUBUS",
+   "KNIGHT_OF_ABYSS",
+   "INCUBUS",
+   "FAKE_ANGEL",
+   "MYSTELTAINN",
+   "EXECUTIONER",
+   "TIRFING",
+   "BLOODY_KNIGHT"
+  ],
+  "gefenia02": [],
+  "gefenia03": [],
+  "gefenia04": [],
+  "gl_cas01": [
+   "DARK_FRAME",
+   "SAGEWORM",
+   "OWL_BARON",
+   "ALICE",
+   "CARAT"
+  ],
+  "gl_cas02": [
+   "RAYDRIC",
+   "RAYDRIC_ARCHER",
+   "WANDER_MAN",
+   "EVIL_DRUID",
+   "KHALITZBURG",
+   "CHIMERA"
+  ],
+  "gl_cas02_": [],
+  "gl_church": [],
+  "gl_chyard": [
+   "DARK_PRIEST",
+   "DARK_ILLUSION",
+   "DARK_LORD"
+  ],
+  "gl_chyard_": [],
+  "gl_dun01": [
+   "STING"
+  ],
+  "gl_dun02": [
+   "GARGOYLE",
+   "MAJORUROS"
+  ],
+  "gl_in01": [],
+  "gl_knt01": [
+   "WHISPER_BOSS"
+  ],
+  "gl_knt02": [],
+  "gl_prison": [
+   "RYBIO",
+   "INJUSTICE",
+   "ZOMBIE_PRISONER"
+  ],
+  "gl_prison1": [
+   "SKEL_PRISONER",
+   "PHENDARK",
+   "ZHERLTHSH"
+  ],
+  "gl_sew01": [],
+  "gl_sew02": [],
+  "gl_sew03": [],
+  "gl_sew04": [
+   "ANOLIAN"
+  ],
+  "glast_01": [],
+  "gld2_ald": [
+   "KILLER_MANTIS",
+   "MAYA_PUPLE",
+   "GIOIA",
+   "ELVIRA"
+  ],
+  "gld2_gef": [
+   "KADES",
+   "RUDO"
+  ],
+  "gld2_pay": [
+   "SKELETON_GENERAL",
+   "DAEHYON",
+   "SOHEON"
+  ],
+  "gld2_prt": [
+   "PYURIEL",
+   "LORA"
+  ],
+  "gld_dun01": [
+   "LEIB_OLMAI",
+   "CAT_O_NINE_TAIL",
+   "MOONLIGHT",
+   "EDDGA",
+   "VAGABOND_WOLF"
+  ],
+  "gld_dun02": [
+   "GIANT_HONET",
+   "GIANT_SPIDER",
+   "MISTRESS"
+  ],
+  "gld_dun03": [
+   "CATERPILLAR",
+   "CREMY_FEAR",
+   "BAPHOMET"
+  ],
+  "gld_dun04": [
+   "ZOMBIE_MASTER",
+   "GHOSTRING"
+  ],
+  "gon_dun01": [
+   "LIVE_PEACH_TREE",
+   "ZIPPER_BEAR",
+   "BLOOD_BUTTERFLY"
+  ],
+  "gon_dun02": [
+   "BABY_LEOPARD",
+   "EVIL_CLOUD_HERMIT"
+  ],
+  "gon_dun03": [
+   "WILD_GINSENG",
+   "WICKED_NYMPH",
+   "DARK_SNAKE_LORD"
+  ],
+  "gon_fild01": [
+   "RICE_CAKE_BOY"
+  ],
+  "hu_fild01": [
+   "GEOGRAPHER"
+  ],
+  "hu_fild02": [
+   "GRYPHON"
+  ],
+  "hu_fild04": [],
+  "hu_fild05": [],
+  "hu_fild06": [],
+  "ice_dun01": [
+   "GAZETI",
+   "ROWEEN",
+   "MUSCIPULAR",
+   "SIROMA"
+  ],
+  "ice_dun02": [
+   "ICEICLE",
+   "SNOWIER",
+   "ICE_TITAN"
+  ],
+  "ice_dun03": [],
+  "in_sphinx1": [
+   "REQUIEM",
+   "MATYR",
+   "ZEROM"
+  ],
+  "in_sphinx2": [],
+  "in_sphinx3": [
+   "MARDUK",
+   "PASANA"
+  ],
+  "in_sphinx4": [
+   "MINOROUS",
+   "ANUBIS"
+  ],
+  "in_sphinx5": [
+   "PHARAOH"
+  ],
+  "iz_ac01": [],
+  "iz_dun00": [
+   "VADON"
+  ],
+  "iz_dun01": [
+   "CORNUTUS"
+  ],
+  "iz_dun02": [
+   "MARSE",
+   "OBEAUNE"
+  ],
+  "iz_dun03": [
+   "MARC",
+   "MARINE_SPHERE",
+   "SWORD_FISH",
+   "PHEN"
+  ],
+  "iz_dun04": [
+   "DEVIACE",
+   "STROUF"
+  ],
+  "iz_dun05": [
+   "SROPHO",
+   "SEDORA",
+   "POT_DOFLE",
+   "KING_DRAMOH",
+   "KRAKEN"
+  ],
+  "iz_ng01": [],
+  "job_monk": [],
+  "jupe_core": [
+   "DIMIK_1",
+   "VENATU_1",
+   "ARCHDAM",
+   "APOCALIPS_H",
+   "VENATU_4"
+  ],
+  "juperos_02": [
+   "APOCALIPS"
+  ],
+  "kh_dun01": [
+   "ALICEL",
+   "ALIOT",
+   "ALIZA",
+   "CONSTANT"
+  ],
+  "kh_dun02": [
+   "KIEL_"
+  ],
+  "lasa_dun01": [
+   "DR_SPORE",
+   "DR_BASILISK1",
+   "DR_BIG_EGGRING"
+  ],
+  "lasa_dun02": [
+   "DR_BASILISK2",
+   "DR_MANDRAGORA"
+  ],
+  "lasa_dun03": [
+   "DR_BASILISK3",
+   "DR_POM_SPIDER"
+  ],
+  "lasa_fild01": [
+   "DR_EGGRING",
+   "DR_FABRE",
+   "DR_LUNATIC"
+  ],
+  "lasa_fild02": [
+   "DR_HORNET",
+   "DR_RODA_FROG",
+   "DR_DESERT_WOLF_B"
+  ],
+  "lhz_dun01": [
+   "RAWREL",
+   "REMOVAL",
+   "ARMAIA",
+   "ANOPHELES",
+   "YGNIZEM",
+   "EREND",
+   "GEMINI",
+   "KAVAC",
+   "WHIKEBAIN"
+  ],
+  "lhz_dun02": [
+   "EREMES"
+  ],
+  "lhz_dun03": [
+   "MAGALETA",
+   "SEYREN",
+   "SHECIL",
+   "KATRINN",
+   "HARWORD"
+  ],
+  "lhz_dun04": [
+   "RANDEL",
+   "FLAMEL",
+   "CELIA",
+   "CHEN",
+   "GERTIE",
+   "ALPHOCCIO",
+   "TRENTINI"
+  ],
+  "lhz_fild01": [
+   "RAFFLESIA",
+   "STEM_WORM"
+  ],
+  "lhz_fild02": [
+   "BREEZE"
+  ],
+  "lhz_fild03": [],
+  "lou_dun01": [
+   "GRIZZLY",
+   "INCREASE_SOIL",
+   "LI_ME_MANG_RYANG"
+  ],
+  "lou_dun02": [
+   "MUNAK",
+   "DANCING_DRAGON",
+   "HYEGUN"
+  ],
+  "lou_dun03": [
+   "CIVIL_SERVANT",
+   "BACSOJIN_"
+  ],
+  "lou_fild01": [],
+  "ma_dun01": [
+   "WAKWAK",
+   "MANANANGGAL",
+   "TIYANAK"
+  ],
+  "ma_fild01": [
+   "JEJELING",
+   "TIKBALANG"
+  ],
+  "ma_fild02": [
+   "BUNGISNGIS",
+   "ENGKANTO",
+   "MANGKUKULAM"
+  ],
+  "mag_dun01": [
+   "LAVA_GOLEM",
+   "BLAZZER",
+   "EXPLOSION",
+   "KAHO"
+  ],
+  "mag_dun02": [
+   "GIG",
+   "NIGHTMARE_TERROR",
+   "DIABOLIC",
+   "DELETER",
+   "DELETER_"
+  ],
+  "mal_dun01": [
+   "SIORAVA",
+   "RED_ERUMA",
+   "WILD_RIDER"
+  ],
+  "man_fild01": [
+   "NEPENTHES",
+   "HILLSRION"
+  ],
+  "man_fild02": [],
+  "man_fild03": [
+   "HARDROCK_MOMMOTH"
+  ],
+  "mjo_dun01": [
+   "MARTIN",
+   "TAROU"
+  ],
+  "mjo_dun02": [
+   "SKEL_WORKER"
+  ],
+  "mjo_dun03": [
+   "MYST"
+  ],
+  "mjolnir_01": [
+   "CARAMEL"
+  ],
+  "mjolnir_02": [],
+  "mjolnir_03": [
+   "DRILLER"
+  ],
+  "mjolnir_04": [],
+  "mjolnir_05": [],
+  "mjolnir_06": [],
+  "mjolnir_07": [
+   "KIND_OF_BEETLE"
+  ],
+  "mjolnir_08": [],
+  "mjolnir_09": [
+   "WILOW",
+   "HORNET",
+   "SAVAGE_BABE"
+  ],
+  "mjolnir_10": [
+   "ARGOS"
+  ],
+  "mjolnir_11": [],
+  "mjolnir_12": [
+   "DUSTINESS"
+  ],
+  "moc_fild01": [
+   "MUKA",
+   "PECOPECO"
+  ],
+  "moc_fild02": [],
+  "moc_fild03": [
+   "WOLF"
+  ],
+  "moc_fild07": [
+   "DROPS",
+   "PICKY"
+  ],
+  "moc_fild11": [
+   "CONDOR",
+   "DESERT_WOLF_B",
+   "SCORPION"
+  ],
+  "moc_fild12": [],
+  "moc_fild13": [
+   "MAGNOLIA"
+  ],
+  "moc_fild16": [
+   "FRILLDORA",
+   "SAND_MAN",
+   "HODE"
+  ],
+  "moc_fild17": [
+   "PHREEONI"
+  ],
+  "moc_fild18": [
+   "DRAGON_FLY"
+  ],
+  "moc_fild20": [
+   "MOROCC_1",
+   "MOROCC_2",
+   "MOROCC_3",
+   "MOROCC_4"
+  ],
+  "moc_fild21": [],
+  "moc_fild22": [],
+  "moc_pryd01": [],
+  "moc_pryd02": [
+   "MUMMY",
+   "ISIS"
+  ],
+  "moc_pryd03": [],
+  "moc_pryd04": [
+   "ANCIENT_MUMMY",
+   "OSIRIS"
+  ],
+  "moc_pryd05": [],
+  "moc_pryd06": [
+   "AMON_RA"
+  ],
+  "moc_prydn1": [
+   "N_MINOROUS",
+   "N_MUMMY"
+  ],
+  "moc_prydn2": [
+   "N_MIMIC",
+   "N_ARCLOUSE",
+   "N_ANCIENT_MUMMY",
+   "N_AMON_RA"
+  ],
+  "moro_vol": [
+   "FIRE_CONDOR",
+   "FIRE_SAND_MAN",
+   "FIRE_FRILLDORA",
+   "FIRE_GOLEM",
+   "FIREPIT",
+   "FULBUK",
+   "SONIA",
+   "E_ANGRY_MIMIC"
+  ],
+  "mosk_dun01": [
+   "LES",
+   "WOOD_GOBLIN"
+  ],
+  "mosk_dun02": [
+   "VAVAYAGA",
+   "UZHAS"
+  ],
+  "mosk_dun03": [
+   "MAVKA",
+   "GOPINICH"
+  ],
+  "mosk_fild02": [],
+  "nameless_n": [],
+  "nif_fild01": [
+   "DULLAHAN",
+   "DISGUISE",
+   "GIBBET",
+   "QUVE",
+   "HYLOZOIST"
+  ],
+  "nif_fild02": [
+   "LOLI_RURI",
+   "LUDE",
+   "BLOODY_MURDERER"
+  ],
+  "niflheim": [],
+  "nyd_dun01": [
+   "DRACO",
+   "AQUA_ELEMENTAL",
+   "PINGUICULA_D",
+   "RATA",
+   "DUNEYRR",
+   "DRACO_EGG"
+  ],
+  "odin_tem01": [
+   "SKOGUL",
+   "FRUS",
+   "PLASMA_B"
+  ],
+  "odin_tem02": [
+   "SKEGGIOLD"
+  ],
+  "odin_tem03": [
+   "G_RANDGRIS",
+   "RANDGRIS"
+  ],
+  "orcsdun01": [
+   "ORC_SKELETON",
+   "ORC_ZOMBIE"
+  ],
+  "orcsdun02": [
+   "ZENORC"
+  ],
+  "pay_d03_i": [
+   "ILL_NINE_TAIL",
+   "ILL_MUNAK",
+   "ILL_BON_GUN",
+   "ILL_SOHEE",
+   "ILL_ARCHER_SKELETON",
+   "ILL_FURY_HERO"
+  ],
+  "pay_dun00": [
+   "SKELETON"
+  ],
+  "pay_dun01": [
+   "EGGYRA"
+  ],
+  "pay_dun02": [
+   "NINE_TAIL",
+   "BON_GUN"
+  ],
+  "pay_dun03": [
+   "SOHEE",
+   "GREATEST_GENERAL"
+  ],
+  "pay_dun04": [],
+  "pay_fild01": [],
+  "pay_fild02": [
+   "WORM_TAIL",
+   "SNAKE",
+   "SPORE"
+  ],
+  "pay_fild03": [],
+  "pay_fild04": [
+   "MARIN",
+   "DEVILING",
+   "ANGELING",
+   "MASTERING"
+  ],
+  "pay_fild06": [],
+  "pay_fild07": [],
+  "pay_fild08": [],
+  "pay_fild09": [],
+  "pay_fild10": [],
+  "prt_cas": [
+   "GLASS_PLATE"
+  ],
+  "prt_fild00": [],
+  "prt_fild01": [],
+  "prt_fild02": [
+   "ECLIPSE"
+  ],
+  "prt_fild03": [
+   "CHOCO"
+  ],
+  "prt_fild04": [
+   "VOCAL"
+  ],
+  "prt_fild05": [],
+  "prt_fild06": [],
+  "prt_fild07": [
+   "ROCKER"
+  ],
+  "prt_fild08": [
+   "LITTLE_PORING"
+  ],
+  "prt_fild09": [],
+  "prt_fild10": [],
+  "prt_fild11": [
+   "GOBLIN_ARCHER",
+   "ROTAR_ZAIRO",
+   "STEAM_GOBLIN",
+   "PANZER_GOBLIN"
+  ],
+  "prt_maze01": [],
+  "prt_maze02": [
+   "SASQUATCH"
+  ],
+  "prt_maze03": [
+   "BAPHOMET_"
+  ],
+  "prt_prison": [
+   "FROZENWOLF",
+   "TAFFY",
+   "WATCHER"
+  ],
+  "prt_q": [
+   "ZOMBIE_GUARD",
+   "IMMOTAL_CORPS"
+  ],
+  "prt_sewb2": [],
+  "prt_sewb3": [],
+  "prt_sewb4": [
+   "GOLDEN_BUG"
+  ],
+  "que_qsch01": [
+   "GARDEN_KEEPER",
+   "GARDEN_WATCHER"
+  ],
+  "ra_fild01": [
+   "DESERT_WOLF"
+  ],
+  "ra_fild03": [
+   "HILL_WIND_1",
+   "ANACONDAQ"
+  ],
+  "ra_fild04": [],
+  "ra_fild05": [
+   "KOBOLD_1"
+  ],
+  "ra_fild06": [
+   "KOBOLD_ARCHER",
+   "KOBOLD_LEADER"
+  ],
+  "ra_fild08": [],
+  "ra_fild12": [],
+  "ra_san01": [
+   "GREMLIN",
+   "BEHOLDER",
+   "ISILLA",
+   "VANBERK",
+   "HODREMLIN"
+  ],
+  "ra_san02": [
+   "SEEKER"
+  ],
+  "ra_san03": [],
+  "ra_san04": [
+   "AGAV",
+   "ECHIO"
+  ],
+  "ra_san05": [
+   "GLOOMUNDERNIGHT"
+  ],
+  "schg_dun01": [
+   "HELL_APOCALIPS",
+   "ZAKUDAM",
+   "HEAVY_METALING",
+   "COBALT_MINERAL"
+  ],
+  "slabw01": [
+   "EP16_2_HUMAN_KIMERA",
+   "EP16_2_MATTER_KIMERA",
+   "EP16_2_VENOM_KIMERA"
+  ],
+  "sp_os": [],
+  "sp_rudus": [],
+  "sp_rudus2": [
+   "EP17_1_R4885_BESTIA"
+  ],
+  "sp_rudus3": [],
+  "spl_fild01": [
+   "NAGA"
+  ],
+  "spl_fild02": [
+   "PINGUICULA"
+  ],
+  "spl_fild03": [
+   "TENDRILRION"
+  ],
+  "teg_dun01": [
+   "L_SEYREN",
+   "L_EREMES",
+   "L_HARWORD",
+   "L_SHECIL",
+   "L_KATRINN",
+   "L_MAGALETA",
+   "B_NOVICE"
+  ],
+  "teg_dun02": [
+   "L_YGNIZEM",
+   "L_WHIKEBAIN",
+   "L_ARMAIA",
+   "L_KAVAC",
+   "L_DANCER",
+   "L_RAWREL",
+   "L_EREND",
+   "B_SUPERNOVICE"
+  ],
+  "tha_t01": [
+   "SOLACE"
+  ],
+  "tha_t02": [
+   "DEATHWORD",
+   "RETRIBUTION"
+  ],
+  "tha_t03": [
+   "SHELTER"
+  ],
+  "tha_t04": [
+   "OBSERVATION"
+  ],
+  "tha_t05": [
+   "THA_DOLOR"
+  ],
+  "tha_t06": [
+   "THA_MAERO"
+  ],
+  "tha_t07": [
+   "THA_DESPERO"
+  ],
+  "tha_t08": [
+   "THA_ODIUM"
+  ],
+  "thor_v01": [
+   "MAGMARING",
+   "BYORGUE",
+   "SALAMANDER",
+   "IMP",
+   "KASA"
+  ],
+  "thor_v02": [
+   "KNOCKER"
+  ],
+  "thor_v03": [
+   "IFRIT"
+  ],
+  "treasure01": [
+   "PIRATE_SKEL"
+  ],
+  "treasure02": [
+   "DRAKE"
+  ],
+  "treasure_n1": [
+   "DEAD_PLANKTON",
+   "WEAK_SKELETON"
+  ],
+  "treasure_n2": [
+   "WEAK_SKEL_SOLDIER"
+  ],
+  "tur_d03_i": [
+   "ILL_SOLIDER",
+   "ILL_PERMETER"
+  ],
+  "tur_d04_i": [
+   "ILL_ASSULTER",
+   "ILL_FREEZER",
+   "ILL_HEATER"
+  ],
+  "tur_dun01": [
+   "DRAGON_TAIL",
+   "SPRING_RABBIT",
+   "PERMETER"
+  ],
+  "tur_dun02": [
+   "SOLIDER",
+   "FREEZER"
+  ],
+  "tur_dun03": [
+   "ASSULTER",
+   "HEATER"
+  ],
+  "tur_dun04": [
+   "TURTLE_GENERAL"
+  ],
+  "tur_dun05": [],
+  "um_fild01": [
+   "STONE_SHOOTER",
+   "WOOTAN_SHOOTER",
+   "WOOTAN_FIGHTER",
+   "DRYAD",
+   "WOODEN_GOLEM"
+  ],
+  "um_fild02": [],
+  "um_fild03": [
+   "PARASITE"
+  ],
+  "um_fild04": [
+   "WILD_ROSE"
+  ],
+  "un_bunker": [
+   "ZOMBIE_H",
+   "GHOUL_H",
+   "SCR_MT_ROBOTS",
+   "REPAIR_ROBOT_T",
+   "EXPLORATION_ROVER_T"
+  ],
+  "ve_fild01": [
+   "GALION",
+   "STAPO",
+   "DROSERA"
+  ],
+  "ve_fild02": [],
+  "ve_fild03": [],
+  "ve_fild04": [],
+  "ve_fild07": [],
+  "ver_eju": [
+   "EXCAVATOR_ROBOT",
+   "RECON_ROBOT"
+  ],
+  "verus01": [
+   "CENERE_G"
+  ],
+  "verus03": [
+   "REPAIR_ROBOT",
+   "EXPLORATION_ROVER"
+  ],
+  "xmas_dun01": [
+   "MYSTCASE",
+   "COOKIE",
+   "CHEPET"
+  ],
+  "xmas_dun02": [
+   "CRUISER",
+   "KNIGHT_OF_WINDSTORM"
+  ],
+  "xmas_fild01": [
+   "GARM_BABY",
+   "GARM"
+  ],
+  "yuno_fild01": [],
+  "yuno_fild02": [
+   "SLEEPER",
+   "GRAND_PECO",
+   "HARPY"
+  ],
+  "yuno_fild03": [
+   "GOAT"
+  ],
+  "yuno_fild04": [
+   "ARCHANGELING"
+  ],
+  "yuno_fild06": [],
+  "yuno_fild07": [],
+  "yuno_fild08": [],
+  "yuno_fild09": [],
+  "yuno_fild11": [],
+  "yuno_fild12": []
+ },
+ "habilidades": {
+  "NPC_DARKNESSATTACK": {
+   "id": "NPC_DARKNESSATTACK",
+   "nome": "Kage Nui",
+   "tem_icone": false
+  },
+  "NPC_HELLJUDGEMENT": {
+   "id": "NPC_HELLJUDGEMENT",
+   "nome": "Magen: Narakumi no Jutsu",
+   "tem_icone": false
+  },
+  "NPC_STUNATTACK": {
+   "id": "NPC_STUNATTACK",
+   "nome": "Shikumi no Jutsu",
+   "tem_icone": false
+  },
+  "NPC_CURSEATTACK": {
+   "id": "NPC_CURSEATTACK",
+   "nome": "Kokubanjou no Jutsu",
+   "tem_icone": false
+  },
+  "NPC_COMBOATTACK": {
+   "id": "NPC_COMBOATTACK",
+   "nome": "Shoufuu Rendan",
+   "tem_icone": false
+  },
+  "NPC_CRITICALWOUND": {
+   "id": "NPC_CRITICALWOUND",
+   "nome": "Ferimento Crítico",
+   "tem_icone": false
+  },
+  "NPC_AGIUP": {
+   "id": "NPC_AGIUP",
+   "nome": "Tática de Fuga",
+   "tem_icone": false
+  },
+  "NV_BASIC": {
+   "id": "NV_BASIC",
+   "nome": "Habilidades Ninjas",
+   "tem_icone": false
+  },
+  "NPC_BLEEDING": {
+   "id": "NPC_BLEEDING",
+   "nome": "Tsukuyomi",
+   "tem_icone": false
+  },
+  "SM_SWORD": {
+   "id": "SM_SWORD",
+   "nome": "Perícia com Espada",
+   "tem_icone": false
+  },
+  "SM_TWOHAND": {
+   "id": "SM_TWOHAND",
+   "nome": "Perícia com Espada de Duas Mãos",
+   "tem_icone": false
+  },
+  "SM_RECOVERY": {
+   "id": "SM_RECOVERY",
+   "nome": "Aumentar Recuperação Natural",
+   "tem_icone": false
+  },
+  "SM_BASH": {
+   "id": "SM_BASH",
+   "nome": "Kage Buyou",
+   "tem_icone": false
+  },
+  "SM_PROVOKE": {
+   "id": "SM_PROVOKE",
+   "nome": "Provocar",
+   "tem_icone": false
+  },
+  "SM_MAGNUM": {
+   "id": "SM_MAGNUM",
+   "nome": "Kaiten",
+   "tem_icone": false
+  },
+  "SM_ENDURE": {
+   "id": "SM_ENDURE",
+   "nome": "Espírito Shinobi",
+   "tem_icone": false
+  },
+  "MG_SRECOVERY": {
+   "id": "MG_SRECOVERY",
+   "nome": "Aumentar Recuperação de Chakra",
+   "tem_icone": false
+  },
+  "MG_SIGHT": {
+   "id": "MG_SIGHT",
+   "nome": "Chama Reveladora",
+   "tem_icone": false
+  },
+  "MG_NAPALMBEAT": {
+   "id": "MG_NAPALMBEAT",
+   "nome": "Fuuton Daitoppa",
+   "tem_icone": false
+  },
+  "MG_SAFETYWALL": {
+   "id": "MG_SAFETYWALL",
+   "nome": "Escudo Mágico",
+   "tem_icone": false
+  },
+  "MG_SOULSTRIKE": {
+   "id": "MG_SOULSTRIKE",
+   "nome": "Kikaichu Arare",
+   "tem_icone": false
+  },
+  "MG_COLDBOLT": {
+   "id": "MG_COLDBOLT",
+   "nome": "Suiton Suiryuudan no Jutsu",
+   "tem_icone": false
+  },
+  "MG_FROSTDIVER": {
+   "id": "MG_FROSTDIVER",
+   "nome": "Suiton Hahonryuu no Jutsu",
+   "tem_icone": false
+  },
+  "MG_STONECURSE": {
+   "id": "MG_STONECURSE",
+   "nome": "Sabaku Kyuu",
+   "tem_icone": false
+  },
+  "MG_FIREBOLT": {
+   "id": "MG_FIREBOLT",
+   "nome": "Katon Gougakyuu no Jutsu",
+   "tem_icone": false
+  },
+  "MG_FIREBALL": {
+   "id": "MG_FIREBALL",
+   "nome": "Katon Housenka no Jutsu",
+   "tem_icone": false
+  },
+  "MG_FIREWALL": {
+   "id": "MG_FIREWALL",
+   "nome": "Amaterasu",
+   "tem_icone": false
+  },
+  "MG_LIGHTNINGBOLT": {
+   "id": "MG_LIGHTNINGBOLT",
+   "nome": "Raiton Gian",
+   "tem_icone": false
+  },
+  "MG_THUNDERSTORM": {
+   "id": "MG_THUNDERSTORM",
+   "nome": "Raiton Kaminari Oroshi",
+   "tem_icone": false
+  },
+  "AL_DP": {
+   "id": "AL_DP",
+   "nome": "Proteção Divina",
+   "tem_icone": false
+  },
+  "AL_DEMONBANE": {
+   "id": "AL_DEMONBANE",
+   "nome": "Flagelo do Mal",
+   "tem_icone": false
+  },
+  "AL_RUWACH": {
+   "id": "AL_RUWACH",
+   "nome": "Kanchi Taipu",
+   "tem_icone": false
+  },
+  "AL_PNEUMA": {
+   "id": "AL_PNEUMA",
+   "nome": "Kekkai",
+   "tem_icone": false
+  },
+  "AL_TELEPORT": {
+   "id": "AL_TELEPORT",
+   "nome": "Teleporte",
+   "tem_icone": false
+  },
+  "AL_WARP": {
+   "id": "AL_WARP",
+   "nome": "Portal",
+   "tem_icone": false
+  },
+  "AL_HEAL": {
+   "id": "AL_HEAL",
+   "nome": "Chiyute no Jutsu",
+   "tem_icone": false
+  },
+  "AL_INCAGI": {
+   "id": "AL_INCAGI",
+   "nome": "Concentrar Chakra nos pés",
+   "tem_icone": false
+  },
+  "AL_DECAGI": {
+   "id": "AL_DECAGI",
+   "nome": "Mahi no Jutsu",
+   "tem_icone": false
+  },
+  "AL_HOLYWATER": {
+   "id": "AL_HOLYWATER",
+   "nome": "Produzir Água Benta",
+   "tem_icone": false
+  },
+  "AL_CRUCIS": {
+   "id": "AL_CRUCIS",
+   "nome": "Purificar com Chakra",
+   "tem_icone": false
+  },
+  "AL_ANGELUS": {
+   "id": "AL_ANGELUS",
+   "nome": "Tsubaki no Mai",
+   "tem_icone": false
+  },
+  "AL_BLESSING": {
+   "id": "AL_BLESSING",
+   "nome": "Benção",
+   "tem_icone": false
+  },
+  "AL_CURE": {
+   "id": "AL_CURE",
+   "nome": "Inyu Shometsu",
+   "tem_icone": false
+  },
+  "MC_INCCARRY": {
+   "id": "MC_INCCARRY",
+   "nome": "Aumentar Capacidade de Carga",
+   "tem_icone": false
+  },
+  "MC_DISCOUNT": {
+   "id": "MC_DISCOUNT",
+   "nome": "Desconto",
+   "tem_icone": false
+  },
+  "MC_OVERCHARGE": {
+   "id": "MC_OVERCHARGE",
+   "nome": "Superfaturar",
+   "tem_icone": false
+  },
+  "MC_PUSHCART": {
+   "id": "MC_PUSHCART",
+   "nome": "Usar Carrinho",
+   "tem_icone": false
+  },
+  "MC_IDENTIFY": {
+   "id": "MC_IDENTIFY",
+   "nome": "Identificar Item",
+   "tem_icone": false
+  },
+  "MC_VENDING": {
+   "id": "MC_VENDING",
+   "nome": "Montar Loja Shinobi",
+   "tem_icone": false
+  },
+  "MC_MAMMONITE": {
+   "id": "MC_MAMMONITE",
+   "nome": "Mammonita",
+   "tem_icone": false
+  },
+  "AC_OWL": {
+   "id": "AC_OWL",
+   "nome": "Precisão",
+   "tem_icone": false
+  },
+  "AC_VULTURE": {
+   "id": "AC_VULTURE",
+   "nome": "Kikai Hijutsu",
+   "tem_icone": false
+  },
+  "AC_CONCENTRATION": {
+   "id": "AC_CONCENTRATION",
+   "nome": "Concentração",
+   "tem_icone": false
+  },
+  "AC_DOUBLE": {
+   "id": "AC_DOUBLE",
+   "nome": "Rajada de Flechas",
+   "tem_icone": false
+  },
+  "AC_SHOWER": {
+   "id": "AC_SHOWER",
+   "nome": "Chuva de Flechas",
+   "tem_icone": false
+  },
+  "TF_DOUBLE": {
+   "id": "TF_DOUBLE",
+   "nome": "Jyuuken Ryuu",
+   "tem_icone": false
+  },
+  "TF_MISS": {
+   "id": "TF_MISS",
+   "nome": "Perícia em Esquiva",
+   "tem_icone": false
+  },
+  "TF_STEAL": {
+   "id": "TF_STEAL",
+   "nome": "Furto",
+   "tem_icone": false
+  },
+  "TF_HIDING": {
+   "id": "TF_HIDING",
+   "nome": "Kawarimi no Jutsu",
+   "tem_icone": false
+  },
+  "TF_POISON": {
+   "id": "TF_POISON",
+   "nome": "Kikaichuu Arare no Justu",
+   "tem_icone": false
+  },
+  "TF_DETOXIFY": {
+   "id": "TF_DETOXIFY",
+   "nome": "Saikan Chuushutsu no Jutsu",
+   "tem_icone": false
+  },
+  "KN_SPEARMASTERY": {
+   "id": "KN_SPEARMASTERY",
+   "nome": "Perícia com Lança",
+   "tem_icone": false
+  },
+  "KN_PIERCE": {
+   "id": "KN_PIERCE",
+   "nome": "Yanagi no Mai",
+   "tem_icone": false
+  },
+  "KN_BRANDISHSPEAR": {
+   "id": "KN_BRANDISHSPEAR",
+   "nome": "Karamatsu no Mai",
+   "tem_icone": false
+  },
+  "KN_SPEARSTAB": {
+   "id": "KN_SPEARSTAB",
+   "nome": "Tokken",
+   "tem_icone": false
+  },
+  "KN_SPEARBOOMERANG": {
+   "id": "KN_SPEARBOOMERANG",
+   "nome": "Mokuton - Ude ki no jutsu",
+   "tem_icone": false
+  },
+  "KN_TWOHANDQUICKEN": {
+   "id": "KN_TWOHANDQUICKEN",
+   "nome": "Rapidez com Duas Mãos",
+   "tem_icone": false
+  },
+  "KN_AUTOCOUNTER": {
+   "id": "KN_AUTOCOUNTER",
+   "nome": "Contra-Ataque",
+   "tem_icone": false
+  },
+  "KN_BOWLINGBASH": {
+   "id": "KN_BOWLINGBASH",
+   "nome": "TsuutenKyaku",
+   "tem_icone": false
+  },
+  "KN_RIDING": {
+   "id": "KN_RIDING",
+   "nome": "Selo de Mão: Boi",
+   "tem_icone": false
+  },
+  "KN_CAVALIERMASTERY": {
+   "id": "KN_CAVALIERMASTERY",
+   "nome": "Perícia em Montaria",
+   "tem_icone": false
+  },
+  "PR_MACEMASTERY": {
+   "id": "PR_MACEMASTERY",
+   "nome": "Perícia com Maça",
+   "tem_icone": false
+  },
+  "PR_IMPOSITIO": {
+   "id": "PR_IMPOSITIO",
+   "nome": "Nikudan Sensha",
+   "tem_icone": false
+  },
+  "PR_SUFFRAGIUM": {
+   "id": "PR_SUFFRAGIUM",
+   "nome": "Suffragium",
+   "tem_icone": false
+  },
+  "PR_ASPERSIO": {
+   "id": "PR_ASPERSIO",
+   "nome": "Aspersio",
+   "tem_icone": false
+  },
+  "PR_BENEDICTIO": {
+   "id": "PR_BENEDICTIO",
+   "nome": "B.S. Sacramenti",
+   "tem_icone": false
+  },
+  "PR_SANCTUARY": {
+   "id": "PR_SANCTUARY",
+   "nome": "Shouen no Jutsu",
+   "tem_icone": false
+  },
+  "PR_STRECOVERY": {
+   "id": "PR_STRECOVERY",
+   "nome": "Souzou Saisei",
+   "tem_icone": false
+  },
+  "PR_SLOWPOISON": {
+   "id": "PR_SLOWPOISON",
+   "nome": "Retardar Veneno",
+   "tem_icone": false
+  },
+  "ALL_RESURRECTION": {
+   "id": "ALL_RESURRECTION",
+   "nome": "Shikon no Jutsu",
+   "tem_icone": false
+  },
+  "PR_KYRIE": {
+   "id": "PR_KYRIE",
+   "nome": "Defesa Absoluta",
+   "tem_icone": false
+  },
+  "PR_MAGNIFICAT": {
+   "id": "PR_MAGNIFICAT",
+   "nome": "Chikatsu no Jutsu",
+   "tem_icone": false
+  },
+  "PR_GLORIA": {
+   "id": "PR_GLORIA",
+   "nome": "Gloria",
+   "tem_icone": false
+  },
+  "PR_LEXDIVINA": {
+   "id": "PR_LEXDIVINA",
+   "nome": "Jigyaku no Chakra",
+   "tem_icone": false
+  },
+  "PR_TURNUNDEAD": {
+   "id": "PR_TURNUNDEAD",
+   "nome": "Esconjurar",
+   "tem_icone": false
+  },
+  "PR_LEXAETERNA": {
+   "id": "PR_LEXAETERNA",
+   "nome": "Enfraquecer Oponente",
+   "tem_icone": false
+  },
+  "PR_MAGNUS": {
+   "id": "PR_MAGNUS",
+   "nome": "Magnus Exorcismus",
+   "tem_icone": false
+  },
+  "HT_ANKLESNARE": {
+   "id": "HT_ANKLESNARE",
+   "nome": "Instalar Armadilha",
+   "tem_icone": false
+  },
+  "HT_BEASTBANE": {
+   "id": "HT_BEASTBANE",
+   "nome": "Aumentar Controle de Kikai",
+   "tem_icone": false
+  },
+  "HT_BLASTMINE": {
+   "id": "HT_BLASTMINE",
+   "nome": "Instalar Mina",
+   "tem_icone": false
+  },
+  "HT_BLITZBEAT": {
+   "id": "HT_BLITZBEAT",
+   "nome": "Dokujin no Jutsu",
+   "tem_icone": false
+  },
+  "HT_CLAYMORETRAP": {
+   "id": "HT_CLAYMORETRAP",
+   "nome": "Jutsu Explosivo",
+   "tem_icone": false
+  },
+  "HT_DETECTING": {
+   "id": "HT_DETECTING",
+   "nome": "Espionar com Kikai",
+   "tem_icone": false
+  },
+  "HT_FALCON": {
+   "id": "HT_FALCON",
+   "nome": "Controlar: Kikaichu no jutsu",
+   "tem_icone": false
+  },
+  "HT_FLASHER": {
+   "id": "HT_FLASHER",
+   "nome": "Armadilha Luminosa",
+   "tem_icone": false
+  },
+  "HT_FREEZINGTRAP": {
+   "id": "HT_FREEZINGTRAP",
+   "nome": "Jutsu Congelante",
+   "tem_icone": false
+  },
+  "HT_LANDMINE": {
+   "id": "HT_LANDMINE",
+   "nome": "Jutsu Atordoante",
+   "tem_icone": false
+  },
+  "HT_REMOVETRAP": {
+   "id": "HT_REMOVETRAP",
+   "nome": "Remover Armadilha",
+   "tem_icone": false
+  },
+  "HT_TALKIEBOX": {
+   "id": "HT_TALKIEBOX",
+   "nome": "Mensagem Secreta",
+   "tem_icone": false
+  },
+  "HT_SANDMAN": {
+   "id": "HT_SANDMAN",
+   "nome": "Jutsu Paralizador",
+   "tem_icone": false
+  },
+  "HT_SHOCKWAVE": {
+   "id": "HT_SHOCKWAVE",
+   "nome": "Armadilha Extenuante",
+   "tem_icone": false
+  },
+  "HT_SKIDTRAP": {
+   "id": "HT_SKIDTRAP",
+   "nome": "Jutsu Repulsor",
+   "tem_icone": false
+  },
+  "HT_SPRINGTRAP": {
+   "id": "HT_SPRINGTRAP",
+   "nome": "Chuwa suru no Jutsu",
+   "tem_icone": false
+  },
+  "HT_STEELCROW": {
+   "id": "HT_STEELCROW",
+   "nome": "Hijutsu: Mushitatsumaki",
+   "tem_icone": false
+  },
+  "WZ_FIREPILLAR": {
+   "id": "WZ_FIREPILLAR",
+   "nome": "Katon Gouryuuka no Jutsu",
+   "tem_icone": false
+  },
+  "WZ_SIGHTRASHER": {
+   "id": "WZ_SIGHTRASHER",
+   "nome": "Enton: Yasaka no Magatama",
+   "tem_icone": false
+  },
+  "WZ_FIREIVY": {
+   "id": "WZ_FIREIVY",
+   "nome": "Hera de Fogo",
+   "tem_icone": false
+  },
+  "WZ_METEOR": {
+   "id": "WZ_METEOR",
+   "nome": "Katon Kasumi Enbu no Jutsu",
+   "tem_icone": false
+  },
+  "WZ_JUPITEL": {
+   "id": "WZ_JUPITEL",
+   "nome": "Chidori",
+   "tem_icone": false
+  },
+  "WZ_VERMILION": {
+   "id": "WZ_VERMILION",
+   "nome": "Raiton Shichuu Shibarai",
+   "tem_icone": false
+  },
+  "WZ_WATERBALL": {
+   "id": "WZ_WATERBALL",
+   "nome": "Suiton Daibakufu no Jutsu",
+   "tem_icone": false
+  },
+  "WZ_ICEWALL": {
+   "id": "WZ_ICEWALL",
+   "nome": "Suiton Suijinheki",
+   "tem_icone": false
+  },
+  "WZ_FROSTNOVA": {
+   "id": "WZ_FROSTNOVA",
+   "nome": "Suiton Haran Banshou",
+   "tem_icone": false
+  },
+  "WZ_STORMGUST": {
+   "id": "WZ_STORMGUST",
+   "nome": "Suiton Suishouha",
+   "tem_icone": false
+  },
+  "WZ_EARTHSPIKE": {
+   "id": "WZ_EARTHSPIKE",
+   "nome": "Suna Raishin",
+   "tem_icone": false
+  },
+  "WZ_HEAVENDRIVE": {
+   "id": "WZ_HEAVENDRIVE",
+   "nome": "Sabaku Sousou",
+   "tem_icone": false
+  },
+  "WZ_QUAGMIRE": {
+   "id": "WZ_QUAGMIRE",
+   "nome": "Doton Jigoku",
+   "tem_icone": false
+  },
+  "WZ_ESTIMATION": {
+   "id": "WZ_ESTIMATION",
+   "nome": "Enxergar Tenketsu",
+   "tem_icone": false
+  },
+  "AS_RIGHT": {
+   "id": "AS_RIGHT",
+   "nome": "Perícia com Mão Direita",
+   "tem_icone": false
+  },
+  "AS_LEFT": {
+   "id": "AS_LEFT",
+   "nome": "Perícia com Mão Esquerda",
+   "tem_icone": false
+  },
+  "AS_KATAR": {
+   "id": "AS_KATAR",
+   "nome": "Perícia com Katar",
+   "tem_icone": false
+  },
+  "AS_CLOAKING": {
+   "id": "AS_CLOAKING",
+   "nome": "Furtividade",
+   "tem_icone": false
+  },
+  "AS_SONICBLOW": {
+   "id": "AS_SONICBLOW",
+   "nome": "Hakkeshou Gutten",
+   "tem_icone": false
+  },
+  "AS_GRIMTOOTH": {
+   "id": "AS_GRIMTOOTH",
+   "nome": "Doton Doryuusou no Jutsu",
+   "tem_icone": false
+  },
+  "AS_ENCHANTPOISON": {
+   "id": "AS_ENCHANTPOISON",
+   "nome": "Envenenar equipamento",
+   "tem_icone": false
+  },
+  "AS_POISONREACT": {
+   "id": "AS_POISONREACT",
+   "nome": "Anticorpos Anti-Veneno",
+   "tem_icone": false
+  },
+  "AS_VENOMDUST": {
+   "id": "AS_VENOMDUST",
+   "nome": "Futton Tanketsu no Jutsu",
+   "tem_icone": false
+  },
+  "AS_SPLASHER": {
+   "id": "AS_SPLASHER",
+   "nome": "Envenenar Orgãos Vitais",
+   "tem_icone": false
+  },
+  "BS_IRON": {
+   "id": "BS_IRON",
+   "nome": "Trabalhar Ferro",
+   "tem_icone": false
+  },
+  "BS_STEEL": {
+   "id": "BS_STEEL",
+   "nome": "Trabalhar Aço",
+   "tem_icone": false
+  },
+  "BS_ENCHANTEDSTONE": {
+   "id": "BS_ENCHANTEDSTONE",
+   "nome": "Produzir Pedra Fundamental",
+   "tem_icone": false
+  },
+  "BS_ORIDEOCON": {
+   "id": "BS_ORIDEOCON",
+   "nome": "Perícia com Oridecon",
+   "tem_icone": false
+  },
+  "BS_DAGGER": {
+   "id": "BS_DAGGER",
+   "nome": "Forjar Adaga",
+   "tem_icone": false
+  },
+  "BS_SWORD": {
+   "id": "BS_SWORD",
+   "nome": "Forjar Espada",
+   "tem_icone": false
+  },
+  "BS_TWOHANDSWORD": {
+   "id": "BS_TWOHANDSWORD",
+   "nome": "Forjar Espada de Duas Mãos",
+   "tem_icone": false
+  },
+  "BS_AXE": {
+   "id": "BS_AXE",
+   "nome": "Forjar Machado",
+   "tem_icone": false
+  },
+  "BS_MACE": {
+   "id": "BS_MACE",
+   "nome": "Forjar Maça",
+   "tem_icone": false
+  },
+  "BS_KNUCKLE": {
+   "id": "BS_KNUCKLE",
+   "nome": "Forjar Soqueira",
+   "tem_icone": false
+  },
+  "BS_SPEAR": {
+   "id": "BS_SPEAR",
+   "nome": "Forjar Lança",
+   "tem_icone": false
+  },
+  "BS_HILTBINDING": {
+   "id": "BS_HILTBINDING",
+   "nome": "Punho Firme",
+   "tem_icone": false
+  },
+  "BS_FINDINGORE": {
+   "id": "BS_FINDINGORE",
+   "nome": "Encontrar Minério",
+   "tem_icone": false
+  },
+  "BS_WEAPONRESEARCH": {
+   "id": "BS_WEAPONRESEARCH",
+   "nome": "Perícia em Armamento",
+   "tem_icone": false
+  },
+  "BS_REPAIRWEAPON": {
+   "id": "BS_REPAIRWEAPON",
+   "nome": "Consertar Armas",
+   "tem_icone": false
+  },
+  "BS_SKINTEMPER": {
+   "id": "BS_SKINTEMPER",
+   "nome": "Resistência ao Fogo",
+   "tem_icone": false
+  },
+  "BS_HAMMERFALL": {
+   "id": "BS_HAMMERFALL",
+   "nome": "Genzouga",
+   "tem_icone": false
+  },
+  "BS_ADRENALINE": {
+   "id": "BS_ADRENALINE",
+   "nome": "Wheel Kessho",
+   "tem_icone": false
+  },
+  "BS_WEAPONPERFECT": {
+   "id": "BS_WEAPONPERFECT",
+   "nome": "Abrir 2º Portão",
+   "tem_icone": false
+  },
+  "BS_OVERTHRUST": {
+   "id": "BS_OVERTHRUST",
+   "nome": "Abrir 4° Portão",
+   "tem_icone": false
+  },
+  "BS_MAXIMIZE": {
+   "id": "BS_MAXIMIZE",
+   "nome": "Juin Jutsu",
+   "tem_icone": false
+  },
+  "NV_FIRSTAID": {
+   "id": "NV_FIRSTAID",
+   "nome": "Selo de Mão:  Macaco",
+   "tem_icone": false
+  },
+  "SM_MOVINGRECOVERY": {
+   "id": "SM_MOVINGRECOVERY",
+   "nome": "Recuperar HP em Movimento",
+   "tem_icone": false
+  },
+  "AC_MAKINGARROW": {
+   "id": "AC_MAKINGARROW",
+   "nome": "Fabricar Flechas",
+   "tem_icone": false
+  },
+  "TF_SPRINKLESAND": {
+   "id": "TF_SPRINKLESAND",
+   "nome": "Chutar Areia",
+   "tem_icone": false
+  },
+  "MC_CARTREVOLUTION": {
+   "id": "MC_CARTREVOLUTION",
+   "nome": "Cavalo-de-Pau",
+   "tem_icone": false
+  },
+  "AL_HOLYLIGHT": {
+   "id": "AL_HOLYLIGHT",
+   "nome": "Suigudan no Jutsu",
+   "tem_icone": false
+  },
+  "MG_ENERGYCOAT": {
+   "id": "MG_ENERGYCOAT",
+   "nome": "Susanoo!",
+   "tem_icone": false
+  },
+  "NPC_ENERGYDRAIN": {
+   "id": "NPC_ENERGYDRAIN",
+   "nome": "Hijutsu: Mushi Jamingu",
+   "tem_icone": false
+  },
+  "NV_TRICKDEAD": {
+   "id": "NV_TRICKDEAD",
+   "nome": "Fingir de Morto",
+   "tem_icone": false
+  },
+  "SM_FATALBLOW": {
+   "id": "SM_FATALBLOW",
+   "nome": "Shishi Rendan",
+   "tem_icone": false
+  },
+  "AC_CHARGEARROW": {
+   "id": "AC_CHARGEARROW",
+   "nome": "Fuuton Nindou",
+   "tem_icone": false
+  },
+  "TF_BACKSLIDING": {
+   "id": "TF_BACKSLIDING",
+   "nome": "Kawarimi no Jutsu",
+   "tem_icone": false
+  },
+  "MC_CHANGECART": {
+   "id": "MC_CHANGECART",
+   "nome": "Personalizar Carrinho",
+   "tem_icone": false
+  },
+  "SM_AUTOBERSERK": {
+   "id": "SM_AUTOBERSERK",
+   "nome": "Chi no Juin: Nível 1",
+   "tem_icone": false
+  },
+  "TF_PICKSTONE": {
+   "id": "TF_PICKSTONE",
+   "nome": "Procurar Pedras",
+   "tem_icone": false
+  },
+  "TF_THROWSTONE": {
+   "id": "TF_THROWSTONE",
+   "nome": "Shinra Tensei",
+   "tem_icone": false
+  },
+  "MC_LOUD": {
+   "id": "MC_LOUD",
+   "nome": "Grito de Guerra",
+   "tem_icone": false
+  },
+  "GD_APPROVAL": {
+   "id": "GD_APPROVAL",
+   "nome": "Autorização Oficial",
+   "tem_icone": false
+  },
+  "GD_KAFRACONTRACT": {
+   "id": "GD_KAFRACONTRACT",
+   "nome": "Contrato com Kafra",
+   "tem_icone": false
+  },
+  "GD_GUARDRESEARCH": {
+   "id": "GD_GUARDRESEARCH",
+   "nome": "Comandar Guardiões",
+   "tem_icone": false
+  },
+  "GD_CHARISMA": {
+   "id": "GD_CHARISMA",
+   "nome": "Carisma",
+   "tem_icone": false
+  },
+  "GD_EXTENSION": {
+   "id": "GD_EXTENSION",
+   "nome": "Expandir Vila",
+   "tem_icone": false
+  },
+  "RG_SNATCHER": {
+   "id": "RG_SNATCHER",
+   "nome": "Mãos Leves",
+   "tem_icone": false
+  },
+  "RG_STEALCOIN": {
+   "id": "RG_STEALCOIN",
+   "nome": "Afanar",
+   "tem_icone": false
+  },
+  "RG_BACKSTAP": {
+   "id": "RG_BACKSTAP",
+   "nome": "Chakra Senpuu",
+   "tem_icone": false
+  },
+  "RG_TUNNELDRIVE": {
+   "id": "RG_TUNNELDRIVE",
+   "nome": "Mizu Hide no Jutsu",
+   "tem_icone": false
+  },
+  "RG_RAID": {
+   "id": "RG_RAID",
+   "nome": "Ataque Surpresa",
+   "tem_icone": false
+  },
+  "RG_STRIPWEAPON": {
+   "id": "RG_STRIPWEAPON",
+   "nome": "Remover Arma",
+   "tem_icone": false
+  },
+  "RG_STRIPSHIELD": {
+   "id": "RG_STRIPSHIELD",
+   "nome": "Remover Escudo",
+   "tem_icone": false
+  },
+  "RG_STRIPARMOR": {
+   "id": "RG_STRIPARMOR",
+   "nome": "Remover Armadura",
+   "tem_icone": false
+  },
+  "RG_STRIPHELM": {
+   "id": "RG_STRIPHELM",
+   "nome": "Remover Capacete",
+   "tem_icone": false
+  },
+  "RG_INTIMIDATE": {
+   "id": "RG_INTIMIDATE",
+   "nome": "Rapto",
+   "tem_icone": false
+  },
+  "RG_GRAFFITI": {
+   "id": "RG_GRAFFITI",
+   "nome": "Grafitti",
+   "tem_icone": false
+  },
+  "RG_FLAGGRAFFITI": {
+   "id": "RG_FLAGGRAFFITI",
+   "nome": "Selo de Mão: Cavalo",
+   "tem_icone": false
+  },
+  "RG_CLEANER": {
+   "id": "RG_CLEANER",
+   "nome": "Selo de Mão: Tigre",
+   "tem_icone": false
+  },
+  "RG_GANGSTER": {
+   "id": "RG_GANGSTER",
+   "nome": "Mateki: Mugen Onsa",
+   "tem_icone": false
+  },
+  "RG_COMPULSION": {
+   "id": "RG_COMPULSION",
+   "nome": "Extorquir",
+   "tem_icone": false
+  },
+  "RG_PLAGIARISM": {
+   "id": "RG_PLAGIARISM",
+   "nome": "Sharingan",
+   "tem_icone": false
+  },
+  "AM_AXEMASTERY": {
+   "id": "AM_AXEMASTERY",
+   "nome": "Perícia com Machado",
+   "tem_icone": false
+  },
+  "AM_LEARNINGPOTION": {
+   "id": "AM_LEARNINGPOTION",
+   "nome": "Pesquisa de Poções",
+   "tem_icone": false
+  },
+  "AM_PHARMACY": {
+   "id": "AM_PHARMACY",
+   "nome": "Preparar Poção",
+   "tem_icone": false
+  },
+  "AM_DEMONSTRATION": {
+   "id": "AM_DEMONSTRATION",
+   "nome": "Fogo Grego",
+   "tem_icone": false
+  },
+  "AM_ACIDTERROR": {
+   "id": "AM_ACIDTERROR",
+   "nome": "Futton Atsuryokuha Chikaraotoshi",
+   "tem_icone": false
+  },
+  "AM_POTIONPITCHER": {
+   "id": "AM_POTIONPITCHER",
+   "nome": "Arremessar Poção",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE": {
+   "id": "AM_CANNIBALIZE",
+   "nome": "Kuchiyose no Jutsu!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE2": {
+   "id": "AM_CANNIBALIZE2",
+   "nome": "Kuchiyose: Girino!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE3": {
+   "id": "AM_CANNIBALIZE3",
+   "nome": "Kuchiyose: Gama-Kishi",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE4": {
+   "id": "AM_CANNIBALIZE4",
+   "nome": "Kuchiyose: Gama-Bunta!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE5": {
+   "id": "AM_CANNIBALIZE5",
+   "nome": "Kuchiyose: Gama-Bunta!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE6": {
+   "id": "AM_CANNIBALIZE6",
+   "nome": "Kuchiyose: Jya!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE7": {
+   "id": "AM_CANNIBALIZE7",
+   "nome": "Kuchiyose: Kyodaija Ermida",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE8": {
+   "id": "AM_CANNIBALIZE8",
+   "nome": "Kuchiyose: Manda!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE9": {
+   "id": "AM_CANNIBALIZE9",
+   "nome": "Kuchiyose: Filhote katsuyu!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE10": {
+   "id": "AM_CANNIBALIZE10",
+   "nome": "Kuchiyose: Namekuji!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE11": {
+   "id": "AM_CANNIBALIZE11",
+   "nome": "Kuchiyose: Katsuyu!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE12": {
+   "id": "AM_CANNIBALIZE12",
+   "nome": "Kuchiyose: C3",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE13": {
+   "id": "AM_CANNIBALIZE13",
+   "nome": "Kuchiyose: Doki Kowai!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE14": {
+   "id": "AM_CANNIBALIZE14",
+   "nome": "Kuchiyose: Doki Fumetsu!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE15": {
+   "id": "AM_CANNIBALIZE15",
+   "nome": "Kuchiyose: Doki Moretsuna!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE16": {
+   "id": "AM_CANNIBALIZE16",
+   "nome": "Kuchiyose: Ibuse",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE17": {
+   "id": "AM_CANNIBALIZE17",
+   "nome": "Kuchiyose: Pain no Rikudou",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE18": {
+   "id": "AM_CANNIBALIZE18",
+   "nome": "Kuchiyose no Jutsu!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE19": {
+   "id": "AM_CANNIBALIZE19",
+   "nome": "Kuchiyose: Akino!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE20": {
+   "id": "AM_CANNIBALIZE20",
+   "nome": "Kuchiyose: Pakkun!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE21": {
+   "id": "AM_CANNIBALIZE21",
+   "nome": "Kuchiyose: Baru!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE22": {
+   "id": "AM_CANNIBALIZE22",
+   "nome": "Kuchiyose: Onbba!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE23": {
+   "id": "AM_CANNIBALIZE23",
+   "nome": "Kuchiyose: Saru!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE24": {
+   "id": "AM_CANNIBALIZE24",
+   "nome": "Kuchiyose: Enma!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE25": {
+   "id": "AM_CANNIBALIZE25",
+   "nome": "Kuchiyose: Karasu!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE26": {
+   "id": "AM_CANNIBALIZE26",
+   "nome": "Kuchiyose: Kuroari!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE27": {
+   "id": "AM_CANNIBALIZE27",
+   "nome": "Kuchiyose: Sanshouou!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE28": {
+   "id": "AM_CANNIBALIZE28",
+   "nome": "Kuchiyose no Jutsu!",
+   "tem_icone": false
+  },
+  "AM_CANNIBALIZE29": {
+   "id": "AM_CANNIBALIZE29",
+   "nome": "Kuchiyose no Jutsu!",
+   "tem_icone": false
+  },
+  "AM_SPHEREMINE": {
+   "id": "AM_SPHEREMINE",
+   "nome": "Criar Esfera Marinha",
+   "tem_icone": false
+  },
+  "AM_CP_WEAPON": {
+   "id": "AM_CP_WEAPON",
+   "nome": "Revestir Arma",
+   "tem_icone": false
+  },
+  "AM_CP_SHIELD": {
+   "id": "AM_CP_SHIELD",
+   "nome": "Revestir Escudo",
+   "tem_icone": false
+  },
+  "AM_CP_ARMOR": {
+   "id": "AM_CP_ARMOR",
+   "nome": "Revestir Armadura",
+   "tem_icone": false
+  },
+  "AM_CP_HELM": {
+   "id": "AM_CP_HELM",
+   "nome": "Revestir Capacete",
+   "tem_icone": false
+  },
+  "AM_BIOETHICS": {
+   "id": "AM_BIOETHICS",
+   "nome": "Bioética",
+   "tem_icone": false
+  },
+  "AM_BIOTECHNOLOGY": {
+   "id": "AM_BIOTECHNOLOGY",
+   "nome": "Biotecnologia",
+   "tem_icone": false
+  },
+  "AM_CREATECREATURE": {
+   "id": "AM_CREATECREATURE",
+   "nome": "Criar Criatura",
+   "tem_icone": false
+  },
+  "AM_CULTIVATION": {
+   "id": "AM_CULTIVATION",
+   "nome": "Cultivo",
+   "tem_icone": false
+  },
+  "AM_FLAMECONTROL": {
+   "id": "AM_FLAMECONTROL",
+   "nome": "Controle das Chamas",
+   "tem_icone": false
+  },
+  "AM_CALLHOMUN": {
+   "id": "AM_CALLHOMUN",
+   "nome": "Invocar Marionete",
+   "tem_icone": false
+  },
+  "AM_REST": {
+   "id": "AM_REST",
+   "nome": "Vaporizar",
+   "tem_icone": false
+  },
+  "AM_DRILLMASTER": {
+   "id": "AM_DRILLMASTER",
+   "nome": "Semeadeira",
+   "tem_icone": false
+  },
+  "AM_HEALHOMUN": {
+   "id": "AM_HEALHOMUN",
+   "nome": "Curar Homunculus",
+   "tem_icone": false
+  },
+  "AM_RESURRECTHOMUN": {
+   "id": "AM_RESURRECTHOMUN",
+   "nome": "Remontar Marionete",
+   "tem_icone": false
+  },
+  "CR_TRUST": {
+   "id": "CR_TRUST",
+   "nome": "Fé",
+   "tem_icone": false
+  },
+  "CR_AUTOGUARD": {
+   "id": "CR_AUTOGUARD",
+   "nome": "Suna no Tate",
+   "tem_icone": false
+  },
+  "CR_SHIELDCHARGE": {
+   "id": "CR_SHIELDCHARGE",
+   "nome": "Moku Sengou",
+   "tem_icone": false
+  },
+  "CR_SHIELDBOOMERANG": {
+   "id": "CR_SHIELDBOOMERANG",
+   "nome": "Escudo Bumerangue",
+   "tem_icone": false
+  },
+  "CR_REFLECTSHIELD": {
+   "id": "CR_REFLECTSHIELD",
+   "nome": "Devoção a Jashin",
+   "tem_icone": false
+  },
+  "CR_HOLYCROSS": {
+   "id": "CR_HOLYCROSS",
+   "nome": "Tessenka no Mai",
+   "tem_icone": false
+  },
+  "CR_GRANDCROSS": {
+   "id": "CR_GRANDCROSS",
+   "nome": "Sawarabi no Mai",
+   "tem_icone": false
+  },
+  "CR_DEVOTION": {
+   "id": "CR_DEVOTION",
+   "nome": "Proteção Ninja",
+   "tem_icone": false
+  },
+  "CR_PROVIDENCE": {
+   "id": "CR_PROVIDENCE",
+   "nome": "Divina Providência",
+   "tem_icone": false
+  },
+  "CR_DEFENDER": {
+   "id": "CR_DEFENDER",
+   "nome": "Abrir 3º Portão",
+   "tem_icone": false
+  },
+  "CR_SPEARQUICKEN": {
+   "id": "CR_SPEARQUICKEN",
+   "nome": "Tessenka Hana",
+   "tem_icone": false
+  },
+  "MO_IRONHAND": {
+   "id": "MO_IRONHAND",
+   "nome": "Punhos de Chakra",
+   "tem_icone": false
+  },
+  "MO_SPIRITSRECOVERY": {
+   "id": "MO_SPIRITSRECOVERY",
+   "nome": "Descanso",
+   "tem_icone": false
+  },
+  "MO_CALLSPIRITS": {
+   "id": "MO_CALLSPIRITS",
+   "nome": "Concentração de Chakra",
+   "tem_icone": false
+  },
+  "MO_ABSORBSPIRITS": {
+   "id": "MO_ABSORBSPIRITS",
+   "nome": "Selo de Mão: Cavalo",
+   "tem_icone": false
+  },
+  "MO_TRIPLEATTACK": {
+   "id": "MO_TRIPLEATTACK",
+   "nome": "Shippo Tetsu Rendan",
+   "tem_icone": false
+  },
+  "MO_BODYRELOCATION": {
+   "id": "MO_BODYRELOCATION",
+   "nome": "Hiraishin no Jutsu",
+   "tem_icone": false
+  },
+  "MO_DODGE": {
+   "id": "MO_DODGE",
+   "nome": "Cair das Pétalas",
+   "tem_icone": false
+  },
+  "MO_INVESTIGATE": {
+   "id": "MO_INVESTIGATE",
+   "nome": "Chakra no Mesu",
+   "tem_icone": false
+  },
+  "MO_FINGEROFFENSIVE": {
+   "id": "MO_FINGEROFFENSIVE",
+   "nome": "Oodama Rasengan",
+   "tem_icone": false
+  },
+  "MO_STEELBODY": {
+   "id": "MO_STEELBODY",
+   "nome": "Muralha de Chakra",
+   "tem_icone": false
+  },
+  "MO_BLADESTOP": {
+   "id": "MO_BLADESTOP",
+   "nome": "Kage Mane No Jutsu",
+   "tem_icone": false
+  },
+  "MO_EXPLOSIONSPIRITS": {
+   "id": "MO_EXPLOSIONSPIRITS",
+   "nome": "Explodir Chakra",
+   "tem_icone": false
+  },
+  "MO_EXTREMITYFIST": {
+   "id": "MO_EXTREMITYFIST",
+   "nome": "Fuuton Rasenshuriken",
+   "tem_icone": false
+  },
+  "MO_CHAINCOMBO": {
+   "id": "MO_CHAINCOMBO",
+   "nome": "Jyuuken 8 Hits",
+   "tem_icone": false
+  },
+  "MO_COMBOFINISH": {
+   "id": "MO_COMBOFINISH",
+   "nome": "Jyuuken 16 Hits",
+   "tem_icone": false
+  },
+  "SA_ADVANCEDBOOK": {
+   "id": "SA_ADVANCEDBOOK",
+   "nome": "Pedir Reforços",
+   "tem_icone": false
+  },
+  "SA_CASTCANCEL": {
+   "id": "SA_CASTCANCEL",
+   "nome": "Cancelar Jutsu",
+   "tem_icone": false
+  },
+  "SA_FREECAST": {
+   "id": "SA_FREECAST",
+   "nome": "Fazer Selo Rápido",
+   "tem_icone": false
+  },
+  "SA_SPELLBREAKER": {
+   "id": "SA_SPELLBREAKER",
+   "nome": "Kaisher",
+   "tem_icone": false
+  },
+  "SA_AUTOSPELL": {
+   "id": "SA_AUTOSPELL",
+   "nome": "Auto spell",
+   "tem_icone": false
+  },
+  "SA_MAGICROD": {
+   "id": "SA_MAGICROD",
+   "nome": "Kamui",
+   "tem_icone": false
+  },
+  "SA_VOLCANO": {
+   "id": "SA_VOLCANO",
+   "nome": "Katon Haisekisho",
+   "tem_icone": false
+  },
+  "SA_DELUGE": {
+   "id": "SA_DELUGE",
+   "nome": "Suiton Takitsubo no Jutsu",
+   "tem_icone": false
+  },
+  "SA_VIOLENTGALE": {
+   "id": "SA_VIOLENTGALE",
+   "nome": "Furacão",
+   "tem_icone": false
+  },
+  "SA_BARRENZONE": {
+   "id": "SA_BARRENZONE",
+   "nome": "Terra Estéril",
+   "tem_icone": false
+  },
+  "SA_LANDPROTECTOR": {
+   "id": "SA_LANDPROTECTOR",
+   "nome": "Kekkai Houjin",
+   "tem_icone": false
+  },
+  "SA_FLAMELAUNCHER": {
+   "id": "SA_FLAMELAUNCHER",
+   "nome": "Encantar com Katon",
+   "tem_icone": false
+  },
+  "SA_FROSTWEAPON": {
+   "id": "SA_FROSTWEAPON",
+   "nome": "Encantar com Suiton",
+   "tem_icone": false
+  },
+  "SA_LIGHTNINGLOADER": {
+   "id": "SA_LIGHTNINGLOADER",
+   "nome": "Encantar com Fuuton",
+   "tem_icone": false
+  },
+  "SA_SEISMICWEAPON": {
+   "id": "SA_SEISMICWEAPON",
+   "nome": "Encantar com Doton",
+   "tem_icone": false
+  },
+  "SA_DRAGONOLOGY": {
+   "id": "SA_DRAGONOLOGY",
+   "nome": "Dragonologia",
+   "tem_icone": false
+  },
+  "SA_DISPELL": {
+   "id": "SA_DISPELL",
+   "nome": "Kai",
+   "tem_icone": false
+  },
+  "SA_ABRACADABRA": {
+   "id": "SA_ABRACADABRA",
+   "nome": "Copy Sharingan",
+   "tem_icone": false
+  },
+  "SA_MONOCELL": {
+   "id": "SA_MONOCELL",
+   "nome": "Mono Cell",
+   "tem_icone": false
+  },
+  "SA_CLASSCHANGE": {
+   "id": "SA_CLASSCHANGE",
+   "nome": "Transformação",
+   "tem_icone": false
+  },
+  "SA_SUMMONMONSTER": {
+   "id": "SA_SUMMONMONSTER",
+   "nome": "Invocar Monstro",
+   "tem_icone": false
+  },
+  "SA_REVERSEORCISH": {
+   "id": "SA_REVERSEORCISH",
+   "nome": "Transformação Orc",
+   "tem_icone": false
+  },
+  "SA_DEATH": {
+   "id": "SA_DEATH",
+   "nome": "Extermínio",
+   "tem_icone": false
+  },
+  "SA_FORTUNE": {
+   "id": "SA_FORTUNE",
+   "nome": "Toque de Midas",
+   "tem_icone": false
+  },
+  "SA_TAMINGMONSTER": {
+   "id": "SA_TAMINGMONSTER",
+   "nome": "Hipnose",
+   "tem_icone": false
+  },
+  "SA_QUESTION": {
+   "id": "SA_QUESTION",
+   "nome": "Interrogatório",
+   "tem_icone": false
+  },
+  "SA_GRAVITY": {
+   "id": "SA_GRAVITY",
+   "nome": "Gravity",
+   "tem_icone": false
+  },
+  "SA_LEVELUP": {
+   "id": "SA_LEVELUP",
+   "nome": "Level Up!",
+   "tem_icone": false
+  },
+  "SA_INSTANTDEATH": {
+   "id": "SA_INSTANTDEATH",
+   "nome": "Suicídio",
+   "tem_icone": false
+  },
+  "SA_FULLRECOVERY": {
+   "id": "SA_FULLRECOVERY",
+   "nome": "Recuperação",
+   "tem_icone": false
+  },
+  "SA_COMA": {
+   "id": "SA_COMA",
+   "nome": "Coma",
+   "tem_icone": false
+  },
+  "BD_ADAPTATION": {
+   "id": "BD_ADAPTATION",
+   "nome": "Encerramento",
+   "tem_icone": false
+  },
+  "BD_ENCORE": {
+   "id": "BD_ENCORE",
+   "nome": "Bis",
+   "tem_icone": false
+  },
+  "BD_LULLABY": {
+   "id": "BD_LULLABY",
+   "nome": "Genjutsu no Harg",
+   "tem_icone": false
+  },
+  "BD_RICHMANKIM": {
+   "id": "BD_RICHMANKIM",
+   "nome": "Byakugo No Jutsu",
+   "tem_icone": false
+  },
+  "BD_ETERNALCHAOS": {
+   "id": "BD_ETERNALCHAOS",
+   "nome": "Ryou Mayakashi no Jutsu",
+   "tem_icone": false
+  },
+  "BD_DRUMBATTLEFIELD": {
+   "id": "BD_DRUMBATTLEFIELD",
+   "nome": "Rufar dos Tambores",
+   "tem_icone": false
+  },
+  "BD_RINGNIBELUNGEN": {
+   "id": "BD_RINGNIBELUNGEN",
+   "nome": "Anel dos Nibelungos",
+   "tem_icone": false
+  },
+  "BD_ROKISWEIL": {
+   "id": "BD_ROKISWEIL",
+   "nome": "Miro no Gen",
+   "tem_icone": false
+  },
+  "BD_INTOABYSS": {
+   "id": "BD_INTOABYSS",
+   "nome": "Canção Preciosa",
+   "tem_icone": false
+  },
+  "BD_SIEGFRIED": {
+   "id": "BD_SIEGFRIED",
+   "nome": "Gogyou Fuuin",
+   "tem_icone": false
+  },
+  "BD_RAGNAROK": {
+   "id": "BD_RAGNAROK",
+   "nome": "Ragnarök",
+   "tem_icone": false
+  },
+  "BA_MUSICALLESSON": {
+   "id": "BA_MUSICALLESSON",
+   "nome": "Lições de Música",
+   "tem_icone": false
+  },
+  "BA_MUSICALSTRIKE": {
+   "id": "BA_MUSICALSTRIKE",
+   "nome": "Flecha Melódica",
+   "tem_icone": false
+  },
+  "BA_DISSONANCE": {
+   "id": "BA_DISSONANCE",
+   "nome": "Fubakku Houjin",
+   "tem_icone": false
+  },
+  "BA_FROSTJOKE": {
+   "id": "BA_FROSTJOKE",
+   "nome": "Piada Infame",
+   "tem_icone": false
+  },
+  "BA_WHISTLE": {
+   "id": "BA_WHISTLE",
+   "nome": "Kekkai:Tengai Houjin",
+   "tem_icone": false
+  },
+  "BA_ASSASSINCROSS": {
+   "id": "BA_ASSASSINCROSS",
+   "nome": "Chuusuusei Biribiri",
+   "tem_icone": false
+  },
+  "BA_POEMBRAGI": {
+   "id": "BA_POEMBRAGI",
+   "nome": "Nehan Shouja no Jutsu",
+   "tem_icone": false
+  },
+  "BA_APPLEIDUN": {
+   "id": "BA_APPLEIDUN",
+   "nome": "Idou no Kaibutsu",
+   "tem_icone": false
+  },
+  "DC_DANCINGLESSON": {
+   "id": "DC_DANCINGLESSON",
+   "nome": "Lições de Dança",
+   "tem_icone": false
+  },
+  "DC_THROWARROW": {
+   "id": "DC_THROWARROW",
+   "nome": "Estilingue",
+   "tem_icone": false
+  },
+  "DC_UGLYDANCE": {
+   "id": "DC_UGLYDANCE",
+   "nome": "Dança do Ventre",
+   "tem_icone": false
+  },
+  "DC_SCREAM": {
+   "id": "DC_SCREAM",
+   "nome": "Escândalo",
+   "tem_icone": false
+  },
+  "DC_HUMMING": {
+   "id": "DC_HUMMING",
+   "nome": "Ninpou:Kanchi Denden",
+   "tem_icone": false
+  },
+  "DC_DONTFORGETME": {
+   "id": "DC_DONTFORGETME",
+   "nome": "Magen:Jubaku Satsu",
+   "tem_icone": false
+  },
+  "DC_FORTUNEKISS": {
+   "id": "DC_FORTUNEKISS",
+   "nome": "Beijo da Sorte",
+   "tem_icone": false
+  },
+  "DC_SERVICEFORYOU": {
+   "id": "DC_SERVICEFORYOU",
+   "nome": "Tensha Fuin: Chakra",
+   "tem_icone": false
+  },
+  "WE_MALE": {
+   "id": "WE_MALE",
+   "nome": "Amor Verdadeiro",
+   "tem_icone": false
+  },
+  "WE_FEMALE": {
+   "id": "WE_FEMALE",
+   "nome": "Amor Eterno",
+   "tem_icone": false
+  },
+  "WE_CALLPARTNER": {
+   "id": "WE_CALLPARTNER",
+   "nome": "Saudades de Você",
+   "tem_icone": false
+  },
+  "LK_AURABLADE": {
+   "id": "LK_AURABLADE",
+   "nome": "Manejo Perfeito da Espada",
+   "tem_icone": false
+  },
+  "LK_PARRYING": {
+   "id": "LK_PARRYING",
+   "nome": "Suna no Tate",
+   "tem_icone": false
+  },
+  "LK_CONCENTRATION": {
+   "id": "LK_CONCENTRATION",
+   "nome": "Dai Senkou",
+   "tem_icone": false
+  },
+  "LK_TENSIONRELAX": {
+   "id": "LK_TENSIONRELAX",
+   "nome": "Relaxar",
+   "tem_icone": false
+  },
+  "LK_BERSERK": {
+   "id": "LK_BERSERK",
+   "nome": "Abrir 8º Portão",
+   "tem_icone": false
+  },
+  "PA_PRESSURE": {
+   "id": "PA_PRESSURE",
+   "nome": "Gloria Domini",
+   "tem_icone": false
+  },
+  "PA_SACRIFICE": {
+   "id": "PA_SACRIFICE",
+   "nome": "Omote Renge",
+   "tem_icone": false
+  },
+  "PA_GOSPEL": {
+   "id": "PA_GOSPEL",
+   "nome": "Sakki no Jutsu",
+   "tem_icone": false
+  },
+  "HP_ASSUMPTIO": {
+   "id": "HP_ASSUMPTIO",
+   "nome": "Mushi Kame no Jutsu",
+   "tem_icone": false
+  },
+  "HP_BASILICA": {
+   "id": "HP_BASILICA",
+   "nome": "Shugo Hakke Rokujuuyonshou",
+   "tem_icone": false
+  },
+  "HP_MEDITATIO": {
+   "id": "HP_MEDITATIO",
+   "nome": "Meditação",
+   "tem_icone": false
+  },
+  "HW_SOULDRAIN": {
+   "id": "HW_SOULDRAIN",
+   "nome": "Dreno de Alma",
+   "tem_icone": false
+  },
+  "HW_MAGICCRASHER": {
+   "id": "HW_MAGICCRASHER",
+   "nome": "Souryuu Dai Senkai",
+   "tem_icone": false
+  },
+  "HW_MAGICPOWER": {
+   "id": "HW_MAGICPOWER",
+   "nome": "Liberar Shukaku",
+   "tem_icone": false
+  },
+  "CH_PALMSTRIKE": {
+   "id": "CH_PALMSTRIKE",
+   "nome": "Rasengan",
+   "tem_icone": false
+  },
+  "CH_TIGERFIST": {
+   "id": "CH_TIGERFIST",
+   "nome": "Jyuuken 32 Hits",
+   "tem_icone": false
+  },
+  "CH_CHAINCRUSH": {
+   "id": "CH_CHAINCRUSH",
+   "nome": "Jyuuken 64 Hits",
+   "tem_icone": false
+  },
+  "PF_HPCONVERSION": {
+   "id": "PF_HPCONVERSION",
+   "nome": "Indulgir",
+   "tem_icone": false
+  },
+  "PF_SOULCHANGE": {
+   "id": "PF_SOULCHANGE",
+   "nome": "Trocar Chakra",
+   "tem_icone": false
+  },
+  "PF_SOULBURN": {
+   "id": "PF_SOULBURN",
+   "nome": "Acertar Tenketsu",
+   "tem_icone": false
+  },
+  "ASC_KATAR": {
+   "id": "ASC_KATAR",
+   "nome": "Perícia com Katar Avançada",
+   "tem_icone": false
+  },
+  "ASC_BREAKER": {
+   "id": "ASC_BREAKER",
+   "nome": "Asshou",
+   "tem_icone": false
+  },
+  "SN_SIGHT": {
+   "id": "SN_SIGHT",
+   "nome": "Natividade da Floresta",
+   "tem_icone": false
+  },
+  "SN_FALCONASSAULT": {
+   "id": "SN_FALCONASSAULT",
+   "nome": "Mushi Yose no Jutsu",
+   "tem_icone": false
+  },
+  "SN_SHARPSHOOTING": {
+   "id": "SN_SHARPSHOOTING",
+   "nome": "Tiro Preciso",
+   "tem_icone": false
+  },
+  "SN_WINDWALK": {
+   "id": "SN_WINDWALK",
+   "nome": "Kaze Shunshin",
+   "tem_icone": false
+  },
+  "WS_MELTDOWN": {
+   "id": "WS_MELTDOWN",
+   "nome": "Concentrar Chakra Em Arma",
+   "tem_icone": false
+  },
+  "WS_CREATECOIN": {
+   "id": "WS_CREATECOIN",
+   "nome": "Criar Moeda",
+   "tem_icone": false
+  },
+  "WS_CREATENUGGET": {
+   "id": "WS_CREATENUGGET",
+   "nome": "Criar Pepita",
+   "tem_icone": false
+  },
+  "WS_CARTBOOST": {
+   "id": "WS_CARTBOOST",
+   "nome": "Impulso no Carrinho",
+   "tem_icone": false
+  },
+  "WS_SYSTEMCREATE": {
+   "id": "WS_SYSTEMCREATE",
+   "nome": "Criar Máquina Automática de Ataque",
+   "tem_icone": false
+  },
+  "ST_CHASEWALK": {
+   "id": "ST_CHASEWALK",
+   "nome": "Tonton no Jutsu",
+   "tem_icone": false
+  },
+  "ST_REJECTSWORD": {
+   "id": "ST_REJECTSWORD",
+   "nome": "Instinto de Defesa",
+   "tem_icone": false
+  },
+  "ST_STEALBACKPACK": {
+   "id": "ST_STEALBACKPACK",
+   "nome": "Roubar Bolso",
+   "tem_icone": false
+  },
+  "CR_ALCHEMY": {
+   "id": "CR_ALCHEMY",
+   "nome": "Alquimia",
+   "tem_icone": false
+  },
+  "CR_SYNTHESISPOTION": {
+   "id": "CR_SYNTHESISPOTION",
+   "nome": "Síntese de Poção",
+   "tem_icone": false
+  },
+  "CG_ARROWVULCAN": {
+   "id": "CG_ARROWVULCAN",
+   "nome": "Fuuton Mugen Sajin Daitoppa",
+   "tem_icone": false
+  },
+  "CG_MOONLIT": {
+   "id": "CG_MOONLIT",
+   "nome": "Bênção Protetora",
+   "tem_icone": false
+  },
+  "CG_MARIONETTE": {
+   "id": "CG_MARIONETTE",
+   "nome": "Hitokugutsu",
+   "tem_icone": false
+  },
+  "LK_SPIRALPIERCE": {
+   "id": "LK_SPIRALPIERCE",
+   "nome": "Tessenka Tsuru",
+   "tem_icone": false
+  },
+  "BA_PANGVOICEZ2": {
+   "id": "BA_PANGVOICEZ2",
+   "nome": "Arremessar Osso",
+   "tem_icone": false
+  },
+  "BA_PANGVOICEZ": {
+   "id": "BA_PANGVOICEZ",
+   "nome": "Ativar Shikotsumyaku Completo",
+   "tem_icone": false
+  },
+  "LK_HEADCRUSH": {
+   "id": "LK_HEADCRUSH",
+   "nome": "Golpe Traumático",
+   "tem_icone": false
+  },
+  "LK_JOINTBEAT": {
+   "id": "LK_JOINTBEAT",
+   "nome": "Shikomishindan",
+   "tem_icone": false
+  },
+  "HW_NAPALMVULCAN": {
+   "id": "HW_NAPALMVULCAN",
+   "nome": "Fuuton Atsugai",
+   "tem_icone": false
+  },
+  "CH_SOULCOLLECT": {
+   "id": "CH_SOULCOLLECT",
+   "nome": "Concentração de Chakra Avançada",
+   "tem_icone": false
+  },
+  "PF_MINDBREAKER": {
+   "id": "PF_MINDBREAKER",
+   "nome": "Goukan Sakusou",
+   "tem_icone": false
+  },
+  "PF_MEMORIZE": {
+   "id": "PF_MEMORIZE",
+   "nome": "Fazer Selos com 1 mão",
+   "tem_icone": false
+  },
+  "PF_FOGWALL": {
+   "id": "PF_FOGWALL",
+   "nome": "Kokohi Tatakai",
+   "tem_icone": false
+  },
+  "PF_SPIDERWEB": {
+   "id": "PF_SPIDERWEB",
+   "nome": "Kumosouka",
+   "tem_icone": false
+  },
+  "ASC_METEORASSAULT": {
+   "id": "ASC_METEORASSAULT",
+   "nome": "Espalhar Veneno Tóxico",
+   "tem_icone": false
+  },
+  "ASC_CDP": {
+   "id": "ASC_CDP",
+   "nome": "Concentrar Chakra no selo",
+   "tem_icone": false
+  },
+  "ASC_EDP": {
+   "id": "ASC_EDP",
+   "nome": "Infuuin - Kai",
+   "tem_icone": false
+  },
+  "WE_BABY": {
+   "id": "WE_BABY",
+   "nome": "Mãe, Pai, amo vocês!",
+   "tem_icone": false
+  },
+  "WE_CALLPARENT": {
+   "id": "WE_CALLPARENT",
+   "nome": "Mãe, Pai, cadê vocês?",
+   "tem_icone": false
+  },
+  "WE_CALLBABY": {
+   "id": "WE_CALLBABY",
+   "nome": "Vem cá, filhote!",
+   "tem_icone": false
+  },
+  "GD_GLORYGUILD": {
+   "id": "GD_GLORYGUILD",
+   "nome": "Glória da Vila",
+   "tem_icone": false
+  },
+  "GD_LEADERSHIP": {
+   "id": "GD_LEADERSHIP",
+   "nome": "Grande Liderança",
+   "tem_icone": false
+  },
+  "GD_GLORYWOUNDS": {
+   "id": "GD_GLORYWOUNDS",
+   "nome": "Ferimentos de Glória",
+   "tem_icone": false
+  },
+  "GD_SOULCOLD": {
+   "id": "GD_SOULCOLD",
+   "nome": "Coração Frio",
+   "tem_icone": false
+  },
+  "GD_HAWKEYES": {
+   "id": "GD_HAWKEYES",
+   "nome": "Olhar Apurado",
+   "tem_icone": false
+  },
+  "GD_BATTLEORDER": {
+   "id": "GD_BATTLEORDER",
+   "nome": "Comando de Batalha",
+   "tem_icone": false
+  },
+  "GD_REGENERATION": {
+   "id": "GD_REGENERATION",
+   "nome": "Regeneração",
+   "tem_icone": false
+  },
+  "GD_RESTORE": {
+   "id": "GD_RESTORE",
+   "nome": "Restauração",
+   "tem_icone": false
+  },
+  "GD_EMERGENCYCALL": {
+   "id": "GD_EMERGENCYCALL",
+   "nome": "Chamado Urgente",
+   "tem_icone": false
+  },
+  "GD_GUARDUP": {
+   "id": "GD_GUARDUP",
+   "nome": "Fortalecer Guardiões",
+   "tem_icone": false
+  },
+  "GD_DEVELOPMENT": {
+   "id": "GD_DEVELOPMENT",
+   "nome": "Desenvolvimento Permanente",
+   "tem_icone": false
+  },
+  "ST_PRESERVE": {
+   "id": "ST_PRESERVE",
+   "nome": "Memorizar Jutsu",
+   "tem_icone": false
+  },
+  "ST_FULLSTRIP": {
+   "id": "ST_FULLSTRIP",
+   "nome": "Sabaku Sousou",
+   "tem_icone": false
+  },
+  "WS_WEAPONREFINE": {
+   "id": "WS_WEAPONREFINE",
+   "nome": "Aprimorar Armamento",
+   "tem_icone": false
+  },
+  "CR_SLIMPITCHER": {
+   "id": "CR_SLIMPITCHER",
+   "nome": "Arremessar Poção Compacta",
+   "tem_icone": false
+  },
+  "CR_FULLPROTECTION": {
+   "id": "CR_FULLPROTECTION",
+   "nome": "Proteção Química Total",
+   "tem_icone": false
+  },
+  "ITM_TOMAHAWK": {
+   "id": "ITM_TOMAHAWK",
+   "nome": "Arremessar Tomahawk",
+   "tem_icone": false
+  },
+  "TK_RUN": {
+   "id": "TK_RUN",
+   "nome": "Corrida",
+   "tem_icone": false
+  },
+  "TK_READYSTORM": {
+   "id": "TK_READYSTORM",
+   "nome": "Preparar Konoha Dai Senpuu",
+   "tem_icone": false
+  },
+  "TK_STORMKICK": {
+   "id": "TK_STORMKICK",
+   "nome": "Konoha Dai Senpuu",
+   "tem_icone": false
+  },
+  "TK_READYDOWN": {
+   "id": "TK_READYDOWN",
+   "nome": "Preparar Konoha Renpuu",
+   "tem_icone": false
+  },
+  "TK_DOWNKICK": {
+   "id": "TK_DOWNKICK",
+   "nome": "Konoha Repuu",
+   "tem_icone": false
+  },
+  "TK_READYTURN": {
+   "id": "TK_READYTURN",
+   "nome": "Preparar Konoha Senpuu",
+   "tem_icone": false
+  },
+  "TK_TURNKICK": {
+   "id": "TK_TURNKICK",
+   "nome": "Konoha Senpuu",
+   "tem_icone": false
+  },
+  "TK_READYCOUNTER": {
+   "id": "TK_READYCOUNTER",
+   "nome": "Preparar Konoha Shoufuu",
+   "tem_icone": false
+  },
+  "TK_COUNTER": {
+   "id": "TK_COUNTER",
+   "nome": "Konoha Shoufuu",
+   "tem_icone": false
+  },
+  "TK_DODGE": {
+   "id": "TK_DODGE",
+   "nome": "Cambalhota",
+   "tem_icone": false
+  },
+  "TK_JUMPKICK": {
+   "id": "TK_JUMPKICK",
+   "nome": "Dinamic Entry",
+   "tem_icone": false
+  },
+  "TK_HPTIME": {
+   "id": "TK_HPTIME",
+   "nome": "Trégua Rápida",
+   "tem_icone": false
+  },
+  "TK_SPTIME": {
+   "id": "TK_SPTIME",
+   "nome": "Retiro Rápido",
+   "tem_icone": false
+  },
+  "TK_POWER": {
+   "id": "TK_POWER",
+   "nome": "Abrir 5º Portão",
+   "tem_icone": false
+  },
+  "TK_SEVENWIND": {
+   "id": "TK_SEVENWIND",
+   "nome": "Gouken Ryuu",
+   "tem_icone": false
+  },
+  "TK_HIGHJUMP": {
+   "id": "TK_HIGHJUMP",
+   "nome": "Salto Ninja",
+   "tem_icone": false
+  },
+  "TK_MISSION": {
+   "id": "TK_MISSION",
+   "nome": "Treinamento Estilo Maito Gai",
+   "tem_icone": false
+  },
+  "SG_FEEL": {
+   "id": "SG_FEEL",
+   "nome": "Posicionamento Estratégico",
+   "tem_icone": false
+  },
+  "SG_SUN_WARM": {
+   "id": "SG_SUN_WARM",
+   "nome": "Calor Solar",
+   "tem_icone": false
+  },
+  "SG_MOON_WARM": {
+   "id": "SG_MOON_WARM",
+   "nome": "Calor Lunar",
+   "tem_icone": false
+  },
+  "SG_STAR_WARM": {
+   "id": "SG_STAR_WARM",
+   "nome": "Calor Estelar",
+   "tem_icone": false
+  },
+  "SG_SUN_COMFORT": {
+   "id": "SG_SUN_COMFORT",
+   "nome": "Proteção Solar",
+   "tem_icone": false
+  },
+  "SG_MOON_COMFORT": {
+   "id": "SG_MOON_COMFORT",
+   "nome": "Proteção Lunar",
+   "tem_icone": false
+  },
+  "SG_STAR_COMFORT": {
+   "id": "SG_STAR_COMFORT",
+   "nome": "Proteção Estelar",
+   "tem_icone": false
+  },
+  "SG_HATE": {
+   "id": "SG_HATE",
+   "nome": "Oposição Solar, Lunar e Estelar",
+   "tem_icone": false
+  },
+  "SG_SUN_ANGER": {
+   "id": "SG_SUN_ANGER",
+   "nome": "Fúria Solar",
+   "tem_icone": false
+  },
+  "SG_MOON_ANGER": {
+   "id": "SG_MOON_ANGER",
+   "nome": "Fúria Lunar",
+   "tem_icone": false
+  },
+  "SG_STAR_ANGER": {
+   "id": "SG_STAR_ANGER",
+   "nome": "Fúria Estelar",
+   "tem_icone": false
+  },
+  "SG_SUN_BLESS": {
+   "id": "SG_SUN_BLESS",
+   "nome": "Bênção Solar",
+   "tem_icone": false
+  },
+  "SG_MOON_BLESS": {
+   "id": "SG_MOON_BLESS",
+   "nome": "Bênção Lunar",
+   "tem_icone": false
+  },
+  "SG_STAR_BLESS": {
+   "id": "SG_STAR_BLESS",
+   "nome": "Bênção Estelar",
+   "tem_icone": false
+  },
+  "SG_DEVIL": {
+   "id": "SG_DEVIL",
+   "nome": "Sombra Solar, Lunar e Estelar",
+   "tem_icone": false
+  },
+  "SG_FRIEND": {
+   "id": "SG_FRIEND",
+   "nome": "Auxílio Solar, Lunar e Estelar",
+   "tem_icone": false
+  },
+  "SG_KNOWLEDGE": {
+   "id": "SG_KNOWLEDGE",
+   "nome": "Transmissão Solar, Lunar e Estelar",
+   "tem_icone": false
+  },
+  "SG_FUSION": {
+   "id": "SG_FUSION",
+   "nome": "Suna Shigure",
+   "tem_icone": false
+  },
+  "SL_ALCHEMIST": {
+   "id": "SL_ALCHEMIST",
+   "nome": "Espírito do Alquimista",
+   "tem_icone": false
+  },
+  "AM_BERSERKPITCHER": {
+   "id": "AM_BERSERKPITCHER",
+   "nome": "Arremessar Poção da Fúria Selvagem",
+   "tem_icone": false
+  },
+  "AM_TWILIGHT1": {
+   "id": "AM_TWILIGHT1",
+   "nome": "Criação Espiritual de Poções",
+   "tem_icone": false
+  },
+  "AM_TWILIGHT2": {
+   "id": "AM_TWILIGHT2",
+   "nome": "Criação Espiritual de Poções",
+   "tem_icone": false
+  },
+  "AM_TWILIGHT3": {
+   "id": "AM_TWILIGHT3",
+   "nome": "Criação Espiritual de Poções",
+   "tem_icone": false
+  },
+  "SL_MONK": {
+   "id": "SL_MONK",
+   "nome": "Espírito do Monge",
+   "tem_icone": false
+  },
+  "SL_STAR": {
+   "id": "SL_STAR",
+   "nome": "Espírito do Mestre Taekwon",
+   "tem_icone": false
+  },
+  "SL_SAGE": {
+   "id": "SL_SAGE",
+   "nome": "Espírito do Sábio",
+   "tem_icone": false
+  },
+  "SL_CRUSADER": {
+   "id": "SL_CRUSADER",
+   "nome": "Espírito do Templário",
+   "tem_icone": false
+  },
+  "SL_SUPERNOVICE": {
+   "id": "SL_SUPERNOVICE",
+   "nome": "Espírito do Superaprendiz",
+   "tem_icone": false
+  },
+  "SL_KNIGHT": {
+   "id": "SL_KNIGHT",
+   "nome": "Espírito do Cavaleiro",
+   "tem_icone": false
+  },
+  "SL_WIZARD": {
+   "id": "SL_WIZARD",
+   "nome": "Espírito do Bruxo",
+   "tem_icone": false
+  },
+  "SL_PRIEST": {
+   "id": "SL_PRIEST",
+   "nome": "Espírito do Sacerdote",
+   "tem_icone": false
+  },
+  "SL_BARDDANCER": {
+   "id": "SL_BARDDANCER",
+   "nome": "Espírito do Artista",
+   "tem_icone": false
+  },
+  "SL_ROGUE": {
+   "id": "SL_ROGUE",
+   "nome": "Espírito do Arruaceiro",
+   "tem_icone": false
+  },
+  "SL_ASSASIN": {
+   "id": "SL_ASSASIN",
+   "nome": "Espírito do Mercenário",
+   "tem_icone": false
+  },
+  "SL_BLACKSMITH": {
+   "id": "SL_BLACKSMITH",
+   "nome": "Espírito do Ferreiro",
+   "tem_icone": false
+  },
+  "BS_ADRENALINE2": {
+   "id": "BS_ADRENALINE2",
+   "nome": "Adrenalina Concentrada",
+   "tem_icone": false
+  },
+  "SL_HUNTER": {
+   "id": "SL_HUNTER",
+   "nome": "Espírito do Caçador",
+   "tem_icone": false
+  },
+  "SL_SOULLINKER": {
+   "id": "SL_SOULLINKER",
+   "nome": "Espírito do Espiritualista",
+   "tem_icone": false
+  },
+  "SL_HIGH": {
+   "id": "SL_HIGH",
+   "nome": "Espírito dos Transcendentais",
+   "tem_icone": false
+  },
+  "SL_KAIZEL": {
+   "id": "SL_KAIZEL",
+   "nome": "Kaizel",
+   "tem_icone": false
+  },
+  "SL_KAAHI": {
+   "id": "SL_KAAHI",
+   "nome": "Kaahi",
+   "tem_icone": false
+  },
+  "SL_KAUPE": {
+   "id": "SL_KAUPE",
+   "nome": "Ryuu Kawarimi",
+   "tem_icone": false
+  },
+  "SL_KAITE": {
+   "id": "SL_KAITE",
+   "nome": "Kaite",
+   "tem_icone": false
+  },
+  "SL_KAINA": {
+   "id": "SL_KAINA",
+   "nome": "Kaina",
+   "tem_icone": false
+  },
+  "SL_STIN": {
+   "id": "SL_STIN",
+   "nome": "Estin",
+   "tem_icone": false
+  },
+  "SL_STUN": {
+   "id": "SL_STUN",
+   "nome": "Estun",
+   "tem_icone": false
+  },
+  "SL_SMA": {
+   "id": "SL_SMA",
+   "nome": "Esma",
+   "tem_icone": false
+  },
+  "SL_SWOO": {
+   "id": "SL_SWOO",
+   "nome": "Eswoo",
+   "tem_icone": false
+  },
+  "SL_SKE": {
+   "id": "SL_SKE",
+   "nome": "Eske",
+   "tem_icone": false
+  },
+  "SL_SKA": {
+   "id": "SL_SKA",
+   "nome": "Eska",
+   "tem_icone": false
+  },
+  "PA_SHIELDCHAIN": {
+   "id": "PA_SHIELDCHAIN",
+   "nome": "Hakke Kuushou",
+   "tem_icone": false
+  },
+  "HP_MANARECHARGE": {
+   "id": "HP_MANARECHARGE",
+   "nome": "Espírito Ninja",
+   "tem_icone": false
+  },
+  "PF_DOUBLECASTING": {
+   "id": "PF_DOUBLECASTING",
+   "nome": "Expandir Chakra",
+   "tem_icone": false
+  },
+  "HW_GANBANTEIN": {
+   "id": "HW_GANBANTEIN",
+   "nome": "Neutralizar terreno",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE47": {
+   "id": "BA_PANGVOICE47",
+   "nome": "Tajuu Kage Bushin no Jutsu",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE48": {
+   "id": "BA_PANGVOICE48",
+   "nome": "Tairyoku Kaifuku",
+   "tem_icone": false
+  },
+  "HW_GRAVITATION": {
+   "id": "HW_GRAVITATION",
+   "nome": "Suna no Yomi",
+   "tem_icone": false
+  },
+  "WS_CARTTERMINATION": {
+   "id": "WS_CARTTERMINATION",
+   "nome": "Choque de Carrinho",
+   "tem_icone": false
+  },
+  "WS_OVERTHRUSTMAX": {
+   "id": "WS_OVERTHRUSTMAX",
+   "nome": "Bubun Baika no Jutsu",
+   "tem_icone": false
+  },
+  "CG_LONGINGFREEDOM": {
+   "id": "CG_LONGINGFREEDOM",
+   "nome": "Grito de Liberdade",
+   "tem_icone": false
+  },
+  "CG_HERMODE": {
+   "id": "CG_HERMODE",
+   "nome": "Bastão de Hermod",
+   "tem_icone": false
+  },
+  "CG_TAROTCARD": {
+   "id": "CG_TAROTCARD",
+   "nome": "Jutsu Aleatório",
+   "tem_icone": false
+  },
+  "CR_ACIDDEMONSTRATION": {
+   "id": "CR_ACIDDEMONSTRATION",
+   "nome": "Bomba Ácida",
+   "tem_icone": false
+  },
+  "NPC_SLOWCAST": {
+   "id": "NPC_SLOWCAST",
+   "nome": "Magen:Kasegui no Jutsu",
+   "tem_icone": false
+  },
+  "CR_CULTIVATION": {
+   "id": "CR_CULTIVATION",
+   "nome": "Cultivar Planta",
+   "tem_icone": false
+  },
+  "KN_ONEHAND": {
+   "id": "KN_ONEHAND",
+   "nome": "Rapidez com Uma Mão",
+   "tem_icone": false
+  },
+  "HT_POWER": {
+   "id": "HT_POWER",
+   "nome": "Ataque da Fera",
+   "tem_icone": false
+  },
+  "HLIF_HEAL": {
+   "id": "HLIF_HEAL",
+   "nome": "Cura pelas Mãos",
+   "tem_icone": false
+  },
+  "HLIF_AVOID": {
+   "id": "HLIF_AVOID",
+   "nome": "Bater em Retirada",
+   "tem_icone": false
+  },
+  "HLIF_BRAIN": {
+   "id": "HLIF_BRAIN",
+   "nome": "Cirurgia Cerebral",
+   "tem_icone": false
+  },
+  "HLIF_CHANGE": {
+   "id": "HLIF_CHANGE",
+   "nome": "Esforço Mental",
+   "tem_icone": false
+  },
+  "HAMI_CASTLE": {
+   "id": "HAMI_CASTLE",
+   "nome": "Troca de Lugar",
+   "tem_icone": false
+  },
+  "HAMI_DEFENCE": {
+   "id": "HAMI_DEFENCE",
+   "nome": "Fortaleza",
+   "tem_icone": false
+  },
+  "HAMI_SKIN": {
+   "id": "HAMI_SKIN",
+   "nome": "Pele de Adamantium",
+   "tem_icone": false
+  },
+  "HAMI_BLOODLUST": {
+   "id": "HAMI_BLOODLUST",
+   "nome": "Sede de Sangue",
+   "tem_icone": false
+  },
+  "HFLI_MOON": {
+   "id": "HFLI_MOON",
+   "nome": "Pica-Pau",
+   "tem_icone": false
+  },
+  "HFLI_FLEET": {
+   "id": "HFLI_FLEET",
+   "nome": "Vôo Frenético",
+   "tem_icone": false
+  },
+  "HFLI_SPEED": {
+   "id": "HFLI_SPEED",
+   "nome": "Vôo Acelerado",
+   "tem_icone": false
+  },
+  "HFLI_SBR44": {
+   "id": "HFLI_SBR44",
+   "nome": "Veneno Mortal",
+   "tem_icone": false
+  },
+  "HVAN_CAPRICE": {
+   "id": "HVAN_CAPRICE",
+   "nome": "Ataque Com Marionete",
+   "tem_icone": false
+  },
+  "HVAN_CHAOTIC": {
+   "id": "HVAN_CHAOTIC",
+   "nome": "Bênção Caótica",
+   "tem_icone": false
+  },
+  "HVAN_INSTRUCT": {
+   "id": "HVAN_INSTRUCT",
+   "nome": "Mudança de Planos",
+   "tem_icone": false
+  },
+  "HVAN_EXPLOSION": {
+   "id": "HVAN_EXPLOSION",
+   "nome": "Autodestruição",
+   "tem_icone": false
+  },
+  "KN_CHARGEATK": {
+   "id": "KN_CHARGEATK",
+   "nome": "Choudan Bakugeki",
+   "tem_icone": false
+  },
+  "CR_SHRINK": {
+   "id": "CR_SHRINK",
+   "nome": "Submissão",
+   "tem_icone": false
+  },
+  "AS_SONICACCEL": {
+   "id": "AS_SONICACCEL",
+   "nome": "Acertar Tenketsu",
+   "tem_icone": false
+  },
+  "AS_VENOMKNIFE": {
+   "id": "AS_VENOMKNIFE",
+   "nome": "Faca Envenenada",
+   "tem_icone": false
+  },
+  "RG_CLOSECONFINE": {
+   "id": "RG_CLOSECONFINE",
+   "nome": "Kage Kubi Shibari no Jutsu",
+   "tem_icone": false
+  },
+  "WZ_SIGHTBLASTER": {
+   "id": "WZ_SIGHTBLASTER",
+   "nome": "Kami no Bakuhatsu",
+   "tem_icone": false
+  },
+  "SA_CREATECON": {
+   "id": "SA_CREATECON",
+   "nome": "Criar Conversor Elemental",
+   "tem_icone": false
+  },
+  "SA_ELEMENTWATER": {
+   "id": "SA_ELEMENTWATER",
+   "nome": "Mudança Elemental - Água",
+   "tem_icone": false
+  },
+  "SA_ELEMENTGROUND": {
+   "id": "SA_ELEMENTGROUND",
+   "nome": "Mudança Elemental - Terra",
+   "tem_icone": false
+  },
+  "SA_ELEMENTFIRE": {
+   "id": "SA_ELEMENTFIRE",
+   "nome": "Mudança Elemental - Fogo",
+   "tem_icone": false
+  },
+  "SA_ELEMENTWIND": {
+   "id": "SA_ELEMENTWIND",
+   "nome": "Mudança Elemental - Vento",
+   "tem_icone": false
+  },
+  "HT_PHANTASMIC": {
+   "id": "HT_PHANTASMIC",
+   "nome": "Flecha Fantasma",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE": {
+   "id": "BA_PANGVOICE",
+   "nome": "Kage Bunshin no Jutsu",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE2": {
+   "id": "BA_PANGVOICE2",
+   "nome": "Ativar Selo do Céu Extremo",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE3": {
+   "id": "BA_PANGVOICE3",
+   "nome": "Ativar Selo da Terra Extremo",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE4": {
+   "id": "BA_PANGVOICE4",
+   "nome": "Espelhos de Gelo",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE5": {
+   "id": "BA_PANGVOICE5",
+   "nome": "Meditar",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE6": {
+   "id": "BA_PANGVOICE6",
+   "nome": "Tomar Pilula Verde",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE7": {
+   "id": "BA_PANGVOICE7",
+   "nome": "Tomar Pilula Amarela",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE8": {
+   "id": "BA_PANGVOICE8",
+   "nome": "Tomar Pilula Vermelha",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE9": {
+   "id": "BA_PANGVOICE9",
+   "nome": "Byakugo No Jutsu",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE10": {
+   "id": "BA_PANGVOICE10",
+   "nome": "Byakugo No Jutsu",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE11": {
+   "id": "BA_PANGVOICE11",
+   "nome": "Reunião Emergencial",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE12": {
+   "id": "BA_PANGVOICE12",
+   "nome": "Chamar ANBU's",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE13": {
+   "id": "BA_PANGVOICE13",
+   "nome": "Fuga Emergencial",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE14": {
+   "id": "BA_PANGVOICE14",
+   "nome": "Transformação Bijuu",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE16": {
+   "id": "BA_PANGVOICE16",
+   "nome": "Shunpo",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE17": {
+   "id": "BA_PANGVOICE17",
+   "nome": "Portão Kaimon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE18": {
+   "id": "BA_PANGVOICE18",
+   "nome": "Portão Seimon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE19": {
+   "id": "BA_PANGVOICE19",
+   "nome": "Portão Keimon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE20": {
+   "id": "BA_PANGVOICE20",
+   "nome": "Portão Shimon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE21": {
+   "id": "BA_PANGVOICE21",
+   "nome": "Ativar Mangekyou Sharingan",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE22": {
+   "id": "BA_PANGVOICE22",
+   "nome": "Ativar Mangekyou Sharingan",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE23": {
+   "id": "BA_PANGVOICE23",
+   "nome": "Ativar Mangekyou Sharingan",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE24": {
+   "id": "BA_PANGVOICE24",
+   "nome": "Ativar Mangekyou Sharingan",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE26": {
+   "id": "BA_PANGVOICE26",
+   "nome": "Jujutsu: Shiji Hyoketsu",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE27": {
+   "id": "BA_PANGVOICE27",
+   "nome": "Fé Jashinista",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE28": {
+   "id": "BA_PANGVOICE28",
+   "nome": "Sogu: Baku Ryusei",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE29": {
+   "id": "BA_PANGVOICE29",
+   "nome": "Hijutsu: Mushimayu",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE30": {
+   "id": "BA_PANGVOICE30",
+   "nome": "Hijutsu: Mushi kame",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE31": {
+   "id": "BA_PANGVOICE31",
+   "nome": "Invocar Guardiões Genjutsu",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE32": {
+   "id": "BA_PANGVOICE32",
+   "nome": "Invocar Guardiões Taijutsu",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE33": {
+   "id": "BA_PANGVOICE33",
+   "nome": "Invocar Guardiões Ninjutsu",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE34": {
+   "id": "BA_PANGVOICE34",
+   "nome": "Invocar Guardiões ANBU",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE35": {
+   "id": "BA_PANGVOICE35",
+   "nome": "Byakugan",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE36": {
+   "id": "BA_PANGVOICE36",
+   "nome": "Hanei Suru",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE37": {
+   "id": "BA_PANGVOICE37",
+   "nome": "Portão Kyumon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE38": {
+   "id": "BA_PANGVOICE38",
+   "nome": "Portão Shoumon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE39": {
+   "id": "BA_PANGVOICE39",
+   "nome": "Portão Keimon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE40": {
+   "id": "BA_PANGVOICE40",
+   "nome": "Portão Shimon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE41": {
+   "id": "BA_PANGVOICE41",
+   "nome": "Voltar",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE42": {
+   "id": "BA_PANGVOICE42",
+   "nome": "Portão Keimon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE43": {
+   "id": "BA_PANGVOICE43",
+   "nome": "Portão Kyomon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE44": {
+   "id": "BA_PANGVOICE44",
+   "nome": "Portão Shimon: Kai!",
+   "tem_icone": false
+  },
+  "BA_PANGVOICE50": {
+   "id": "BA_PANGVOICE50",
+   "nome": "Ativar Shikigami no Mai",
+   "tem_icone": false
+  },
+  "DC_WINKCHARM": {
+   "id": "DC_WINKCHARM",
+   "nome": "Piscadela",
+   "tem_icone": false
+  },
+  "BS_UNFAIRLYTRICK": {
+   "id": "BS_UNFAIRLYTRICK",
+   "nome": "Venda Duvidosa",
+   "tem_icone": false
+  },
+  "BS_GREED": {
+   "id": "BS_GREED",
+   "nome": "Ganância",
+   "tem_icone": false
+  },
+  "PR_REDEMPTIO": {
+   "id": "PR_REDEMPTIO",
+   "nome": "Rinne Tensei",
+   "tem_icone": false
+  },
+  "MO_KITRANSLATION": {
+   "id": "MO_KITRANSLATION",
+   "nome": "Concessão Espiritual",
+   "tem_icone": false
+  },
+  "MO_BALKYOUNG": {
+   "id": "MO_BALKYOUNG",
+   "nome": "Punhos Intensos",
+   "tem_icone": false
+  },
+  "NJ_TOBIDOUGU": {
+   "id": "NJ_TOBIDOUGU",
+   "nome": "Pericia com Shurikens",
+   "tem_icone": false
+  },
+  "NJ_SYURIKEN": {
+   "id": "NJ_SYURIKEN",
+   "nome": "Arremessar Shuriken",
+   "tem_icone": false
+  },
+  "NJ_KUNAI": {
+   "id": "NJ_KUNAI",
+   "nome": "Arremessar Kunai",
+   "tem_icone": false
+  },
+  "NJ_HUUMA": {
+   "id": "NJ_HUUMA",
+   "nome": "Kage Huuma Shuriken no Jutsu",
+   "tem_icone": false
+  },
+  "NJ_ZENYNAGE": {
+   "id": "NJ_ZENYNAGE",
+   "nome": "Selo de Mão: Cachorro",
+   "tem_icone": false
+  },
+  "NJ_TATAMIGAESHI": {
+   "id": "NJ_TATAMIGAESHI",
+   "nome": "Doruki Gaeshi",
+   "tem_icone": false
+  },
+  "NJ_KASUMIKIRI": {
+   "id": "NJ_KASUMIKIRI",
+   "nome": "Mizu Shunshin no Jutsu",
+   "tem_icone": false
+  },
+  "NJ_SHADOWJUMP": {
+   "id": "NJ_SHADOWJUMP",
+   "nome": "Dai shunshin",
+   "tem_icone": false
+  },
+  "NJ_KIRIKAGE": {
+   "id": "NJ_KIRIKAGE",
+   "nome": "Corte das Sombras",
+   "tem_icone": false
+  },
+  "NJ_UTSUSEMI": {
+   "id": "NJ_UTSUSEMI",
+   "nome": "Troca de Pele",
+   "tem_icone": false
+  },
+  "NJ_BUNSINJYUTSU": {
+   "id": "NJ_BUNSINJYUTSU",
+   "nome": "Shinkirou no Genjutsu",
+   "tem_icone": false
+  },
+  "NJ_NINPOU": {
+   "id": "NJ_NINPOU",
+   "nome": "Perícia Ninja",
+   "tem_icone": false
+  },
+  "NJ_KOUENKA": {
+   "id": "NJ_KOUENKA",
+   "nome": "Katon Hana Shuriken",
+   "tem_icone": false
+  },
+  "NJ_KAENSIN": {
+   "id": "NJ_KAENSIN",
+   "nome": "Escudo de Chamas",
+   "tem_icone": false
+  },
+  "NJ_BAKUENRYU": {
+   "id": "NJ_BAKUENRYU",
+   "nome": "Katon Zukokku",
+   "tem_icone": false
+  },
+  "NJ_HYOUSENSOU": {
+   "id": "NJ_HYOUSENSOU",
+   "nome": "Hyouton Sensatsu Suishou",
+   "tem_icone": false
+  },
+  "NJ_SUITON": {
+   "id": "NJ_SUITON",
+   "nome": "Suiton Gousuiwan",
+   "tem_icone": false
+  },
+  "NJ_HYOUSYOURAKU": {
+   "id": "NJ_HYOUSYOURAKU",
+   "nome": "Suiton Goshokuzame",
+   "tem_icone": false
+  },
+  "NJ_HUUJIN": {
+   "id": "NJ_HUUJIN",
+   "nome": "Fuuton Kamaitachi",
+   "tem_icone": false
+  },
+  "NJ_RAIGEKISAI": {
+   "id": "NJ_RAIGEKISAI",
+   "nome": "Chidori Nagashi",
+   "tem_icone": false
+  },
+  "NJ_KAMAITACHI": {
+   "id": "NJ_KAMAITACHI",
+   "nome": "Fuuton Renkuudan",
+   "tem_icone": false
+  },
+  "NJ_NEN": {
+   "id": "NJ_NEN",
+   "nome": "Aura Ninja",
+   "tem_icone": false
+  },
+  "NJ_ISSEN": {
+   "id": "NJ_ISSEN",
+   "nome": "Shiki Fujin",
+   "tem_icone": false
+  },
+  "GS_GLITTERING": {
+   "id": "GS_GLITTERING",
+   "nome": "Selo de Mão: Coelho",
+   "tem_icone": false
+  },
+  "NPC_WIDESTONE": {
+   "id": "NPC_WIDESTONE",
+   "nome": "Doton: Gandan Kyuu",
+   "tem_icone": false
+  },
+  "GS_FLING": {
+   "id": "GS_FLING",
+   "nome": "Atirar Moedas",
+   "tem_icone": false
+  },
+  "GS_TRIPLEACTION": {
+   "id": "GS_TRIPLEACTION",
+   "nome": "Ataque Triplo",
+   "tem_icone": false
+  },
+  "GS_BULLSEYE": {
+   "id": "GS_BULLSEYE",
+   "nome": "Ataque Certeiro",
+   "tem_icone": false
+  },
+  "GS_MADNESSCANCEL": {
+   "id": "GS_MADNESSCANCEL",
+   "nome": "Resistência Final",
+   "tem_icone": false
+  },
+  "GS_ADJUSTMENT": {
+   "id": "GS_ADJUSTMENT",
+   "nome": "Pânico do Justiceiro",
+   "tem_icone": false
+  },
+  "GS_INCREASING": {
+   "id": "GS_INCREASING",
+   "nome": "Henge No Jutsu",
+   "tem_icone": false
+  },
+  "GS_MAGICALBULLET": {
+   "id": "GS_MAGICALBULLET",
+   "nome": "Bala Mágica",
+   "tem_icone": false
+  },
+  "GS_CRACKER": {
+   "id": "GS_CRACKER",
+   "nome": "Tiro Bombinha",
+   "tem_icone": false
+  },
+  "GS_SINGLEACTION": {
+   "id": "GS_SINGLEACTION",
+   "nome": "Dekopin",
+   "tem_icone": false
+  },
+  "GS_SNAKEEYE": {
+   "id": "GS_SNAKEEYE",
+   "nome": "Abrir 6º Portão",
+   "tem_icone": false
+  },
+  "GS_CHAINACTION": {
+   "id": "GS_CHAINACTION",
+   "nome": "Reação em Cadeia",
+   "tem_icone": false
+  },
+  "GS_TRACKING": {
+   "id": "GS_TRACKING",
+   "nome": "Bakuretsu C4",
+   "tem_icone": false
+  },
+  "GS_DISARM": {
+   "id": "GS_DISARM",
+   "nome": "Bakuton: Jiraiken",
+   "tem_icone": false
+  },
+  "GS_PIERCINGSHOT": {
+   "id": "GS_PIERCINGSHOT",
+   "nome": "Ferir Alvo",
+   "tem_icone": false
+  },
+  "GS_RAPIDSHOWER": {
+   "id": "GS_RAPIDSHOWER",
+   "nome": "Raiton Raiga Bakuretsu",
+   "tem_icone": false
+  },
+  "GS_DESPERADO": {
+   "id": "GS_DESPERADO",
+   "nome": "Desperado",
+   "tem_icone": false
+  },
+  "GS_GATLINGFEVER": {
+   "id": "GS_GATLINGFEVER",
+   "nome": "Senton Kaisen",
+   "tem_icone": false
+  },
+  "GS_DUST": {
+   "id": "GS_DUST",
+   "nome": "Ninpou: Kami no Ikari",
+   "tem_icone": false
+  },
+  "GS_FULLBUSTER": {
+   "id": "GS_FULLBUSTER",
+   "nome": "Ataque Total",
+   "tem_icone": false
+  },
+  "GS_SPREADATTACK": {
+   "id": "GS_SPREADATTACK",
+   "nome": "Hijutsu: Mushidama",
+   "tem_icone": false
+  },
+  "GS_GROUNDDRIFT": {
+   "id": "GS_GROUNDDRIFT",
+   "nome": "Bakuretsu Koinu",
+   "tem_icone": false
+  },
+  "NPC_EARTHQUAKE": {
+   "id": "NPC_EARTHQUAKE",
+   "nome": "Terremoto",
+   "tem_icone": false
+  },
+  "NPC_HALLUCINATION": {
+   "id": "NPC_HALLUCINATION",
+   "nome": "Kokuangyo no Jutsu",
+   "tem_icone": false
+  },
+  "NPC_BARRIER": {
+   "id": "NPC_BARRIER",
+   "nome": "Defesa Absoluta",
+   "tem_icone": false
+  },
+  "NPC_PETRIFYATTACK": {
+   "id": "NPC_PETRIFYATTACK",
+   "nome": "Sabaku Taisou",
+   "tem_icone": false
+  },
+  "ALL_INCCARRY": {
+   "id": "ALL_INCCARRY",
+   "nome": "Aumentar Capacidade de Carga Especial",
+   "tem_icone": false
+  },
+  "MS_BASH": {
+   "id": "MS_BASH",
+   "nome": "Golpe Fulminante",
+   "tem_icone": false
+  },
+  "MS_MAGNUM": {
+   "id": "MS_MAGNUM",
+   "nome": "Impacto Explosivo",
+   "tem_icone": false
+  },
+  "MS_BOWLINGBASH": {
+   "id": "MS_BOWLINGBASH",
+   "nome": "Impacto de Tyr",
+   "tem_icone": false
+  },
+  "MS_PARRYING": {
+   "id": "MS_PARRYING",
+   "nome": "Aparar Golpe",
+   "tem_icone": false
+  },
+  "MS_REFLECTSHIELD": {
+   "id": "MS_REFLECTSHIELD",
+   "nome": "Escudo Refletor",
+   "tem_icone": false
+  },
+  "MS_BERSERK": {
+   "id": "MS_BERSERK",
+   "nome": "Fúria Insana",
+   "tem_icone": false
+  },
+  "MA_DOUBLE": {
+   "id": "MA_DOUBLE",
+   "nome": "Rajada de Flechas",
+   "tem_icone": false
+  },
+  "MA_SHOWER": {
+   "id": "MA_SHOWER",
+   "nome": "Chuva de Flechas",
+   "tem_icone": false
+  },
+  "MA_SKIDTRAP": {
+   "id": "MA_SKIDTRAP",
+   "nome": "Armadilha Escorregadia",
+   "tem_icone": false
+  },
+  "MA_LANDMINE": {
+   "id": "MA_LANDMINE",
+   "nome": "Armadilha Atordoante",
+   "tem_icone": false
+  },
+  "MA_SANDMAN": {
+   "id": "MA_SANDMAN",
+   "nome": "Armadilha Sonífera",
+   "tem_icone": false
+  },
+  "MA_FREEZINGTRAP": {
+   "id": "MA_FREEZINGTRAP",
+   "nome": "Armadilha Congelante",
+   "tem_icone": false
+  },
+  "MA_REMOVETRAP": {
+   "id": "MA_REMOVETRAP",
+   "nome": "Remover Armadilha",
+   "tem_icone": false
+  },
+  "MA_CHARGEARROW": {
+   "id": "MA_CHARGEARROW",
+   "nome": "Carregar Flechas",
+   "tem_icone": false
+  },
+  "MA_SHARPSHOOTING": {
+   "id": "MA_SHARPSHOOTING",
+   "nome": "Tiro Preciso",
+   "tem_icone": false
+  },
+  "ML_PIERCE": {
+   "id": "ML_PIERCE",
+   "nome": "Perfurar",
+   "tem_icone": false
+  },
+  "ML_BRANDISH": {
+   "id": "ML_BRANDISH",
+   "nome": "Brandir Lança",
+   "tem_icone": false
+  },
+  "ML_SPIRALPIERCE": {
+   "id": "ML_SPIRALPIERCE",
+   "nome": "Perfurar em Espiral",
+   "tem_icone": false
+  },
+  "ML_DEFENDER": {
+   "id": "ML_DEFENDER",
+   "nome": "Aura Sagrada",
+   "tem_icone": false
+  },
+  "ML_AUTOGUARD": {
+   "id": "ML_AUTOGUARD",
+   "nome": "Bloqueio",
+   "tem_icone": false
+  },
+  "ML_DEVOTION": {
+   "id": "ML_DEVOTION",
+   "nome": "Redenção",
+   "tem_icone": false
+  },
+  "MER_MAGNIFICAT": {
+   "id": "MER_MAGNIFICAT",
+   "nome": "Magnificat",
+   "tem_icone": false
+  },
+  "MER_QUICKEN": {
+   "id": "MER_QUICKEN",
+   "nome": "Rapidez com Arma",
+   "tem_icone": false
+  },
+  "MER_SIGHT": {
+   "id": "MER_SIGHT",
+   "nome": "Chama Reveladora",
+   "tem_icone": false
+  },
+  "MER_CRASH": {
+   "id": "MER_CRASH",
+   "nome": "Impacto",
+   "tem_icone": false
+  },
+  "MER_REGAIN": {
+   "id": "MER_REGAIN",
+   "nome": "Recompor",
+   "tem_icone": false
+  },
+  "MER_TENDER": {
+   "id": "MER_TENDER",
+   "nome": "Amolecer",
+   "tem_icone": false
+  },
+  "MER_BENEDICTION": {
+   "id": "MER_BENEDICTION",
+   "nome": "Bendição",
+   "tem_icone": false
+  },
+  "MER_RECUPERATE": {
+   "id": "MER_RECUPERATE",
+   "nome": "Restabelecer",
+   "tem_icone": false
+  },
+  "MER_MENTALCURE": {
+   "id": "MER_MENTALCURE",
+   "nome": "Cura Mental",
+   "tem_icone": false
+  },
+  "MER_COMPRESS": {
+   "id": "MER_COMPRESS",
+   "nome": "Compressa",
+   "tem_icone": false
+  },
+  "MER_PROVOKE": {
+   "id": "MER_PROVOKE",
+   "nome": "Provocar",
+   "tem_icone": false
+  },
+  "MER_AUTOBERSERK": {
+   "id": "MER_AUTOBERSERK",
+   "nome": "Instinto de Sobrevivência Automático",
+   "tem_icone": false
+  },
+  "MER_DECAGI": {
+   "id": "MER_DECAGI",
+   "nome": "Diminuir Agilidade",
+   "tem_icone": false
+  },
+  "MER_SCAPEGOAT": {
+   "id": "MER_SCAPEGOAT",
+   "nome": "Bode Expiatório",
+   "tem_icone": false
+  },
+  "MER_LEXDIVINA": {
+   "id": "MER_LEXDIVINA",
+   "nome": "Lex Divina",
+   "tem_icone": false
+  },
+  "MER_ESTIMATION": {
+   "id": "MER_ESTIMATION",
+   "nome": "Propriedades do Monstro",
+   "tem_icone": false
+  },
+  "ALL_WEWISH": {
+   "id": "ALL_WEWISH",
+   "nome": "Noite Feliz!",
+   "tem_icone": false
+  },
+  "GM_SANDMAN": {
+   "id": "GM_SANDMAN",
+   "nome": "Durma bem, minha criança",
+   "tem_icone": false
+  },
+  "ALL_CATCRY": {
+   "id": "ALL_CATCRY",
+   "nome": "Rugido da Fera",
+   "tem_icone": false
+  },
+  "ALL_REVERSEORCISH": {
+   "id": "ALL_REVERSEORCISH",
+   "nome": "Transformação Orc",
+   "tem_icone": false
+  },
+  "GD_ITEMEMERGENCYCALL": {
+   "id": "GD_ITEMEMERGENCYCALL",
+   "nome": "Chamado Urgente",
+   "tem_icone": false
+  },
+  "NPC_HELLPOWER": {
+   "id": "NPC_HELLPOWER",
+   "nome": "Poder Infernal",
+   "tem_icone": false
+  },
+  "NPC_VAMPIRE_GIFT": {
+   "id": "NPC_VAMPIRE_GIFT",
+   "nome": "Beijo do Vampiro",
+   "tem_icone": false
+  },
+  "CASH_BLESSING": {
+   "id": "CASH_BLESSING",
+   "nome": "Bênção em Grupo",
+   "tem_icone": false
+  },
+  "CASH_INCAGI": {
+   "id": "CASH_INCAGI",
+   "nome": "Aumentar Agilidade em Grupo",
+   "tem_icone": false
+  },
+  "CASH_ASSUMPTIO": {
+   "id": "CASH_ASSUMPTIO",
+   "nome": "Assumptio em Grupo",
+   "tem_icone": false
+  },
+  "NPC_STONESKIN": {
+   "id": "NPC_STONESKIN",
+   "nome": "Hijutsu: Mushi kame",
+   "tem_icone": false
+  },
+  "NPC_ANTIMAGIC": {
+   "id": "NPC_ANTIMAGIC",
+   "nome": "Doryuu Heki",
+   "tem_icone": false
+  },
+  "NPC_DRAGONFEAR": {
+   "id": "NPC_DRAGONFEAR",
+   "nome": "Yubi no Genjutsu",
+   "tem_icone": false
+  },
+  "NPC_FIREATTACK": {
+   "id": "NPC_FIREATTACK",
+   "nome": "Katon Haisekishou",
+   "tem_icone": false
+  },
+  "NPC_WATERATTACK": {
+   "id": "NPC_WATERATTACK",
+   "nome": "Suiton Mizurappa",
+   "tem_icone": false
+  },
+  "NPC_GROUNDATTACK": {
+   "id": "NPC_GROUNDATTACK",
+   "nome": "Doton Doryuuheki",
+   "tem_icone": false
+  },
+  "NPC_MAGICALATTACK": {
+   "id": "NPC_MAGICALATTACK",
+   "nome": "Raiton Maisou",
+   "tem_icone": false
+  },
+  "NPC_WINDATTACK": {
+   "id": "NPC_WINDATTACK",
+   "nome": "Raiton Jibashiri",
+   "tem_icone": false
+  },
+  "NPC_BLINDATTACK": {
+   "id": "NPC_BLINDATTACK",
+   "nome": "Raigen Raikouchuu",
+   "tem_icone": false
+  },
+  "NPC_WIDECURSE": {
+   "id": "NPC_WIDECURSE",
+   "nome": "Jigoku Kouka no Jutsu",
+   "tem_icone": false
+  },
+  "NPC_WIDESTUN": {
+   "id": "NPC_WIDESTUN",
+   "nome": "Kanashibari no Genjutsu",
+   "tem_icone": false
+  },
+  "NPC_SLEEPATTACK": {
+   "id": "NPC_SLEEPATTACK",
+   "nome": "Fukai Yasumi",
+   "tem_icone": false
+  },
+  "NPC_WIDECONFUSE": {
+   "id": "NPC_WIDECONFUSE",
+   "nome": "Bakuhatsu Kemuri",
+   "tem_icone": false
+  },
+  "NPC_WIDESILENCE": {
+   "id": "NPC_WIDESILENCE",
+   "nome": "Konohi Kemuri",
+   "tem_icone": false
+  },
+  "NPC_WIDESLEEP": {
+   "id": "NPC_WIDESLEEP",
+   "nome": "Fukai Kemuri",
+   "tem_icone": false
+  },
+  "NPC_POISON": {
+   "id": "NPC_POISON",
+   "nome": "Masei Seijutsu",
+   "tem_icone": false
+  },
+  "NPC_SELFDESTRUCTION": {
+   "id": "NPC_SELFDESTRUCTION",
+   "nome": "C0",
+   "tem_icone": false
+  },
+  "NPC_COMOATTACK": {
+   "id": "NPC_COMOATTACK",
+   "nome": "Shoufuu Rendan",
+   "tem_icone": false
+  },
+  "NPC_TELEKINESISATTACK": {
+   "id": "NPC_TELEKINESISATTACK",
+   "nome": "Shinkuuha no Jutsu",
+   "tem_icone": false
+  },
+  "DOTASWAP": {
+   "id": "DOTASWAP",
+   "nome": "Troca de posição",
+   "tem_icone": false
+  },
+  "NARUTO_CAPTUREBIJUU": {
+   "id": "NARUTO_CAPTUREBIJUU",
+   "nome": "Capturar Bijuu",
+   "tem_icone": false
+  },
+  "GODD_STEALSOMETHING": {
+   "id": "GODD_STEALSOMETHING",
+   "nome": "Roubar Chakra Bijuu",
+   "tem_icone": false
+  },
+  "GODD_PULLEN": {
+   "id": "GODD_PULLEN",
+   "nome": "Bansho Ten'in",
+   "tem_icone": false
+  },
+  "GODD_SPLASPD": {
+   "id": "GODD_SPLASPD",
+   "nome": "Flauta Demoníaca: Sol",
+   "tem_icone": false
+  },
+  "GODD_SPLSWALK": {
+   "id": "GODD_SPLSWALK",
+   "nome": "Flauta Demoníaca: Ré",
+   "tem_icone": false
+  },
+  "NPC_EXPULSION": {
+   "id": "NPC_EXPULSION",
+   "nome": "Hiraishingiri",
+   "tem_icone": false
+  },
+  "NRO_CONFINE2": {
+   "id": "NRO_CONFINE2",
+   "nome": "Kage Mane No Jutsu",
+   "tem_icone": false
+  },
+  "NRO_OMOTE": {
+   "id": "NRO_OMOTE",
+   "nome": "Omote Renge",
+   "tem_icone": false
+  },
+  "NRO_OMOTE2": {
+   "id": "NRO_OMOTE2",
+   "nome": "Omote Renge",
+   "tem_icone": false
+  },
+  "NRO_LOTHUS": {
+   "id": "NRO_LOTHUS",
+   "nome": "Ura Renge",
+   "tem_icone": false
+  },
+  "BA_PANGVOICEX": {
+   "id": "BA_PANGVOICEX",
+   "nome": "Ativação Senju",
+   "tem_icone": false
+  },
+  "NRO_INUZUKA_CAO": {
+   "id": "NRO_INUZUKA_CAO",
+   "nome": "Kuchiyose: Akamaru",
+   "tem_icone": true
+  },
+  "NRO_INUZUKA_PILULA": {
+   "id": "NRO_INUZUKA_PILULA",
+   "nome": "Pilula de Comida Inuzuka",
+   "tem_icone": true
+  },
+  "NRO_INUZUKA_INSTINTO": {
+   "id": "NRO_INUZUKA_INSTINTO",
+   "nome": "Instinto Inuzuka",
+   "tem_icone": true
+  },
+  "NRO_TARTARUGA1": {
+   "id": "NRO_TARTARUGA1",
+   "nome": "Kuchiyose: Pequena Tartaruga",
+   "tem_icone": true
+  },
+  "NRO_TARTARUGA2": {
+   "id": "NRO_TARTARUGA2",
+   "nome": "Kuchiyose: Tartaruga",
+   "tem_icone": true
+  },
+  "NRO_TARTARUGA3": {
+   "id": "NRO_TARTARUGA3",
+   "nome": "Kuchiyose: Ninkame",
+   "tem_icone": true
+  }
+ },
+ "estados": [
+  "agi_gogi",
+  "akaitsuki",
+  "all_ray_of_protection",
+  "arclousedash",
+  "arcwandclan",
+  "aspdcash",
+  "bd_burnning",
+  "bd_freezing",
+  "bd_imprison",
+  "bd_sleep",
+  "bd_stonecurse",
+  "bd_stun",
+  "bitescar",
+  "catnippowder",
+  "chattering",
+  "cheerup",
+  "criticalwound",
+  "crossbowclan",
+  "crushstrike",
+  "cursedcircle_target",
+  "darkcrow",
+  "death",
+  "dex_gogi",
+  "efst_atk",
+  "efst_def",
+  "efst_matk",
+  "eldicastes",
+  "en_celermine_juice",
+  "en_white_potz",
+  "exeedbreak",
+  "exp",
+  "exp_g",
+  "exp_w",
+  "expiatio",
+  "extremityfist",
+  "flower_leaf",
+  "freshshrimp",
+  "frigg_song",
+  "full_throttle",
+  "gensou",
+  "glastheim_atk",
+  "glastheim_def",
+  "glastheim_heal",
+  "glastheim_trans",
+  "gogi",
+  "goldenmaceclan",
+  "grooming",
+  "h_mine",
+  "handicaptolerance_levelgap",
+  "hiss",
+  "hl_confusion",
+  "hl_curse",
+  "hl_heavypoison",
+  "hl_poison",
+  "hl_silence",
+  "hl_state_fear",
+  "hp_increase_potion",
+  "i_accuracy",
+  "i_adjustment",
+  "i_bunsin",
+  "i_closeconfine",
+  "i_counter",
+  "i_dodge",
+  "i_downkick",
+  "i_fever",
+  "i_kaahi",
+  "i_kaizel",
+  "i_kaupe",
+  "i_madness",
+  "i_maemi",
+  "i_mooncomfort",
+  "i_nen",
+  "i_onehand",
+  "i_p_dark",
+  "i_p_earth",
+  "i_p_fire",
+  "i_p_saint",
+  "i_p_tele",
+  "i_p_water",
+  "i_p_wind",
+  "i_run",
+  "i_shrink",
+  "i_sightblaster",
+  "i_starcomfort",
+  "i_stormkick",
+  "i_suncomfort",
+  "i_turnkick",
+  "icon01",
+  "icon02",
+  "icon03",
+  "icon04",
+  "icon05",
+  "icon06",
+  "icon07",
+  "icon08",
+  "icon09",
+  "icon10",
+  "insu",
+  "int_gogi",
+  "inven",
+  "item",
+  "item_g",
+  "item_w",
+  "izayoi",
+  "job",
+  "job_g",
+  "job_w",
+  "kagemusya",
+  "kg_kagehumi",
+  "kings_grace",
+  "kyomu",
+  "laudaagnus",
+  "laudaramus",
+  "luk_gogi",
+  "magical_bullet",
+  "magneticfield",
+  "mandragora",
+  "meikyousisui",
+  "mysticpowder",
+  "norecover",
+  "npc_hellpower",
+  "nyanggrass",
+  "offertorium",
+  "phidemon",
+  "plusattackpower",
+  "plusmagicpower",
+  "protectionofshrimp",
+  "rebound",
+  "resist_elemental_darkness",
+  "resist_elemental_fire",
+  "resist_elemental_ground",
+  "resist_elemental_nothing",
+  "resist_elemental_poison",
+  "resist_elemental_saint",
+  "resist_elemental_telekinesis",
+  "resist_elemental_undead",
+  "resist_elemental_water",
+  "resist_elemental_wind",
+  "rwcscroll",
+  "setdef",
+  "setmdef",
+  "shrimp",
+  "sj_creatingstar",
+  "sj_dimension",
+  "sj_fallingstar",
+  "sj_flashkick",
+  "sj_gravitycontrol",
+  "sj_lightofmoon",
+  "sj_lightofstar",
+  "sj_lightofsun",
+  "sj_lunastance",
+  "sj_newmoon",
+  "sj_starstance",
+  "sj_sunstance",
+  "sj_universestance",
+  "slowcast",
+  "sp_increase_potion",
+  "sp_soul",
+  "sp_soulcollect",
+  "sp_souldivision",
+  "sp_soulreaper",
+  "sp_soulunity",
+  "spritemable",
+  "stasis",
+  "str_gogi",
+  "su_stoop",
+  "suhide",
+  "sv_roottwist",
+  "swordclan",
+  "telekinesis_intense",
+  "tunaparty",
+  "unlimit",
+  "vacuum_extreme",
+  "vit_gogi",
+  "vitata500",
+  "weapon_property",
+  "zangetsu"
+ ],
+ "cursores": {
+  "normal": 6,
+  "fala": 2,
+  "item": 5,
+  "giro": 1,
+  "ataque": 1,
+  "portal": 5,
+  "bloqueado": 1,
+  "alvo": 1
+ },
+ "mapas": {
+  "ein_dun01": "Trilhos",
+  "yuno_fild04": "Campo do Pais da Terra 1",
+  "ein_fild02": "Campo do Pais da Terra 2",
+  "ra_fild01": "Campo do Pais da Tera 3",
+  "ra_fild04": "Campo do Pais da Tera 4",
+  "hu_fild04": "Arredores de Amegakure 2",
+  "um_dun01": "1 Esconderijo Kamizaru",
+  "um_dun02": "1 Esconderijo Kamizaru nivel 2",
+  "moc_fild04": "Arredores de Amagakure 1",
+  "einbech": "Vila Oculta da Chuva",
+  "gef_fild01": "Floresta de Amegakure",
+  "prt_fild05": "Floresta de Konoha",
+  "prt_fild01": "Arredores de Konoha 2",
+  "prt_fild02": "Arredores de Konoha 1",
+  "konoha3": "Konohagakure",
+  "anthell01": "2 Esconnderijo Kamizaru",
+  "cmd_fild01": "Entrada do 2 Esconnderijo Kamizaru",
+  "mjolnir_04": "Campo de Kusagakure",
+  "nuvem": "Kumokagure",
+  "yuno_fild08": "Arredores da Nuvem",
+  "ein_fild08": "Arredores da Nuvem 2",
+  "yuno_fild05": "Arredores da Nuvem 3",
+  "hu_fild06": "Praia de Kumogakure",
+  "bra_fild01": "Ilha da Tartaruga",
+  "hu_fild07": "Arredores da Nuvem 4",
+  "ein_fild01": "Arredores Nuvem 5",
+  "ra_fild13": "Campo do Pais da Terra 5",
+  "lhz_fild02": "Desfiladeiro IwaSuna",
+  "ve_fild02": "Arredores da Areia 8",
+  "mjolnir_06": "Ponte de Konohagakure",
+  "pay_fild02": "Floresta do Pais do Fogo",
+  "moc_fild15": "Deserto do Pais do Vento",
+  "ra_fild02": "Campo do Pais da Terra 5",
+  "prt_fild09": "Area desconhecida Areia",
+  "que_job03": "Corredor de Amegakure",
+  "bossnia_01": "Esconderijo do Cap Anbu",
+  "areia": "Sunagakure",
+  "moc_fild03": "Arredores de Konoha 3",
+  "mjolnir_07": "Arredores de Konoha 4",
+  "pay_fild03": "Floresta do Pais do Fogo 2",
+  "moc_fild13": "Arredores da Areia 3A",
+  "cmd_fild09": "Arredores da Areia 2A",
+  "moc_fild01": "Arredores da Areia 1",
+  "moc_fild08": "Arredores da Areia 4a",
+  "moc_fild17": "Area desconhecida Suna",
+  "ve_fild04": "Arredores Areia 5",
+  "moc_fild06": "Arredores da Areia 3b",
+  "pay_fild06": "Floresta Obscura",
+  "gl_prison": "Esgoto Divisorio",
+  "gl_church": "Esconderijo Mestre Velo",
+  "moc_fild14": "Arredores da Areia 5b",
+  "ra_fild03": "Arredores da Areia 6",
+  "prt_fild06": "Aredores de konoha 2b",
+  "mjolnir_08": "Arredores de Konoha 5",
+  "prt_fild00": "Arredores de Konoha 6",
+  "mjolnir_11": "Arredores de Konoha 7",
+  "gef_fild02": "Floresta Shikkotsu",
+  "moc_pryd05": "Labirinto",
+  "ve_fild03": "Arredores da Areia 7",
+  "yuno_fild11": "Arredores da Nuvem 6",
+  "yuno_fild07": "Arredores da Nuvem 7",
+  "yuno_fild09": "Vale dos Relampagos",
+  "gef_fild08": "Bosque das Nuvens",
+  "gef_fild06": "Cachoeiras das Ilusoes",
+  "glast_01": "Castelo",
+  "gef_fild10": "Arredores de Otagakure",
+  "tur_dun01": "Garganta Nuvem",
+  "tur_dun02": "Garganta Nuvem 2",
+  "tur_dun03": "Garganta Nuvem 3",
+  "hu_fild05": "Garganta Nuvem 4",
+  "gef_fild07": "Divisa Ponte",
+  "um_fild03": "Desfiladeiro de Otogakure",
+  "prt_fild07": "Campo Nanakusa",
+  "gef_fild03": "Floresta Kikyou",
+  "gef_fild12": "Bosque do Pais do Cha",
+  "payon": "Pais do Cha",
+  "prt_fild03": "Campo Pais do Cha 1",
+  "prt_fild11": "Campo Pais do Cha 2",
+  "pay_fild05": "Ponte Mizu",
+  "pay_fild01": "Floresta de Kirigakure",
+  "alb2trea": "Porto de Kirigakure",
+  "odin_tem01": "Area desconhecida Kirigakure",
+  "gef_fild09": "Area desconhecida kirigakure 2",
+  "prt_fild04": "Area desconhecida kirigakure Chunin",
+  "gef_fild04": "Arredores da Nevoa 1",
+  "nevoa": "Kirgaure",
+  "mjolnir_01": "Arredores da Nevoa 2",
+  "mjolnir_03": "Floresta Mizuame",
+  "gef_fild05": "Arredores da Nevoa 3",
+  "mjolnir_02": "Arredores da NÃ©voa 4",
+  "mjo_dun01": "Minas Shinobi",
+  "um_fild01": "Bosque Nevoa",
+  "pay_fild10": "Arredores Nevoa 5",
+  "ama_fild01": "Arredores da Nevoa 6",
+  "kakashi": "Campo de Treinamento",
+  "hospital": "Hospital Konohagakure",
+  "orochimaru": "Esconderijo Orochimaru"
+ }
+}

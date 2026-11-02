@@ -1,0 +1,2 @@
+Coloque aqui o map_cache.dat (rAthena) ou os arquivos .mcache (Hercules) do servidor
+para o bot ter a colisao dos mapas que estao criptografados nos GRFs do jogo.

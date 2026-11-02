@@ -1,0 +1,16 @@
+# Ambiente e caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.tmp
+
+# Arquivos de cada usuario (nunca vao para o GitHub nem sao trocados pelo atualizador)
+logs/
+backups/
+perfis/
+data/mapas/*
+!data/mapas/LEIA-ME.txt
+data/rede/painel_config.json
+data/rede/buffs_aprendidos.json
+*.etl

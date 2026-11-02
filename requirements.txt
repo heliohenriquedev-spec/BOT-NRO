@@ -1,0 +1,2 @@
+numpy==2.5.4
+PySide6-Essentials==6.12.0
