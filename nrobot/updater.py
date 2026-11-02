@@ -68,10 +68,21 @@ def fetch(url):
 
 
 def remote_version():
-    try:
-        return json.loads(fetch(raw_url('versao.json')+f'?t={datetime.now().timestamp():.0f}'))
-    except ValueError as exc:
-        raise UpdateError('versao.json do GitHub é inválido') from exc
+    # The contents API is never stale; raw.githubusercontent.com caches for minutes.
+    c = config()
+    api = (f"https://api.github.com/repos/{c['owner']}/{c['repo']}/contents/versao.json"
+           f"?ref={c.get('branch', 'main')}")
+    for url, accept in ((api, 'application/vnd.github.raw'), (raw_url('versao.json'), '*/*')):
+        request = urllib.request.Request(url, headers={'User-Agent': 'BOT-NRO-atualizador', 'Accept': accept,
+                                                       'Cache-Control': 'no-cache'})
+        try:
+            with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+                return json.loads(response.read())
+        except ValueError as exc:
+            raise UpdateError('versao.json do GitHub é inválido') from exc
+        except OSError as exc:
+            error = exc
+    raise UpdateError(f'não foi possível acessar o GitHub: {error}')
 
 
 def check():

@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.2",
- "published_at": "2026-11-02T17:10:26",
- "notes": "O bot encontra a pasta do jogo em qualquer lugar do PC, ou pergunta qual é",
+ "version": "2026.11.02.3",
+ "published_at": "2026-11-02T17:10:50",
+ "notes": "Verificar atualização mostra a versão nova na hora",
  "files": [
   ".gitattributes",
   ".gitignore",
