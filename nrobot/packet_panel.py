@@ -168,6 +168,7 @@ class PacketPanel(QMainWindow):
         tabs.addTab(combat, 'Combate')
         from .skill_panel import SkillPanel
         self.skill_panel = SkillPanel()
+        self.skill_panel.summon_finished.connect(lambda: self.command('summon_finished'))
         self.skill_panel.apply_requested.connect(self.apply)
         self.skill_panel.probe_requested.connect(lambda identity, level: self.command('probe_buff', skill_id=identity, level=level))
         tabs.addTab(self.skill_panel, 'Habilidades')

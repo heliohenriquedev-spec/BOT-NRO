@@ -114,3 +114,40 @@ ate um monstro.
 O formato 0113 de chao foi conferido por leitura estatica do cliente local;
 a evidencia esta em data/rede/habilidades_chao_validacao.json. O uso real das novas
 habilidades ainda precisa ser validado no jogo apos reiniciar o painel e reconectar.
+
+
+### Fila exclusiva Kuchiyose e duracao
+
+Na aba Habilidades, **Marcar Kuchiyose aprendidas para a fila** seleciona apenas
+habilidades aprendidas cujo nome local contem Kuchiyose e cujo tipo do servidor
+permite execucao em si ou no chao. Outras habilidades de chao nao entram sozinhas.
+As colunas **Prioridade invocacao** (menor primeiro) e **Duracao invocacao (s)**
+configuram a fila. Depois do termino, a fila passa para a proxima disponivel e
+reinicia o ciclo quando chega ao fim. SP, cooldown e delay continuam obrigatorios;
+portanto pode haver um intervalo sem invocacao se nenhuma estiver disponivel.
+
+O bot reserva a fila no envio e acompanha somente uma invocacao por vez, inclusive
+em rajada. Confirmacoes e efeitos sao fatos separados. Uma resposta de sucesso
+pode confirmar a execucao; um efeito proprio vinculado confirma atividade e seu
+termino libera a proxima invocacao. O efeito e associado automaticamente apenas
+apos uma resposta de sucesso da habilidade, quando ha um unico efeito novo na
+janela observada. Respostas ambiguas ou outra habilidade nessa janela nao criam
+vinculo. Remover uma animacao de chao nao prova que o ser invocado morreu.
+
+**Duracao 0** aguarda o efeito vinculado. Caso nao haja sinal identificavel, a fila
+mostra duracao desconhecida e nao cria outra invocacao cegamente. Voce pode informar
+uma duracao conhecida ou, depois de verificar no jogo que a invocacao realmente
+terminou, clicar **A invocacao terminou no jogo: confirmar fim e aprender duracao**.
+Essa medicao assistida passa a ser o temporizador dos proximos usos quando nao ha
+efeito vinculado; ela e uma duracao observada, nao um prazo nominal enviado pelo
+servidor. A medicao manual e recusada se o servidor ainda informa o efeito ativo.
+
+O fim observado de um efeito mede sua duracao real naquele uso (podendo terminar
+antes por cancelamento), sem confundir o tempo com cooldown nem afirmar que toda
+invocacao tem o mesmo prazo. Com efeito vinculado, o sinal do servidor prevalece
+sobre o temporizador. Os dados ficam em **data/rede/invocacoes_aprendidas.json**,
+separados por habilidade e nivel, protegidos da atualizacao e fora da publicacao.
+Mudancas de configuracao/pausa preservam a invocacao acompanhada; trocar de mapa
+limpa a presenca local e mantem os dados aprendidos. O funcionamento ao vivo das
+Kuchiyose ainda precisa ser validado: a descricao local de Filhote Katsuyu nao
+informa tempo e os registros anteriores nao fornecem uma duracao confirmada.

@@ -1,5 +1,6 @@
 """REDE-41: independent skill cooldowns and effect-driven self buffs."""
 import math
+import time
 
 
 def skill_category(metadata):
@@ -62,6 +63,8 @@ class CombatRotation:
         self.buff_confirmed = 0
         self.reason = 'aguardando dados'
         self.session_key = None
+        from .summon_queue import SummonQueue
+        self.summons = SummonQueue()
         self.blocked_buffs = set()
         self.last_sent = {}
         self.learned_min_interval = {}
@@ -75,6 +78,7 @@ class CombatRotation:
                 self.order.setdefault(identity, index)
 
     def reset_session(self, key=None):
+        self.summons.reset()
         self.ready.clear()
         self.pending.clear()
         self.failures.clear()
@@ -87,6 +91,8 @@ class CombatRotation:
 
     def _fail(self, skill_id, now, reason):
         pending = self.pending.pop(skill_id, None)
+        if pending and pending['role'] == 'summon':
+            self.summons.failed(skill_id, now, reason == 'servidor recusou')
         if pending and pending['role'] == 'buff':
             self.blocked_buffs.add(skill_id)
         sent = self.last_sent.get(skill_id)
@@ -103,6 +109,7 @@ class CombatRotation:
         self.log.append({'kind': 'rotation_failed', 'skill_id': skill_id, 'reason': reason, 'failures': count})
 
     def observe(self, events, player_id, now):
+        self.summons.observe(events, player_id, now)
         for event in events:
             kind = event['kind']
             if kind in ('map_change', 'map_transfer'):
@@ -116,6 +123,7 @@ class CombatRotation:
                     self.learned_min_interval[latest] = max(self.learned_min_interval.get(latest, 0), elapsed+retry)
                     self.ready[latest] = max(self.ready.get(latest, 0), now+retry)
                     self.pending.pop(latest)
+                    self.summons.failed(latest, now, True)
                     self.log.append({'kind': 'rotation_cooldown_notice', 'skill_id': latest, 'retry_seconds': retry})
                 continue
             skill_id = event.get('skill_id')
@@ -195,6 +203,12 @@ class CombatRotation:
         return max(ranges, default=2)
 
     def plan(self, state, now, target_id=None):
+        self.summons.update(state, self.profiles, now)
+        # Keep the half-second attribution window free of another bot skill.
+        active = self.summons.active
+        if active and not active['effect_id'] and now <= active.get('learn_until', 0):
+            return None
+
         for identity, pending in list(self.pending.items()):
             if now >= pending['deadline']:
                 if self.burst and pending['role'] == 'offensive':
@@ -234,7 +248,12 @@ class CombatRotation:
                         self.last_sent.get(profile['skill_id'], -1))
             # Without an order every offensive takes its turn: the one sent longest ago goes next.
             return (profile['role'] != 'buff', self.last_sent.get(profile['skill_id'], -1), not option.get('ready', True))
-        profiles = sorted(self.profiles, key=priority)
+        summon_order = {p['skill_id']: i for i, p in enumerate(self.summons.ordered(self.profiles))}
+        def rotation_priority(p):
+            if p['role'] == 'summon':
+                return (0, summon_order.get(p['skill_id'], 999), 0, 0)
+            return (1, *priority(p))
+        profiles = sorted(self.profiles, key=rotation_priority)
         turn = self.throw_turn(state, known, now, available_sp)
         for profile in profiles:
             identity = profile['skill_id']
@@ -264,7 +283,9 @@ class CombatRotation:
                 if target is None:
                     continue
             elif profile['role'] == 'summon':
-                if flags != 2:
+                if self.summons.active is not None or self.summons.waiting is not None:
+                    continue
+                if flags not in (2, 4, 16):
                     self.reason = f'Habilidade {identity}: invocacao exige tipo de chao'
                     continue
                 target = state.get('player_id')
@@ -294,11 +315,12 @@ class CombatRotation:
                 action['combat_target_id'] = target_id
                 action['cast_mode'] = 'self'
             elif profile['role'] == 'summon':
-                action['cast_mode'] = 'ground'
+                action['cast_mode'] = 'ground' if flags == 2 else 'self'
                 # Aim beside the current position, never at an unvalidated distant cell.
                 own = (state.get('combat_player_positions') or [state['player_position']])[0]
                 action['ground_origin'] = [round(v) for v in own]
                 action['cast_range'] = configured_range(profile, meta)
+                action['initial_effects'] = [int(i) for i, v in state.get('own_effects', {}).items() if v]
             ammo = state.get('ammo')
             if identity in (523, 524) and ammo is not None:
                 options = ammo['options']
@@ -377,6 +399,8 @@ class CombatRotation:
         return other
 
     def sent(self, action, now):
+        if action['role'] == 'summon':
+            self.summons.reserve(action, now)
         self.last_sent[action['skill_id']] = now
         if action['role'] == 'offensive' and self.order:
             self.cursor = self.order.get(action['skill_id'], len(self.order)+1)
@@ -389,7 +413,8 @@ class CombatRotation:
                          'target_id': action['target_id'], 'role': action['role']})
 
     def snapshot(self):
-        return {'reason': self.reason, 'confirmed_skills': self.confirmed, 'confirmed_buffs': self.buff_confirmed,
+        return {'summons': self.summons.snapshot(self.profiles, time.monotonic()),
+                'reason': self.reason, 'confirmed_skills': self.confirmed, 'confirmed_buffs': self.buff_confirmed,
                 'pending': list(self.pending.values()), 'ready_at': dict(self.ready),
                 'global_ready_at': self.next_send, 'local_global_delay': self.global_delay,
                 'after_skill_delay': round(self.after_skill_delay, 2),

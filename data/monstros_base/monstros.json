@@ -45,6 +45,17 @@
   "name": "Doki",
   "max_hp": 980100
  },
+ "1188": {
+  "species_id": 1188,
+  "maps": {
+   "hospital2": 3,
+   "yuno_in01": 1
+  },
+  "walk_speed_ms": 150,
+  "captured_sprite": true,
+  "name": "Tronco de madeira",
+  "max_hp": 10
+ },
  "1210": {
   "species_id": 1210,
   "symbol": "FILAMENTOUS",
@@ -55,7 +66,7 @@
   "species_id": 1212,
   "maps": {
    "kakashi": 12,
-   "moc_fild01": 14
+   "moc_fild01": 58
   },
   "walk_speed_ms": 350,
   "captured_sprite": true,
@@ -65,7 +76,7 @@
  "1315": {
   "species_id": 1315,
   "maps": {
-   "yuno_fild11": 12
+   "yuno_fild11": 17
   },
   "walk_speed_ms": 155,
   "captured_sprite": true,
@@ -86,9 +97,9 @@
   "species_id": 1634,
   "maps": {
    "areia": 5,
-   "yuno_fild11": 5
+   "yuno_fild11": 6
   },
-  "walk_speed_ms": 500,
+  "walk_speed_ms": 170,
   "captured_sprite": true,
   "name": "Jounin",
   "max_hp": 1300000
@@ -117,7 +128,7 @@
   "species_id": 1783,
   "maps": {
    "kakashi": 28,
-   "moc_fild01": 35
+   "moc_fild01": 75
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,

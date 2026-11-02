@@ -96,6 +96,14 @@ def validate(data):
         normalized.append({k: p[k] for k in ('skill_id', 'enabled', 'role', 'level', 'interval', 'effect_id')})
         if 'range_override' in p:
             normalized[-1]['range_override'] = distance
+        for key, minimum, maximum in (('summon_duration', 0, 86400), ('summon_priority', 0, 999)):
+            value = p.get(key, 0)
+            if type(value) not in (int, float) or not math.isfinite(value) or not minimum <= value <= maximum:
+                raise ValueError(f'{key}: valor invalido')
+            if key == 'summon_priority' and type(value) is not int:
+                raise ValueError('Prioridade da invocacao deve ser um inteiro')
+            if key in p:
+                normalized[-1][key] = value
         seen.add(p['skill_id'])
     result['skill_profiles'] = normalized
     for key in ('hotkey_hunt', 'hotkey_minimap'):

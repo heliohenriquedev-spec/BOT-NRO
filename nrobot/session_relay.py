@@ -200,6 +200,8 @@ class SessionRelay:
         self.hunt.auto_attacks = settings['auto_attacks']
         from .combat_rotation import CombatRotation
         previous_rotation = self.rotation
+        if previous_rotation is not None:
+            self.saved_summon_queue = previous_rotation.summons
         self.rotation = CombatRotation(settings['skill_profiles'], response_timeout=settings['skill_timeout'],
             attempts=settings['skill_attempts'], defer=settings['target_defer'], interval=settings['skill_interval'], global_delay=settings['skill_global_delay'],
             priority=settings['skill_priority'], fast=settings['fast_offensives'],
@@ -220,6 +222,16 @@ class SessionRelay:
             self.rotation.next_send = previous_rotation.next_send
             self.rotation.confirmed = previous_rotation.confirmed
             self.rotation.buff_confirmed = previous_rotation.buff_confirmed
+            self.rotation.summons = previous_rotation.summons
+        if self.rotation is not None and getattr(self, 'saved_summon_queue', None) is not None:
+            self.rotation.summons = self.saved_summon_queue
+        if self.rotation is not None and previous_rotation is None and getattr(self, 'saved_summon_queue', None) is None:
+            try:
+                cache = json.loads((Path(__file__).resolve().parents[1]/'data/rede/invocacoes_aprendidas.json').read_text(encoding='utf-8'))
+                from .summon_queue import validated_learning
+                self.rotation.summons.learned = validated_learning(cache)
+            except (OSError, ValueError):
+                pass
         if self.rotation is not None:
             self.hunt.use_skills = False
         if settings['patrol']:
@@ -604,6 +616,14 @@ class SessionRelay:
             elif command == 'release_player':
                 self.capture_armed_until = 0
                 self.release_player()
+            elif command == 'summon_finished':
+                if self.rotation is None or self.rotation.summons.active is None:
+                    raise ValueError('Nenhuma invocacao acompanhada para confirmar termino')
+                active = self.rotation.summons.active
+                if active['effect_id'] and self.tracker.observer.effects.get(active['effect_id']):
+                    raise ValueError('O servidor ainda informa o efeito ativo; aguarde o termino real')
+                self.rotation.summons.finish(time.monotonic(), 'user_observed_end')
+                self.flush_rotation_diagnostics()
             elif command == 'probe_buff':
                 if self.hunt.enabled:
                     raise ValueError('Pause a caça antes de testar um buff')
@@ -654,6 +674,18 @@ class SessionRelay:
     def flush_rotation_diagnostics(self):
         if self.rotation is None:
             return
+        summons = self.rotation.summons
+        self.rotation.log.extend(summons.log)
+        summons.log.clear()
+        if summons.dirty:
+            try:
+                path = Path(__file__).resolve().parents[1]/'data/rede/invocacoes_aprendidas.json'
+                temporary = path.with_suffix('.tmp')
+                temporary.write_text(json.dumps(summons.learned, ensure_ascii=False, indent=2), encoding='utf-8')
+                temporary.replace(path)
+                summons.dirty = False
+            except OSError:
+                pass
         for event in self.rotation.log:
             self.record_hunt(event)
             if event['kind'] == 'rotation_skill_confirmed':
@@ -662,6 +694,8 @@ class SessionRelay:
                 print(f"Buff {event['skill_id']} confirmado pelo efeito {event['effect_id']}.")
             elif event['kind'] == 'rotation_cooldown_notice':
                 print(f"Recarga recusada para habilidade {event['skill_id']}; aguardando {event['retry_seconds']} s antes da proxima tentativa.")
+            elif event['kind'] in ('summon_started', 'summon_ended', 'summon_effect_linked'):
+                print(f"Invocacao {event['skill_id']}: {event['kind']} ({event.get('evidence', 'efeito vinculado')}).")
             elif event['kind'] == 'rotation_failed':
                 print(f"Habilidade {event['skill_id']}: {event['reason']} (falhas: {event['failures']}).")
         self.rotation.log.clear()
@@ -794,6 +828,7 @@ class SessionRelay:
                         self.rotation.reason = 'nenhuma celula valida para invocacao proxima'
                         return False
                     payload = ground_skill(*point, action['skill_id'], action['level'])
+                    action = {**action, 'ground_position': list(point)}
                 else:
                     payload = skill(action['target_id'], action['skill_id'], action['level'])
                 self.rotation.sent(action, now)
@@ -979,6 +1014,8 @@ class SessionRelay:
                 if self.rotation is not None:
                     self.rotation.observe(events, self.tracker.observer.player_id, time.monotonic())
                     self.flush_rotation_diagnostics()
+                elif getattr(self, 'saved_summon_queue', None) is not None:
+                    self.saved_summon_queue.observe(events, self.tracker.observer.player_id, time.monotonic())
                 manual = self.manual_skill_pending
                 if manual is not None and time.monotonic() >= manual['deadline']:
                     self.manual_skill_pending = manual = None

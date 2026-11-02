@@ -1,6 +1,6 @@
 {
- "version": "2026.11.02.13",
- "published_at": "2026-11-02T20:00:42",
+ "version": "2026.11.02.14",
+ "published_at": "2026-11-02T20:15:15",
  "notes": "Kuchy",
  "files": [
   ".gitattributes",
@@ -19,6 +19,7 @@
   "data/monstros_base/sprites/1041.png",
   "data/monstros_base/sprites/1062.png",
   "data/monstros_base/sprites/1177.png",
+  "data/monstros_base/sprites/1188.png",
   "data/monstros_base/sprites/1210.png",
   "data/monstros_base/sprites/1212.png",
   "data/monstros_base/sprites/1315.png",
@@ -249,6 +250,7 @@
   "nrobot/session_relay.py",
   "nrobot/skill_panel.py",
   "nrobot/sprite_reader.py",
+  "nrobot/summon_queue.py",
   "nrobot/update_panel.py",
   "nrobot/updater.py",
   "requirements.txt",
@@ -294,6 +296,7 @@
   "tests/test_session_relay.py",
   "tests/test_skill_cast_modes.py",
   "tests/test_skill_panel_performance.py",
+  "tests/test_summon_queue.py",
   "tests/test_target_priority.py",
   "tests/test_updater.py",
   "third_party/rathena/LICENCE",
@@ -302,5 +305,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "0f6e35de86ff"
+ "files_digest": "bca882ab0b8b"
 }

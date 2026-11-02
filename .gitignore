@@ -16,3 +16,6 @@ data/rede/buffs_aprendidos.json
 *.etl
 data/monstros/
 perfis/painel_ui.json
+
+data/rede/invocacoes_aprendidas.json
+data/rede/invocacoes_aprendidas.tmp
