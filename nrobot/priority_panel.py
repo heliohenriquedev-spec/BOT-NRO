@@ -13,6 +13,7 @@ class PriorityPanel(QWidget):
     capture_requested = Signal()
     release_requested = Signal()
     target_requested = Signal(int)
+    changed = Signal()  # reordering: the panel saves it by itself
 
     def __init__(self, priority=None):
         super().__init__()
@@ -55,6 +56,7 @@ class PriorityPanel(QWidget):
         self.order = QListWidget()
         self.order.setDragDropMode(QAbstractItemView.InternalMove)
         self.order.setDefaultDropAction(Qt.MoveAction)
+        self.order.model().rowsMoved.connect(lambda *args: self.changed.emit())
         order_layout.addWidget(self.order, 1)
         side = QVBoxLayout()
         for label, step in (('▲ Subir', -1), ('▼ Descer', 1)):
@@ -109,7 +111,9 @@ class PriorityPanel(QWidget):
     def priority(self):
         if self.available is None:
             return list(self.saved)
-        return [self.order.item(index).data(Qt.UserRole) for index in range(self.order.count())]
+        shown = [self.order.item(index).data(Qt.UserRole) for index in range(self.order.count())]
+        # Skills this character does not have keep their place in the saved order.
+        return shown+[token for token in self.saved if token not in shown]
 
     def move(self, step):
         row = self.order.currentRow()
@@ -119,6 +123,7 @@ class PriorityPanel(QWidget):
         item = self.order.takeItem(row)
         self.order.insertItem(target, item)
         self.order.setCurrentRow(target)
+        self.changed.emit()
 
     def choose_selected(self):
         row = self.players.currentRow()

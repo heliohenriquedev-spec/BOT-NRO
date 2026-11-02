@@ -80,6 +80,7 @@ class PacketPanel(QMainWindow):
         buttons.addWidget(close)
         layout.addLayout(buttons)
         tabs = QTabWidget()
+        self.tabs = tabs
         layout.addWidget(tabs)
         configuration = QWidget()
         config_layout = QHBoxLayout(configuration)
@@ -244,6 +245,8 @@ class PacketPanel(QMainWindow):
         self.priority_panel.saved = settings['skill_priority']
         for key, field in self.combat_fields.items():
             field.setValue(settings[key])
+        self.watch_settings()
+        self.load_ui()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.refresh)
         self.timer.start(700)
@@ -417,6 +420,7 @@ class PacketPanel(QMainWindow):
                     box = QCheckBox()
                     self.species[identity] = box
                     self.species_layout.insertWidget(self.species_layout.count()-1, box)
+                    box.toggled.connect(self.schedule_save)
                 self.species[identity].setText(f"{monster['name']} (ID {identity}, presentes: {monster['present']})")
                 self.species[identity].setEnabled(not self.auto_map_targets.isChecked())
 
@@ -558,7 +562,74 @@ class PacketPanel(QMainWindow):
         restart_panel()
         self.close()
 
+    # -- automatic saving (REDE-78) -----------------------------------------------------
+    def watch_settings(self):
+        """Every edit is saved by itself; no button needed to keep the configuration."""
+        self.save_timer = QTimer(self)
+        self.save_timer.setSingleShot(True)
+        self.save_timer.setInterval(800)
+        self.save_timer.timeout.connect(self.autosave)
+        for box in (*self.species.values(), self.auto_map_targets, self.patrol, self.skills, self.strict_map,
+                    self.advanced, self.auto_attacks, self.pause_players, self.pause_disguised, self.pause_hidden):
+            box.toggled.connect(self.schedule_save)
+        for field in (self.radius, self.step, *self.combat_fields.values()):
+            field.valueChanged.connect(self.schedule_save)
+        self.skill_panel.changed.connect(self.schedule_save)
+        self.priority_panel.changed.connect(self.schedule_save)
+        self.priority_panel.minimap.toggled.connect(lambda checked: self.save_ui())
+        self.overlay.on_change = self.save_ui
+
+    def schedule_save(self, *args):
+        self.save_timer.start()
+
+    def autosave(self):
+        try:
+            settings = save(self.settings())
+        except (OSError, ValueError) as exc:
+            self.notice.setText('Configuração não salva: '+str(exc))
+            return
+        self.skill_panel.saved = settings['skill_profiles']
+        self.priority_panel.saved = settings['skill_priority']
+        if self.process.state() != QProcess.NotRunning and self.session is not None:
+            if self.pending_command:
+                self.save_timer.start()  # apply once the previous command is answered
+                return
+            self.command('apply', settings=settings)
+        self.notice.setText('Configuração salva automaticamente.')
+
+    UI_FILE = ROOT/'perfis'/'painel_ui.json'
+
+    def load_ui(self):
+        try:
+            ui = json.loads(self.UI_FILE.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            return
+        from PySide6.QtCore import QByteArray
+        if ui.get('geometry'):
+            self.restoreGeometry(QByteArray.fromBase64(ui['geometry'].encode('ascii')))
+        if isinstance(ui.get('tab'), int) and 0 <= ui['tab'] < self.tabs.count():
+            self.tabs.setCurrentIndex(ui['tab'])
+        if 'minimap' in ui:
+            self.priority_panel.minimap.setChecked(bool(ui['minimap']))
+        try:
+            self.overlay.restore_layout(ui.get('minimap_layout'))
+        except (TypeError, ValueError):
+            pass
+
+    def save_ui(self):
+        ui = {'geometry': bytes(self.saveGeometry().toBase64()).decode('ascii'), 'tab': self.tabs.currentIndex(),
+              'minimap': self.priority_panel.minimap.isChecked(), 'minimap_layout': self.overlay.layout_state()}
+        try:
+            self.UI_FILE.parent.mkdir(parents=True, exist_ok=True)
+            self.UI_FILE.write_text(json.dumps(ui), encoding='utf-8')
+        except OSError:
+            pass
+
     def closeEvent(self, event):
+        if self.save_timer.isActive():
+            self.save_timer.stop()
+            self.autosave()
+        self.save_ui()
         self.overlay.close()
         self.game_overlay.close()
         self.close_relay()

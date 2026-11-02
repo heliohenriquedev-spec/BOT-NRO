@@ -9,6 +9,7 @@ import time
 class SkillPanel(QWidget):
     apply_requested = Signal()
     probe_requested = Signal(int, int)
+    changed = Signal()  # any edit: the panel saves it by itself
     def __init__(self, profiles=None):
         super().__init__()
         self.saved = profiles or []
@@ -70,9 +71,11 @@ class SkillPanel(QWidget):
     def profiles(self):
         if self.signature is None:
             return self.saved
-        return [{'skill_id': identity, 'enabled': row['enabled'].isChecked(), 'role': row['role'].currentData(),
-                 'level': row['level'].value(), 'interval': row['interval'].value(), 'effect_id': row['effect'].value()}
-                for identity, row in self.rows.items()]
+        shown = [{'skill_id': identity, 'enabled': row['enabled'].isChecked(), 'role': row['role'].currentData(),
+                  'level': row['level'].value(), 'interval': row['interval'].value(), 'effect_id': row['effect'].value()}
+                 for identity, row in self.rows.items()]
+        # Skills this character does not have (another character's setup) stay saved.
+        return shown+[p for p in self.saved if p['skill_id'] not in self.rows]
 
     def update_catalog(self, catalog, effects, candidates=None, rotation=None):
         catalog = [skill for skill in catalog if type(skill.get('level')) is int and skill['level'] > 0]
@@ -151,6 +154,10 @@ class SkillPanel(QWidget):
                                    'target_flags': flags, 'index': index}
             for column, widget in ((0, enabled), (5, level), (7, role), (8, interval), (9, effect)):
                 self.table.setCellWidget(index, column, widget)
+            enabled.toggled.connect(self.changed.emit)
+            role.currentIndexChanged.connect(self.changed.emit)
+            for spin in (level, interval, effect):
+                spin.valueChanged.connect(self.changed.emit)
 
     def update_states(self, effects, rotation):
         pending = {entry['skill_id'] for entry in rotation.get('pending', [])}

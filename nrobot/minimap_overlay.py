@@ -44,6 +44,7 @@ class MinimapOverlay(QWidget):
         self.zoom_index = 0
         self.offset = None  # position relative to the game's client area once dragged
         self.drag = None
+        self.on_change = lambda: None  # size, zoom or position changed: the panel saves them
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool | Qt.WindowDoesNotAcceptFocus)
@@ -132,6 +133,7 @@ class MinimapOverlay(QWidget):
                 self.apply_size()
                 if self.offset is None:
                     self.follow_game()
+                self.on_change()
                 return
         self.drag = event.globalPosition()-QPointF(self.x(), self.y())
 
@@ -149,11 +151,25 @@ class MinimapOverlay(QWidget):
         ratio = screen.devicePixelRatio() if screen else 1
         if rect is not None:
             self.offset = (self.x()-rect[0]/ratio, self.y()-rect[1]/ratio)
+            self.on_change()
 
     def wheelEvent(self, event):
         step = 1 if event.angleDelta().y() > 0 else -1
         self.zoom_index = max(0, min(len(self.ZOOMS)-1, self.zoom_index+step))
         self.update()
+        self.on_change()
+
+    def layout_state(self):
+        return {'side_index': self.side_index, 'zoom_index': self.zoom_index,
+                'offset': list(self.offset) if self.offset is not None else None}
+
+    def restore_layout(self, state):
+        state = state or {}
+        self.side_index = max(0, min(len(self.SIDES)-1, int(state.get('side_index', self.side_index))))
+        self.zoom_index = max(0, min(len(self.ZOOMS)-1, int(state.get('zoom_index', self.zoom_index))))
+        offset = state.get('offset')
+        self.offset = tuple(offset) if offset else None
+        self.apply_size()
 
     # -- drawing ------------------------------------------------------------------------
     def paintEvent(self, event):
