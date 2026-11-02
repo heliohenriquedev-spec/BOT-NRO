@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.4",
- "published_at": "2026-11-02T17:14:06",
- "notes": "Campo para colar o caminho da pasta do jogo no painel e no instalador",
+ "version": "2026.11.02.5",
+ "published_at": "2026-11-02T17:19:54",
+ "notes": "Corrige erro de porta 16900 ocupada: o painel encerra a conexao inteira e o bot fecha conexoes antigas que ficaram abertas",
  "files": [
   ".gitattributes",
   ".gitignore",
@@ -45,6 +45,7 @@
   "nrobot/packet_reader.py",
   "nrobot/packet_settings.py",
   "nrobot/patrol_tour.py",
+  "nrobot/port_guard.py",
   "nrobot/presence_guard.py",
   "nrobot/priority_panel.py",
   "nrobot/radar_overlay.py",
@@ -85,6 +86,7 @@
   "tests/test_packet_settings.py",
   "tests/test_packet_skills.py",
   "tests/test_patrol_exploration.py",
+  "tests/test_port_guard.py",
   "tests/test_presence_guard.py",
   "tests/test_relay_profile.py",
   "tests/test_relay_target_lifetime.py",
@@ -100,5 +102,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "f49a034041f9"
+ "files_digest": "0bbc46513b13"
 }

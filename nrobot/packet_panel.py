@@ -392,7 +392,15 @@ class PacketPanel(QMainWindow):
 
     def close_relay(self):
         if self.process.state() != QProcess.NotRunning:
-            self.process.terminate()
+            # The venv python.exe is a launcher: the relay runs in its child process, which
+            # would survive and keep port 16900 busy. End the whole process tree.
+            pid = self.process.processId()
+            if pid and sys.platform == 'win32':
+                import subprocess
+                subprocess.run(['taskkill', '/PID', str(pid), '/T', '/F'], capture_output=True,
+                               creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+            else:
+                self.process.terminate()
             if not self.process.waitForFinished(1500):
                 self.process.kill()
                 self.process.waitForFinished(500)

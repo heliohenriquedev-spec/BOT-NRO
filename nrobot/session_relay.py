@@ -785,7 +785,20 @@ class SessionRelay:
                 task = asyncio.create_task(self.bridge(stage, host, port, reader, writer))
                 self.tasks.add(task)
                 task.add_done_callback(self.tasks.discard)
-            listener = await asyncio.start_server(accepted, '127.0.0.1', self.local_port if stage == 'login' else 0)
+            port_wanted = self.local_port if stage == 'login' else 0
+            try:
+                listener = await asyncio.start_server(accepted, '127.0.0.1', port_wanted)
+            except OSError as exc:
+                if not port_wanted or getattr(exc, 'winerror', exc.errno) not in (10048, 98):
+                    raise
+                # REDE-77: an old relay of the bot left running keeps the game port.
+                from .port_guard import free
+                freed, message = free(port_wanted)
+                if not freed:
+                    raise OSError(exc.errno, message) from exc
+                print(message[:1].upper()+message[1:]+'.')
+                await asyncio.sleep(1)
+                listener = await asyncio.start_server(accepted, '127.0.0.1', port_wanted)
             self.listeners[key] = listener
         return self.listeners[key].sockets[0].getsockname()[1]
 
