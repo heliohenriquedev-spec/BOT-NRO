@@ -47,11 +47,21 @@ class PacketPanel(QMainWindow):
         revision = QLabel(f"Versão {local_version().get('version', 'dev')} | Pasta: "+str(ROOT))
         layout.addWidget(revision)
         game_row = QHBoxLayout()
+        game_row.addWidget(QLabel('Pasta do jogo:'))
+        from PySide6.QtWidgets import QLineEdit
+        self.game_field = QLineEdit()
+        self.game_field.setPlaceholderText(r'Cole aqui o caminho da pasta do jogo, ex.: D:\Jogos\NRO (a pasta que tem DATA.INI)')
+        self.game_field.setClearButtonEnabled(True)
+        self.game_field.returnPressed.connect(self.save_game_field)
+        game_row.addWidget(self.game_field, 1)
+        save_game = QPushButton('Salvar')
+        save_game.clicked.connect(self.save_game_field)
+        game_row.addWidget(save_game)
+        browse_game = QPushButton('Procurar...')
+        browse_game.clicked.connect(self.choose_game_folder)
+        game_row.addWidget(browse_game)
         self.game_label = QLabel()
-        game_row.addWidget(self.game_label, 1)
-        change_game = QPushButton('Trocar pasta do jogo')
-        change_game.clicked.connect(self.choose_game_folder)
-        game_row.addWidget(change_game)
+        game_row.addWidget(self.game_label)
         layout.addLayout(game_row)
         self.show_game_folder()
         self.status_label = QLabel('Conexão fechada • abra a conexão e entre pelo perfil local')
@@ -274,30 +284,54 @@ class PacketPanel(QMainWindow):
     def show_game_folder(self, folder=None):
         from .game_folder import find
         folder = folder or find()
-        self.game_label.setText(f'Jogo: {folder}' if folder else
-                                'Jogo: pasta não encontrada • clique em Trocar pasta do jogo')
+        if folder:
+            self.game_field.setText(str(folder))
+            self.game_label.setText('encontrada')
+            self.game_label.setStyleSheet('color:#2e9e4f;font-weight:600')
+        else:
+            self.game_label.setText('não encontrada')
+            self.game_label.setStyleSheet('color:#d33;font-weight:600')
         return folder
 
-    def choose_game_folder(self):
-        """Ask for the game folder (the one with DATA.INI); returns it or None."""
-        from PySide6.QtWidgets import QFileDialog
+    def save_game_field(self):
+        """Save the folder pasted in the field; returns it or None."""
         from .game_folder import save as save_game
+        text = self.game_field.text()
+        if not text.strip():
+            self.notice.setText('Cole o caminho da pasta do jogo no campo "Pasta do jogo".')
+            self.game_field.setFocus()
+            return None
+        try:
+            folder = save_game(text)
+        except ValueError as exc:
+            self.game_label.setText('pasta inválida')
+            self.game_label.setStyleSheet('color:#d33;font-weight:600')
+            self.notice.setText(str(exc))
+            return None
+        self.notice.setText(f'Pasta do jogo salva: {folder}')
+        return self.show_game_folder(folder)
+
+    def choose_game_folder(self):
+        """Pick the game folder in a dialog; returns it or None."""
+        from PySide6.QtWidgets import QFileDialog
         chosen = QFileDialog.getExistingDirectory(self, 'Escolha a pasta do jogo NRO (a que tem DATA.INI)')
         if not chosen:
             return None
-        try:
-            folder = save_game(chosen)
-        except ValueError as exc:
-            self.notice.setText(str(exc))
-            return None
-        return self.show_game_folder(folder)
+        self.game_field.setText(chosen)
+        return self.save_game_field()
 
     def open_relay(self):
         if self.process.state() != QProcess.NotRunning:
             return
-        game = self.show_game_folder() or self.choose_game_folder()
+        from .game_folder import saved
+        pasted = self.game_field.text().strip()
+        if pasted and (saved() is None or Path(pasted.strip('"')) != saved()):
+            game = self.save_game_field()  # a path pasted but not saved yet
+        else:
+            game = self.show_game_folder()
         if game is None:
-            self.notice.setText('Escolha a pasta do jogo (a que tem DATA.INI) antes de abrir a conexão.')
+            self.notice.setText('Cole o caminho da pasta do jogo (a que tem DATA.INI) no campo "Pasta do jogo" e clique Salvar.')
+            self.game_field.setFocus()
             return
         try:
             save(self.settings())

@@ -29,8 +29,18 @@ def saved():
     return folder if is_game_dir(folder) else None
 
 
+def normalize(text):
+    """Pasted text -> folder: quotes and spaces removed; a file (NRO.exe, DATA.INI) means its folder."""
+    folder = Path(str(text).strip().strip('"').strip("'").strip())
+    return folder.parent if folder.is_file() else folder
+
+
 def save(folder):
-    folder = Path(folder)
+    folder = normalize(folder)
+    if not str(folder) or str(folder) == '.':
+        raise ValueError('cole o caminho da pasta do jogo')
+    if not folder.is_dir():
+        raise ValueError(f'a pasta {folder} não existe; confira o caminho colado')
     if not is_game_dir(folder):
         raise ValueError(f'{folder} não é a pasta do jogo (falta DATA.INI ou os arquivos .grf)')
     SETTINGS.parent.mkdir(parents=True, exist_ok=True)
@@ -108,8 +118,22 @@ def find():
 
 
 def ask_console():
-    """Folder chooser for the .bat installers (no Qt needed)."""
-    print('Não encontrei a pasta do jogo sozinho. Escolha a pasta onde está o NRO (a que tem DATA.INI).')
+    """For the .bat installers: paste the path, or press Enter to pick it in a window."""
+    print('Não encontrei a pasta do jogo sozinho.')
+    while True:
+        print('Cole o caminho da pasta do jogo (a que tem DATA.INI) e tecle Enter,')
+        text = input('ou só tecle Enter para escolher numa janela: ').strip()
+        if not text:
+            text = pick_in_window()
+            if not text:
+                raise SystemExit('Nenhuma pasta escolhida.')
+        try:
+            return save(text)
+        except ValueError as exc:
+            print(f'Pasta inválida: {exc}')
+
+
+def pick_in_window():
     try:
         import tkinter
         from tkinter import filedialog
@@ -118,11 +142,9 @@ def ask_console():
         window.attributes('-topmost', True)
         chosen = filedialog.askdirectory(title='Escolha a pasta do jogo NRO (a que tem DATA.INI)')
         window.destroy()
-    except Exception:  # no Tk: fall back to typing the path
-        chosen = input('Caminho da pasta do jogo: ').strip().strip('"')
-    if not chosen:
-        raise SystemExit('Nenhuma pasta escolhida.')
-    return save(chosen)
+        return chosen
+    except Exception:  # no Tk available
+        return ''
 
 
 def require(ask=ask_console):
