@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.5",
- "published_at": "2026-11-02T17:19:54",
- "notes": "Corrige erro de porta 16900 ocupada: o painel encerra a conexao inteira e o bot fecha conexoes antigas que ficaram abertas",
+ "version": "2026.11.02.6",
+ "published_at": "2026-11-02T17:25:30",
+ "notes": "Conexao automatica: servidor lido do jogo, conexao antiga do bot encerrada sozinha e porta livre escolhida se outro programa usar a 16900",
  "files": [
   ".gitattributes",
   ".gitignore",
@@ -59,6 +59,7 @@
   "requirements.txt",
   "tests/conftest.py",
   "tests/test_ammo.py",
+  "tests/test_auto_connection.py",
   "tests/test_buff_probe.py",
   "tests/test_capture_guard.py",
   "tests/test_capture_priority.py",
@@ -102,5 +103,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "0bbc46513b13"
+ "files_digest": "d34840978b9b"
 }

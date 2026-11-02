@@ -28,6 +28,62 @@ def make_profile(original: bytes, port=16900):
     return original.replace(b'</clientinfo>', b'\n'+local+b'\n</clientinfo>')
 
 
+def connections(xml: bytes):
+    """(display, address, port) of every server entry of a clientinfo.xml."""
+    found = []
+    for block in re.findall(rb'<connection\s*>.*?</connection>', xml, re.S):
+        fields = {}
+        for tag in (b'display', b'address', b'port'):
+            match = re.search(b'<'+tag+b'>(.*?)</'+tag+b'>', block, re.S)
+            fields[tag.decode()] = match.group(1).strip().decode('cp1252', 'replace') if match else ''
+        found.append((fields['display'], fields['address'], fields['port']))
+    return found
+
+
+def manifest():
+    try:
+        data = json.loads(MANIFEST.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return None
+    return None if data.get('restored') else data
+
+
+def original_server():
+    """The game's own server (address, port), read from the original clientinfo.xml kept in backups."""
+    data = manifest()
+    for record in (data or {}).get('files', []):
+        try:
+            xml = Path(record['backup']).read_bytes()
+        except OSError:
+            continue
+        for _display, address, port in connections(xml):
+            if address and address not in ('127.0.0.1', 'localhost') and port.isdigit():
+                return address, int(port)
+    return None
+
+
+def installed_port():
+    data = manifest()
+    return int(data['local_port']) if data and data.get('local_port') else None
+
+
+def change_local_port(port):
+    """Point the NRO - BOT LOCAL entry at another local port (the game must be reopened)."""
+    data = manifest()
+    if data is None:
+        raise ValueError('a conexão local não está instalada; execute CONFIGURAR_CONEXAO_LOCAL.bat')
+    for record in data['files']:
+        target = Path(record['target'])
+        if not target.exists() or hashlib.sha256(target.read_bytes()).hexdigest() != record['installed_hash']:
+            raise ValueError(f'{target.name} foi alterado depois da instalação; não troquei a porta')
+    for record in data['files']:
+        proposed = make_profile(Path(record['backup']).read_bytes(), port)
+        Path(record['target']).write_bytes(proposed)
+        record['installed_hash'] = hashlib.sha256(proposed).hexdigest()
+    data['local_port'] = port
+    MANIFEST.write_text(json.dumps(data, indent=2), encoding='utf-8')
+
+
 def install():
     if MANIFEST.exists() and not json.loads(MANIFEST.read_text())['restored']:
         raise ValueError('Perfil local já instalado; use o restaurador antes de reinstalar')

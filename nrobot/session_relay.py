@@ -789,18 +789,44 @@ class SessionRelay:
             try:
                 listener = await asyncio.start_server(accepted, '127.0.0.1', port_wanted)
             except OSError as exc:
-                if not port_wanted or getattr(exc, 'winerror', exc.errno) not in (10048, 98):
+                if not port_wanted or not port_busy(exc):
                     raise
-                # REDE-77: an old relay of the bot left running keeps the game port.
-                from .port_guard import free
-                freed, message = free(port_wanted)
-                if not freed:
-                    raise OSError(exc.errno, message) from exc
-                print(message[:1].upper()+message[1:]+'.')
-                await asyncio.sleep(1)
-                listener = await asyncio.start_server(accepted, '127.0.0.1', port_wanted)
+                listener = await self.listen_on_free_port(accepted, port_wanted)
             self.listeners[key] = listener
         return self.listeners[key].sockets[0].getsockname()[1]
+
+    async def listen_on_free_port(self, accepted, port):
+        """REDE-77: the game port is taken. An old relay of the bot is ended; any other
+        program keeps its port and the game's NRO - BOT LOCAL entry moves to a free one."""
+        from .port_guard import free
+        freed, message = free(port)
+        if freed:
+            print(message[:1].upper()+message[1:]+'.')
+            for _ in range(10):
+                await asyncio.sleep(.5)
+                try:
+                    return await asyncio.start_server(accepted, '127.0.0.1', port)
+                except OSError as exc:
+                    if not port_busy(exc):
+                        raise
+        from . import relay_profile
+        message = message or 'programa não identificado'
+        for candidate in range(port+1, port+100):
+            try:
+                listener = await asyncio.start_server(accepted, '127.0.0.1', candidate)
+            except OSError:
+                continue
+            try:
+                relay_profile.change_local_port(candidate)
+            except ValueError as exc:
+                listener.close()
+                raise OSError(f'porta {port} ocupada ({message}); e não foi possível mudar a porta do jogo: {exc}') from exc
+            self.local_port = candidate
+            print(f'[ALERTA] A porta {port} está ocupada por outro programa ({message}).')
+            print(f'[ALERTA] O bot passou a usar a porta {candidate} e já atualizou o jogo: FECHE E ABRA O JOGO '
+                  'DE NOVO e entre por NRO - BOT LOCAL.')
+            return listener
+        raise OSError(f'nenhuma porta livre entre {port} e {port+99}')
 
     def mirror_map(self, data):
         if self.tracker.failed:
@@ -1220,10 +1246,35 @@ class SessionRelay:
                               'collision_route': action.get('collision_route', False)})
 
 
+def port_busy(exc):
+    """Address already in use, however the platform reports it."""
+    return exc.errno in (10048, 98, 48) or getattr(exc, 'winerror', None) == 10048
+
+
+def resolve_connection(args):
+    """Server and local port without typing them: read from the game's own files."""
+    import socket
+    from . import relay_profile
+    server, port = args.server, args.port
+    if server is None:
+        found = relay_profile.original_server()
+        server, found_port = found if found else ('187.77.36.200', 6900)
+        port = port or found_port
+        print(f'Servidor do jogo: {server}:{port}'+(' (lido da conexão original do jogo)' if found else ' (padrão)'))
+    port = port or 6900
+    try:
+        address = socket.gethostbyname(server)  # clientinfo may hold a host name
+    except OSError:
+        address = server
+    local = args.local_port or relay_profile.installed_port() or 16900
+    return address, port, local
+
+
 async def run(args):
     folder = Path(args.session_dir) if getattr(args, 'session_dir', None) else Path(__file__).resolve().parents[1]/'logs/relay'/datetime.now().strftime('%Y%m%d-%H%M%S-%f')
     active_test = getattr(args, 'single_attack_test', False)
     hunt_mode = getattr(args, 'hunt', False)
+    args.server, args.port, args.local_port = resolve_connection(args)
     relay = SessionRelay(args.server, args.port, args.local_port, folder=folder,
                          species={1037} if hunt_mode else None,
                          allow_commands=active_test or hunt_mode)
@@ -1401,9 +1452,9 @@ async def run(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--server', default='187.77.36.200')
-    parser.add_argument('--port', type=int, default=6900)
-    parser.add_argument('--local-port', type=int, default=16900)
+    parser.add_argument('--server', default=None, help='padrão: o servidor da conexão original do jogo')
+    parser.add_argument('--port', type=int, default=None)
+    parser.add_argument('--local-port', type=int, default=None, help='padrão: a porta da entrada NRO - BOT LOCAL')
     parser.add_argument('--game-dir', default=None, help='pasta do jogo; padrão: a encontrada pelo bot')
     parser.add_argument('--session-dir')
     modes = parser.add_mutually_exclusive_group()

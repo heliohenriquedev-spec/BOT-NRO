@@ -49,10 +49,8 @@ def free(port):
         return True, ''
     others = []
     for pid in pids:
-        if pid == os.getpid():
-            continue
-        command = command_line(pid)
-        if is_bot_relay(command):
+        command = 'este mesmo processo' if pid == os.getpid() else command_line(pid)
+        if pid != os.getpid() and is_bot_relay(command):
             run(['taskkill', '/PID', str(pid), '/T', '/F'])
         else:
             others.append(f'PID {pid}: {command or "programa desconhecido"}')
