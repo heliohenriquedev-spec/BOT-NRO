@@ -15,6 +15,8 @@ DEFAULTS.update(auto_map_targets=True, skill_global_delay=.12, require_collision
 DEFAULTS.update(skill_priority=[])
 # REDE-70: which presences hold the bot.
 DEFAULTS.update(pause_on_players=True, pause_on_disguised=True, pause_on_hidden=True)
+# REDE-80: offensive skills as fast as the server accepts them (manual interval ignored).
+DEFAULTS.update(fast_offensives=True)
 THROWS_TOKEN = 'throws'
 
 
@@ -50,7 +52,7 @@ def validate(data):
     if result['skill_timeout'] < result['skill_interval']:
         raise ValueError('Espera por resposta deve ser maior ou igual ao intervalo da habilidade')
     for key in ('patrol', 'skills', 'require_collision', 'auto_attacks', 'advanced_combat', 'auto_map_targets',
-                'pause_on_players', 'pause_on_disguised', 'pause_on_hidden'):
+                'pause_on_players', 'pause_on_disguised', 'pause_on_hidden', 'fast_offensives'):
         if type(result[key]) is not bool:
             raise ValueError(f'{key}: valor deve ser booleano')
     profiles = result['skill_profiles']

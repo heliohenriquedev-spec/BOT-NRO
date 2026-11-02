@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.7",
- "published_at": "2026-11-02T17:46:22",
- "notes": "Configuracoes salvas sozinhas a cada alteracao (inclusive habilidades de outros personagens, prioridade, minimapa e janela)",
+ "version": "2026.11.02.8",
+ "published_at": "2026-11-02T17:53:56",
+ "notes": "Aba Monstros com todos os monstros e sprites, alvos so do mapa atual e habilidades ofensivas na velocidade maxima com validacao de alcance",
  "files": [
   ".gitattributes",
   ".gitignore",
@@ -35,6 +35,8 @@
   "nrobot/map_navigation.py",
   "nrobot/map_search.py",
   "nrobot/minimap_overlay.py",
+  "nrobot/monster_db.py",
+  "nrobot/monster_panel.py",
   "nrobot/network_observer.py",
   "nrobot/network_targets.py",
   "nrobot/packet_controls.py",
@@ -50,10 +52,12 @@
   "nrobot/priority_panel.py",
   "nrobot/radar_overlay.py",
   "nrobot/relay_profile.py",
+  "nrobot/screen_capture.py",
   "nrobot/server_clock.py",
   "nrobot/server_path.py",
   "nrobot/session_relay.py",
   "nrobot/skill_panel.py",
+  "nrobot/sprite_reader.py",
   "nrobot/update_panel.py",
   "nrobot/updater.py",
   "requirements.txt",
@@ -74,6 +78,7 @@
   "tests/test_map_monsters.py",
   "tests/test_map_navigation.py",
   "tests/test_map_search.py",
+  "tests/test_monsters_and_fast_skills.py",
   "tests/test_movement_recovery.py",
   "tests/test_native_capture_minimap.py",
   "tests/test_network_observer.py",
@@ -103,5 +108,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "d34840978b9b"
+ "files_digest": "7e9a11768050"
 }

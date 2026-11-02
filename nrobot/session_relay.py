@@ -131,6 +131,11 @@ class SessionRelay:
         self.manual_until = 0  # REDE-76: the bot yields while the player walks by hand
         self.manual_active = False
         self.trails = {}  # REDE-76: walked cells per map, for the minimap
+        from .monster_db import load_captured
+        self.monsters_seen = load_captured()  # REDE-79: what the game showed about each monster
+        self.monsters_dirty = False
+        self.monsters_written = 0
+        self.sprite_state = {}  # species -> 'exists' / 'grf' / 'captured' / None (needs a capture)
         self.minimap_ground_written = None
         self.last_route_written = 0
         self.next_map = None
@@ -187,9 +192,13 @@ class SessionRelay:
         previous_rotation = self.rotation
         self.rotation = CombatRotation(settings['skill_profiles'], response_timeout=settings['skill_timeout'],
             attempts=settings['skill_attempts'], defer=settings['target_defer'], interval=settings['skill_interval'], global_delay=settings['skill_global_delay'],
-            priority=settings['skill_priority']) if settings['skills'] and settings['advanced_combat'] else None
+            priority=settings['skill_priority'], fast=settings['fast_offensives']) if settings['skills'] and settings['advanced_combat'] else None
         if self.rotation is not None and previous_rotation is not None:
+            # Saving a setting must not forget what was learned about the server's timing.
             self.rotation.ready = dict(previous_rotation.ready)
+            self.rotation.learned_min_interval = dict(previous_rotation.learned_min_interval)
+            self.rotation.after_skill_delay = previous_rotation.after_skill_delay
+            self.rotation.last_throw = previous_rotation.last_throw
             self.rotation.learned_min_interval = dict(previous_rotation.learned_min_interval)
             self.rotation.pending = dict(previous_rotation.pending)
             self.rotation.next_send = previous_rotation.next_send
@@ -234,6 +243,9 @@ class SessionRelay:
             self.trace_map_send('client', opcode, self.native_frames.sizes[opcode])
         if 0x89 in completed:
             self.tracker.observer.clock.request_sent(time.monotonic())  # answered by 007F
+        for opcode, frame in self.native_frames.frames:
+            if opcode == 0x8c and len(frame) == 11:
+                self.capture_monster_sprite(struct.unpack_from('<I', frame, 7)[0])
         if time.monotonic() < self.capture_armed_until:
             for opcode, frame in self.native_frames.frames:
                 target = self.CAPTURE_TARGET_OFFSETS.get((opcode, len(frame)))
@@ -349,6 +361,57 @@ class SessionRelay:
         return {'position': motion['origin'], 'destination': motion['destination'], 'at': motion['at'],
                 'path': [list(cell) for cell in motion['path']] if motion.get('path') else None,
                 'speed_ms': observer.walk_speed_ms}
+
+    # -- monsters seen in the game (REDE-79) ----------------------------------------------
+    def learn_monsters(self, events):
+        from .monster_db import record
+        from .network_targets import is_player_id
+        from .presence_guard import monster_sprite
+        map_name = self.tracker.observer.map_name
+        for event in events:
+            identity = event.get('entity_id')
+            if event['kind'] not in ('appearance', 'name') or identity is None or is_player_id(identity):
+                continue
+            entity = self.inventory.entities.get(identity) or {}
+            species = event.get('species_id', entity.get('species_id'))
+            if species is None or not monster_sprite(species):
+                continue
+            changed = record(self.monsters_seen, species, map_name, name=event.get('name') if event.get('max_hp') else None,
+                             max_hp=event.get('max_hp'), walk_speed_ms=event.get('walk_speed_ms'),
+                             new_entity=event['kind'] == 'appearance' and not entity.get('movements'))
+            self.monsters_dirty |= changed
+
+    def write_monsters(self):
+        if not self.monsters_dirty or time.monotonic()-self.monsters_written < 5:
+            return
+        from .monster_db import save_captured
+        try:
+            save_captured(self.monsters_seen)
+        except OSError:
+            return
+        self.monsters_dirty = False
+        self.monsters_written = time.monotonic()
+
+    def capture_monster_sprite(self, identity):
+        """The mouse rests on a monster (client name request): save its sprite if it has none."""
+        from .monster_db import ensure_sprite, sprite_path
+        from .presence_guard import monster_sprite
+        species = (self.inventory.entities.get(identity) or {}).get('species_id')
+        if species is None or not monster_sprite(species) or self.sprite_state.get(species):
+            return
+        grfs = self.map_repository.grfs if self.map_repository is not None else None
+        state = ensure_sprite(grfs, species)
+        if state is None:
+            from .screen_capture import capture_under_cursor
+            path = sprite_path(species)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if capture_under_cursor(path):
+                state = 'captured'
+                entry = self.monsters_seen.setdefault(species, {'species_id': species, 'maps': {}, 'first_seen': None})
+                entry['captured_sprite'] = True
+                self.monsters_dirty = True
+                print(f'Sprite do monstro {species} capturado do jogo (não existe nos arquivos do cliente).')
+        self.sprite_state[species] = state
 
     def record_trail(self):
         name, player = self.tracker.observer.map_name, self.tracker.observer.player
@@ -766,6 +829,7 @@ class SessionRelay:
                 inventory_file.write_text(json.dumps(self.inventory.snapshot(time.monotonic()), ensure_ascii=False, indent=2), encoding='utf-8')
                 inventory_file.replace(self.folder/'entidades_mapa.json')
                 self.write_minimap()
+                self.write_monsters()
 
             except PermissionError:
                 # Windows readers can temporarily deny replacement. Telemetry
@@ -844,6 +908,7 @@ class SessionRelay:
             events = self.tracker.feed(self.mirror_sequence, data, time.monotonic())
             self.mirror_sequence += len(data)
             self.inventory.observe(events, time.monotonic())
+            self.learn_monsters(events)
             self.ammo.observe(events, time.monotonic())
             self.presence.observe(events, self.tracker.observer.player_id, time.monotonic())
             self.track_players(events)

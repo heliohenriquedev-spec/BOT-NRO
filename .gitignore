@@ -14,3 +14,5 @@ data/mapas/*
 data/rede/painel_config.json
 data/rede/buffs_aprendidos.json
 *.etl
+data/monstros/
+perfis/painel_ui.json

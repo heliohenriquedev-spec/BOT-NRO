@@ -90,13 +90,10 @@ class PacketPanel(QMainWindow):
         self.auto_map_targets = QCheckBox('Identificar monstros pelos dados recebidos do mapa')
         species_layout.addWidget(self.auto_map_targets)
         self.auto_map_targets.setToolTip('No modo automatico, os monstros confirmados do mapa sao incluidos. Para escolher especies manualmente, desative esta opcao.')
-        self.species = {}
-        for identity, name in SPECIES.items():
-            box = QCheckBox(name)
-            self.species[identity] = box
-            species_layout.addWidget(box)
-        self.auto_map_targets.toggled.connect(lambda enabled: [box.setEnabled(not enabled) for box in self.species.values()])
-        species_layout.addStretch()
+        from .monster_panel import MapTargets
+        self.targets = MapTargets()  # REDE-79: only the monsters of the current map
+        species_layout.addWidget(self.targets, 1)
+        self.auto_map_targets.toggled.connect(lambda enabled: self.targets.setEnabled(not enabled))
         species_scroll = QScrollArea()
         species_scroll.setWidgetResizable(True)
         species_scroll.setWidget(species_box)
@@ -177,6 +174,9 @@ class PacketPanel(QMainWindow):
         self.priority_panel.release_requested.connect(lambda: self.command('release_player'))
         self.priority_panel.target_requested.connect(lambda identity: self.command('set_player_target', entity_id=identity))
         tabs.addTab(self.priority_panel, 'Prioridade')
+        from .monster_panel import MonsterPanel
+        self.monster_panel = MonsterPanel()
+        tabs.addTab(self.monster_panel, 'Monstros')
         from .update_panel import UpdatePanel
         self.update_panel = UpdatePanel(relay_running=lambda: self.process.state() != QProcess.NotRunning)
         self.update_panel.restart_requested.connect(self.restart_after_update)
@@ -197,6 +197,9 @@ class PacketPanel(QMainWindow):
         combat_form.addRow(self.advanced)
         self.auto_attacks = QCheckBox('Intercalar ataques básicos nos intervalos')
         combat_form.addRow(self.auto_attacks)
+        self.fast_offensives = QCheckBox('Habilidades ofensivas na velocidade máxima (cada uma assim que estiver no '
+                                         'alcance e fora do cooldown; o bot aprende o menor intervalo que o servidor aceita)')
+        combat_form.addRow(self.fast_offensives)
         overview = QWidget()
         overview_layout = QVBoxLayout(overview)
         self.details = QLabel('Aguardando conexão')
@@ -223,13 +226,7 @@ class PacketPanel(QMainWindow):
         except (OSError, ValueError) as exc:
             self.notice.setText('Configuração inválida: '+str(exc))
             settings = DEFAULTS.copy()
-        for identity in settings['species']:
-            if identity not in self.species:
-                box = QCheckBox(f'Aparencia {identity}')
-                self.species[identity] = box
-                self.species_layout.insertWidget(self.species_layout.count()-1, box)
-        for identity, box in self.species.items():
-            box.setChecked(identity in settings['species'])
+        self.targets.selected = set(settings['species'])
         self.auto_map_targets.setChecked(settings['auto_map_targets'])
         self.radius.setValue(settings['radius'])
         self.step.setValue(settings['patrol_step'])
@@ -238,6 +235,7 @@ class PacketPanel(QMainWindow):
         self.strict_map.setChecked(settings['require_collision'])
         self.advanced.setChecked(settings['advanced_combat'])
         self.auto_attacks.setChecked(settings['auto_attacks'])
+        self.fast_offensives.setChecked(settings['fast_offensives'])
         self.pause_players.setChecked(settings['pause_on_players'])
         self.pause_disguised.setChecked(settings['pause_on_disguised'])
         self.pause_hidden.setChecked(settings['pause_on_hidden'])
@@ -256,14 +254,14 @@ class PacketPanel(QMainWindow):
         tabs.currentChanged.connect(lambda index: self.refresh())
 
     def settings(self):
-        return {'species': [i for i, box in self.species.items() if box.isChecked()],
+        return {'species': sorted(self.targets.selected),
                 'radius': self.radius.value(), 'patrol_step': self.step.value(),
                 'patrol': self.patrol.isChecked(), 'skills': self.skills.isChecked(), 'auto_map_targets': self.auto_map_targets.isChecked(),
                 'require_collision': self.strict_map.isChecked(), 'advanced_combat': self.advanced.isChecked(),
                 'auto_attacks': self.auto_attacks.isChecked(), 'skill_profiles': self.skill_panel.profiles(),
                 'skill_priority': self.priority_panel.priority(),
                 'pause_on_players': self.pause_players.isChecked(), 'pause_on_disguised': self.pause_disguised.isChecked(),
-                'pause_on_hidden': self.pause_hidden.isChecked(),
+                'pause_on_hidden': self.pause_hidden.isChecked(), 'fast_offensives': self.fast_offensives.isChecked(),
                 **{key: field.value() for key, field in self.combat_fields.items()}}
 
     def reset_combat(self):
@@ -414,15 +412,9 @@ class PacketPanel(QMainWindow):
         try:
             state = json.loads((self.session/'estado.json').read_text(encoding='utf-8'))
             hunt = state.get('hunt', {})
-            for monster in state.get('map_monsters', []):
-                identity = monster['species_id']
-                if identity not in self.species:
-                    box = QCheckBox()
-                    self.species[identity] = box
-                    self.species_layout.insertWidget(self.species_layout.count()-1, box)
-                    box.toggled.connect(self.schedule_save)
-                self.species[identity].setText(f"{monster['name']} (ID {identity}, presentes: {monster['present']})")
-                self.species[identity].setEnabled(not self.auto_map_targets.isChecked())
+            self.targets.show_map(state.get('map_name'), {m['species_id']: m for m in state.get('map_monsters', [])})
+            if self.monster_panel.isVisible():
+                self.monster_panel.reload()
 
             if self.skill_panel.isVisible():
                 self.skill_panel.update_catalog(state.get('learned_skills', []), state.get('own_effects', {}), state.get('buff_candidates', {}), state.get('rotation'))
@@ -569,7 +561,8 @@ class PacketPanel(QMainWindow):
         self.save_timer.setSingleShot(True)
         self.save_timer.setInterval(800)
         self.save_timer.timeout.connect(self.autosave)
-        for box in (*self.species.values(), self.auto_map_targets, self.patrol, self.skills, self.strict_map,
+        self.targets.changed.connect(self.schedule_save)
+        for box in (self.auto_map_targets, self.patrol, self.skills, self.strict_map, self.fast_offensives,
                     self.advanced, self.auto_attacks, self.pause_players, self.pause_disguised, self.pause_hidden):
             box.toggled.connect(self.schedule_save)
         for field in (self.radius, self.step, *self.combat_fields.values()):
@@ -609,6 +602,8 @@ class PacketPanel(QMainWindow):
             self.restoreGeometry(QByteArray.fromBase64(ui['geometry'].encode('ascii')))
         if isinstance(ui.get('tab'), int) and 0 <= ui['tab'] < self.tabs.count():
             self.tabs.setCurrentIndex(ui['tab'])
+        if ui.get('last_map'):
+            self.targets.show_map(ui['last_map'])  # until connected, the last map visited
         if 'minimap' in ui:
             self.priority_panel.minimap.setChecked(bool(ui['minimap']))
         try:
@@ -618,7 +613,8 @@ class PacketPanel(QMainWindow):
 
     def save_ui(self):
         ui = {'geometry': bytes(self.saveGeometry().toBase64()).decode('ascii'), 'tab': self.tabs.currentIndex(),
-              'minimap': self.priority_panel.minimap.isChecked(), 'minimap_layout': self.overlay.layout_state()}
+              'minimap': self.priority_panel.minimap.isChecked(), 'minimap_layout': self.overlay.layout_state(),
+              'last_map': self.targets.map_name}
         try:
             self.UI_FILE.parent.mkdir(parents=True, exist_ok=True)
             self.UI_FILE.write_text(json.dumps(ui), encoding='utf-8')

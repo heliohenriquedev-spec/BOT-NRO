@@ -26,10 +26,15 @@ class CombatRotation:
     TURN_WAIT_LIMIT = 3
     # REDE-76: the server silently drops a skill sent during the previous one's delay; in the
     # logs nothing sent <0.4 s after a confirmed skill went through, almost all after 0.5 s.
-    AFTER_SKILL_DELAY = .55
+    # REDE-80: the wait starts there and keeps moving towards the shortest gap that works.
+    AFTER_SKILL_DELAY = .45
+    MIN_AFTER_SKILL_DELAY = .3
     MAX_AFTER_SKILL_DELAY = 1.0
+    FASTER_STEP = .01
 
-    def __init__(self, profiles, *, response_timeout=1.5, attempts=3, defer=8, interval=.5, global_delay=.12, priority=None):
+    def __init__(self, profiles, *, response_timeout=1.5, attempts=3, defer=8, interval=.5, global_delay=.12, priority=None,
+                 fast=False):
+        self.fast = fast  # offensives ignore the manual interval: only server cooldowns and delay
         self.profiles = profiles or [{'skill_id': 524, 'enabled': True, 'role': 'offensive',
                                       'level': 10, 'interval': interval, 'effect_id': 0}]
         self.response_timeout, self.attempts, self.defer = response_timeout, attempts, defer
@@ -130,6 +135,11 @@ class CombatRotation:
                 self.pending.pop(skill_id)
                 self.failures[skill_id] = 0
                 self.confirmed += 1
+                sent = self.last_sent.get(skill_id)
+                if (self.fast and sent is not None and self.last_confirmed_at is not None
+                        and sent-self.last_confirmed_at < self.after_skill_delay+.1):
+                    # Accepted right at the current wait: try a slightly shorter one next time.
+                    self.after_skill_delay = max(self.MIN_AFTER_SKILL_DELAY, self.after_skill_delay-self.FASTER_STEP)
                 self.last_confirmed_at = now
                 self.next_send = max(self.next_send, now+self.after_skill_delay)
                 if skill_id in self.THROWS:
@@ -285,7 +295,8 @@ class CombatRotation:
     def sent(self, action, now):
         self.last_sent[action['skill_id']] = now
         self.pending[action['skill_id']] = {**action, 'deadline': now+self.response_timeout}
-        self.ready[action['skill_id']] = now+max(action['interval'], self.learned_min_interval.get(action['skill_id'], 0))
+        interval = 0 if self.fast and action['role'] == 'offensive' else action['interval']
+        self.ready[action['skill_id']] = now+max(interval, self.learned_min_interval.get(action['skill_id'], 0))
         self.next_send = now+self.global_delay
         self.log.append({'kind': 'rotation_skill_sent', 'skill_id': action['skill_id'],
                          'target_id': action['target_id'], 'role': action['role']})

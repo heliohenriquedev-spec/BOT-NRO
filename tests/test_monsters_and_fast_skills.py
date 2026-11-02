@@ -1,0 +1,126 @@
+"""REDE-79/80: monstros do jogo, alvos do mapa atual e ofensivas na velocidade máxima."""
+import json
+import os
+import struct
+import time
+
+os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
+
+import pytest
+
+from nrobot import monster_db
+from nrobot.combat_rotation import CombatRotation
+
+
+def profile(identity, interval=5):
+    return {'skill_id': identity, 'enabled': True, 'role': 'offensive', 'level': 10, 'interval': interval, 'effect_id': 0}
+
+
+def state(distance=2):
+    return {'state': 'tracking', 'player_position_recent': True, 'player_position': [10, 10], 'player_id': 1,
+            'player_sp': 999, 'own_effects': {}, 'own_cast_until': 0,
+            'learned_skills': [{'skill_id': 1001, 'level': 10, 'sp_cost': 10, 'range': 3, 'target_flags': 1},
+                               {'skill_id': 1002, 'level': 10, 'sp_cost': 10, 'range': 9, 'target_flags': 1}],
+            'recent_entities': [{'entity_id': 20, 'position': [10+distance, 10], 'position_age_seconds': .1}]}
+
+
+def hit(skill):
+    return [{'kind': 'skill_damage', 'skill_id': skill, 'source_id': 1, 'target_id': 20, 'level': 10, 'damage_raw': 1}]
+
+
+def test_fast_mode_ignores_the_manual_interval_and_learns_a_shorter_wait():
+    rotation = CombatRotation([profile(1001), profile(1002)], fast=True)
+    now = 0
+    for expected in (1001, 1002, 1001, 1002):
+        action = rotation.plan(state(), now, 20)
+        assert action['skill_id'] == expected  # back again long before its 5 s manual interval
+        rotation.sent(action, now)
+        rotation.observe(hit(expected), 1, now+.01)
+        now += rotation.after_skill_delay+.02
+    assert rotation.after_skill_delay < CombatRotation.AFTER_SKILL_DELAY
+    slow = CombatRotation([profile(1001)], fast=False)
+    slow.sent(slow.plan(state(), 0, 20), 0)
+    slow.observe(hit(1001), 1, .01)
+    assert slow.plan(state(), 1, 20) is None  # without fast mode the 5 s interval still applies
+
+
+def test_each_skill_is_used_only_when_the_target_is_inside_its_own_range():
+    rotation = CombatRotation([profile(1001), profile(1002)], fast=True, priority=[1001, 1002])
+    far = rotation.plan(state(distance=6), 0, 20)
+    assert far['skill_id'] == 1002  # 1001 reaches 3 cells only: skipped, not sent
+    rotation.sent(far, 0)
+    rotation.observe(hit(1002), 1, .01)
+    near = rotation.plan(state(distance=2), 1, 20)
+    assert near['skill_id'] == 1001
+
+
+def test_monsters_seen_in_the_game_are_recorded_with_their_maps(tmp_path):
+    captured = {}
+    assert monster_db.record(captured, 21999, 'novo_mapa.gat', name='Boneco Novo', max_hp=900, walk_speed_ms=200,
+                             new_entity=True)
+    assert not monster_db.record(captured, 21999, 'novo_mapa.gat')  # nothing new learned
+    monster_db.save_captured(captured, tmp_path/'capturados.json')
+    loaded = monster_db.load_captured(tmp_path/'capturados.json')
+    assert loaded[21999]['name'] == 'Boneco Novo' and loaded[21999]['maps'] == {'novo_mapa': 1}
+    assert 21999 in monster_db.monsters_of_map('novo_mapa.gat', captured=loaded)
+    rows = {row['species_id']: row for row in monster_db.all_monsters(loaded)}
+    assert rows[21999]['origin'] == 'capturado no jogo' and rows[21999]['max_hp'] == 900
+    assert len(rows) > 600  # the client catalog is there too
+
+
+def test_catalog_monsters_of_a_map_come_from_the_client_navi_list():
+    ids = monster_db.monsters_of_map('moc_fild13.gat', captured={})
+    names = [monster_db.catalog()[i]['symbol'] for i in ids]
+    assert 'MAGNOLIA' in names
+
+
+def test_relay_records_monsters_and_captures_a_missing_sprite_when_the_mouse_rests_on_it(tmp_path, monkeypatch):
+    from nrobot import screen_capture
+    from nrobot.session_relay import SessionRelay
+    monkeypatch.setattr(monster_db, 'SPRITES', tmp_path/'sprites')
+    relay = SessionRelay('127.0.0.1', folder=tmp_path)
+    relay.tracker.observer.map_name = 'campo.gat'
+    monkeypatch.setattr(relay, 'monsters_seen', {})
+    appearance = {'kind': 'appearance', 'entity_id': 110000001, 'species_id': 21999, 'position': [5, 5],
+                  'object_type': 5, 'walk_speed_ms': 180}
+    relay.inventory.observe([appearance], time.monotonic())
+    relay.learn_monsters([appearance, {'kind': 'name', 'entity_id': 110000001, 'name': 'Raro', 'hp': 50, 'max_hp': 50}])
+    assert relay.monsters_seen[21999]['name'] == 'Raro' and relay.monsters_dirty
+    shots = []
+    monkeypatch.setattr(screen_capture, 'capture_under_cursor', lambda path: shots.append(path) or path.write_bytes(b'png') or True)
+    relay.inspect_native_frames(struct.pack('<H5sI', 0x8c, bytes(5), 110000001))
+    assert shots == [tmp_path/'sprites'/'21999.png'] and relay.monsters_seen[21999]['captured_sprite']
+    relay.inspect_native_frames(struct.pack('<H5sI', 0x8c, bytes(5), 110000001))
+    assert len(shots) == 1  # once per monster type
+
+
+def test_targets_show_only_the_current_map_and_keep_other_maps_choices(monkeypatch):
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QApplication
+    app = QApplication.instance() or QApplication([])
+    from nrobot.monster_panel import MapTargets
+    monkeypatch.setattr(monster_db, 'load_captured', lambda path=None: {})
+    targets = MapTargets()
+    targets.selected = {9999}  # chosen on another map
+    targets.show_map('moc_fild13.gat', {1836: {'name': 'Boneco de Treino', 'present': 2}})
+    shown = {targets.list.item(i).data(Qt.UserRole) for i in range(targets.list.count())}
+    assert 1836 in shown and 9999 not in shown
+    item = next(targets.list.item(i) for i in range(targets.list.count()) if targets.list.item(i).data(Qt.UserRole) == 1836)
+    item.setCheckState(Qt.Checked)
+    assert targets.selected == {9999, 1836}
+    targets.set_all(False)
+    assert targets.selected == {9999}
+    targets.close()
+
+
+def test_monster_tab_lists_the_game_monsters(monkeypatch):
+    from PySide6.QtWidgets import QApplication
+    app = QApplication.instance() or QApplication([])
+    from nrobot.monster_panel import MonsterPanel
+    panel = MonsterPanel()
+    panel.extracted = True  # no background extraction in the test
+    panel.reload()
+    assert panel.table.rowCount() > 600
+    panel.search.setText('magnolia')
+    assert 1 <= panel.table.rowCount() < 10
+    panel.close()
