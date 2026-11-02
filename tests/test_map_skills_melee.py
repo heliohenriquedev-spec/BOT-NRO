@@ -64,19 +64,36 @@ def test_without_basic_attacks_the_bot_keeps_its_skill_distance():
     hunt = PacketHunt()
     hunt.auto_attacks = False
     hunt.start()
-    assert hunt.plan(hunt_state([10, 10], [15, 10]), 0) is None  # in skill range: stays there
+    assert hunt.plan(hunt_state([10, 10], [16, 10]), 0) is None  # at the edge of skill range: stays there
     assert 'só habilidades' in hunt.reason
-    hunt.target = None
-    retreat = hunt.plan(hunt_state([10, 10], [11, 10]), 1)
-    assert retreat['kind'] == 'move' and retreat['purpose'] == 'keep_distance'
-    assert math.dist(retreat['destination'], [11, 10]) > 1
+    for monster in ([11, 10], [13, 12]):  # REDE-84: inside the skill distance it runs away
+        hunt.target, hunt.pending = None, None
+        retreat = hunt.plan(hunt_state([10, 10], monster), 1)
+        assert retreat['kind'] == 'move' and retreat['purpose'] == 'keep_distance'
+        assert math.dist(retreat['destination'], monster) > math.dist([10, 10], monster)
+
+
+def test_running_away_goes_around_a_wall():
+    from nrobot.map_navigation import CollisionMap
+    cells = bytearray([1]*(40*40))
+    for y in range(40):
+        cells[y*40+8] = 0  # wall right behind the player (x=8)
+    collision = CollisionMap(40, 40, cells)
+    hunt = PacketHunt()
+    hunt.auto_attacks = False
+    hunt.start()
+    retreat = hunt.plan(hunt_state([10, 20], [12, 20]), 0, collision=collision)
+    assert retreat['purpose'] == 'keep_distance' and retreat['destination'][0] > 8
+    assert collision.segment([10, 20], retreat['destination'], max_steps=8)
+    assert math.dist(retreat['destination'], [12, 20]) > 2
 
 
 def test_with_basic_attacks_a_close_target_is_attacked_hand_to_hand():
     hunt = PacketHunt()
     hunt.start()
     far = hunt.plan(hunt_state([10, 10], [15, 10]), 0)
-    assert far is None  # 5 cells: skills only, no walking in for basic attacks
+    assert far['kind'] == 'move' and math.dist(far['destination'], [15, 10]) < 5  # REDE-84: walks up to it
+    hunt.pending = None
     hunt.target = None
     close = hunt.plan(hunt_state([10, 10], [12, 10]), 1)
     assert close == {'kind': 'attack', 'target_id': 20}
@@ -92,3 +109,24 @@ def test_basic_attack_waits_while_a_skill_in_reach_is_about_to_be_ready():
     snapshot['recent_entities'][0]['position'] = [30, 10]  # beyond every skill's reach
     import math
     assert rotation.soonest_offensive(snapshot, 10, 20) == math.inf
+
+
+def test_basic_attacks_take_a_turn_after_each_skill_only_when_enabled(tmp_path):
+    from nrobot.packet_settings import DEFAULTS
+    from nrobot.session_relay import SessionRelay
+    relay = SessionRelay('127.0.0.1', folder=tmp_path, allow_commands=True)
+    relay.hunt = PacketHunt()
+    attack = {'kind': 'attack', 'target_id': 20}
+    relay.apply_settings({**DEFAULTS, 'species': [1037]})
+    assert relay.attack_turn(attack) and not relay.attack_turn({'kind': 'move'})
+    relay.apply_settings({**DEFAULTS, 'species': [1037], 'auto_attacks': False})
+    assert not relay.attack_turn(attack) and not relay.hunt.auto_attacks
+
+
+def test_an_unanswered_basic_attack_does_not_hold_the_next_one_for_long():
+    hunt = PacketHunt()
+    hunt.start()
+    action = hunt.plan(hunt_state([10, 10], [11, 10]), 0)
+    assert action['kind'] == 'attack'
+    hunt.sent(action, 0)
+    assert hunt.pending['deadline'] <= PacketHunt.ATTACK_RESPONSE_TIMEOUT

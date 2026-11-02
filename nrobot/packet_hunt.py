@@ -18,11 +18,11 @@ class PacketHunt:
     # REDE-62: a monster we hit (or that hits us) is kept until it dies or leaves the
     # client view; only this long without any confirmed damage releases it.
     ENGAGED_GIVE_UP = 15
-    # REDE-83: with basic attacks on, a target this close is attacked hand to hand; with them
-    # off the bot keeps its skill distance and steps back when a monster gets this close.
-    MELEE_REACH = 3
+    # REDE-84: basic attacks on: walk up to the target and attack it between skills.
+    # Basic attacks off: run away whenever the monster comes inside the skill distance.
     MELEE_RANGE = 2  # the server itself takes the last step of an attack request
-    KEEP_AWAY = 2
+    KITE_MARGIN = 1  # flee when the monster is closer than skill range minus this
+    ATTACK_RESPONSE_TIMEOUT = 1.2  # a basic attack is answered well within this; then the next one goes
 
     def __init__(self, patrol=False, patrol_step=8, use_skills=False):
         self.auto_attacks = True
@@ -120,24 +120,40 @@ class PacketHunt:
                 'last_decision': self.last_decision, 'engaged_target_id': self.engaged}
 
     def step_back(self, player, monster, combat_range, collision, walk_speed_ms):
-        """Walk away from a monster that came too close, back towards skill distance."""
+        """Run from a monster inside the skill distance: the free spot farthest from it, ideally
+        still inside skill range. Walls are walked around by trying other directions."""
         dx, dy = player[0]-monster[0], player[1]-monster[1]
-        length = math.hypot(dx, dy) or 1
-        want = min(4, max(1, round(combat_range-1-length)))
-        for scale in (1, .5):
-            cells = max(1, round(want*scale))
-            destination = [round(player[0]+dx/length*cells), round(player[1]+dy/length*cells)]
-            if destination == list(player):
-                continue
-            if collision is not None and not collision.segment(player, destination, max_steps=4):
-                continue
-            steps = max(abs(destination[i]-player[i]) for i in (0, 1))
-            seconds = max(50, min(walk_speed_ms, 2000))/1000
-            self.reason = 'monstro perto demais: recuando para a distância das habilidades'
-            return {'kind': 'move', 'target_id': self.target, 'destination': destination, 'wait_seconds': steps*seconds,
-                    'origin': list(player), 'collision_route': collision is not None, 'seconds_per_step': seconds,
-                    'purpose': 'keep_distance'}
-        return None
+        length = math.hypot(dx, dy)
+        base = math.atan2(dy, dx) if length else 0.0
+        want = combat_range-.5  # stay just inside the reach of the skills
+        best = None
+        for turn in (0, 45, -45, 90, -90, 135, -135, 180):
+            angle = base+math.radians(turn)
+            for cells in (5, 4, 3, 2, 1):
+                destination = [round(player[0]+math.cos(angle)*cells), round(player[1]+math.sin(angle)*cells)]
+                if destination == list(player):
+                    continue
+                if collision is not None and not collision.segment(player, destination, max_steps=self.patrol.max_step
+                                                                    if self.patrol else 5):
+                    continue
+                distance = math.dist(destination, monster)
+                if distance <= length:
+                    continue  # not away from it
+                score = -abs(distance-want)  # as close as possible to the wanted distance
+                if best is None or score > best[0]:
+                    best = (score, destination)
+                break  # longest free step in this direction found
+            if best is not None and best[0] > -1:
+                break  # a good spot straight away: no need to turn
+        if best is None:
+            return None
+        destination = best[1]
+        steps = max(abs(destination[i]-player[i]) for i in (0, 1))
+        seconds = max(50, min(walk_speed_ms, 2000))/1000
+        self.reason = 'monstro dentro da distância: correndo para manter o alcance das habilidades'
+        return {'kind': 'move', 'target_id': self.target, 'destination': destination, 'wait_seconds': steps*seconds,
+                'origin': list(player), 'collision_route': collision is not None, 'seconds_per_step': seconds,
+                'purpose': 'keep_distance'}
 
     def retry_skill(self, now, reason):
         target_id = self.pending['target_id']
@@ -303,7 +319,7 @@ class PacketHunt:
             self.attempts += 1
             self.moves += 1
         else:
-            self.pending['deadline'] = now+(self.SKILL_RESPONSE_TIMEOUT if action['kind'] == 'skill' else 4)
+            self.pending['deadline'] = now+(self.SKILL_RESPONSE_TIMEOUT if action['kind'] == 'skill' else self.ATTACK_RESPONSE_TIMEOUT)
             if action['kind'] == 'skill':
                 self.skill_ready_at = now+self.SKILL_INTERVAL
 
@@ -416,10 +432,10 @@ class PacketHunt:
                        and state['player_sp'] >= metadata.get('sp_cost', 65535))
         combat_range = state.get('engagement_range', min(6, metadata['range']) if wants_skill else 2)
         closest = min(math.dist(player, point) for point in range_positions)
-        melee = self.auto_attacks and closest <= self.MELEE_REACH
+        melee = self.auto_attacks and not wants_skill  # the old Kunai-only mode keeps its range
         if melee:
-            combat_range = self.MELEE_RANGE  # close enough: go hand to hand for basic attacks
-        elif not self.auto_attacks and combat_range > self.KEEP_AWAY+1 and closest <= self.KEEP_AWAY:
+            combat_range = self.MELEE_RANGE  # go hand to hand: basic attacks between the skills
+        elif not self.auto_attacks and combat_range >= 3 and closest < combat_range-self.KITE_MARGIN:
             retreat = self.step_back(player, actual_position, combat_range, collision, walk_speed_ms)
             if retreat is not None:
                 return retreat

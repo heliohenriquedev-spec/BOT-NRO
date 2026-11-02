@@ -190,6 +190,7 @@ def test_empty_route_is_unavailable_without_crashing():
 def test_ranged_cooldown_wait_does_not_walk_into_melee_or_past_target():
     collision = grid(['...............'] * 8)
     hunt = PacketHunt()
+    hunt.auto_attacks = False  # REDE-84: skills only, the bot keeps its distance
     hunt.start()
     snapshot = {'state': 'tracking', 'player_position_recent': True, 'player_position': [1, 2],
                 'engagement_range': 6, 'recent_entities': [{'entity_id': 20, 'position': [9, 2]}]}

@@ -228,8 +228,8 @@ class PacketPanel(QMainWindow):
         form.insertRow(form.rowCount()-1, presence_box)
         self.advanced = QCheckBox('Combinar habilidades configuradas e buffs por intervalos individuais')
         combat_form.addRow(self.advanced)
-        self.auto_attacks = QCheckBox('Ataque básico: a até 3 células do alvo, chega junto e intercala ataques '
-                                      'básicos entre as habilidades (desligado: só habilidades, mantendo distância)')
+        self.auto_attacks = QCheckBox('Ataque básico: vai até o monstro e intercala um ataque básico após cada habilidade '
+                                      '(desligado: só habilidades, correndo para manter a distância do alcance delas)')
         combat_form.addRow(self.auto_attacks)
         self.fast_offensives = QCheckBox('Habilidades ofensivas na velocidade máxima (cada uma assim que estiver no '
                                          'alcance e fora do cooldown; o bot aprende o menor intervalo que o servidor aceita)')

@@ -1,8 +1,18 @@
 {
+ "1039": {
+  "species_id": 1039,
+  "maps": {
+   "tur_dun03": 22
+  },
+  "walk_speed_ms": 200,
+  "name": "Monstro Marinho",
+  "max_hp": 385000,
+  "captured_sprite": true
+ },
  "1041": {
   "species_id": 1041,
   "maps": {
-   "tur_dun02": 44
+   "tur_dun02": 53
   },
   "walk_speed_ms": 300,
   "name": "Grande Esquilo",
@@ -37,7 +47,7 @@
  "1601": {
   "species_id": 1601,
   "maps": {
-   "tur_dun02": 73
+   "tur_dun02": 89
   },
   "walk_speed_ms": 250,
   "name": "Tartaruga",
@@ -72,6 +82,16 @@
   "captured_sprite": true,
   "name": "Filhote de Katsuyu",
   "max_hp": 70
+ },
+ "1917": {
+  "species_id": 1917,
+  "maps": {
+   "tur_dun03": 2
+  },
+  "walk_speed_ms": 400,
+  "captured_sprite": true,
+  "name": "Polvo Gigante",
+  "max_hp": 4690000
  },
  "2407": {
   "species_id": 2407,

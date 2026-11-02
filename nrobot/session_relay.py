@@ -122,6 +122,7 @@ class SessionRelay:
         self.presence = PresenceGuard()
         self.presence_hold = None
         self.sit_on_players = False
+        self.last_combat_packet = None  # 'skill' / 'attack': basic attacks alternate with skills
         self.hunt_key, self.hunt_key_name = 0x24, 'Home'
         self.sitting = False  # REDE-82: the bot sat down while a player is near
         self.capture_armed_until = 0
@@ -1237,7 +1238,10 @@ class SessionRelay:
             self.hunt.reason = 'suspensa: '+reason+(' • sentado' if self.sitting else '')
         return True
 
-    ATTACK_WINDOW = .6  # no basic attack when an offensive skill is ready sooner than this
+    def attack_turn(self, action):
+        """A basic attack may take the next packet (basic attacks on, target in reach)."""
+        return (action is not None and action['kind'] == 'attack' and self.rotation is not None
+                and bool(self.settings and self.settings['auto_attacks']))
 
     def walking_now(self):
         motion = self.tracker.observer.player_motion
@@ -1510,20 +1514,19 @@ async def run(args):
                                     candidate = min(candidates, key=lambda e: math.dist(own, e.get('effective_position', e['position'])))
                                     if math.dist(own, candidate.get('effective_position', candidate['position'])) <= relay.hunt.SEARCH_RADIUS:
                                         relay.hunt.target = candidate['entity_id']
-                                rotation_action = relay.rotation.plan(state, now, relay.hunt.target)
+                                # REDE-84: with basic attacks on, a basic attack follows every skill
+                                # (skill, attack, skill...); with no skill ready it keeps attacking.
+                                attack_turn = (relay.attack_turn(action) and relay.last_combat_packet == 'skill'
+                                               and now >= relay.tracker.observer.cast_until)
+                                rotation_action = None if attack_turn else relay.rotation.plan(state, now, relay.hunt.target)
                                 if rotation_action is not None and relay.native_frames.ready:
                                     try:
                                         if await relay.send_rotation_action(rotation_action, game_gate=lambda: controls.connected(relay.game_peer, relay.game_local)):
                                             action = None
+                                            relay.last_combat_packet = 'skill'
                                     except (OSError, ValueError) as exc:
                                         relay.hunt.pause(str(exc))
-                                if now < max(relay.rotation.next_send, relay.tracker.observer.cast_until):
-                                    action = None
-                                elif (action is not None and action['kind'] == 'attack'
-                                      and relay.rotation.soonest_offensive(state, now, relay.hunt.target) < now+relay.ATTACK_WINDOW):
-                                    # REDE-83: a basic attack keeps the character busy and the server then
-                                    # refuses skills; attack only while no skill is about to be ready.
-                                    relay.hunt.reason = 'habilidade pronta em instantes: sem ataque básico agora'
+                                if not attack_turn and now < max(relay.rotation.next_send, relay.tracker.observer.cast_until):
                                     action = None
                                 relay.flush_rotation_diagnostics()
                             if action is not None and action['kind'] == 'attack' and relay.settings and not relay.settings['auto_attacks']:
@@ -1534,7 +1537,9 @@ async def run(args):
                                 try:
                                     await relay.send_hunt_action(action, game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                                     if relay.rotation is not None and action['kind'] == 'attack':
-                                        relay.rotation.next_send = max(relay.rotation.next_send, time.monotonic()+.12)
+                                        relay.last_combat_packet = 'attack'
+                                        gap = relay.rotation.burst_interval if relay.rotation.burst else .12
+                                        relay.rotation.next_send = max(relay.rotation.next_send, time.monotonic()+gap)
                                 except HuntTargetChanged as exc:
                                     relay.hunt.abandon(time.monotonic(), str(exc))
                                     relay.flush_hunt_diagnostics()
