@@ -25,7 +25,9 @@ def test_install_and_restore_both_preexisting_and_created_files(monkeypatch, tmp
     (game/'data/clientinfo.xml').write_bytes(XML)
     bot = tmp_path/'bot'
     monkeypatch.setattr(module, 'ROOT', bot)
-    monkeypatch.setattr(module, 'GAME', game)
+    import nrobot.game_folder as game_folder
+    monkeypatch.setattr(game_folder, 'require', lambda: game)
+    (game/'DATA.INI').write_text('[Data]')
     monkeypatch.setattr(module, 'MANIFEST', bot/'perfis/relay/instalacao.json')
     class FakeGrf:
         def __init__(self, root):
@@ -48,7 +50,9 @@ def test_restore_does_not_overwrite_later_user_changes(monkeypatch, tmp_path):
         (game/'data'/name).write_bytes(XML)
     bot = tmp_path/'bot'
     monkeypatch.setattr(module, 'ROOT', bot)
-    monkeypatch.setattr(module, 'GAME', game)
+    import nrobot.game_folder as game_folder
+    monkeypatch.setattr(game_folder, 'require', lambda: game)
+    (game/'DATA.INI').write_text('[Data]')
     monkeypatch.setattr(module, 'MANIFEST', bot/'perfis/relay/instalacao.json')
     monkeypatch.setattr(module, 'GrfSet', lambda root: None)
     module.install()

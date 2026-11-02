@@ -46,6 +46,14 @@ class PacketPanel(QMainWindow):
         layout.addWidget(title)
         revision = QLabel(f"Versão {local_version().get('version', 'dev')} | Pasta: "+str(ROOT))
         layout.addWidget(revision)
+        game_row = QHBoxLayout()
+        self.game_label = QLabel()
+        game_row.addWidget(self.game_label, 1)
+        change_game = QPushButton('Trocar pasta do jogo')
+        change_game.clicked.connect(self.choose_game_folder)
+        game_row.addWidget(change_game)
+        layout.addLayout(game_row)
+        self.show_game_folder()
         self.status_label = QLabel('Conexão fechada • abra a conexão e entre pelo perfil local')
         self.status_label.setWordWrap(True)
         layout.addWidget(self.status_label)
@@ -263,8 +271,33 @@ class PacketPanel(QMainWindow):
         except (OSError, ValueError) as exc:
             self.notice.setText(str(exc))
 
+    def show_game_folder(self, folder=None):
+        from .game_folder import find
+        folder = folder or find()
+        self.game_label.setText(f'Jogo: {folder}' if folder else
+                                'Jogo: pasta não encontrada • clique em Trocar pasta do jogo')
+        return folder
+
+    def choose_game_folder(self):
+        """Ask for the game folder (the one with DATA.INI); returns it or None."""
+        from PySide6.QtWidgets import QFileDialog
+        from .game_folder import save as save_game
+        chosen = QFileDialog.getExistingDirectory(self, 'Escolha a pasta do jogo NRO (a que tem DATA.INI)')
+        if not chosen:
+            return None
+        try:
+            folder = save_game(chosen)
+        except ValueError as exc:
+            self.notice.setText(str(exc))
+            return None
+        return self.show_game_folder(folder)
+
     def open_relay(self):
         if self.process.state() != QProcess.NotRunning:
+            return
+        game = self.show_game_folder() or self.choose_game_folder()
+        if game is None:
+            self.notice.setText('Escolha a pasta do jogo (a que tem DATA.INI) antes de abrir a conexão.')
             return
         try:
             save(self.settings())
@@ -272,7 +305,8 @@ class PacketPanel(QMainWindow):
             self.session.mkdir(parents=True)
             self.pending_command = None
             self.log.clear()
-            self.process.start(sys.executable, ['-u', '-m', 'nrobot.session_relay', '--hunt', '--session-dir', str(self.session)])
+            self.process.start(sys.executable, ['-u', '-m', 'nrobot.session_relay', '--hunt', '--session-dir', str(self.session),
+                                                '--game-dir', str(game)])
             self.open_button.setEnabled(False)
             self.notice.setText('Entre no jogo por NRO - BOT LOCAL (TESTE), depois clique em Iniciar.')
         except (OSError, ValueError) as exc:

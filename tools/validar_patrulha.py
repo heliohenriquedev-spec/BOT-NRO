@@ -29,9 +29,9 @@ repository = None
 
 def init_worker():
     global repository
-    from nrobot.catalog import DEFAULT_GAME_DIR
+    from nrobot.game_folder import require
     from nrobot.map_navigation import MapRepository
-    repository = MapRepository(DEFAULT_GAME_DIR)
+    repository = MapRepository(require())
 
 
 def main_ground(collision, rng):

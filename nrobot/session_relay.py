@@ -1223,7 +1223,11 @@ async def run(args):
         from .grf import GrfError
         try:
             print('Preparando índice de mapas locais...')
-            relay.map_repository = MapRepository(args.game_dir)
+            from .game_folder import find
+            game_dir = args.game_dir or find()
+            if game_dir is None:
+                raise GrfError('pasta do jogo não encontrada; escolha a pasta do jogo no painel')
+            relay.map_repository = MapRepository(game_dir)
             from .ammo import names_from_grfs
             relay.ammo.names = names_from_grfs(relay.map_repository.grfs)
         except (OSError, ValueError, GrfError) as exc:
@@ -1387,7 +1391,7 @@ def main():
     parser.add_argument('--server', default='187.77.36.200')
     parser.add_argument('--port', type=int, default=6900)
     parser.add_argument('--local-port', type=int, default=16900)
-    parser.add_argument('--game-dir', default=r'C:\NRO - Jogo COMPLETO')
+    parser.add_argument('--game-dir', default=None, help='pasta do jogo; padrão: a encontrada pelo bot')
     parser.add_argument('--session-dir')
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument('--single-attack-test', action='store_true')

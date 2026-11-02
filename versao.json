@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.1",
- "published_at": "2026-11-02T16:53:55",
- "notes": "Primeira versão: caça por pacotes, minimapa, patrulha validada em 799 mapas e atualizador",
+ "version": "2026.11.02.2",
+ "published_at": "2026-11-02T17:10:26",
+ "notes": "O bot encontra a pasta do jogo em qualquer lugar do PC, ou pergunta qual é",
  "files": [
   ".gitattributes",
   ".gitignore",
@@ -26,6 +26,7 @@
   "nrobot/continuous_observer.py",
   "nrobot/entity_inventory.py",
   "nrobot/etw_capture.py",
+  "nrobot/game_folder.py",
   "nrobot/game_overlay.py",
   "nrobot/grf.py",
   "nrobot/grf_header.py",
@@ -64,6 +65,7 @@
   "tests/test_combat_rotation.py",
   "tests/test_continuous_observer.py",
   "tests/test_entity_inventory.py",
+  "tests/test_game_folder.py",
   "tests/test_grf.py",
   "tests/test_grf_map_validation.py",
   "tests/test_manual_skill_diagnostic.py",
@@ -98,5 +100,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "9ae2af929ad6"
+ "files_digest": "f49a034041f9"
 }

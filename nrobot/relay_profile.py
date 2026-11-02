@@ -11,7 +11,6 @@ import re
 from .grf import GrfSet
 
 ROOT = Path(__file__).resolve().parents[1]
-GAME = Path(r'C:\NRO - Jogo COMPLETO')
 MANIFEST = ROOT/'perfis/relay/instalacao.json'
 
 
@@ -34,10 +33,13 @@ def install():
         raise ValueError('Perfil local já instalado; use o restaurador antes de reinstalar')
     backup = ROOT/'backups/relay'/datetime.now().strftime('%Y%m%d-%H%M%S-%f')
     backup.mkdir(parents=True)
-    grfs = GrfSet(str(GAME))
+    from .game_folder import require
+    game = require()
+    print(f'Pasta do jogo: {game}')
+    grfs = GrfSet(str(game))
     records = []
     for filename in ('clientinfo.xml', 'sclientinfo.xml'):
-        target = GAME/'data'/filename
+        target = game/'data'/filename
         existed = target.exists()
         original = target.read_bytes() if existed else grfs.read('data'+chr(92)+filename)
         proposed = make_profile(original)
@@ -63,7 +65,8 @@ def restore():
         return
     for record in data['files']:
         target = Path(record['target'])
-        if target.resolve().parent != (GAME/'data').resolve() or target.name not in ('clientinfo.xml', 'sclientinfo.xml'):
+        if (target.parent.name.lower() != 'data' or not (target.parent.parent/'DATA.INI').is_file()
+                or target.name not in ('clientinfo.xml', 'sclientinfo.xml')):
             raise ValueError('Caminho de restauração inesperado')
         if not target.exists() or hashlib.sha256(target.read_bytes()).hexdigest() != record['installed_hash']:
             raise ValueError('O perfil foi alterado depois da instalação; não sobrescrevi suas mudanças')
