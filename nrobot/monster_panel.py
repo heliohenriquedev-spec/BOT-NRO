@@ -1,72 +1,112 @@
-"""Aba Monstros (todos os monstros do jogo) e lista de alvos do mapa atual (REDE-79)."""
+"""Aba Monstros (todos os monstros do jogo) e lista de alvos do mapa atual (REDE-79/81).
+
+A tabela é um modelo: só as linhas visíveis são desenhadas e cada sprite é carregado quando
+a linha aparece. A extração dos sprites roda em outro processo, para o painel não travar.
+"""
 from __future__ import annotations
 
-from PySide6.QtCore import QObject, QSize, Qt, QThread, Signal
+import os
+import sys
+import unicodedata
+
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, QProcess, QSize, Qt, Signal
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (QCheckBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QListWidget, QListWidgetItem,
-                               QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
+                               QPushButton, QTableView, QVBoxLayout, QWidget)
 
 from . import monster_db
 
 ICON = 40
+_icons = {}
 
 
 def plain(text):
     """Lowercase without accents, so 'magnolia' finds 'Magnólia'."""
-    import unicodedata
     return ''.join(c for c in unicodedata.normalize('NFKD', str(text).lower()) if not unicodedata.combining(c))
 
 
-def icon_for(species_id, cache={}):
-    path = monster_db.sprite_path(species_id)
-    stamp = path.stat().st_mtime_ns if path.is_file() else None
-    cached = cache.get(species_id)
-    if cached and cached[0] == stamp:
-        return cached[1]
-    icon = QIcon(QPixmap(str(path)).scaled(ICON, ICON, Qt.KeepAspectRatio, Qt.SmoothTransformation)) if stamp else QIcon()
-    cache[species_id] = (stamp, icon)
-    return icon
+def icon_for(species_id, path=None):
+    path = path or monster_db.find_sprite(species_id)
+    key = (species_id, str(path) if path else None)
+    if key not in _icons:
+        _icons[key] = (QIcon(QPixmap(str(path)).scaled(ICON, ICON, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                       if path else QIcon())
+    return _icons[key]
 
 
-class SpriteExtractor(QObject):
-    """Writes the sprites the client files have, once, outside the interface thread."""
-    progress = Signal(int, int)
-    finished = Signal(int, int)
-
-    def run(self):
-        from .game_folder import find
-        from .grf import GrfError, GrfSet
-        folder = find()
-        written = missing = 0
+def data_stamp():
+    """Cheap change check: the monster files and sprite folders."""
+    stamp = []
+    for path in (monster_db.CAPTURED, monster_db.BASE_INFO, monster_db.SPRITES, monster_db.BASE_SPRITES):
         try:
-            grfs = GrfSet(str(folder)) if folder else None
-        except (GrfError, OSError):
-            grfs = None
-        ids = sorted(monster_db.catalog())
-        for index, identity in enumerate(ids, 1):
-            state = monster_db.ensure_sprite(grfs, identity)
-            written += state == 'grf'
-            missing += state is None
-            if index % 40 == 0:
-                self.progress.emit(index, len(ids))
-        self.finished.emit(written, missing)
+            info = os.stat(path)
+            stamp.append((info.st_mtime_ns, info.st_size))
+        except OSError:
+            stamp.append(None)
+    return tuple(stamp)
 
 
-class MonsterPanel(QWidget):
-    COLUMNS = ['Sprite', 'Nome', 'ID', 'Mapas', 'HP', 'Origem', 'Sprite']
+class MonsterModel(QAbstractTableModel):
+    HEADERS = ['Sprite', 'Nome', 'ID', 'Mapas', 'HP', 'Origem', 'Sprite de']
 
     def __init__(self):
         super().__init__()
+        self.rows, self.visible, self.sprites = [], [], {}
+
+    def set_rows(self, rows, sprites):
+        self.beginResetModel()
+        self.rows, self.sprites = rows, sprites
+        for row in rows:
+            maps = sorted(set(row['maps']) | set(row['seen_maps']))
+            row['text'] = ('', row['name'], str(row['species_id']), ', '.join(maps) or '—',
+                           str(row['max_hp']) if row.get('max_hp') else '—', row['origin'],
+                           row['sprite_source'] if row['has_sprite'] else 'falta: passe o mouse sobre ele no jogo')
+            row['search'] = plain(' '.join((row['name'], str(row['species_id']), *maps)))
+        self.visible = list(range(len(rows)))
+        self.endResetModel()
+
+    def filter(self, text, only_missing):
+        text = plain(text.strip())
+        self.beginResetModel()
+        self.visible = [i for i, row in enumerate(self.rows)
+                        if (not text or text in row['search']) and (not only_missing or not row['has_sprite'])]
+        self.endResetModel()
+
+    def rowCount(self, parent=QModelIndex()):
+        return 0 if parent.isValid() else len(self.visible)
+
+    def columnCount(self, parent=QModelIndex()):
+        return 0 if parent.isValid() else len(self.HEADERS)
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            return self.HEADERS[section]
+        return None
+
+    def data(self, index, role=Qt.DisplayRole):
+        if not index.isValid():
+            return None
+        row = self.rows[self.visible[index.row()]]
+        if role == Qt.DisplayRole:
+            return row['text'][index.column()]
+        if role == Qt.DecorationRole and index.column() == 0:
+            return icon_for(row['species_id'], self.sprites.get(row['species_id']))  # only for rows on screen
+        return None
+
+
+class MonsterPanel(QWidget):
+    def __init__(self):
+        super().__init__()
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel('Todos os monstros do jogo. Os que não têm sprite nos arquivos do cliente são '
-                                'capturados do próprio jogo quando você passa o mouse sobre eles.'))
+        layout.addWidget(QLabel('Todos os monstros do jogo. Os monstros custom do servidor têm o sprite tirado dos dados '
+                                'do jogo; os que faltarem são capturados quando você passa o mouse sobre eles no jogo.'))
         row = QHBoxLayout()
         self.search = QLineEdit()
         self.search.setPlaceholderText('Buscar por nome, ID ou mapa')
-        self.search.textChanged.connect(self.fill)
+        self.search.textChanged.connect(self.apply_filter)
         row.addWidget(self.search, 1)
         self.only_missing = QCheckBox('Só sem sprite')
-        self.only_missing.toggled.connect(self.fill)
+        self.only_missing.toggled.connect(self.apply_filter)
         row.addWidget(self.only_missing)
         self.extract_button = QPushButton('Extrair sprites dos arquivos do jogo')
         self.extract_button.clicked.connect(self.extract)
@@ -74,21 +114,28 @@ class MonsterPanel(QWidget):
         layout.addLayout(row)
         self.summary = QLabel()
         layout.addWidget(self.summary)
-        self.table = QTableWidget(0, len(self.COLUMNS))
-        self.table.setHorizontalHeaderLabels(self.COLUMNS)
+        self.model = MonsterModel()
+        self.table = QTableView()
+        self.table.setModel(self.model)
         self.table.setIconSize(QSize(ICON, ICON))
         self.table.verticalHeader().setDefaultSectionSize(ICON+6)
         self.table.verticalHeader().setVisible(False)
-        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table.setSelectionBehavior(QTableView.SelectRows)
+        self.table.setWordWrap(False)
         header = self.table.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        for column, width in enumerate((60, 220, 70, 0, 80, 150, 0)):
+            if width:
+                self.table.setColumnWidth(column, width)
         header.setSectionResizeMode(3, QHeaderView.Stretch)
+        header.setSectionResizeMode(6, QHeaderView.Stretch)
         layout.addWidget(self.table, 1)
-        self.rows = []
-        self.signature = None
-        self.thread = None
+        self.stamp = None
         self.extracted = False
+        self.process = QProcess(self)
+        self.process.setWorkingDirectory(str(monster_db.ROOT))
+        self.process.setProcessChannelMode(QProcess.MergedChannels)
+        self.process.readyReadStandardOutput.connect(self.read_progress)
+        self.process.finished.connect(self.extraction_done)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -97,63 +144,43 @@ class MonsterPanel(QWidget):
             self.extract()
 
     def extract(self):
-        if self.thread is not None:
+        if self.process.state() != QProcess.NotRunning:
             return
         self.extracted = True
         self.extract_button.setEnabled(False)
-        self.thread = QThread(self)
-        self.worker = SpriteExtractor()
-        self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.run)
-        self.worker.progress.connect(lambda done, total: self.summary.setText(f'Extraindo sprites: {done}/{total}...'))
-        self.worker.finished.connect(self.extraction_done)
-        self.thread.start()
+        self.summary.setText('Extraindo sprites dos arquivos do jogo em segundo plano...')
+        self.process.start(sys.executable, ['-u', '-m', 'nrobot.monster_db'])
 
-    def extraction_done(self, written, missing):
-        self.thread.quit()
-        self.thread.wait()
-        self.thread = None
+    def read_progress(self):
+        for line in bytes(self.process.readAllStandardOutput()).decode('utf-8', 'replace').splitlines():
+            if line.startswith('progresso'):
+                self.summary.setText('Extraindo sprites dos arquivos do jogo: '+line.split()[1]+'...')
+            elif line.startswith('ERRO'):
+                self.summary.setText(line)
+
+    def extraction_done(self, *args):
         self.extract_button.setEnabled(True)
-        self.signature = None
+        self.stamp = None
         self.reload()
 
     def reload(self):
-        """Re-read the monsters (cheap); rebuild the table only when something changed."""
-        rows = monster_db.all_monsters()
-        signature = tuple((r['species_id'], r['name'], r['has_sprite'], r.get('max_hp'), tuple(r['seen_maps'])) for r in rows)
-        if signature == self.signature:
+        """Cheap when nothing changed on disk (the panel calls it every refresh)."""
+        stamp = data_stamp()
+        if stamp == self.stamp:
             return
-        self.signature, self.rows = signature, rows
-        self.fill()
+        self.stamp = stamp
+        rows = monster_db.all_monsters()
+        self.model.set_rows(rows, monster_db.sprite_index())
+        self.apply_filter()
 
-    def fill(self):
-        text = plain(self.search.text().strip())
-        rows = [r for r in self.rows
-                if (not text or text in plain(r['name']) or text == str(r['species_id'])
-                    or any(text in m for m in r['maps']+r['seen_maps']))
-                and (not self.only_missing.isChecked() or not r['has_sprite'])]
-        game = sum(r['origin'] == 'jogo' for r in self.rows)
-        captured = sum(r['origin'] != 'jogo' for r in self.rows)
-        without = sum(not r['has_sprite'] for r in self.rows)
-        if self.thread is None:
-            self.summary.setText(f'{len(self.rows)} monstros: {game} dos arquivos do jogo, {captured} descobertos jogando • '
+    def apply_filter(self, *args):
+        self.model.filter(self.search.text(), self.only_missing.isChecked())
+        rows = self.model.rows
+        if self.process.state() == QProcess.NotRunning:
+            custom = sum(r['origin'] != 'jogo' for r in rows)
+            without = sum(not r['has_sprite'] for r in rows)
+            self.summary.setText(f'{len(rows)} monstros: {len(rows)-custom} do catálogo do jogo, {custom} custom do servidor • '
                                  f'{without} ainda sem sprite (passe o mouse sobre eles no jogo)')
-        self.table.setUpdatesEnabled(False)
-        self.table.setRowCount(len(rows))
-        for index, row in enumerate(rows):
-            maps = sorted(set(row['maps']) | set(row['seen_maps']))
-            sprite = ('capturado do jogo' if row.get('captured_sprite') else 'arquivos do jogo') if row['has_sprite'] \
-                else 'falta: passe o mouse sobre ele no jogo'
-            values = ['', row['name'], str(row['species_id']), ', '.join(maps) or '—',
-                      str(row['max_hp']) if row.get('max_hp') else '—', row['origin'], sprite]
-            for column, value in enumerate(values):
-                item = self.table.item(index, column)
-                if item is None:
-                    item = QTableWidgetItem()
-                    self.table.setItem(index, column, item)
-                item.setText(value)
-            self.table.item(index, 0).setIcon(icon_for(row['species_id']))
-        self.table.setUpdatesEnabled(True)
 
 
 class MapTargets(QWidget):
@@ -184,12 +211,12 @@ class MapTargets(QWidget):
     def show_map(self, map_name, seen=None, force=False):
         """seen: {species_id: {'name', 'present'}} confirmed on this map by the server."""
         seen = seen or {}
-        ids = monster_db.monsters_of_map(map_name, seen=seen)
-        key = (monster_db.map_key(map_name), tuple(ids), tuple(sorted((i, v.get('present', 0)) for i, v in seen.items())))
+        key = (monster_db.map_key(map_name), tuple(sorted((i, v.get('present', 0)) for i, v in seen.items())))
         if key == self.shown and not force:
             return
-        self.shown, self.map_name = key, map_name
         captured = monster_db.load_captured()
+        ids = monster_db.monsters_of_map(map_name, captured=captured, seen=seen)
+        self.shown, self.map_name = key, map_name
         self.list.blockSignals(True)
         self.list.clear()
         for identity in ids:

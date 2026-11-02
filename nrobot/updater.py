@@ -184,12 +184,19 @@ def publish(message, log=print, run_tests=True):
         raise UpdateError('escreva o que mudou nesta atualização')
     if not can_publish():
         raise UpdateError('esta cópia não é a do desenvolvedor (sem git ou sem repositório de origem)')
+    from .monster_db import export_base
+    export_base(log)  # custom monsters learned here reach every user with this version
     if run_tests and (ROOT/'tests').is_dir():
         log('Rodando os testes antes de publicar...')
         result = subprocess.run([sys.executable, '-m', 'pytest', '-q', '-p', 'no:cacheprovider', 'tests'],
                                 cwd=ROOT, capture_output=True, text=True, encoding='utf-8', errors='replace')
         if result.returncode:
-            raise UpdateError('os testes falharam; nada foi publicado:\n'+result.stdout[-2000:])
+            summary = result.stdout.strip().splitlines()[-1] if result.stdout.strip() else ''
+            if ' passed' in summary and not any(word in summary for word in ('failed', 'error')):
+                raise UpdateError(f'os testes passaram ({summary}), mas o processo de testes fechou com erro '
+                                  f'(código {result.returncode & 0xffffffff:#x}); nada foi publicado. Tente de novo.\n'
+                                  + result.stderr[-1000:])
+            raise UpdateError('os testes falharam; nada foi publicado:\n'+result.stdout[-2000:]+result.stderr[-1000:])
         log(result.stdout.strip().splitlines()[-1])
     version = next_version(local_version().get('version'))
     files = tracked_files()

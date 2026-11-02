@@ -64,7 +64,7 @@ def test_monsters_seen_in_the_game_are_recorded_with_their_maps(tmp_path):
     assert loaded[21999]['name'] == 'Boneco Novo' and loaded[21999]['maps'] == {'novo_mapa': 1}
     assert 21999 in monster_db.monsters_of_map('novo_mapa.gat', captured=loaded)
     rows = {row['species_id']: row for row in monster_db.all_monsters(loaded)}
-    assert rows[21999]['origin'] == 'capturado no jogo' and rows[21999]['max_hp'] == 900
+    assert rows[21999]['origin'] == 'visto neste PC' and rows[21999]['max_hp'] == 900
     assert len(rows) > 600  # the client catalog is there too
 
 
@@ -120,7 +120,41 @@ def test_monster_tab_lists_the_game_monsters(monkeypatch):
     panel = MonsterPanel()
     panel.extracted = True  # no background extraction in the test
     panel.reload()
-    assert panel.table.rowCount() > 600
+    assert panel.model.rowCount() > 600
     panel.search.setText('magnolia')
-    assert 1 <= panel.table.rowCount() < 10
+    assert 1 <= panel.model.rowCount() < 10
     panel.close()
+
+
+def test_publishing_moves_custom_monsters_to_the_shared_base(tmp_path):
+    from nrobot.screen_capture import write_png
+    import numpy as np
+    captured = {}
+    monster_db.record(captured, 21999, 'campo.gat', name='Custom', max_hp=500, new_entity=True)
+    captured[21999]['captured_sprite'] = True
+    monster_db.record(captured, 1138, 'moc_fild13.gat', name='Magnólia', max_hp=80)  # catalog: not exported
+    monster_db.save_captured(captured)
+    monster_db.SPRITES.mkdir(parents=True)
+    write_png(monster_db.sprite_path(21999), np.zeros((4, 4, 4), dtype=np.uint8))
+    assert monster_db.export_base(log=lambda text: None) == (1, 0, 1)
+    base = monster_db.load_base()
+    assert set(base) == {21999} and base[21999]['name'] == 'Custom' and base[21999]['maps'] == {'campo': 1}
+    assert (monster_db.BASE_SPRITES/'21999.png').is_file()
+    # Another PC without that monster sees it through the base.
+    monster_db.save_captured({})
+    (monster_db.SPRITES/'21999.png').unlink()
+    rows = {row['species_id']: row for row in monster_db.all_monsters()}
+    assert rows[21999]['origin'] == 'base compartilhada' and rows[21999]['has_sprite']
+    assert 21999 in monster_db.monsters_of_map('campo.gat')
+
+
+def test_custom_monster_sprite_comes_from_the_game_data_by_its_client_identity():
+    from nrobot.game_folder import find
+    from nrobot.grf import GrfSet
+    folder = find()
+    if folder is None:
+        pytest.skip('jogo não instalado')
+    grfs = GrfSet(str(folder))
+    custom = [i for i in monster_db.identities() if i not in monster_db.catalog()]
+    readable = [i for i in custom[:400] if monster_db.sprite_from_grf(grfs, i) is not None]
+    assert readable  # NRO custom monsters outside the Navi catalog still have client sprites
