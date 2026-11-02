@@ -1,0 +1,34 @@
+{
+  "client_sha256": "8a77adb20ce94fded406e4d132d969830cd7d6e3cf7359e684bf651871e3b538",
+  "method": "readonly static disassembly; no game process access",
+  "builder": "0x58C3BA-0x58C435",
+  "opcode": "0113",
+  "length": 22,
+  "fields": {
+    "level": 5,
+    "skill_id": 9,
+    "x": 12,
+    "y": 20
+  },
+  "filler_fields": [
+    [
+      2,
+      3
+    ],
+    [
+      7,
+      2
+    ],
+    [
+      11,
+      1
+    ]
+  ],
+  "opaque_bytes": [
+    14,
+    6
+  ],
+  "opaque_note": "No semantic write to bytes 14..19 in this builder. Encoder initializes them to zero.",
+  "length_evidence": "data/rede/tamanhos_cliente.json: 0113, length 22, key@0x41c2d5,length@0x41c2f8",
+  "live_validation": "pending; no live packets sent during implementation"
+}

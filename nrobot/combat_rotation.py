@@ -7,14 +7,24 @@ def skill_category(metadata):
     if flags == 1:
         return 'Ofensiva no alvo'
     if flags == 4:
-        return 'Em si (confirmar buff)'
+        return 'Em si (buff ou ofensiva)'
     if flags == 16:
-        return 'Suporte (confirmar buff/alvo)'
+        return 'Suporte / uso em si'
     if flags == 2:
-        return 'Área no chão (não suportada)'
+        return 'Área no chão'
     if flags == 0:
         return 'Passiva'
     return 'Tipo não confirmado'
+
+
+def configured_range(profile, meta):
+    override = profile.get('range_override')
+    # Self skills commonly advertise cast range 0, not their damage radius. In automatic
+    # mode require a nearby target; the user can explicitly set its activation radius.
+    value = meta.get('range', 0) if override is None else override
+    if override is None and meta.get('target_flags') in (4, 16) and profile['role'] == 'offensive' and value == 0:
+        value = 2
+    return max(0, min(value, 32))
 
 
 class CombatRotation:
@@ -86,7 +96,8 @@ class CombatRotation:
             self.after_skill_delay = min(self.MAX_AFTER_SKILL_DELAY, self.after_skill_delay+.05)
         count = self.failures.get(skill_id, 0)+1
         self.failures[skill_id] = count
-        self.ready[skill_id] = now+(self.defer if count >= self.attempts else .3)
+        self.ready[skill_id] = max(self.ready.get(skill_id, 0) if pending and pending['role'] == 'summon' else 0,
+                                   now+(self.defer if count >= self.attempts else .3))
         if count >= self.attempts:
             self.failures[skill_id] = 0
         self.log.append({'kind': 'rotation_failed', 'skill_id': skill_id, 'reason': reason, 'failures': count})
@@ -135,7 +146,8 @@ class CombatRotation:
             if kind == 'skill_failed':
                 self._fail(skill_id, now, 'servidor recusou')
             elif (kind == 'skill_damage' and pending['role'] == 'offensive'
-                  and event['source_id'] == player_id and event['target_id'] == pending['target_id']
+                  and event['source_id'] == player_id
+                  and (pending.get('cast_mode') == 'self' or event['target_id'] == pending['target_id'])
                   and event['level'] == pending['level']):
                 self.pending.pop(skill_id)
                 self.failures[skill_id] = 0
@@ -152,6 +164,14 @@ class CombatRotation:
                     self.last_throw = skill_id
                 self.log.append({'kind': 'rotation_skill_confirmed', 'skill_id': skill_id,
                                  'target_id': event['target_id'], 'damage_raw': event['damage_raw']})
+            elif (kind == 'skill_no_damage' and (pending['role'] == 'summon' or pending.get('cast_mode') == 'self')
+                  and event['source_id'] == player_id and event['target_id'] == player_id):
+                if event['success']:
+                    self.pending.pop(skill_id)
+                    self.failures[skill_id] = 0
+                    self.log.append({'kind': 'rotation_execution_confirmed', 'skill_id': skill_id, 'role': pending['role']})
+                else:
+                    self._fail(skill_id, now, 'servidor recusou')
             elif (kind == 'skill_no_damage' and pending['role'] == 'buff'
                   and event['source_id'] == player_id and event['target_id'] == player_id):
                 if not event['success']:
@@ -163,11 +183,11 @@ class CombatRotation:
     def engagement_range(self, state):
         """Keep ranged spacing during cooldown; range availability is not readiness."""
         known = {s['skill_id']: s for s in state.get('learned_skills', [])}
-        ranges = [min(known[p['skill_id']]['range'], 12) for p in self.profiles
+        ranges = [configured_range(p, known[p['skill_id']]) for p in self.profiles
                   if p['enabled'] and p['role'] == 'offensive' and p['skill_id'] in known
                   and known[p['skill_id']]['level'] >= p['level']
-                  and (known[p['skill_id']].get('target_flags') == 1 or p['skill_id'] == 524)
-                  and 1 <= known[p['skill_id']]['range'] <= 32
+                  and (known[p['skill_id']].get('target_flags') in (1, 4, 16) or p['skill_id'] == 524)
+                  and configured_range(p, known[p['skill_id']]) >= 1
                   and state.get('player_sp') is not None
                   and state['player_sp'] >= known[p['skill_id']]['sp_cost']
                   and (p['skill_id'] not in (523,524) or state.get('ammo') is None or
@@ -243,24 +263,42 @@ class CombatRotation:
                 target = state.get('player_id')
                 if target is None:
                     continue
+            elif profile['role'] == 'summon':
+                if flags != 2:
+                    self.reason = f'Habilidade {identity}: invocacao exige tipo de chao'
+                    continue
+                target = state.get('player_id')
+                if target is None:
+                    continue
             else:
-                if flags != 1 and identity != 524:
+                if flags not in (1, 4, 16) and identity != 524:
                     self.reason = f'Habilidade {identity}: alvo ofensivo não confirmado'
                     continue
                 entity = entities.get(target_id)
-                if entity is None or not 1 <= meta['range'] <= 32:
+                if entity is None or not 0 <= configured_range(profile, meta) <= 32:
                     self.reason = f'Habilidade {identity}: alvo ou alcance ainda não confirmado'
                     continue
                 bounds = entity.get('attack_positions') or [entity.get('effective_position', entity['position'])]
                 if not entity.get('attack_positions') and entity.get('destination') and not entity.get('arrival_estimated'):
                     bounds.append(entity['destination'])
-                if max(math.dist(own, p) for own in (state.get('combat_player_positions') or [state['player_position']]) for p in bounds) > min(meta['range'], 12):
+                if max(math.dist(own, p) for own in (state.get('combat_player_positions') or [state['player_position']]) for p in bounds) > configured_range(profile, meta):
                     continue
                 if entity.get('position_age_seconds', 0) > 1.5 and not entity.get('position_usable'):
                     continue
-                target = target_id
+                target = state.get('player_id') if flags in (4, 16) else target_id
+                if target is None:
+                    continue
             self.reason = f"pronta: {meta.get('name') or identity}"
             action = {'kind': 'skill', **profile, 'target_id': target, 'sp_cost': meta['sp_cost']}
+            if profile['role'] == 'offensive' and flags in (4, 16):
+                action['combat_target_id'] = target_id
+                action['cast_mode'] = 'self'
+            elif profile['role'] == 'summon':
+                action['cast_mode'] = 'ground'
+                # Aim beside the current position, never at an unvalidated distant cell.
+                own = (state.get('combat_player_positions') or [state['player_position']])[0]
+                action['ground_origin'] = [round(v) for v in own]
+                action['cast_range'] = configured_range(profile, meta)
             ammo = state.get('ammo')
             if identity in (523, 524) and ammo is not None:
                 options = ammo['options']
@@ -307,7 +345,7 @@ class CombatRotation:
                 continue
             if entity is not None and own:
                 position = entity.get('effective_position', entity['position'])
-                if min(math.dist(p, position) for p in own) > min(meta['range'], 12):
+                if min(math.dist(p, position) for p in own) > configured_range(profile, meta):
                     continue  # out of this skill's reach: it will not interrupt an attack
             cooldown = cooldowns.get(identity, cooldowns.get(str(identity), 0))
             soonest = min(soonest, max(self.ready.get(identity, 0), cooldown, now))

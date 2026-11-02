@@ -84,3 +84,33 @@ Com habilidades ofensivas de longo alcance habilitadas e utilizaveis, o moviment
 mantem distancia mesmo com ataques basicos ligados. O recuo respeita colisao,
 linha de visao e alcance; ataques basicos continuam limitados ao proprio alcance.
 Estas alteracoes exigem reiniciar o painel e reconectar o personagem ao relay.
+
+
+### Modos e alcance das habilidades
+
+A lista de jogadores permitidos inicia bloqueada. Clique em **Editar jogadores
+permitidos** para alterar e em **Concluir e bloquear lista** ao terminar.
+
+Na aba Habilidades, apenas habilidades aprendidas recebem controles. O papel pode
+ser ofensiva no alvo, ofensiva em si (para tipos de uso em si/suporte), buff em si,
+ou invocacao no chao (para habilidades de chao). Uma ofensiva em si exige um alvo
+proximo, mas envia o ID do proprio personagem. Ela nao precisa de vinculo de buff.
+A confirmacao de dano continua exigindo resposta do servidor da mesma habilidade.
+
+Invocacoes usam uma celula livre ao lado do personagem, ou a propria celula se for
+necessario. Exigem colisao disponivel, alcance valido, SP, cooldown e delay. O
+intervalo configurado e respeitado mesmo no modo rapido/rajada; novas habilidades
+de chao ficam desmarcadas e usam inicialmente 30 segundos. Uma resposta sem dano
+com sucesso confirma execucao, nao dano nem duracao da invocacao. Na ausencia de
+resposta reconhecida, o intervalo e preservado para evitar repeticao imediata.
+
+**Alcance (celulas)** inicia em **Jogo (N)**. Um valor numerico substitui o limite
+local de aproximacao e de tentativa de uso. Voltar ao minimo restaura o padrao do
+jogo. Isso nao altera o alcance aceito pelo servidor. Habilidades em si com alcance
+recebido zero nao informam raio de dano: usa-se uma proximidade conservadora de 2
+celulas para ativar, que pode ser ajustada. Buffs em si nao precisam de distancia
+ate um monstro.
+
+O formato 0113 de chao foi conferido por leitura estatica do cliente local;
+a evidencia esta em data/rede/habilidades_chao_validacao.json. O uso real das novas
+habilidades ainda precisa ser validado no jogo apos reiniciar o painel e reconectar.

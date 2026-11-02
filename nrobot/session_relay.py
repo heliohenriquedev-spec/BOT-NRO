@@ -759,7 +759,7 @@ class SessionRelay:
             if self.settings and self.settings['require_collision'] and collision is None:
                 raise ValueError('Mapa de colisão deixou de estar disponível')
             if action['role'] == 'offensive':
-                entity = observer.registry.entities.get(action['target_id'])
+                entity = observer.registry.entities.get(action.get('combat_target_id', action['target_id']))
                 if (entity is None or not entity.alive or entity.species_id not in observer.species
                     or not observer.registry.current(entity, now)):
                     return False
@@ -780,7 +780,22 @@ class SessionRelay:
                 self.ammo.sent(action['inventory_index'], now)
                 self.record_hunt({'kind':'ammo_equip_sent','skill_id':action['skill_id'],'index':action['inventory_index']})
             else:
-                payload = skill(action['target_id'], action['skill_id'], action['level'])
+                if action.get('cast_mode') == 'ground':
+                    from .packet_encoder import ground_skill
+                    if collision is None:
+                        self.rotation.reason = 'invocacao aguardando mapa de colisao'
+                        return False
+                    origin = action['ground_origin']
+                    candidates = [(origin[0]+dx, origin[1]+dy) for dx, dy in ((1,0),(0,1),(-1,0),(0,-1),(0,0))]
+                    point = next((p for p in candidates if collision.walkable(p)
+                                  and all(math.dist(own, p) <= action['cast_range'] for own in observer.combat_positions(now))
+                                  and collision.line_clear(origin, p)), None)
+                    if point is None:
+                        self.rotation.reason = 'nenhuma celula valida para invocacao proxima'
+                        return False
+                    payload = ground_skill(*point, action['skill_id'], action['level'])
+                else:
+                    payload = skill(action['target_id'], action['skill_id'], action['level'])
                 self.rotation.sent(action, now)
             try:
                 self.trace_map_send('bot', struct.unpack_from('<H', payload)[0], len(payload))

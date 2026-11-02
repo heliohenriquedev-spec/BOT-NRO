@@ -27,6 +27,9 @@ class SkillPanel(QWidget):
         explanation = QLabel('Selecione um buff e clique em Aprender e ativar buff. Com a caça pausada, o bot usa a habilidade, identifica o efeito e salva a renovação automática.\nNenhum vínculo é criado se a resposta for ambígua.')
         explanation.setWordWrap(True)
         layout.addWidget(explanation)
+        modes_help = QLabel('Papel: ofensivas em si ativam perto do alvo; buffs renovam pelo efeito; invocacoes usam o chao proximo pelo intervalo configurado. Alcance: Jogo usa o padrao recebido; selecione um numero para alterar e volte ao minimo para restaurar o padrao. Em si com alcance 0 usa proximidade de 2 celulas, pois o servidor nao informa o raio de dano.')
+        modes_help.setWordWrap(True)
+        layout.addWidget(modes_help)
         self.effects_label = QLabel('Efeitos próprios: aguardando conexão')
         self.effects_label.setWordWrap(True)
         layout.addWidget(self.effects_label)
@@ -42,9 +45,10 @@ class SkillPanel(QWidget):
         probe = QPushButton('Aprender e ativar buff selecionado • exige caça pausada')
         probe.clicked.connect(self.probe_selected)
         layout.addWidget(probe)
-        self.table = QTableWidget(0, 11)
+        self.table = QTableWidget(0, 12)
         self.table.setHorizontalHeaderLabels(['Usar', 'ID', 'Nome recebido', 'Tipo do servidor', 'Aprendida',
-                                             'Nível usado', 'SP / alcance', 'Papel', 'CD local (s)', 'B?nus monitorado', 'Situa??o'])
+                                             'Nível usado', 'SP / alcance', 'Papel', 'CD local (s)', 'B?nus monitorado', 'Situa??o', 'Alcance (celulas)'])
+        self.table.setColumnWidth(11, 130)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         for column, width in {0:42, 1:52, 3:185, 4:72, 5:90, 6:80, 7:102, 8:98, 9:115, 10:160}.items():
             self.table.setColumnWidth(column, width)
@@ -72,7 +76,8 @@ class SkillPanel(QWidget):
         if self.signature is None:
             return self.saved
         shown = [{'skill_id': identity, 'enabled': row['enabled'].isChecked(), 'role': row['role'].currentData(),
-                  'level': row['level'].value(), 'interval': row['interval'].value(), 'effect_id': row['effect'].value()}
+                  'level': row['level'].value(), 'interval': row['interval'].value(), 'effect_id': row['effect'].value(),
+                  'range_override': None if row['range'].value() == -1 else row['range'].value()}
                  for identity, row in self.rows.items()]
         # Skills this character does not have (another character's setup) stay saved.
         return shown+[p for p in self.saved if p['skill_id'] not in self.rows]
@@ -106,7 +111,7 @@ class SkillPanel(QWidget):
     def build_rows(self, catalog, configured):
         self.rows.clear()
         for row in range(self.table.rowCount()):
-            for column in (0, 5, 7, 8, 9):
+            for column in (0, 5, 7, 8, 9, 11):
                 if self.table.cellWidget(row, column) is not None:
                     self.table.removeCellWidget(row, column)
         self.table.clearContents()
@@ -114,7 +119,7 @@ class SkillPanel(QWidget):
         for index, metadata in enumerate(catalog):
             identity = metadata['skill_id']
             flags = metadata.get('target_flags')
-            compatible = metadata['level'] > 0 and (flags in (1, 4, 16) or identity == 524)
+            compatible = metadata['level'] > 0 and (flags in (1, 2, 4, 16) or identity == 524)
             received_name = metadata.get('name')
             display_name = self.local_names.get(received_name, received_name) or ('Arremessar Kunai' if identity == 524 else 'Nome não recebido')
             values = {1: identity, 2: display_name, 3: skill_category(metadata), 4: metadata['level'],
@@ -122,12 +127,12 @@ class SkillPanel(QWidget):
             for column, value in values.items():
                 self.table.setItem(index, column, QTableWidgetItem(str(value)))
             if not compatible:
-                for column in (0, 5, 7, 8, 9):
+                for column in (0, 5, 7, 8, 9, 11):
                     self.table.setItem(index, column, QTableWidgetItem('—'))
                 self.table.setItem(index, 10, QTableWidgetItem('Não executável no bot'))
                 continue
-            profile = configured.get(identity, {'enabled': identity == 524 and compatible, 'role': 'buff' if flags in (4, 16) else 'offensive',
-                'level': min(10, metadata['level']) if identity == 524 else max(1, metadata['level']), 'interval': .5, 'effect_id': 0})
+            profile = configured.get(identity, {'enabled': identity == 524 and compatible, 'role': 'summon' if flags == 2 else 'buff' if flags in (4, 16) else 'offensive',
+                'level': min(10, metadata['level']) if identity == 524 else max(1, metadata['level']), 'interval': 30 if flags == 2 else .5, 'effect_id': 0})
             enabled = QCheckBox()
             enabled.setChecked(profile['enabled'] and compatible)
             enabled.setEnabled(compatible)
@@ -136,9 +141,13 @@ class SkillPanel(QWidget):
             level.setValue(profile['level'])
             level.setEnabled(compatible)
             role = QComboBox()
-            role.addItem('Ofensiva', 'offensive')
+            role.addItem('Ofensiva em si' if flags in (4, 16) else 'Ofensiva no alvo', 'offensive')
             role.addItem('Buff em si', 'buff')
-            role.setCurrentIndex(1 if profile['role'] == 'buff' else 0)
+            role.addItem('Invocacao no chao', 'summon')
+            role.model().item(0).setEnabled(flags in (1, 4, 16) or identity == 524)
+            role.model().item(1).setEnabled(flags in (4, 16))
+            role.model().item(2).setEnabled(flags == 2)
+            role.setCurrentIndex(max(0, role.findData(profile['role'])))
             role.setEnabled(compatible)
             interval = QDoubleSpinBox()
             interval.setRange(.1, 300)
@@ -150,13 +159,18 @@ class SkillPanel(QWidget):
             effect.setSpecialValueText('Não identificado')
             effect.setToolTip('Efeito informado pelo servidor; diferente do ID da habilidade. Use Testar buff e Preencher vínculos para identificar.')
             effect.setValue(profile['effect_id'])
-            self.rows[identity] = {'enabled': enabled, 'level': level, 'role': role, 'interval': interval, 'effect': effect,
+            distance = QSpinBox()
+            distance.setRange(-1, 32)
+            distance.setSpecialValueText(f"Jogo ({metadata['range']})")
+            distance.setValue(-1 if profile.get('range_override') is None else profile['range_override'])
+            distance.setToolTip('Automatico usa os dados do jogo. Alterar este limite nao aumenta o alcance permitido pelo servidor. Em si: raio de proximidade para ativar (se o jogo informa 0, o bot usa 2 para ativacao; nao e o raio de dano). Chao: alcance da conjuracao.')
+            self.rows[identity] = {'range': distance, 'enabled': enabled, 'level': level, 'role': role, 'interval': interval, 'effect': effect,
                                    'target_flags': flags, 'index': index}
-            for column, widget in ((0, enabled), (5, level), (7, role), (8, interval), (9, effect)):
+            for column, widget in ((0, enabled), (5, level), (7, role), (8, interval), (9, effect), (11, distance)):
                 self.table.setCellWidget(index, column, widget)
             enabled.toggled.connect(self.changed.emit)
             role.currentIndexChanged.connect(self.changed.emit)
-            for spin in (level, interval, effect):
+            for spin in (level, interval, effect, distance):
                 spin.valueChanged.connect(self.changed.emit)
 
     def update_states(self, effects, rotation):

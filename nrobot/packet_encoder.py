@@ -66,3 +66,16 @@ def equip_ammo(index: int):
     """REDE-57: native 0x5886DF/0x588B78, <opcode,index,position>, six bytes."""
     uint(index,16,positive=True)
     return struct.pack('<HHH',0xa9,index,0x8000)
+
+
+def ground_skill(x: int, y: int, skill_id: int, level: int, *, ticks=windows_tick) -> bytes:
+    """Native NRO 0x58C3BA..0x58C435: 0113, 22 bytes; level@5, id@9, x@12, y@20.
+    The six opaque bytes between coordinates carry no semantic field in the builder.
+    """
+    uint(x, 10)
+    uint(y, 10)
+    uint(skill_id, 16, positive=True)
+    uint(level, 16, positive=True)
+    return (struct.pack('<H', 0x113)+filler(3, ticks)+struct.pack('<H', level)
+            +filler(2, ticks)+struct.pack('<H', skill_id)+filler(1, ticks)
+            +struct.pack('<H', x)+bytes(6)+struct.pack('<H', y))

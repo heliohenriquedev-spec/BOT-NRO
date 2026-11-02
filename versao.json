@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.12",
- "published_at": "2026-11-02T19:42:14",
- "notes": "Bot",
+ "version": "2026.11.02.13",
+ "published_at": "2026-11-02T20:00:42",
+ "notes": "Kuchy",
  "files": [
   ".gitattributes",
   ".gitignore",
@@ -204,6 +204,7 @@
   "data/monstros_base/sprites/3824.png",
   "data/monstros_base/sprites/3825.png",
   "data/rede/especies_nro.json",
+  "data/rede/habilidades_chao_validacao.json",
   "data/rede/identidades_cliente.json",
   "data/rede/tamanhos_cliente.json",
   "instalar.bat",
@@ -291,6 +292,7 @@
   "tests/test_relay_windows_lifecycle.py",
   "tests/test_server_path.py",
   "tests/test_session_relay.py",
+  "tests/test_skill_cast_modes.py",
   "tests/test_skill_panel_performance.py",
   "tests/test_target_priority.py",
   "tests/test_updater.py",
@@ -300,5 +302,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "2176cb4fab29"
+ "files_digest": "0f6e35de86ff"
 }

@@ -80,7 +80,7 @@ def validate(data):
         p = {'enabled': False, 'role': 'offensive', 'level': 1, 'interval': .5, 'effect_id': 0, **profile}
         if type(p.get('skill_id')) is not int or not 1 <= p['skill_id'] <= 65535 or p['skill_id'] in seen:
             raise ValueError('ID de habilidade inválido ou duplicado')
-        if p['role'] not in ('offensive', 'buff') or type(p['enabled']) is not bool:
+        if p['role'] not in ('offensive', 'buff', 'summon') or type(p['enabled']) is not bool:
             raise ValueError('Tipo/habilitação de habilidade inválido')
         if type(p['level']) is not int or not 1 <= p['level'] <= 100:
             raise ValueError('Nível de habilidade inválido')
@@ -90,7 +90,12 @@ def validate(data):
             raise ValueError('Efeito de buff inválido')
         if p['role'] == 'buff' and not p['effect_id'] and p['skill_id'] in links:
             p['effect_id'] = links[p['skill_id']]
+        distance = p.get('range_override')
+        if distance is not None and (type(distance) is not int or not 0 <= distance <= 32):
+            raise ValueError('Alcance da habilidade deve estar entre 0 e 32 celulas, ou automatico')
         normalized.append({k: p[k] for k in ('skill_id', 'enabled', 'role', 'level', 'interval', 'effect_id')})
+        if 'range_override' in p:
+            normalized[-1]['range_override'] = distance
         seen.add(p['skill_id'])
     result['skill_profiles'] = normalized
     for key in ('hotkey_hunt', 'hotkey_minimap'):

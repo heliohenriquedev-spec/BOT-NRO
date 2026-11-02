@@ -224,6 +224,11 @@ class PacketPanel(QMainWindow):
         presence_layout.addWidget(QLabel('Jogadores permitidos: um nome por linha. N?o pausam a ca?a.'))
         self.allowed_players = QPlainTextEdit()
         self.allowed_players.setMaximumHeight(95)
+        self.allowed_players.setReadOnly(True)
+        self.edit_allowed_players = QPushButton('Editar jogadores permitidos')
+        self.edit_allowed_players.setCheckable(True)
+        self.edit_allowed_players.toggled.connect(self.toggle_allowed_players_edit)
+        presence_layout.addWidget(self.edit_allowed_players)
         self.allowed_players.setPlaceholderText('Nome exato do personagem')
         presence_layout.addWidget(self.allowed_players)
         presence_layout.addWidget(QLabel('Os alertas em vermelho no Diagnóstico aparecem sempre.'))
@@ -623,6 +628,14 @@ class PacketPanel(QMainWindow):
         self.close()
 
     # -- automatic saving (REDE-78) -----------------------------------------------------
+    def toggle_allowed_players_edit(self, editing):
+        self.allowed_players.setReadOnly(not editing)
+        self.edit_allowed_players.setText('Concluir e bloquear lista' if editing else 'Editar jogadores permitidos')
+        if editing:
+            self.allowed_players.setFocus()
+        else:
+            self.schedule_save()
+
     def watch_settings(self):
         """Every edit is saved by itself; no button needed to keep the configuration."""
         self.save_timer = QTimer(self)
