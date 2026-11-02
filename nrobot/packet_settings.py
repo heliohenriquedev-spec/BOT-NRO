@@ -25,7 +25,7 @@ HOTKEYS = {name: code for name, code in (
     + [(f'Num {i}', 0x60+i) for i in range(10)])}
 DEFAULTS.update(hotkey_hunt='Home', hotkey_minimap='End', sit_on_players=False, resume_delay=10,
                 limit_target_failures=True, defer_failed_targets=True, skill_burst=False, skill_burst_interval=.05)
-DEFAULTS.update(allowed_players=[])
+DEFAULTS.update(allowed_players=[], summon_queue_mode='cycle')
 THROWS_TOKEN = 'throws'
 
 
@@ -43,6 +43,8 @@ def validate(data):
     if not isinstance(data, dict):
         raise ValueError('Configuração deve ser um objeto')
     result = {**DEFAULTS, **data}
+    if result['summon_queue_mode'] not in ('cycle', 'priority'):
+        raise ValueError('Modo da fila Kuchiyose invalido')
     names = result['allowed_players']
     if not isinstance(names, list) or len(names) > 200 or any(not isinstance(n, str) or not n.strip() or len(n.strip()) > 64 for n in names):
         raise ValueError('Lista de jogadores permitidos inv?lida')
@@ -84,7 +86,7 @@ def validate(data):
             raise ValueError('Tipo/habilitação de habilidade inválido')
         if type(p['level']) is not int or not 1 <= p['level'] <= 100:
             raise ValueError('Nível de habilidade inválido')
-        if type(p['interval']) not in (int, float) or not math.isfinite(p['interval']) or not .1 <= p['interval'] <= 300:
+        if type(p['interval']) not in (int, float) or not math.isfinite(p['interval']) or not .1 <= p['interval'] <= (86400 if p['role'] == 'summon' else 300):
             raise ValueError('Intervalo da habilidade deve estar entre 0,1 e 300 segundos')
         if type(p['effect_id']) is not int or not 0 <= p['effect_id'] <= 65535:
             raise ValueError('Efeito de buff inválido')

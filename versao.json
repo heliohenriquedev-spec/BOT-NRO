@@ -1,6 +1,6 @@
 {
- "version": "2026.11.02.14",
- "published_at": "2026-11-02T20:15:15",
+ "version": "2026.11.02.15",
+ "published_at": "2026-11-02T20:36:21",
  "notes": "Kuchy",
  "files": [
   ".gitattributes",
@@ -222,6 +222,7 @@
   "nrobot/game_overlay.py",
   "nrobot/grf.py",
   "nrobot/grf_header.py",
+  "nrobot/kuchiyose_dialog.py",
   "nrobot/manual_skill_diagnostic.py",
   "nrobot/map_monsters.py",
   "nrobot/map_navigation.py",
@@ -268,6 +269,7 @@
   "tests/test_grf.py",
   "tests/test_grf_map_validation.py",
   "tests/test_keys_sit_burst.py",
+  "tests/test_kuchiyose_modal_combat.py",
   "tests/test_manual_skill_diagnostic.py",
   "tests/test_map_monsters.py",
   "tests/test_map_navigation.py",
@@ -305,5 +307,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "bca882ab0b8b"
+ "files_digest": "29974240fabc"
 }

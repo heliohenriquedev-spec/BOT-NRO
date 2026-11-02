@@ -107,7 +107,7 @@ class ContinuousTracker:
                 'delivery_lag_seconds': round(self.delivery_lag, 3),
                 'candidate': None if target is None else {'entity_id': target.entity_id,
                     'species_id': target.species_id, 'position': [target.x, target.y]},
-                'recent_entities': [{'entity_id': e.entity_id, 'species_id': e.species_id,
+                'recent_entities': [{'entity_id': e.entity_id, 'species_id': e.species_id, 'kind': e.kind,
                                      'position': [e.x, e.y], 'destination': list(e.destination) if e.destination else None,
                                      'effective_position': e.combat_bounds(now)[0][0],
                                      'attack_positions': e.combat_bounds(now)[0],

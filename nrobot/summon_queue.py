@@ -27,6 +27,7 @@ def validated_learning(data):
 
 class SummonQueue:
     def __init__(self):
+        self.mode = 'cycle'
         self.active = None
         self.waiting = None
         self.last_completed = None
@@ -47,7 +48,7 @@ class SummonQueue:
         rows = sorted((p for p in profiles if p['enabled'] and p['role'] == 'summon'),
                       key=lambda p: (p.get('summon_priority', 0), p['skill_id']))
         ids = [p['skill_id'] for p in rows]
-        if self.last_completed in ids:
+        if self.mode == 'cycle' and self.last_completed in ids:
             i = ids.index(self.last_completed)+1
             rows = rows[i:]+rows[:i]
         return rows

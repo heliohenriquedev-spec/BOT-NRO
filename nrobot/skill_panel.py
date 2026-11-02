@@ -1,7 +1,7 @@
 """REDE-41: character skill catalog and explicitly configured rotation."""
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
-                              QCheckBox, QSpinBox, QDoubleSpinBox, QComboBox, QHeaderView, QPushButton, QHBoxLayout)
+                              QCheckBox, QSpinBox, QDoubleSpinBox, QComboBox, QHeaderView, QPushButton, QHBoxLayout, QDialog)
 from .combat_rotation import skill_category
 import time
 
@@ -14,6 +14,7 @@ class SkillPanel(QWidget):
     def __init__(self, profiles=None):
         super().__init__()
         self.saved = profiles or []
+        self.summon_queue_mode = 'cycle'
         self.signature = None
         self.rows = {}
         self.display_names = {}
@@ -51,7 +52,7 @@ class SkillPanel(QWidget):
         probe.clicked.connect(self.probe_selected)
         layout.addWidget(probe)
         kuchiyose = QPushButton('Marcar Kuchiyose aprendidas para a fila')
-        kuchiyose.clicked.connect(self.enable_kuchiyose)
+        kuchiyose.clicked.connect(self.open_kuchiyose)
         summon_buttons = QHBoxLayout()
         summon_buttons.addWidget(kuchiyose)
         self.finish_summon = QPushButton('A invocacao terminou no jogo: confirmar fim e aprender duracao')
@@ -74,6 +75,8 @@ class SkillPanel(QWidget):
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.table.setColumnHidden(9, True)
         self.table.setColumnHidden(10, True)
+        self.table.setColumnHidden(12, True)
+        self.table.setColumnHidden(13, True)
         layout.addWidget(self.table)
 
     def receive_buff_learning(self, result):
@@ -143,6 +146,7 @@ class SkillPanel(QWidget):
             received_name = metadata.get('name')
             display_name = self.local_names.get(received_name, received_name) or ('Arremessar Kunai' if identity == 524 else 'Nome não recebido')
             self.display_names[identity] = display_name
+            self.table.setRowHidden(index, 'kuchiyose' in display_name.casefold())
             values = {1: identity, 2: display_name, 3: skill_category(metadata), 4: metadata['level'],
                       6: f"{metadata['sp_cost']} / {metadata['range']}"}
             for column, value in values.items():
@@ -171,7 +175,7 @@ class SkillPanel(QWidget):
             role.setCurrentIndex(max(0, role.findData(profile['role'])))
             role.setEnabled(compatible)
             interval = QDoubleSpinBox()
-            interval.setRange(.1, 300)
+            interval.setRange(.1, 86400 if 'kuchiyose' in display_name.casefold() else 300)
             interval.setDecimals(2)
             interval.setSingleStep(.1)
             interval.setValue(profile['interval'])
@@ -250,15 +254,37 @@ class SkillPanel(QWidget):
             if row is not None and row['role'].currentData() == 'buff' and row['effect'].value() == 0:
                 row['effect'].setValue(effect)
 
-    def enable_kuchiyose(self):
-        for identity, row in self.rows.items():
-            if 'kuchiyose' in self.display_names.get(identity, '').casefold() and row['target_flags'] in (2, 4, 16):
-                row['role'].setCurrentIndex(row['role'].findData('summon'))
-                row['enabled'].setChecked(True)
+    def open_kuchiyose(self):
+        from .kuchiyose_dialog import KuchiyoseDialog
+        profiles = {p['skill_id']: p for p in self.profiles()}
+        entries = [(identity, self.display_names[identity], profiles[identity]) for identity,row in self.rows.items()
+                   if 'kuchiyose' in self.display_names.get(identity, '').casefold() and row['target_flags'] in (2,4,16)]
+        dialog = KuchiyoseDialog(entries, self.summon_queue_mode, self)
+        if dialog.exec() == QDialog.Accepted:
+            self.apply_kuchiyose(dialog.values(), dialog.mode.currentData())
+
+    def apply_kuchiyose(self, values, mode):
+        self.summon_queue_mode = mode
+        for identity, value in values.items():
+            row = self.rows.get(identity)
+            if row is None or 'kuchiyose' not in self.display_names.get(identity, '').casefold():
+                continue
+            for widget in row.values():
+                if hasattr(widget, 'blockSignals'):
+                    widget.blockSignals(True)
+            row['role'].setCurrentIndex(row['role'].findData('summon'))
+            row['enabled'].setChecked(value['enabled'])
+            row['duration'].setValue(value['summon_duration'])
+            row['interval'].setValue(value['interval'])
+            row['priority'].setValue(value['summon_priority'])
+            for widget in row.values():
+                if hasattr(widget, 'blockSignals'):
+                    widget.blockSignals(False)
+        self.changed.emit()
 
     def enable_offensives(self):
         for identity, row in self.rows.items():
-            if row['enabled'].isEnabled() and (row['target_flags'] == 1 or identity == 524):
+            if 'kuchiyose' not in self.display_names.get(identity, '').casefold() and row['enabled'].isEnabled() and (row['target_flags'] == 1 or identity == 524):
                 row['enabled'].setChecked(True)
                 row['role'].setCurrentIndex(0)
 

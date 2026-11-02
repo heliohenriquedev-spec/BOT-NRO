@@ -198,6 +198,7 @@ class SessionRelay:
             self.hunt.TARGET_DEFER = 0
         self.hunt.use_skills = settings['skills']
         self.hunt.auto_attacks = settings['auto_attacks']
+        self.tracker.observer.free_cast_movement = True
         from .combat_rotation import CombatRotation
         previous_rotation = self.rotation
         if previous_rotation is not None:
@@ -205,7 +206,7 @@ class SessionRelay:
         self.rotation = CombatRotation(settings['skill_profiles'], response_timeout=settings['skill_timeout'],
             attempts=settings['skill_attempts'], defer=settings['target_defer'], interval=settings['skill_interval'], global_delay=settings['skill_global_delay'],
             priority=settings['skill_priority'], fast=settings['fast_offensives'],
-            burst=settings['skill_burst'], burst_interval=settings['skill_burst_interval']) if settings['skills'] and settings['advanced_combat'] else None
+            burst=settings['skill_burst'], burst_interval=settings['skill_burst_interval'], ignore_animation=True) if settings['skills'] and settings['advanced_combat'] else None
         if self.rotation is not None:
             if not settings['limit_target_failures']:
                 self.rotation.attempts = 10**9
@@ -233,6 +234,7 @@ class SessionRelay:
             except (OSError, ValueError):
                 pass
         if self.rotation is not None:
+            self.rotation.summons.mode = settings['summon_queue_mode']
             self.hunt.use_skills = False
         if settings['patrol']:
             if self.hunt.patrol is None:
@@ -792,10 +794,12 @@ class SessionRelay:
             collision = self.collision_map()
             if self.settings and self.settings['require_collision'] and collision is None:
                 raise ValueError('Mapa de colisão deixou de estar disponível')
-            if action['role'] == 'offensive':
+            if action['role'] in ('offensive', 'summon'):
                 entity = observer.registry.entities.get(action.get('combat_target_id', action['target_id']))
                 if (entity is None or not entity.alive or entity.species_id not in observer.species
                     or not observer.registry.current(entity, now)):
+                    return False
+                if action['role'] == 'summon' and (entity.kind != 'monster' or max(math.dist(own, p) for own in observer.combat_positions(now) for p in entity.combat_bounds(now)[0]) > 12):
                     return False
                 if collision is not None:
                     bounds, _ = entity.combat_bounds(now)
@@ -1006,7 +1010,7 @@ class SessionRelay:
                     self.record_hunt({'kind': 'f2_binding', 'binding': binding})
                     print(f'Atalho F2 recebido do servidor: {binding}. Bot configurado para habilidade 524, nível 10.')
             if self.hunt is not None:
-                if (self.hunt.pending is not None and self.hunt.pending['kind'] == 'move'
+                if (not self.tracker.observer.free_cast_movement and self.hunt.pending is not None and self.hunt.pending['kind'] == 'move'
                     and any(e['kind'] == 'skill_cast' and e.get('source_id') == self.tracker.observer.player_id for e in events)):
                     if self.hunt.patrol is not None and self.tracker.observer.player is not None:
                         self.hunt.patrol.reached(self.tracker.observer.player, self.hunt.pending.get('origin'))
@@ -1106,6 +1110,7 @@ class SessionRelay:
                 self.upstream = upstream
                 pinned = self.tracker.observer.pinned
                 self.tracker = ContinuousTracker(self.tracker.observer.species, player_ttl=None, idle_timeout=None, entity_ttl=None)
+                self.tracker.observer.free_cast_movement = True
                 self.tracker.observer.collision_provider = self.collision_map
                 self.tracker.observer.pinned = pinned
                 self.tracker.observer.map_name = self.next_map
@@ -1293,6 +1298,16 @@ class SessionRelay:
             self.hunt.target = None
             self.hunt.reason = 'suspensa: '+reason+(' • sentado' if self.sitting else '')
         return True
+
+    def after_rotation_action(self, action, *, skill_sent=False, attack_turn=False, now=None):
+        if action is None or action['kind'] == 'move':
+            return action
+        if skill_sent:
+            return None
+        now = time.monotonic() if now is None else now
+        if not attack_turn and now < max(self.rotation.next_send, self.tracker.observer.cast_until):
+            return None
+        return action
 
     def attack_turn(self, action):
         """A basic attack may take the next packet (basic attacks on, target in reach)."""
@@ -1574,16 +1589,16 @@ async def run(args):
                                 # (skill, attack, skill...); with no skill ready it keeps attacking.
                                 attack_turn = (relay.attack_turn(action) and relay.last_combat_packet == 'skill'
                                                and now >= relay.tracker.observer.cast_until)
+                                skill_sent = False
                                 rotation_action = None if attack_turn else relay.rotation.plan(state, now, relay.hunt.target)
                                 if rotation_action is not None and relay.native_frames.ready:
                                     try:
                                         if await relay.send_rotation_action(rotation_action, game_gate=lambda: controls.connected(relay.game_peer, relay.game_local)):
-                                            action = None
+                                            skill_sent = True
                                             relay.last_combat_packet = 'skill'
                                     except (OSError, ValueError) as exc:
                                         relay.hunt.pause(str(exc))
-                                if not attack_turn and now < max(relay.rotation.next_send, relay.tracker.observer.cast_until):
-                                    action = None
+                                action = relay.after_rotation_action(action, skill_sent=skill_sent, attack_turn=attack_turn, now=now)
                                 relay.flush_rotation_diagnostics()
                             if action is not None and action['kind'] == 'attack' and relay.settings and not relay.settings['auto_attacks']:
                                 action = None

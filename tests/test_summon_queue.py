@@ -1,4 +1,4 @@
-﻿import copy
+import copy
 import pytest
 from nrobot.combat_rotation import CombatRotation
 from nrobot.summon_queue import SummonQueue
@@ -12,7 +12,7 @@ def p(identity, priority=0, duration=0, effect=0):
 def state(profiles, effects=None, sp=100):
     return dict(state='tracking', player_position_recent=True, player_position=[10,10],
                 player_id=1, player_sp=sp, own_effects=effects or {}, own_cast_until=0,
-                recent_entities=[], learned_skills=[dict(skill_id=x['skill_id'], level=1,
+                recent_entities=[dict(entity_id=20,position=[12,10],position_age_seconds=.1)], learned_skills=[dict(skill_id=x['skill_id'], level=1,
                 range=4, sp_cost=1, target_flags=2) for x in profiles])
 
 
@@ -156,7 +156,8 @@ def test_ui_marks_only_learned_kuchiyose_and_saves_queue_fields():
     panel.local_names={'A':'Kuchiyose: Katsuyu','B':'Kuchiyose: Akino','C':'Armadilha'}
     meta=[dict(skill_id=i,level=1,range=4,sp_cost=1,target_flags=2,name=name) for i,name in ((700,'A'),(701,'B'),(702,'C'))]
     panel.update_catalog(meta,{})
-    panel.enable_kuchiyose()
+    profiles={x['skill_id']:x for x in panel.profiles()}
+    panel.apply_kuchiyose({i:{**profiles[i],'enabled':True,'summon_duration':0,'summon_priority':0} for i in (700,701)},'cycle')
     panel.rows[700]['priority'].setValue(2)
     panel.rows[701]['priority'].setValue(1)
     panel.rows[701]['duration'].setValue(45)

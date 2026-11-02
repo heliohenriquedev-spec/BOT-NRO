@@ -434,7 +434,7 @@ class PacketHunt:
                        and state['player_sp'] >= metadata.get('sp_cost', 65535))
         combat_range = state.get('engagement_range', min(6, metadata['range']) if wants_skill else 2)
         closest = min(math.dist(player, point) for point in range_positions)
-        melee = self.auto_attacks and not wants_skill and combat_range <= 2  # the old Kunai-only mode keeps its range
+        melee = self.auto_attacks and not wants_skill  # the old Kunai-only mode keeps its range
         if melee:
             combat_range = self.MELEE_RANGE  # go hand to hand: basic attacks between the skills
         # The configured rotation supplies engagement_range and handles shooting while

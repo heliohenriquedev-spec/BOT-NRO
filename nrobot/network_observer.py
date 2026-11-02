@@ -192,6 +192,7 @@ class LiveStream:
 
 class Observer:
     def __init__(self, species: set[int], player_ttl=5, entity_ttl=5):
+        self.free_cast_movement = False
         self.species = species
         self.registry = TargetRegistry(ttl=entity_ttl)
         self.pinned = set()  # REDE-67: characters captured as targets
@@ -304,7 +305,7 @@ class Observer:
         elif kind == 'skill_cooldown':
             self.skill_cooldowns[event['skill_id']] = now+min(event['duration_ms']/1000, 3600)
         elif kind == 'skill_cast' and event['source_id'] == self.player_id:
-            if self.player_motion is not None:
+            if self.player_motion is not None and not self.free_cast_movement:
                 self.player = self.combat_positions(now)[0]
                 self.player_motion = None
             self.cast_until = now+min(event['duration_ms']/1000, 30)

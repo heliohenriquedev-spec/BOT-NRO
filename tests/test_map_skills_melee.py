@@ -88,14 +88,16 @@ def test_running_away_goes_around_a_wall():
     assert math.dist(retreat['destination'], [12, 20]) > 2
 
 
-def test_basic_attacks_do_not_override_ranged_spacing():
+def test_basic_attacks_on_approach_for_melee_off_preserves_ranged_kiting():
     hunt = PacketHunt()
     hunt.start()
-    assert hunt.plan(hunt_state([10, 10], [15, 10]), 0) is None
-    close = hunt.plan(hunt_state([10, 10], [12, 10]), 1)
-    assert close['purpose'] == 'keep_distance'
-    distance = math.dist(close['destination'], [12, 10])
-    assert 2 < distance <= 6
+    approach = hunt.plan(hunt_state([10,10],[15,10]),0)
+    assert approach['kind'] == 'move' and approach['destination'][0] > 10
+    hunt.target = None
+    assert hunt.plan(hunt_state([10,10],[12,10]),1)['kind'] == 'attack'
+    hunt.auto_attacks = False
+    retreat = hunt.plan(hunt_state([10,10],[12,10]),2)
+    assert retreat['purpose'] == 'keep_distance'
 
 
 def test_basic_attack_waits_while_a_skill_in_reach_is_about_to_be_ready():

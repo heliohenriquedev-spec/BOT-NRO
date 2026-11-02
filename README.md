@@ -151,3 +151,36 @@ Mudancas de configuracao/pausa preservam a invocacao acompanhada; trocar de mapa
 limpa a presenca local e mantem os dados aprendidos. O funcionamento ao vivo das
 Kuchiyose ainda precisa ser validado: a descricao local de Filhote Katsuyu nao
 informa tempo e os registros anteriores nao fornecem uma duracao confirmada.
+
+
+### Kuchiyose no modal e combate com movimentacao livre
+
+O botao **Marcar Kuchiyose aprendidas para a fila** agora abre um modal com somente
+as Kuchiyose aprendidas. Elas ficam ocultas na tabela geral e nao sao marcadas pelo
+botao de ofensivas. No modal, selecione Usar e configure duracao, recarga local e
+prioridade; Salvar aplica as alteracoes, Cancelar preserva os valores anteriores.
+A duracao e a recarga sao controles distintos. Uma recarga maior informada pelo
+servidor prevalece sobre o numero local.
+
+Modos da fila:
+- **Ciclo continuo**: percorre as habilitadas, pulando indisponiveis, e depois reinicia.
+- **Prioridade disponivel**: ao terminar a ativa, escolhe a de maior prioridade que
+  ja esteja pronta; pode voltar a 1 antes de usar 3 (por exemplo 1, 2, 1, 3).
+
+Mudar o modo nao substitui uma invocacao ativa. Cada nova invocacao exige um monstro
+alvo recente a ate 12 celulas da posicao atual estimada, e linha livre. Alcance de
+conjuracao, celula livre, SP e recarga sao validados novamente antes do envio. Sem
+monstro proximo, a fila espera. Um jogador capturado nao satisfaz essa condicao.
+
+Com ataque basico desligado, o bot mantem o recuo no alcance das habilidades. O
+movimento nao e mais descartado por espera global de habilidades ou por conjuracao;
+o pacote de movimento pode seguir o de habilidade na mesma passagem do controle.
+O trajeto confirmado nao e apagado pelo inicio da conjuracao. O servidor pode
+corrigir o movimento, e essas correcoes continuam sendo respeitadas.
+
+Com ataque basico ligado, o personagem se aproxima do alcance de ataque e intercala
+ataques basicos com as habilidades. A espera calculada pelo tempo de animacao da
+sprite nao bloqueia a rotacao configurada. Cooldown, delay entre habilidades,
+conjuracao ainda em andamento para iniciar outro uso e verificacao de alcance
+continuam independentes. As alteracoes precisam de reinicio do painel e reconexao;
+os testes locais nao substituem a validacao de movimentacao livre no servidor.

@@ -59,7 +59,9 @@ def test_override_controls_planning_navigation_and_basic_attack_priority():
 
 def test_invocation_needs_ground_type_but_no_enemy_and_respects_interval():
     p=profile('summon');r=CombatRotation([p],fast=True,burst=True)
-    s=snapshot(flags=2,reach=4);s['recent_entities']=[]
+    s=snapshot(flags=2,reach=4);entities=s['recent_entities'];s['recent_entities']=[]
+    assert r.plan(s,0) is None  # summons require nearby targets
+    s['recent_entities']=entities
     a=r.plan(s,0)
     assert a['cast_mode']=='ground' and a['target_id']==1
     r.sent(a,0)
@@ -105,7 +107,7 @@ def test_relay_sends_self_or_ground_packet_and_validates_cells(tmp_path,monkeypa
     o=r.tracker.observer;now=time.monotonic()
     o.player_id,o.player,o.player_at,o.sp=1,[10,10],now,100
     o.skills={1001:dict(skill_id=1001,level=1,sp_cost=1,range=3 if ground else 0,target_flags=2 if ground else 4)}
-    o.registry.update(Entity(20,1051,11,10,now,'monster'))
+    o.registry.update(Entity(20,1051,10,11,now,'monster'))
     r.upstream=Writer()
     cells=bytearray([1]*30*30)
     if ground:cells[10*30+11]=0

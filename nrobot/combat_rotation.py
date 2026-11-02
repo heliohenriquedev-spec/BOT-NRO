@@ -45,7 +45,8 @@ class CombatRotation:
     FASTER_STEP = .01
 
     def __init__(self, profiles, *, response_timeout=1.5, attempts=3, defer=8, interval=.5, global_delay=.12, priority=None,
-                 fast=False, burst=False, burst_interval=.05):
+                 fast=False, burst=False, burst_interval=.05, ignore_animation=False):
+        self.ignore_animation = ignore_animation
         self.fast = fast  # offensives ignore the manual interval: only server cooldowns and delay
         # REDE-82: burst sends every offensive in range in turn, one packet per burst_interval,
         # without waiting for the server's answer.
@@ -127,7 +128,7 @@ class CombatRotation:
                     self.log.append({'kind': 'rotation_cooldown_notice', 'skill_id': latest, 'retry_seconds': retry})
                 continue
             skill_id = event.get('skill_id')
-            if kind in ('skill_damage', 'normal_attack') and event.get('source_id') == player_id:
+            if not self.ignore_animation and kind in ('skill_damage', 'normal_attack') and event.get('source_id') == player_id:
                 self.next_send = max(self.next_send, now+min(max(event.get('source_motion_ms', 0), 0), 30000)/1000)
             if kind == 'skill_cooldown':
                 self.ready[skill_id] = max(self.ready.get(skill_id, 0), now+event['duration_ms']/1000)
@@ -283,6 +284,18 @@ class CombatRotation:
                 if target is None:
                     continue
             elif profile['role'] == 'summon':
+                nearby = entities.get(target_id)
+                own = state.get('combat_player_positions') or [state['player_position']]
+                monsters = [e for e in entities.values() if e.get('kind', 'monster') == 'monster']
+                if nearby is not None and nearby.get('kind', 'monster') != 'monster':
+                    nearby = None
+                if nearby is None and monsters:
+                    nearby = min(monsters, key=lambda e: math.dist(own[0], e.get('effective_position', e['position'])))
+                if nearby is None or (nearby.get('position_age_seconds', 0) > 1.5 and not nearby.get('position_usable')):
+                    continue
+                bounds = nearby.get('attack_positions') or [nearby.get('effective_position', nearby['position'])]
+                if max(math.dist(a,b) for a in own for b in bounds) > 12:
+                    continue
                 if self.summons.active is not None or self.summons.waiting is not None:
                     continue
                 if flags not in (2, 4, 16):
@@ -315,6 +328,7 @@ class CombatRotation:
                 action['combat_target_id'] = target_id
                 action['cast_mode'] = 'self'
             elif profile['role'] == 'summon':
+                action['combat_target_id'] = nearby['entity_id']
                 action['cast_mode'] = 'ground' if flags == 2 else 'self'
                 # Aim beside the current position, never at an unvalidated distant cell.
                 own = (state.get('combat_player_positions') or [state['player_position']])[0]

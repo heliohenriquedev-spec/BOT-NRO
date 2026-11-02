@@ -2,7 +2,7 @@
  "1010": {
   "species_id": 1010,
   "maps": {
-   "areia": 4
+   "areia": 5
   },
   "walk_speed_ms": 500,
   "captured_sprite": true
@@ -66,7 +66,7 @@
   "species_id": 1212,
   "maps": {
    "kakashi": 12,
-   "moc_fild01": 58
+   "moc_fild01": 67
   },
   "walk_speed_ms": 350,
   "captured_sprite": true,
@@ -96,10 +96,10 @@
  "1634": {
   "species_id": 1634,
   "maps": {
-   "areia": 5,
+   "areia": 6,
    "yuno_fild11": 6
   },
-  "walk_speed_ms": 170,
+  "walk_speed_ms": 500,
   "captured_sprite": true,
   "name": "Jounin",
   "max_hp": 1300000
@@ -128,7 +128,7 @@
   "species_id": 1783,
   "maps": {
    "kakashi": 28,
-   "moc_fild01": 75
+   "moc_fild01": 84
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,

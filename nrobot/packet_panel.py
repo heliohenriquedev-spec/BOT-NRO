@@ -307,6 +307,7 @@ class PacketPanel(QMainWindow):
         self.pause_disguised.setChecked(settings['pause_on_disguised'])
         self.pause_hidden.setChecked(settings['pause_on_hidden'])
         self.skill_panel.saved = settings['skill_profiles']
+        self.skill_panel.summon_queue_mode = settings['summon_queue_mode']
         self.priority_panel.saved = settings['skill_priority']
         for key, field in self.combat_fields.items():
             field.setValue(settings[key])
@@ -327,6 +328,7 @@ class PacketPanel(QMainWindow):
                 'require_collision': self.strict_map.isChecked(), 'advanced_combat': self.advanced.isChecked(),
                 'auto_attacks': self.auto_attacks.isChecked(), 'skill_profiles': self.skill_panel.profiles(),
                 'skill_priority': self.priority_panel.priority(),
+                'summon_queue_mode': self.skill_panel.summon_queue_mode,
                 'pause_on_players': self.pause_players.isChecked(), 'pause_on_disguised': self.pause_disguised.isChecked(),
                 'pause_on_hidden': self.pause_hidden.isChecked(), 'fast_offensives': self.fast_offensives.isChecked(),
                 'hotkey_hunt': self.hotkey_hunt.currentText(), 'hotkey_minimap': self.hotkey_minimap.currentText(),
@@ -690,6 +692,7 @@ class PacketPanel(QMainWindow):
             self.notice.setText('Configuração não salva: '+str(exc))
             return
         self.skill_panel.saved = settings['skill_profiles']
+        self.skill_panel.summon_queue_mode = settings['summon_queue_mode']
         self.priority_panel.saved = settings['skill_priority']
         if self.process.state() != QProcess.NotRunning and self.session is not None:
             if self.pending_command:
