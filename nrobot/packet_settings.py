@@ -17,6 +17,14 @@ DEFAULTS.update(skill_priority=[])
 DEFAULTS.update(pause_on_players=True, pause_on_disguised=True, pause_on_hidden=True)
 # REDE-80: offensive skills as fast as the server accepts them (manual interval ignored).
 DEFAULTS.update(fast_offensives=True)
+# REDE-82: configurable keys, sitting while a player is near, failure rules and skill bursts.
+HOTKEYS = {name: code for name, code in (
+    [(f'F{i}', 0x6f+i) for i in range(1, 13)]
+    + [('Home', 0x24), ('End', 0x23), ('Insert', 0x2d), ('Delete', 0x2e), ('Page Up', 0x21), ('Page Down', 0x22),
+       ('Pause', 0x13), ('Scroll Lock', 0x91)]
+    + [(f'Num {i}', 0x60+i) for i in range(10)])}
+DEFAULTS.update(hotkey_hunt='Home', hotkey_minimap='End', sit_on_players=False, resume_delay=10,
+                limit_target_failures=True, defer_failed_targets=True, skill_burst=False, skill_burst_interval=.05)
 THROWS_TOKEN = 'throws'
 
 
@@ -52,7 +60,8 @@ def validate(data):
     if result['skill_timeout'] < result['skill_interval']:
         raise ValueError('Espera por resposta deve ser maior ou igual ao intervalo da habilidade')
     for key in ('patrol', 'skills', 'require_collision', 'auto_attacks', 'advanced_combat', 'auto_map_targets',
-                'pause_on_players', 'pause_on_disguised', 'pause_on_hidden', 'fast_offensives'):
+                'pause_on_players', 'pause_on_disguised', 'pause_on_hidden', 'fast_offensives', 'sit_on_players',
+                'limit_target_failures', 'defer_failed_targets', 'skill_burst'):
         if type(result[key]) is not bool:
             raise ValueError(f'{key}: valor deve ser booleano')
     profiles = result['skill_profiles']
@@ -79,6 +88,16 @@ def validate(data):
         normalized.append({k: p[k] for k in ('skill_id', 'enabled', 'role', 'level', 'interval', 'effect_id')})
         seen.add(p['skill_id'])
     result['skill_profiles'] = normalized
+    for key in ('hotkey_hunt', 'hotkey_minimap'):
+        if result[key] not in HOTKEYS:
+            raise ValueError(f'{key}: tecla não suportada')
+    if result['hotkey_hunt'] == result['hotkey_minimap'] or 'F12' in (result['hotkey_hunt'], result['hotkey_minimap']):
+        raise ValueError('As teclas de iniciar/parar e do minimapa devem ser diferentes entre si e de F12 (bloqueio)')
+    if type(result['resume_delay']) is not int or not 10 <= result['resume_delay'] <= 600:
+        raise ValueError('Tempo para voltar a rodar deve estar entre 10 e 600 segundos')
+    burst = result['skill_burst_interval']
+    if type(burst) not in (int, float) or not math.isfinite(burst) or not .05 <= burst <= 1:
+        raise ValueError('Intervalo da rajada deve estar entre 0,05 e 1 segundo')
     priority = result['skill_priority']
     if (not isinstance(priority, list) or len(priority) > 64 or len(set(map(str, priority))) != len(priority)
             or any(token != THROWS_TOKEN and (type(token) is not int or not 1 <= token <= 65535) for token in priority)):

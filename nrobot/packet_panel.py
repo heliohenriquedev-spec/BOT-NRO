@@ -111,9 +111,9 @@ class PacketPanel(QMainWindow):
         form.addRow('Trecho da patrulha', self.step)
         self.patrol = QCheckBox('Explorar áreas menos visitadas, variando trajetos e diagonais')
         form.addRow(self.patrol)
-        self.skills = QCheckBox('Ativar habilidades configuradas (Kunai no modo simples)')
+        self.skills = QCheckBox('Ativar habilidades configuradas')
         form.addRow(self.skills)
-        explanation = QLabel('Kunai exige nível, custo e SP recebidos do servidor.\nSem colisão legível, os obstáculos são descobertos pelas respostas de movimento.')
+        explanation = QLabel('Sem colisão legível, os obstáculos são descobertos pelas respostas de movimento.')
         explanation.setWordWrap(True)
         form.addRow(explanation)
         apply = QPushButton('Salvar e aplicar • pausa a caça')
@@ -127,7 +127,6 @@ class PacketPanel(QMainWindow):
         combat_layout.addLayout(combat_form)
         self.combat_fields = {}
         fields = [('skill_global_delay', 'Delay global local (nao confirma delay do servidor)', .1, 10, ' s'),
-                  ('skill_interval', 'Intervalo padrão da Kunai (sem perfil específico)', .25, 3, ' s'),
                   ('skill_timeout', 'Espera máxima pela resposta', .75, 8, ' s'),
                   ('skill_attempts', 'Falhas permitidas por alvo', 1, 5, ''),
                   ('target_defer', 'Adiar alvo após falhas', 2, 30, ' s'),
@@ -142,9 +141,19 @@ class PacketPanel(QMainWindow):
                 box.setSingleStep(.05)
             box.setSuffix(suffix)
             self.combat_fields[key] = box
-            if not key.startswith('switch_'):
+            if key in ('skill_attempts', 'target_defer'):
+                # REDE-82: each failure rule can be turned off.
+                toggle = QCheckBox('Ativar')
+                setattr(self, 'limit_failures' if key == 'skill_attempts' else 'defer_failed', toggle)
+                toggle.toggled.connect(box.setEnabled)
+                row = QHBoxLayout()
+                row.addWidget(toggle)
+                row.addWidget(box, 1)
+                combat_form.addRow(label, row)
+            elif not key.startswith('switch_'):
                 combat_form.addRow(label, box)
-        explanation = QLabel('O alvo atual e mantido enquanto estiver presente e valido. Kunai e Shuriken exigem municao equipada e confirmada pelo servidor.\nCD individual, delay global, alcance e SP continuam obrigatorios. Salvar e aplicar pausa a caca.')
+        explanation = QLabel('O alvo atual é mantido enquanto estiver presente e válido. Cooldown informado pelo servidor, '
+                             'alcance e SP continuam obrigatórios. As alterações são salvas e aplicadas sozinhas.')
         explanation.setWordWrap(True)
         combat_layout.addWidget(explanation)
         combat_buttons = QHBoxLayout()
@@ -184,6 +193,17 @@ class PacketPanel(QMainWindow):
         QTimer.singleShot(1500, lambda: self.update_panel.run('check'))  # tell about new versions on start
         self.strict_map = QCheckBox('Exigir mapa de colisão válido antes de iniciar')
         form.insertRow(0, self.strict_map)
+        keys_box = QGroupBox('Teclas (valem com o jogo em primeiro plano)')
+        keys_form = QFormLayout(keys_box)
+        from PySide6.QtWidgets import QComboBox
+        from .packet_settings import HOTKEYS
+        self.hotkey_hunt, self.hotkey_minimap = QComboBox(), QComboBox()
+        for combo in (self.hotkey_hunt, self.hotkey_minimap):
+            combo.addItems([name for name in HOTKEYS if name != 'F12'])
+        keys_form.addRow('Iniciar / parar o bot', self.hotkey_hunt)
+        keys_form.addRow('Esconder / mostrar o minimapa', self.hotkey_minimap)
+        keys_form.addRow(QLabel('F12 continua bloqueando todos os envios do bot.'))
+        form.insertRow(form.rowCount()-1, keys_box)
         presence_box = QGroupBox('Pausar o bot quando aparecer')
         presence_layout = QVBoxLayout(presence_box)
         self.pause_players = QCheckBox('Qualquer jogador por perto (até 14 células)')
@@ -191,15 +211,44 @@ class PacketPanel(QMainWindow):
         self.pause_hidden = QCheckBox('Jogador escondido ou em @hide')
         for box in (self.pause_players, self.pause_disguised, self.pause_hidden):
             presence_layout.addWidget(box)
+        self.sit_on_players = QCheckBox('Sentar enquanto o bot estiver pausado por um jogador por perto')
+        presence_layout.addWidget(self.sit_on_players)
+        resume_row = QHBoxLayout()
+        resume_row.addWidget(QLabel('Voltar a rodar'))
+        self.resume_delay = QSpinBox()
+        self.resume_delay.setRange(10, 600)
+        self.resume_delay.setSuffix(' s')
+        resume_row.addWidget(self.resume_delay)
+        resume_row.addWidget(QLabel('depois que o jogador sair da tela'), 1)
+        presence_layout.addLayout(resume_row)
+        for line in ('Pelos pacotes do mapa: conta como saída se deslogou, teleportou ou andou além de 18 células.',
+                     'Se sumiu perto (pode estar escondido), a espera é de pelo menos 60 s.'):
+            presence_layout.addWidget(QLabel(line))
         presence_layout.addWidget(QLabel('Os alertas em vermelho no Diagnóstico aparecem sempre.'))
         form.insertRow(form.rowCount()-1, presence_box)
         self.advanced = QCheckBox('Combinar habilidades configuradas e buffs por intervalos individuais')
         combat_form.addRow(self.advanced)
-        self.auto_attacks = QCheckBox('Intercalar ataques básicos nos intervalos')
+        self.auto_attacks = QCheckBox('Ataque básico: a até 3 células do alvo, chega junto e intercala ataques '
+                                      'básicos entre as habilidades (desligado: só habilidades, mantendo distância)')
         combat_form.addRow(self.auto_attacks)
         self.fast_offensives = QCheckBox('Habilidades ofensivas na velocidade máxima (cada uma assim que estiver no '
                                          'alcance e fora do cooldown; o bot aprende o menor intervalo que o servidor aceita)')
         combat_form.addRow(self.fast_offensives)
+        burst_row = QHBoxLayout()
+        self.skill_burst = QCheckBox('Rajada: enviar todas as ofensivas no alcance, uma a cada')
+        burst_row.addWidget(self.skill_burst)
+        self.burst_interval = QDoubleSpinBox()
+        self.burst_interval.setRange(.05, 1)
+        self.burst_interval.setDecimals(2)
+        self.burst_interval.setSingleStep(.05)
+        self.burst_interval.setSuffix(' s')
+        burst_row.addWidget(self.burst_interval)
+        burst_row.addWidget(QLabel('sem esperar resposta do servidor'), 1)
+        combat_form.addRow(burst_row)
+        burst_note = QLabel('Na rajada, só o cooldown informado pelo servidor, o alcance de cada habilidade e o SP '
+                            'seguram o envio. Pedidos que chegarem durante o delay do servidor são descartados por ele.')
+        burst_note.setWordWrap(True)
+        combat_form.addRow(burst_note)
         overview = QWidget()
         overview_layout = QVBoxLayout(overview)
         self.details = QLabel('Aguardando conexão')
@@ -236,6 +285,15 @@ class PacketPanel(QMainWindow):
         self.advanced.setChecked(settings['advanced_combat'])
         self.auto_attacks.setChecked(settings['auto_attacks'])
         self.fast_offensives.setChecked(settings['fast_offensives'])
+        self.hotkey_hunt.setCurrentText(settings['hotkey_hunt'])
+        self.hotkey_minimap.setCurrentText(settings['hotkey_minimap'])
+        self.sit_on_players.setChecked(settings['sit_on_players'])
+        self.resume_delay.setValue(settings['resume_delay'])
+        self.limit_failures.setChecked(settings['limit_target_failures'])
+        self.defer_failed.setChecked(settings['defer_failed_targets'])
+        self.skill_burst.setChecked(settings['skill_burst'])
+        self.burst_interval.setValue(settings['skill_burst_interval'])
+        self.update_key_notice()
         self.pause_players.setChecked(settings['pause_on_players'])
         self.pause_disguised.setChecked(settings['pause_on_disguised'])
         self.pause_hidden.setChecked(settings['pause_on_hidden'])
@@ -262,6 +320,11 @@ class PacketPanel(QMainWindow):
                 'skill_priority': self.priority_panel.priority(),
                 'pause_on_players': self.pause_players.isChecked(), 'pause_on_disguised': self.pause_disguised.isChecked(),
                 'pause_on_hidden': self.pause_hidden.isChecked(), 'fast_offensives': self.fast_offensives.isChecked(),
+                'hotkey_hunt': self.hotkey_hunt.currentText(), 'hotkey_minimap': self.hotkey_minimap.currentText(),
+                'sit_on_players': self.sit_on_players.isChecked(), 'resume_delay': self.resume_delay.value(),
+                'limit_target_failures': self.limit_failures.isChecked(),
+                'defer_failed_targets': self.defer_failed.isChecked(),
+                'skill_burst': self.skill_burst.isChecked(), 'skill_burst_interval': self.burst_interval.value(),
                 **{key: field.value() for key, field in self.combat_fields.items()}}
 
     def reset_combat(self):
@@ -451,7 +514,7 @@ class PacketPanel(QMainWindow):
                                       (' (posição estimada)' if state['combat_target']['arrival_estimated'] else '') if state.get('combat_target') else 'nenhum'),
                 f"Ataques confirmados: {hunt.get('confirmed_attacks', 0)}     Habilidades ofensivas confirmadas: {hunt.get('confirmed_skills', 0)}",
                 f"Candidatos recentes: {len(state.get('recent_entities', []))}     Mensagens recebidas: {state.get('messages', 0)}",
-                'Fase: '+hunt.get('phase', 'aguardando')+f" • Espera atual: {hunt.get('wait_seconds', 0)} s • Intervalo da Kunai: {hunt.get('skill_cooldown_seconds', 0)} s",
+                'Fase: '+hunt.get('phase', 'aguardando')+f" • Espera atual: {hunt.get('wait_seconds', 0)} s",
                 'Motivo: '+(hunt.get('reason') or 'nenhum bloqueio global'),
                 f"Falhas no alvo atual: {hunt.get('target_skill_failures', 0)} • Ajustes aplicados: "+self.applied_combat_text(state.get('settings') or {}),
                 'Última decisão: '+self.decision_text(hunt.get('last_decision')),
@@ -504,11 +567,12 @@ class PacketPanel(QMainWindow):
         if event['kind'] == 'target_switched':
             return f"Alvo {event['previous_target']} ({event['previous_distance']} células) trocado por {event['target_id']} ({event['distance']} células)"
         if event['kind'] == 'skill_confirmed':
-            return f"Kunai confirmada no alvo {event['target_id']}, dano {event.get('damage_raw')}"
+            return f"Habilidade confirmada no alvo {event['target_id']}, dano {event.get('damage_raw')}"
         return f"Alvo {event.get('target_id', '—')}: {event.get('reason', event['kind'])}"
 
     def refresh_overlays(self):
         """10 Hz state for the in-game drawings; the dashboard keeps its own slower refresh."""
+        self.check_minimap_key()
         if self.session is None or self.process.state() == QProcess.NotRunning:
             return
         if not (self.game_overlay.isVisible() or self.overlay.isVisible() or self.priority_panel.minimap.isChecked()):
@@ -562,7 +626,13 @@ class PacketPanel(QMainWindow):
         self.save_timer.setInterval(800)
         self.save_timer.timeout.connect(self.autosave)
         self.targets.changed.connect(self.schedule_save)
+        for combo in (self.hotkey_hunt, self.hotkey_minimap):
+            combo.currentTextChanged.connect(self.schedule_save)
+            combo.currentTextChanged.connect(lambda text: self.update_key_notice())
+        for field in (self.resume_delay, self.burst_interval):
+            field.valueChanged.connect(self.schedule_save)
         for box in (self.auto_map_targets, self.patrol, self.skills, self.strict_map, self.fast_offensives,
+                    self.sit_on_players, self.limit_failures, self.defer_failed, self.skill_burst,
                     self.advanced, self.auto_attacks, self.pause_players, self.pause_disguised, self.pause_hidden):
             box.toggled.connect(self.schedule_save)
         for field in (self.radius, self.step, *self.combat_fields.values()):
@@ -571,6 +641,25 @@ class PacketPanel(QMainWindow):
         self.priority_panel.changed.connect(self.schedule_save)
         self.priority_panel.minimap.toggled.connect(lambda checked: self.save_ui())
         self.overlay.on_change = self.save_ui
+
+    def update_key_notice(self):
+        self.notice.setText(f'{self.hotkey_hunt.currentText()} inicia/pausa • {self.hotkey_minimap.currentText()} '
+                            'esconde/mostra o minimapa • F12 bloqueia envios • Alt+Tab mantém a caça')
+
+    def check_minimap_key(self):
+        """REDE-82: the minimap key toggles it while the game (or this panel) is in front."""
+        if sys.platform != 'win32':
+            return
+        import ctypes
+        from .packet_settings import HOTKEYS
+        from .radar_overlay import find_game_window
+        down = bool(ctypes.windll.user32.GetAsyncKeyState(HOTKEYS[self.hotkey_minimap.currentText()]) & 0x8000)
+        was, self.minimap_key_down = getattr(self, 'minimap_key_down', False), down
+        if not down or was:
+            return
+        front = ctypes.windll.user32.GetForegroundWindow()
+        if front in (find_game_window(), int(self.winId())):
+            self.priority_panel.minimap.setChecked(not self.priority_panel.minimap.isChecked())
 
     def schedule_save(self, *args):
         self.save_timer.start()

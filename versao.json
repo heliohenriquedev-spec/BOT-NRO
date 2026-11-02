@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.9",
- "published_at": "2026-11-02T18:13:04",
- "notes": "Configurações",
+ "version": "2026.11.02.10",
+ "published_at": "2026-11-02T18:45:06",
+ "notes": "Teste",
  "files": [
   ".gitattributes",
   ".gitignore",
@@ -20,6 +20,7 @@
   "data/monstros_base/sprites/1212.png",
   "data/monstros_base/sprites/1601.png",
   "data/monstros_base/sprites/1634.png",
+  "data/monstros_base/sprites/1656.png",
   "data/monstros_base/sprites/1783.png",
   "data/monstros_base/sprites/20571.png",
   "data/monstros_base/sprites/20619.png",
@@ -256,10 +257,12 @@
   "tests/test_game_folder.py",
   "tests/test_grf.py",
   "tests/test_grf_map_validation.py",
+  "tests/test_keys_sit_burst.py",
   "tests/test_manual_skill_diagnostic.py",
   "tests/test_map_monsters.py",
   "tests/test_map_navigation.py",
   "tests/test_map_search.py",
+  "tests/test_map_skills_melee.py",
   "tests/test_monsters_and_fast_skills.py",
   "tests/test_movement_recovery.py",
   "tests/test_native_capture_minimap.py",
@@ -290,5 +293,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "ffb0d99fbe9d"
+ "files_digest": "04147125f0cc"
 }

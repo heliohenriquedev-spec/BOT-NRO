@@ -31,8 +31,24 @@ def test_user_priority_picks_first_usable_skill_in_order():
     assert action['skill_id'] == 1001  # 1003 on its interval: next in the user's order
     rotation.sent(action, 1)
     rotation.observe([{'kind': 'skill_damage', 'skill_id': 1001, 'source_id': 1, 'target_id': 20, 'level': 10, 'damage_raw': 1}], 1, 1.1)
-    assert rotation.plan(_state((1001, 1002, 1003)), 2, 20)['skill_id'] == 1002
-    assert rotation.plan(_state((1001, 1002, 1003)), 6, 20)['skill_id'] == 1003  # top priority is back
+    action = rotation.plan(_state((1001, 1002, 1003)), 2, 20)
+    assert action['skill_id'] == 1002
+    rotation.sent(action, 2)
+    rotation.observe([{'kind': 'skill_damage', 'skill_id': 1002, 'source_id': 1, 'target_id': 20, 'level': 10, 'damage_raw': 1}], 1, 2.1)
+    assert rotation.plan(_state((1001, 1002, 1003)), 6, 20)['skill_id'] == 1003  # REDE-83: the cycle starts again
+
+
+def test_priority_cycle_lets_later_skills_go_when_the_first_is_ready_again_at_once():
+    rotation = CombatRotation(_profiles(1001, 1002, 1003), priority=[1001, 1002, 1003], fast=True)
+    used, now = [], 0.0
+    for _ in range(6):
+        action = rotation.plan(_state((1001, 1002, 1003)), now, 20)
+        rotation.sent(action, now)
+        rotation.observe([{'kind': 'skill_damage', 'skill_id': action['skill_id'], 'source_id': 1, 'target_id': 20,
+                           'level': 10, 'damage_raw': 1}], 1, now+.01)
+        used.append(action['skill_id'])
+        now += 1
+    assert used == [1001, 1002, 1003, 1001, 1002, 1003]
 
 
 def test_priority_skips_skill_without_sp_and_throws_share_one_slot():

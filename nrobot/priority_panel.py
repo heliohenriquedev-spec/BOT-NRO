@@ -51,7 +51,7 @@ class PriorityPanel(QWidget):
         target_layout.addWidget(self.players)
         layout.addWidget(target_box)
 
-        order_box = QGroupBox('Depois do alvo: ordem das habilidades (a primeira disponível é usada)')
+        order_box = QGroupBox('Depois do alvo: ordem das habilidades (usadas em ciclo nesta ordem; a que não estiver pronta ou no alcance é pulada)')
         order_layout = QHBoxLayout(order_box)
         self.order = QListWidget()
         self.order.setDragDropMode(QAbstractItemView.InternalMove)

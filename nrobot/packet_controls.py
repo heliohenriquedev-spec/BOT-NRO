@@ -42,8 +42,8 @@ class GameControls:
     def test_pressed(self):
         return self.down(0x11) and self.down(0x12) and self.down(0x79)
 
-    def hunt_pressed(self):
-        return self.down(0x24)  # Home
+    def hunt_pressed(self, key=0x24):
+        return self.down(key)  # Home unless configured (REDE-82)
 
     def connected(self, peer, local):
         return self._check_connection(peer, local, require_focus=False)

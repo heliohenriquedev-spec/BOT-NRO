@@ -23,8 +23,14 @@ class PresenceGuard:
     VIEW_RANGE = 14
     # Invisible characters send nothing more; keep holding this long after the last sign.
     HIDDEN_HOLD = 120
+    # REDE-82: a player who left counts as gone only after walking this far (map packets) or
+    # logging out / teleporting; one who vanished close by may be hiding and is held longer.
+    FAR_ENOUGH = VIEW_RANGE+4
+    NEAR_DEPARTURE_HOLD = 60
+    REMOVE_LOGOUT, REMOVE_TELEPORT = 2, 3
 
     def __init__(self):
+        self.resume_delay = 10  # seconds after a player left before the hunt resumes
         self.allowed = set()  # captured targets never hold the bot
         # REDE-70: each kind of presence can be set not to hold the bot (alerts still happen).
         self.hold_players = self.hold_disguised = self.hold_hidden = True
@@ -41,8 +47,9 @@ class PresenceGuard:
         self.positions = {}
         self.last_seen_cells = {}  # kept after removal: a hiding character is cleared first
         self.players = set()
+        self.departures = {}  # identity -> {'left_at', 'position', 'reason', 'far'}
 
-    def observe(self, events, player_id, now):
+    def observe(self, events, player_id, now, own_position=None):
         for event in events:
             kind = event['kind']
             if kind in ('map_change', 'map_transfer'):
@@ -57,6 +64,7 @@ class PresenceGuard:
                 if identity in self.hidden:
                     self.hidden[identity]['seen_at'] = now
             if kind == 'appearance':
+                self.departures.pop(identity, None)  # back in view
                 if identity not in self.players:
                     self.alerts.append({'kind': 'player', 'entity_id': identity})
                 self.players.add(identity)
@@ -70,6 +78,8 @@ class PresenceGuard:
             elif kind == 'option_change':
                 self.update_option(identity, event['option'], now)
             elif kind == 'remove':
+                if identity in self.players:
+                    self.departures[identity] = self.departure(identity, event.get('reason', 0), now, own_position)
                 self.players.discard(identity)
                 self.disguised.pop(identity, None)
                 self.positions.pop(identity, None)
@@ -77,6 +87,16 @@ class PresenceGuard:
                 # Ordinary hiding ends with removal; GM invisibility may also clear the unit.
                 if hidden is not None and not hidden['option'] & OPTION_INVISIBLE:
                     self.hidden.pop(identity)
+
+    def departure(self, identity, reason, now, own_position):
+        position = self.positions.get(identity) or self.last_seen_cells.get(identity)
+        if reason in (self.REMOVE_LOGOUT, self.REMOVE_TELEPORT):
+            far = True
+        elif position is None or own_position is None:
+            far = False
+        else:  # left the view: its last destination tells how far it went
+            far = math.dist(position, own_position) >= self.FAR_ENOUGH
+        return {'left_at': now, 'position': position, 'reason': reason, 'far': far}
 
     def update_option(self, identity, option, now):
         if option & HIDDEN_OPTIONS:
@@ -105,6 +125,17 @@ class PresenceGuard:
             position = self.positions.get(identity)
             if position is None or player_position is None or math.dist(position, player_position) <= self.VIEW_RANGE:
                 return f'jogador {identity} no campo de visao'
+        for identity, gone in sorted(self.departures.items()):
+            wait = self.resume_delay if gone['far'] else max(self.resume_delay, self.NEAR_DEPARTURE_HOLD)
+            left = wait-(now-gone['left_at'])
+            if left <= 0:
+                del self.departures[identity]
+                continue
+            if identity in self.allowed or not self.hold_players:
+                continue
+            how = {self.REMOVE_LOGOUT: 'deslogou', self.REMOVE_TELEPORT: 'teleportou'}.get(gone['reason'])
+            how = how or ('foi para longe' if gone['far'] else 'sumiu perto (pode estar escondido)')
+            return f'jogador {identity} {how}; retomada em {left:.0f} s'
         return None
 
     def snapshot(self, player_position, now):

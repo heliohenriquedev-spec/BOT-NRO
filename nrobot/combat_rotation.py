@@ -22,6 +22,7 @@ class CombatRotation:
     THROWS = (523, 524)
     # Never swap ammo while an unconfirmed throw may still be processed by the server.
     SWAP_SETTLE = 1.5
+    BURST_SWAP_SETTLE = .3
     # A throw deferred longer than this (repeated failures) gives its turn to the other one.
     TURN_WAIT_LIMIT = 3
     # REDE-76: the server silently drops a skill sent during the previous one's delay; in the
@@ -33,8 +34,11 @@ class CombatRotation:
     FASTER_STEP = .01
 
     def __init__(self, profiles, *, response_timeout=1.5, attempts=3, defer=8, interval=.5, global_delay=.12, priority=None,
-                 fast=False):
+                 fast=False, burst=False, burst_interval=.05):
         self.fast = fast  # offensives ignore the manual interval: only server cooldowns and delay
+        # REDE-82: burst sends every offensive in range in turn, one packet per burst_interval,
+        # without waiting for the server's answer.
+        self.burst, self.burst_interval = burst, burst_interval
         self.profiles = profiles or [{'skill_id': 524, 'enabled': True, 'role': 'offensive',
                                       'level': 10, 'interval': interval, 'effect_id': 0}]
         self.response_timeout, self.attempts, self.defer = response_timeout, attempts, defer
@@ -55,6 +59,7 @@ class CombatRotation:
         self.after_skill_delay = self.AFTER_SKILL_DELAY
         self.last_confirmed_at = None
         self.order = {}
+        self.cursor = None  # place in the user order of the last offensive sent
         for index, token in enumerate(priority or []):
             for identity in (self.THROWS if token == 'throws' else (token,)):
                 self.order.setdefault(identity, index)
@@ -136,12 +141,13 @@ class CombatRotation:
                 self.failures[skill_id] = 0
                 self.confirmed += 1
                 sent = self.last_sent.get(skill_id)
-                if (self.fast and sent is not None and self.last_confirmed_at is not None
+                if (self.fast and not self.burst and sent is not None and self.last_confirmed_at is not None
                         and sent-self.last_confirmed_at < self.after_skill_delay+.1):
                     # Accepted right at the current wait: try a slightly shorter one next time.
                     self.after_skill_delay = max(self.MIN_AFTER_SKILL_DELAY, self.after_skill_delay-self.FASTER_STEP)
                 self.last_confirmed_at = now
-                self.next_send = max(self.next_send, now+self.after_skill_delay)
+                if not self.burst:
+                    self.next_send = max(self.next_send, now+self.after_skill_delay)
                 if skill_id in self.THROWS:
                     self.last_throw = skill_id
                 self.log.append({'kind': 'rotation_skill_confirmed', 'skill_id': skill_id,
@@ -171,11 +177,14 @@ class CombatRotation:
     def plan(self, state, now, target_id=None):
         for identity, pending in list(self.pending.items()):
             if now >= pending['deadline']:
-                self._fail(identity, now, 'sem confirmação')
+                if self.burst and pending['role'] == 'offensive':
+                    self.pending.pop(identity)  # an unanswered burst packet is expected, not a failure
+                else:
+                    self._fail(identity, now, 'sem confirmação')
         if now < max(self.next_send, state.get('own_cast_until', 0)):
             self.reason = 'aguardando intervalo global ou conjuração'
             return None
-        if any(p['role'] == 'offensive' for p in self.pending.values()):
+        if not self.burst and any(p['role'] == 'offensive' for p in self.pending.values()):
             self.reason = 'aguardando confirmação da habilidade anterior'
             return None
         if state.get('state') != 'tracking' or not state.get('player_position_recent'):
@@ -195,9 +204,15 @@ class CombatRotation:
             options = (state.get('ammo') or {}).get('options', {})
             option = options.get(profile['skill_id'], options.get(str(profile['skill_id']), {}))
             if self.order:
-                # User order is strict: the first usable skill in the list always wins.
-                rank = self.order.get(profile['skill_id'], len(self.order)+(profile['role'] != 'buff'))
-                return (rank, not option.get('ready', True), self.last_sent.get(profile['skill_id'], -1))
+                # REDE-83: the user order is a cycle. After a skill, the next one in the list that
+                # is ready and in reach goes, wrapping around: a top skill that is ready again at
+                # once (fast mode, close target) no longer starves the ones after it. Buffs first.
+                rank = self.order.get(profile['skill_id'], len(self.order)+1)
+                if profile['role'] != 'buff' and self.cursor is not None:
+                    rank = (rank-self.cursor-1) % (len(self.order)+2)
+                return (profile['role'] != 'buff', rank, not option.get('ready', True),
+                        self.last_sent.get(profile['skill_id'], -1))
+            # Without an order every offensive takes its turn: the one sent longest ago goes next.
             return (profile['role'] != 'buff', self.last_sent.get(profile['skill_id'], -1), not option.get('ready', True))
         profiles = sorted(self.profiles, key=priority)
         turn = self.throw_turn(state, known, now, available_sp)
@@ -205,8 +220,9 @@ class CombatRotation:
             identity = profile['skill_id']
             meta = known.get(identity)
             cooldown = state.get('skill_cooldowns', {}).get(identity, state.get('skill_cooldowns', {}).get(str(identity), 0))
+            waiting = identity in self.pending and not (self.burst and profile['role'] == 'offensive')
             if (not profile['enabled'] or meta is None or meta['level'] < profile['level']
-                or identity in self.pending or now < max(self.ready.get(identity, 0), cooldown)):
+                or waiting or now < max(self.ready.get(identity, 0), cooldown)):
                 continue
             if identity in self.blocked_buffs:
                 self.reason = f'Buff {identity}: sem efeito confirmado; revisar vínculo antes de repetir'
@@ -254,8 +270,17 @@ class CombatRotation:
                     continue
                 if ammo['pending']:
                     self.reason = 'aguardando confirmacao da municao'
+                    if self.burst:
+                        continue  # the other skills keep going while the ammo is swapped
                     return None
                 if not option['ready']:
+                    if self.burst:
+                        # REDE-83: the throws' turn in the rotation is the moment to swap the ammo
+                        # (waiting for "nothing else ready" never happens in a burst).
+                        last = max((self.last_sent.get(t, -math.inf) for t in self.THROWS), default=-math.inf)
+                        if now-last < self.BURST_SWAP_SETTLE:
+                            continue  # the last throw may still be on its way
+                        return {**action, 'kind': 'equip', 'inventory_index': option['index']}
                     if any(p['role'] == 'offensive' for p in self.pending.values()):
                         self.reason = 'aguardando habilidade anterior antes de trocar municao'
                         return None
@@ -266,6 +291,27 @@ class CombatRotation:
                     return {**action, 'kind':'equip', 'inventory_index':option['index']}
             return action
         return None
+
+    def soonest_offensive(self, state, now, target_id=None):
+        """When the next enabled offensive skill could be used on the target (inf when none)."""
+        known = {s['skill_id']: s for s in state.get('learned_skills', [])}
+        entities = {e['entity_id']: e for e in state.get('recent_entities', [])}
+        entity = entities.get(target_id)
+        cooldowns = state.get('skill_cooldowns', {})
+        own = state.get('combat_player_positions') or ([state['player_position']] if state.get('player_position') else [])
+        soonest = math.inf
+        for profile in self.profiles:
+            identity, meta = profile['skill_id'], known.get(profile['skill_id'])
+            if (not profile['enabled'] or profile['role'] != 'offensive' or meta is None
+                    or meta['level'] < profile['level'] or (state.get('player_sp') or 0) < meta['sp_cost']):
+                continue
+            if entity is not None and own:
+                position = entity.get('effective_position', entity['position'])
+                if min(math.dist(p, position) for p in own) > min(meta['range'], 12):
+                    continue  # out of this skill's reach: it will not interrupt an attack
+            cooldown = cooldowns.get(identity, cooldowns.get(str(identity), 0))
+            soonest = min(soonest, max(self.ready.get(identity, 0), cooldown, now))
+        return soonest
 
     def last_throw_unconfirmed(self):
         sent = [t for t in self.THROWS if t in self.last_sent]
@@ -294,10 +340,13 @@ class CombatRotation:
 
     def sent(self, action, now):
         self.last_sent[action['skill_id']] = now
+        if action['role'] == 'offensive' and self.order:
+            self.cursor = self.order.get(action['skill_id'], len(self.order)+1)
         self.pending[action['skill_id']] = {**action, 'deadline': now+self.response_timeout}
-        interval = 0 if self.fast and action['role'] == 'offensive' else action['interval']
+        offensive = action['role'] == 'offensive'
+        interval = 0 if (self.fast or self.burst) and offensive else action['interval']
         self.ready[action['skill_id']] = now+max(interval, self.learned_min_interval.get(action['skill_id'], 0))
-        self.next_send = now+self.global_delay
+        self.next_send = now+(self.burst_interval if self.burst else self.global_delay)
         self.log.append({'kind': 'rotation_skill_sent', 'skill_id': action['skill_id'],
                          'target_id': action['target_id'], 'role': action['role']})
 

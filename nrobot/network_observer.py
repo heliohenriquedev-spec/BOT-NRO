@@ -213,6 +213,17 @@ class Observer:
         self.cast_until = 0
         self.player_motion = None
 
+    # REDE-83: the server sends the skill list (and SP, hotkeys, buffs) only when the character
+    # logs in, not on every map change: a warp must not forget them.
+    CHARACTER_FIELDS = ('skills', 'hotkeys', 'sp', 'effects', 'walk_speed_ms')
+
+    def keep_character(self):
+        return {field: getattr(self, field) for field in self.CHARACTER_FIELDS}
+
+    def restore_character(self, kept):
+        for field, value in kept.items():
+            setattr(self, field, value)
+
     def clear(self):
         self.registry.clear()
         self.player = None
@@ -264,19 +275,20 @@ class Observer:
     def apply(self, event, now):
         kind = event['kind']
         if kind == 'map_change':
-            identity = self.player_id
+            identity, kept = self.player_id, self.keep_character()
             self.clear()
+            self.restore_character(kept)
             self.player_id = identity
             self.map_name = event.get('map')
             self.player, self.player_at = event['position'], now
         elif kind == 'player_position_init':
             identity = self.player_id
             map_name = self.map_name
-            hotkeys = self.hotkeys
+            kept = self.keep_character()
             self.clear()
+            self.restore_character(kept)
             self.player_id = identity
             self.map_name = map_name
-            self.hotkeys = hotkeys
             self.player, self.player_at = event['position'], now
             self.player_alive = True
         elif kind == 'own_identity':
@@ -305,7 +317,9 @@ class Observer:
         elif kind == 'player_stat' and event['stat_type'] == 7:
             self.sp = event['value']
         elif kind == 'map_transfer':
+            kept = self.keep_character()
             self.clear()
+            self.restore_character(kept)  # the new map server resends the list when it has it
         elif kind == 'server_time':
             self.clock.time_reply(event['server_tick'], now)
         elif kind == 'player_move':

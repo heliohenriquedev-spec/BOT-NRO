@@ -28,8 +28,9 @@ def test_disguised_character_holds_until_it_leaves_view():
     assert guard.reason([10, 20], 1) is None  # walked beyond view range
     guard.observe([{'kind': 'move', 'entity_id': 2003137, 'position': [40, 20], 'destination': [15, 20]}], 2000001, 2)
     assert guard.reason([10, 20], 2)
-    guard.observe([{'kind': 'remove', 'entity_id': 2003137}], 2000001, 3)
-    assert guard.reason([10, 20], 3) is None
+    guard.observe([{'kind': 'remove', 'entity_id': 2003137}], 2000001, 3, own_position=[10, 20])
+    assert 'sumiu perto' in guard.reason([10, 20], 3)  # REDE-82: vanished next to us
+    assert guard.reason([10, 20], 3+PresenceGuard.NEAR_DEPARTURE_HOLD+1) is None
 
 
 def test_any_nearby_character_holds_but_own_character_is_ignored():
@@ -40,8 +41,9 @@ def test_any_nearby_character_holds_but_own_character_is_ignored():
     reason = guard.reason([10, 20], 0)
     assert 'jogador 2003137' in reason and 'disfarcado' not in reason
     assert guard.reason([40, 20], 0) is None  # beyond view range
-    guard.observe([{'kind': 'remove', 'entity_id': 2003137}], 2000001, 1)
-    assert guard.reason([10, 20], 1) is None
+    guard.observe([{'kind': 'remove', 'entity_id': 2003137, 'reason': 2}], 2000001, 1, own_position=[10, 20])
+    assert 'deslogou' in guard.reason([10, 20], 1)  # REDE-82: waits the resume delay
+    assert guard.reason([10, 20], 1+guard.resume_delay+.1) is None
 
 
 def test_hiding_holds_until_unhide_and_gm_invisibility_expires_only_after_silence():
@@ -156,3 +158,25 @@ def test_character_cleared_before_hiding_keeps_last_cell_for_its_shadow():
                    decode(struct.pack('<HIHHIB', 0x229, 2002899, 0, 0, 0x2, 0))], 1, 1)
     details = guard.snapshot([10, 20], 1)['hidden_details']
     assert details == [{'entity_id': 2002899, 'position': [10, 20], 'gm_invisible': False, 'age_seconds': 0}]
+
+
+def test_player_who_walked_far_resumes_after_the_configured_delay_and_returning_resets_it():
+    guard = PresenceGuard()
+    guard.resume_delay = 15
+    guard.observe([decode(appearance_22c(2003137, 26))], 1, 0)
+    guard.observe([{'kind': 'move', 'entity_id': 2003137, 'position': [12, 20], 'destination': [40, 20]}], 1, 1)
+    guard.observe([{'kind': 'remove', 'entity_id': 2003137, 'reason': 0}], 1, 2, own_position=[10, 20])
+    assert 'foi para longe' in guard.reason([10, 20], 2)
+    assert guard.reason([10, 20], 2+14) and guard.reason([10, 20], 2+15.1) is None
+    guard.observe([decode(appearance_22c(2003137, 26))], 1, 30)  # came back
+    guard.observe([{'kind': 'remove', 'entity_id': 2003137, 'reason': 3}], 1, 31, own_position=[10, 20])
+    assert 'teleportou' in guard.reason([10, 20], 40)
+    assert guard.reason([10, 20], 46.1) is None
+
+
+def test_player_ignored_when_pausing_on_players_is_off():
+    guard = PresenceGuard()
+    guard.hold_players = False
+    guard.observe([decode(appearance_22c(2003137, 26)), {'kind': 'remove', 'entity_id': 2003137, 'reason': 2}], 1, 0,
+                  own_position=[10, 20])
+    assert guard.reason([10, 20], 1) is None

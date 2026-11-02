@@ -17,7 +17,7 @@ import struct
 import time
 
 from .continuous_observer import ContinuousTracker
-from .packet_encoder import attack, skill, move
+from .packet_encoder import attack, skill, move, body_action, SIT, STAND
 from .packet_reader import position
 from .entity_inventory import EntityInventory
 
@@ -121,6 +121,9 @@ class SessionRelay:
         from .presence_guard import PresenceGuard
         self.presence = PresenceGuard()
         self.presence_hold = None
+        self.sit_on_players = False
+        self.hunt_key, self.hunt_key_name = 0x24, 'Home'
+        self.sitting = False  # REDE-82: the bot sat down while a player is near
         self.capture_armed_until = 0
         self.captured_player = None
         # REDE-72: other characters' server paths.
@@ -187,12 +190,24 @@ class SessionRelay:
                                ('SWITCH_DISTANCE', 'switch_distance'), ('SWITCH_SAVING', 'switch_saving')):
             setattr(self.hunt, attribute, settings[key])
         self.hunt.SWITCH_RATIO = settings['switch_ratio_percent']/100
+        # REDE-82: failure rules can be switched off.
+        if not settings['limit_target_failures']:
+            self.hunt.SKILL_ATTEMPTS = 10**9
+        if not settings['defer_failed_targets']:
+            self.hunt.TARGET_DEFER = 0
         self.hunt.use_skills = settings['skills']
+        self.hunt.auto_attacks = settings['auto_attacks']
         from .combat_rotation import CombatRotation
         previous_rotation = self.rotation
         self.rotation = CombatRotation(settings['skill_profiles'], response_timeout=settings['skill_timeout'],
             attempts=settings['skill_attempts'], defer=settings['target_defer'], interval=settings['skill_interval'], global_delay=settings['skill_global_delay'],
-            priority=settings['skill_priority'], fast=settings['fast_offensives']) if settings['skills'] and settings['advanced_combat'] else None
+            priority=settings['skill_priority'], fast=settings['fast_offensives'],
+            burst=settings['skill_burst'], burst_interval=settings['skill_burst_interval']) if settings['skills'] and settings['advanced_combat'] else None
+        if self.rotation is not None:
+            if not settings['limit_target_failures']:
+                self.rotation.attempts = 10**9
+            if not settings['defer_failed_targets']:
+                self.rotation.defer = .3
         if self.rotation is not None and previous_rotation is not None:
             # Saving a setting must not forget what was learned about the server's timing.
             self.rotation.ready = dict(previous_rotation.ready)
@@ -228,6 +243,10 @@ class SessionRelay:
         self.presence.hold_players = settings['pause_on_players']
         self.presence.hold_disguised = settings['pause_on_disguised']
         self.presence.hold_hidden = settings['pause_on_hidden']
+        self.presence.resume_delay = settings['resume_delay']
+        from .packet_settings import HOTKEYS
+        self.hunt_key, self.hunt_key_name = HOTKEYS[settings['hotkey_hunt']], settings['hotkey_hunt']
+        self.sit_on_players = settings['sit_on_players']
         self.register_captured()
         self.sync_map_monsters()
 
@@ -910,7 +929,8 @@ class SessionRelay:
             self.inventory.observe(events, time.monotonic())
             self.learn_monsters(events)
             self.ammo.observe(events, time.monotonic())
-            self.presence.observe(events, self.tracker.observer.player_id, time.monotonic())
+            self.presence.observe(events, self.tracker.observer.player_id, time.monotonic(),
+                                  own_position=self.tracker.observer.player)
             self.track_players(events)
             own = self.tracker.observer.player_id
             for event in events:
@@ -988,7 +1008,7 @@ class SessionRelay:
                 if any(e['kind'] in ('map_change', 'map_transfer') for e in events):
                     self.map_validation = None
                     if self.hunt.enabled:
-                        self.hunt.pause('mapa alterado; Home retoma no novo mapa')
+                        self.hunt.pause(f'mapa alterado; {self.hunt_key_name} retoma no novo mapa')
                     self.hunt.blocked_until.clear()
                     if self.hunt.patrol is not None:
                         self.hunt.patrol.reset()
@@ -1110,7 +1130,9 @@ class SessionRelay:
             if self.upstream is upstream:
                 self.upstream = None
                 self.game_peer = self.game_local = None
+                kept = self.tracker.observer.keep_character()  # REDE-83: a map-server switch reconnects
                 self.tracker.observer.clear()
+                self.tracker.observer.restore_character(kept)
                 self.inventory.reset()
                 self.stage = 'map_disconnected'
                 if self.hunt is not None:
@@ -1180,6 +1202,11 @@ class SessionRelay:
         reason = self.presence.reason(self.tracker.observer.player, time.monotonic())
         if reason is None:
             if self.presence_hold is not None:
+                if self.sitting:
+                    await self.send_body_action(STAND)
+                    self.sitting = False
+                    if self.hunt is not None:
+                        self.hunt.ready_at = max(self.hunt.ready_at, time.monotonic()+.6)  # time to stand up
                 self.record_hunt({'kind': 'presence_hold_released', 'reason': self.presence_hold})
                 print('Presenca suspeita saiu do campo de visao; caca retomada.')
                 self.presence_hold = None
@@ -1199,10 +1226,34 @@ class SessionRelay:
                         self.upstream.write(payload)
                         await self.upstream.drain()
         self.presence_hold = reason
+        if self.sit_on_players and not self.sitting and not self.walking_now():
+            if await self.send_body_action(SIT):
+                self.sitting = True
+                self.record_hunt({'kind': 'sat_down', 'reason': reason})
+                print('Sentado enquanto o jogador estiver por perto.')
         if self.hunt is not None:
             self.hunt.pending = None
             self.hunt.target = None
-            self.hunt.reason = 'suspensa: '+reason
+            self.hunt.reason = 'suspensa: '+reason+(' • sentado' if self.sitting else '')
+        return True
+
+    ATTACK_WINDOW = .6  # no basic attack when an offensive skill is ready sooner than this
+
+    def walking_now(self):
+        motion = self.tracker.observer.player_motion
+        return motion is not None and time.monotonic() < motion['at']+motion['duration']
+
+    async def send_body_action(self, action):
+        """Sit or stand up; False when the connection or the native stream is not ready."""
+        if self.upstream is None or not self.allow_commands or self.commands_blocked:
+            return False
+        async with self.send_lock:
+            if not self.native_frames.ready:
+                return False
+            payload = body_action(action)
+            self.trace_map_send('bot', struct.unpack_from('<H', payload)[0], len(payload))
+            self.upstream.write(payload)
+            await self.upstream.drain()
         return True
 
     async def send_hunt_action(self, action, *, game_gate):
@@ -1377,8 +1428,8 @@ async def run(args):
             print('TESTE ÚNICO: no jogo, Ctrl+Alt+F10 solicita um ataque por pacote. F12 bloqueia envios. Nenhum ataque é automático.')
         if hunt_mode:
             targets = 'automaticos do mapa' if relay.settings['auto_map_targets'] else ', '.join(SPECIES.get(i, str(i)) for i in relay.settings['species'])
-            print(f"CAÇA: Home inicia/pausa. F12 para. Alvos: {targets}; raio: {relay.settings['radius']} células. Começa DESLIGADA.")
-            print('Habilidade: Arremessar Kunai nível 10, somente com nível/custo/SP confirmados. Falha retorna a ataque normal; Home permite reativar.')
+            print(f"CAÇA: {relay.hunt_key_name} inicia/pausa. F12 para. Alvos: {targets}; raio: {relay.settings['radius']} células. Começa DESLIGADA.")
+            print('Habilidade: Arremessar Kunai nível 10, somente com nível/custo/SP confirmados. Falha retorna a ataque normal; '+relay.hunt_key_name+' permite reativar.')
         last_display = 0
         last_skill_message = None
         last_heartbeat = 0
@@ -1417,7 +1468,7 @@ async def run(args):
                         print(f'Teste não executado: {exc}')
                 previous_key = key
                 if hunt_mode:
-                    hunt_key = controls.hunt_pressed()
+                    hunt_key = controls.hunt_pressed(relay.hunt_key)
                     if hunt_key and not previous_hunt_key:
                         if relay.hunt.enabled:
                             relay.hunt.pause('pausada pelo usuário')
@@ -1439,7 +1490,7 @@ async def run(args):
                     if relay.hunt.enabled:
                         if not controls.connected(relay.game_peer, relay.game_local):
                             relay.hunt.pause('conexão do jogo indisponível')
-                            print('Caça pausada: conexão do jogo indisponível. Home retoma.')
+                            print(f'Caça pausada: conexão do jogo indisponível. {relay.hunt_key_name} retoma.')
                         elif relay.manual_control(time.monotonic()) or await relay.update_presence_hold():
                             pass
                         else:
@@ -1468,6 +1519,12 @@ async def run(args):
                                         relay.hunt.pause(str(exc))
                                 if now < max(relay.rotation.next_send, relay.tracker.observer.cast_until):
                                     action = None
+                                elif (action is not None and action['kind'] == 'attack'
+                                      and relay.rotation.soonest_offensive(state, now, relay.hunt.target) < now+relay.ATTACK_WINDOW):
+                                    # REDE-83: a basic attack keeps the character busy and the server then
+                                    # refuses skills; attack only while no skill is about to be ready.
+                                    relay.hunt.reason = 'habilidade pronta em instantes: sem ataque básico agora'
+                                    action = None
                                 relay.flush_rotation_diagnostics()
                             if action is not None and action['kind'] == 'attack' and relay.settings and not relay.settings['auto_attacks']:
                                 action = None
@@ -1477,7 +1534,7 @@ async def run(args):
                                 try:
                                     await relay.send_hunt_action(action, game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                                     if relay.rotation is not None and action['kind'] == 'attack':
-                                        relay.rotation.next_send = time.monotonic()+.12
+                                        relay.rotation.next_send = max(relay.rotation.next_send, time.monotonic()+.12)
                                 except HuntTargetChanged as exc:
                                     relay.hunt.abandon(time.monotonic(), str(exc))
                                     relay.flush_hunt_diagnostics()

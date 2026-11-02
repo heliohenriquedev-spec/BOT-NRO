@@ -18,8 +18,14 @@ class PacketHunt:
     # REDE-62: a monster we hit (or that hits us) is kept until it dies or leaves the
     # client view; only this long without any confirmed damage releases it.
     ENGAGED_GIVE_UP = 15
+    # REDE-83: with basic attacks on, a target this close is attacked hand to hand; with them
+    # off the bot keeps its skill distance and steps back when a monster gets this close.
+    MELEE_REACH = 3
+    MELEE_RANGE = 2  # the server itself takes the last step of an attack request
+    KEEP_AWAY = 2
 
     def __init__(self, patrol=False, patrol_step=8, use_skills=False):
+        self.auto_attacks = True
         self.use_skills = use_skills
         self.skill_disabled = False
         self.skill_ready_at = 0
@@ -112,6 +118,26 @@ class PacketHunt:
                 'skill_cooldown_seconds': round(max(0, self.skill_ready_at-now), 2),
                 'target_skill_failures': self.skill_attempts.get(self.target, 0),
                 'last_decision': self.last_decision, 'engaged_target_id': self.engaged}
+
+    def step_back(self, player, monster, combat_range, collision, walk_speed_ms):
+        """Walk away from a monster that came too close, back towards skill distance."""
+        dx, dy = player[0]-monster[0], player[1]-monster[1]
+        length = math.hypot(dx, dy) or 1
+        want = min(4, max(1, round(combat_range-1-length)))
+        for scale in (1, .5):
+            cells = max(1, round(want*scale))
+            destination = [round(player[0]+dx/length*cells), round(player[1]+dy/length*cells)]
+            if destination == list(player):
+                continue
+            if collision is not None and not collision.segment(player, destination, max_steps=4):
+                continue
+            steps = max(abs(destination[i]-player[i]) for i in (0, 1))
+            seconds = max(50, min(walk_speed_ms, 2000))/1000
+            self.reason = 'monstro perto demais: recuando para a distância das habilidades'
+            return {'kind': 'move', 'target_id': self.target, 'destination': destination, 'wait_seconds': steps*seconds,
+                    'origin': list(player), 'collision_route': collision is not None, 'seconds_per_step': seconds,
+                    'purpose': 'keep_distance'}
+        return None
 
     def retry_skill(self, now, reason):
         target_id = self.pending['target_id']
@@ -389,6 +415,14 @@ class PacketHunt:
                        and metadata.get('range', 0) >= 1 and state.get('player_sp') is not None
                        and state['player_sp'] >= metadata.get('sp_cost', 65535))
         combat_range = state.get('engagement_range', min(6, metadata['range']) if wants_skill else 2)
+        closest = min(math.dist(player, point) for point in range_positions)
+        melee = self.auto_attacks and closest <= self.MELEE_REACH
+        if melee:
+            combat_range = self.MELEE_RANGE  # close enough: go hand to hand for basic attacks
+        elif not self.auto_attacks and combat_range > self.KEEP_AWAY+1 and closest <= self.KEEP_AWAY:
+            retreat = self.step_back(player, actual_position, combat_range, collision, walk_speed_ms)
+            if retreat is not None:
+                return retreat
         in_range = max(math.dist(player, point) for point in range_positions) <= combat_range
         # With collision data, retain adjacent-cell combat until ranged line-of-sight is supported.
         if in_range and (collision is None or all(collision.line_clear(player, point) for point in range_positions)):
@@ -401,8 +435,9 @@ class PacketHunt:
                 if skill_action is None:
                     return None
                 return skill_action
-            if max(math.dist(player, point) for point in range_positions) > 2:
-                self.reason = 'mantendo alcance; aguardando habilidade disponivel'
+            if not melee or max(math.dist(player, point) for point in range_positions) > 2:
+                self.reason = ('mantendo distância; só habilidades' if not self.auto_attacks
+                               else 'mantendo alcance; aguardando habilidade disponivel')
                 return None
             return {'kind': 'attack', 'target_id': self.target}
         # REDE-46: route may contain only the origin when the predicted target

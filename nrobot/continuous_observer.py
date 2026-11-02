@@ -61,7 +61,9 @@ class ContinuousTracker:
 
     def fail(self, reason):
         self.failed = str(reason)
+        kept = self.observer.keep_character()
         self.observer.clear()
+        self.observer.restore_character(kept)
 
     def feed(self, sequence, payload, now, *, event_time=None, delivery_lag=0.0):
         if self.failed:
@@ -79,7 +81,9 @@ class ContinuousTracker:
                 if self.delivery_lag <= 2:
                     self.observer.apply(event, now if event_time is None else event_time)
             if self.delivery_lag > 2:
+                kept = self.observer.keep_character()
                 self.observer.clear()
+                self.observer.restore_character(kept)
             return events
         except ValueError as exc:
             self.fail(exc)

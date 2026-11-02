@@ -35,6 +35,17 @@ def attack(target_id: int, *, repeat=False, ticks=windows_tick) -> bytes:
             + filler(9, ticks) + bytes([7 if repeat else 0]))
 
 
+SIT, STAND = 2, 3
+
+
+def body_action(action: int, *, ticks=windows_tick) -> bytes:
+    """REDE-82: sit (2) or stand up (3); same action request as an attack, without a target."""
+    if action not in (SIT, STAND):
+        raise ValueError('Ação de corpo inválida')
+    return (struct.pack('<H', 0x190) + filler(3, ticks) + struct.pack('<I', 0)
+            + filler(9, ticks) + bytes([action]))
+
+
 def skill(target_id: int, skill_id: int, level: int, *, ticks=windows_tick) -> bytes:
     uint(target_id, 32, positive=True)
     uint(skill_id, 16, positive=True)
