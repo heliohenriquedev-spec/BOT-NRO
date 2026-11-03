@@ -259,6 +259,17 @@ class MinimapOverlay(QWidget):
         painter.setBrush(QColor(200, 200, 200))
         for monster in self.state.get('recent_entities', []):
             painter.drawEllipse(self.cell_point(monster.get('effective_position') or monster['position'], view), 2.2, 2.2)
+        for portal in self.state.get('portals', []):
+            # Warp and the area the bot never walks into.
+            point = self.cell_point(portal['position'], view)
+            corner = self.cell_point([portal['position'][0]+portal['margin']+.5, portal['position'][1]+portal['margin']+.5], view)
+            half = QPointF(abs(corner.x()-point.x()), abs(corner.y()-point.y()))
+            painter.setPen(QPen(QColor(190, 90, 255, 200), 1, Qt.DashLine))
+            painter.setBrush(QColor(190, 90, 255, 45))
+            painter.drawRect(QRectF(point-half, point+half))
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(QColor(200, 110, 255))
+            painter.drawEllipse(point, 3.5, 3.5)
         presence = self.state.get('presence') or {}
         disguised = set(presence.get('disguised', []))
         captured = (self.state.get('captured_player') or {}).get('entity_id')
@@ -280,7 +291,7 @@ class MinimapOverlay(QWidget):
             painter.setPen(QPen(QColor(255, 50, 50), 2))
             painter.setBrush(QColor(255, 50, 50, 90))
             painter.drawEllipse(point, 5, 5)
-            painter.drawText(point+QPointF(7, -5), ('?' if hidden.get('possible_hidden') else '@hide' if hidden.get('gm_invisible') else 'hide')+' '+(hidden.get('name') or str(hidden['entity_id']))+' (ultimo registro)')
+            painter.drawText(point+QPointF(7, -5), ('invisivel' if hidden.get('invisible_signal') else '?' if hidden.get('possible_hidden') else '@hide' if hidden.get('gm_invisible') else 'hide')+' '+(hidden.get('name') or str(hidden['entity_id']))+' (ultimo registro)')
         own = self.state.get('player_position')
         if own is not None:
             point = self.cell_point(own, view)

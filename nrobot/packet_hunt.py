@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import math
 import time
+from collections import deque
 
 
 class PacketHunt:
@@ -152,16 +153,73 @@ class PacketHunt:
                 score = (distance, heading, clearance, -max(abs(ox),abs(oy)))
                 if best is None or score > best[0]:
                     best = (score, destination)
+        if collision is not None and (best is None or self.room_behind(best[1], monster, collision, blocked) < self.ROOM_NEEDED):
+            # Wall (or portal area) behind: backing up further would corner the character.
+            # Circle to open ground that still keeps the monster in skill range.
+            spot = self.reposition(player, monster, want, collision, blocked)
+            if spot is not None:
+                self.reason = 'sem espaço para recuar: reposicionando o kite para uma área livre'
+                return self.retreat_move(player, spot, collision, walk_speed_ms, reposition=True)
         if best is None:
             return None
-        destination = best[1]
+        self.reason = 'monstro dentro da distância: correndo para manter o alcance das habilidades'
+        return self.retreat_move(player, best[1], collision, walk_speed_ms)
+
+    ROOM_NEEDED = 6  # free cells farther from the monster around a retreat spot
+    REPOSITION_STEPS = 12
+
+    @staticmethod
+    def room_behind(cell, monster, collision, blocked=frozenset()):
+        """How much ground is left to keep running from this cell: free cells of the 7x7 box at
+        least one cell farther from the monster (side cells along a wall do not count)."""
+        base = math.dist(cell, monster)
+        return sum(1 for ox in range(-3, 4) for oy in range(-3, 4)
+                   if math.dist((cell[0]+ox, cell[1]+oy), monster) > base+1
+                   and (cell[0]+ox, cell[1]+oy) not in blocked and collision.walkable((cell[0]+ox, cell[1]+oy)))
+
+    def reposition(self, player, monster, want, collision, blocked=frozenset()):
+        """Walkable path (never brushing the monster) to the nearby spot with room to keep kiting."""
+        start = tuple(player)
+        parents, queue, best = {start: None}, deque([(start, 0)]), None
+        while queue:
+            point, depth = queue.popleft()
+            distance = math.dist(point, monster)
+            if depth and distance >= 2 and collision.line_clear(point, monster):
+                room = self.room_behind(point, monster, collision, blocked)
+                if room >= self.ROOM_NEEDED:
+                    score = (round(min(distance, want)), room, collision.clearance(point), -depth)
+                    if best is None or score > best[0]:
+                        best = (score, point)
+            if depth == self.REPOSITION_STEPS:
+                continue
+            for dx, dy in ((1,0),(-1,0),(0,1),(0,-1),(1,1),(1,-1),(-1,1),(-1,-1)):
+                nxt = (point[0]+dx, point[1]+dy)
+                if nxt not in parents and math.dist(nxt, monster) >= 2 and collision.edge(point, nxt, blocked):
+                    parents[nxt] = point
+                    queue.append((nxt, depth+1))
+        if best is None:
+            return None
+        path, point = [], best[1]
+        while point is not None:
+            path.append(point)
+            point = parents[point]
+        path.reverse()
+        # The farthest waypoint a single straight move (up to 4 cells) reaches safely.
+        for step in range(min(4, len(path)-1), 0, -1):
+            if collision.segment(start, path[step], blocked, max_steps=4):
+                return list(path[step])
+        return None
+
+    def retreat_move(self, player, destination, collision, walk_speed_ms, reposition=False):
         steps = max(abs(destination[i]-player[i]) for i in (0, 1))
         seconds = max(50, min(walk_speed_ms, 2000))/1000
         duration = (steps+.4*min(abs(destination[i]-player[i]) for i in (0,1)))*seconds
-        self.reason = 'monstro dentro da distância: correndo para manter o alcance das habilidades'
-        return {'kind': 'move', 'target_id': self.target, 'destination': destination, 'wait_seconds': duration,
-                'origin': list(player), 'collision_route': collision is not None, 'seconds_per_step': duration/steps,
-                'purpose': 'keep_distance'}
+        action = {'kind': 'move', 'target_id': self.target, 'destination': list(destination), 'wait_seconds': duration,
+                  'origin': list(player), 'collision_route': collision is not None, 'seconds_per_step': duration/steps,
+                  'purpose': 'keep_distance'}
+        if reposition:
+            action['reposition'] = True
+        return action
 
     def retry_skill(self, now, reason):
         target_id = self.pending['target_id']

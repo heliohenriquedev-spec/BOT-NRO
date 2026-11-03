@@ -80,6 +80,7 @@ class CollisionMap:
         self.width, self.height, self.cells = width, height, bytes(cells)
         self.components = {}
         self.clearances = {}
+        self.forbidden = frozenset()  # portal areas: walking in would change the map
         if not 1 <= width <= 1024 or not 1 <= height <= 1024 or len(cells) != width*height:
             raise ValueError('Dimensões de colisão inválidas')
 
@@ -103,7 +104,15 @@ class CollisionMap:
 
     def walkable(self, point):
         x, y = point
-        return 0 <= x < self.width-1 and 0 <= y < self.height-1 and bool(self.cells[y*self.width+x])
+        return (0 <= x < self.width-1 and 0 <= y < self.height-1 and bool(self.cells[y*self.width+x])
+                and (not self.forbidden or (x, y) not in self.forbidden))
+
+    def set_forbidden(self, cells):
+        """Cells no route, step or patrol may use (portal areas); clears derived caches."""
+        cells = frozenset(cells)
+        if cells != self.forbidden:
+            self.forbidden = cells
+            self.components, self.clearances = {}, {}
 
     def edge(self, start, end, blocked=frozenset()):
         dx, dy = end[0]-start[0], end[1]-start[1]

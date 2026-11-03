@@ -5,6 +5,12 @@ Only server facts are used: the account-range game id (kept while disguised), th
 announced for it, and the option bits of appearance/option-change packets. A character
 that is already invisible (GM @hide) when it enters the area is not sent to the client at
 all, so only the moment it hides inside our view can be detected.
+
+An invisible character still has some actions relayed by the server to everyone around it:
+public chat, emotes, turning, attacks/item pickup/sitting, skills, status effects and ground
+effects all carry its game id. Such a packet from a character id that is not visible means
+someone invisible is next to us (the server only relays them inside the view area), even
+when it was already hidden before we arrived. Nothing is ever asked to the server for this.
 """
 import math
 import unicodedata
@@ -34,6 +40,12 @@ class PresenceGuard:
     NEAR_DEPARTURE_HOLD = 60
     REMOVE_LOGOUT, REMOVE_TELEPORT = 2, 3
 
+    GHOST_GRACE = 2  # seconds after a character left the view: late packets are not a sign
+    SIGNALS = {'chat': 'falou no chat', 'emote': 'usou emoticon', 'direction': 'virou de direcao',
+               'normal_attack': 'atacou/pegou item/sentou', 'skill_damage': 'usou habilidade',
+               'skill_no_damage': 'usou habilidade', 'skill_cast': 'conjurou habilidade',
+               'status_effect': 'recebeu efeito de status', 'ground_effect': 'criou efeito no chao'}
+
     def __init__(self):
         self.resume_delay = 10  # seconds after a player left before the hunt resumes
         self.allowed_names = set()
@@ -57,6 +69,32 @@ class PresenceGuard:
         self.outside_since = {}
         self.players = set()
         self.departures = {}  # identity -> {'left_at', 'position', 'reason', 'far'}
+        self.ghosts = {}  # invisible characters revealed only by their actions
+        self.last_removed = {}
+
+    @staticmethod
+    def signal_source(event):
+        kind = event['kind']
+        if kind in ('actor_signal', 'status_effect'):
+            return event.get('entity_id'), event.get('signal', kind)
+        if kind in ('normal_attack', 'skill_damage', 'skill_no_damage', 'skill_cast', 'ground_effect'):
+            return event.get('source_id'), kind
+        return None, None
+
+    def ghost_signal(self, event, player_id, now):
+        identity, signal = self.signal_source(event)
+        if (identity is None or identity == player_id or not is_player_id(identity) or identity in self.players
+                or now-self.last_removed.get(identity, -1e9) <= self.GHOST_GRACE):
+            return
+        if event.get('name'):
+            self.remember_names({identity: event['name']})
+        label = self.SIGNALS.get(signal, signal)
+        old = self.ghosts.get(identity)
+        if old is None:
+            self.alerts.append({'kind': 'ghost', 'entity_id': identity, 'signal': label})
+        self.ghosts[identity] = {'seen_at': now, 'signal': label, 'count': (old['count'] if old else 0)+1,
+                                 'position': event.get('position') or (old or {}).get('position')
+                                 or self.last_seen_cells.get(identity)}
 
     def observe(self, events, player_id, now, own_position=None):
         for event in events:
@@ -64,6 +102,7 @@ class PresenceGuard:
             if kind in ('map_change', 'map_transfer'):
                 self.reset()
                 continue
+            self.ghost_signal(event, player_id, now)
             identity = event.get('entity_id')
             if identity is None or identity == player_id or not is_player_id(identity):
                 continue
@@ -77,6 +116,7 @@ class PresenceGuard:
                     self.hidden[identity]['position'] = list(event['position'])
             if kind == 'appearance':
                 self.departures.pop(identity, None)  # back in view
+                self.ghosts.pop(identity, None)
                 if identity not in self.players:
                     self.alerts.append({'kind': 'player', 'entity_id': identity})
                 self.players.add(identity)
@@ -90,6 +130,8 @@ class PresenceGuard:
             elif kind == 'option_change':
                 self.update_option(identity, event['option'], now)
             elif kind == 'remove':
+                self.last_removed[identity] = now
+                self.ghosts.pop(identity, None)
                 if identity in self.players:
                     self.departures[identity] = self.departure(identity, event.get('reason', 0), now, own_position)
                 self.players.discard(identity)
@@ -151,6 +193,13 @@ class PresenceGuard:
             kind = '@hide/invisivel' if hidden['option'] & OPTION_INVISIBLE else 'escondido/furtivo'
             remaining = round(self.HIDDEN_HOLD-(now-hidden['seen_at']))
             return f'personagem {identity} {kind} por perto; retomada em ate {remaining} s sem novos sinais'
+        self.ghosts = {i: g for i, g in self.ghosts.items() if now-g['seen_at'] <= self.HIDDEN_HOLD}
+        for identity, ghost in self.ghosts.items():
+            if self.ignored(identity) or not self.hold_hidden:
+                continue
+            remaining = round(self.HIDDEN_HOLD-(now-ghost['seen_at']))
+            return (f"personagem invisivel {identity} ao lado ({ghost['signal']}, sem aparecer na tela); "
+                    f"retomada em ate {remaining} s sem novos sinais")
         for identity in sorted(self.players) if self.hold_players else ():
             if self.ignored(identity):
                 continue
@@ -181,6 +230,11 @@ class PresenceGuard:
                    'gm_invisible': bool(entry['option'] & OPTION_INVISIBLE), 'age_seconds': round(now-entry['seen_at'], 1)}
                   for identity, entry in self.hidden.items()]
         shadows = list(hidden)
+        shadows += [{'entity_id': identity, 'name': self.name_labels.get(identity), 'last_known': True,
+                     'invisible_signal': ghost['signal'], 'signals': ghost['count'], 'gm_invisible': True,
+                     'allowed': self.ignored(identity), 'position': ghost.get('position'),
+                     'age_seconds': round(now-ghost['seen_at'], 1)}
+                    for identity, ghost in self.ghosts.items() if identity not in self.hidden]
         for identity, gone in self.departures.items():
             if identity in self.hidden or gone['far'] or gone['reason'] != 0 or gone.get('position') is None or now-gone['left_at'] >= self.resume_delay:
                 continue
@@ -189,5 +243,5 @@ class PresenceGuard:
                             'last_known': True, 'possible_hidden': True, 'gm_invisible': False,
                             'allowed': self.ignored(identity), 'age_seconds': round(now-gone['left_at'], 1)})
         return {'reason': self.reason(player_position, now), 'disguised': sorted(self.disguised),
-                'hidden': sorted(self.hidden), 'hidden_details': hidden, 'shadow_details': shadows,
+                'hidden': sorted(self.hidden), 'hidden_details': hidden, 'invisible': sorted(self.ghosts), 'shadow_details': shadows,
                 'players': sorted(self.players)}

@@ -75,7 +75,12 @@
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 200,
   "name": "Girino",
-  "max_hp": 50
+  "max_hp": 50,
+  "names_by_map": {
+   "kakashi": [
+    "Girino"
+   ]
+  }
  },
  "1036": {
   "species_id": 1036,
@@ -97,9 +102,14 @@
    "gef_fild04": 0
   },
   "walk_speed_ms": 200,
-  "name": "Filhote de Cobra",
+  "name": "Filhote de cobra",
   "max_hp": 45,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "kakashi": [
+    "Filhote de cobra"
+   ]
+  }
  },
  "1039": {
   "species_id": 1039,
@@ -109,7 +119,12 @@
   "walk_speed_ms": 200,
   "name": "Monstro Marinho",
   "max_hp": 385000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun03": [
+    "Monstro Marinho"
+   ]
+  }
  },
  "1040": {
   "species_id": 1040,
@@ -130,7 +145,12 @@
   "walk_speed_ms": 300,
   "name": "Grande Esquilo",
   "max_hp": 149000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun02": [
+    "Grande Esquilo"
+   ]
+  }
  },
  "1051": {
   "species_id": 1051,
@@ -149,8 +169,10 @@
    "poring_w01": [
     "Bicouchuu",
     "Bikochuu",
-    "Bikouhuu",
-    "Bikouchuu"
+    "Bikouchu",
+    "Bikouchuu",
+    "Bikoucuu",
+    "Bikouhuu"
    ],
    "kakashi": [
     "Bikouchuu"
@@ -191,7 +213,12 @@
   "walk_speed_ms": 300,
   "name": "Crustáceo",
   "max_hp": 350000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun03": [
+    "Crustáceo"
+   ]
+  }
  },
  "1067": {
   "species_id": 1067,
@@ -201,7 +228,12 @@
   "walk_speed_ms": 200,
   "name": "Cornutus",
   "max_hp": 103000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun01": [
+    "Cornutus"
+   ]
+  }
  },
  "1073": {
   "species_id": 1073,
@@ -211,7 +243,12 @@
   "walk_speed_ms": 200,
   "name": "Caranguejo",
   "max_hp": 156000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun02": [
+    "Caranguejo"
+   ]
+  }
  },
  "1078": {
   "species_id": 1078,
@@ -286,7 +323,12 @@
   "walk_speed_ms": 1000,
   "name": "Planta Carnívora",
   "max_hp": 133000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun02": [
+    "Planta Carnívora"
+   ]
+  }
  },
  "1139": {
   "species_id": 1139,
@@ -326,12 +368,21 @@
    "yuno_in01": 1,
    "tur_dun03": 6,
    "hu_fild07": 2,
-   "moc_fild01": 1
+   "moc_fild01": 1,
+   "kakashi": 0
   },
   "walk_speed_ms": 150,
   "name": "Tronco de madeira",
   "max_hp": 10,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "kakashi": [
+    "Tronco de madeira"
+   ],
+   "hospital2": [
+    "Tronco de madeira"
+   ]
+  }
  },
  "1194": {
   "species_id": 1194,
@@ -388,7 +439,12 @@
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 200,
   "name": "Onbba",
-  "max_hp": 55
+  "max_hp": 55,
+  "names_by_map": {
+   "kakashi": [
+    "Onbba"
+   ]
+  }
  },
  "1262": {
   "species_id": 1262,
@@ -408,7 +464,12 @@
   "walk_speed_ms": 400,
   "name": "Estrela-do-Mar",
   "max_hp": 130000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun02": [
+    "Estrela-do-Mar"
+   ]
+  }
  },
  "1289": {
   "species_id": 1289,
@@ -481,7 +542,12 @@
   "walk_speed_ms": 200,
   "name": "General Tartaruga",
   "max_hp": 280000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun03": [
+    "General Tartaruga"
+   ]
+  }
  },
  "1315": {
   "species_id": 1315,
@@ -503,7 +569,12 @@
   "walk_speed_ms": 250,
   "name": "Pequena Tartaruga",
   "max_hp": 118000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun01": [
+    "Pequena Tartaruga"
+   ]
+  }
  },
  "1322": {
   "species_id": 1322,
@@ -525,7 +596,12 @@
   "walk_speed_ms": 2000,
   "name": "Pequena Planta Carnívor",
   "max_hp": 92000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun01": [
+    "Pequena Planta Carnívor"
+   ]
+  }
  },
  "1372": {
   "species_id": 1372,
@@ -607,7 +683,12 @@
   "walk_speed_ms": 200,
   "name": "Gorila",
   "max_hp": 390000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun03": [
+    "Gorila"
+   ]
+  }
  },
  "1517": {
   "species_id": 1517,
@@ -644,7 +725,12 @@
   "walk_speed_ms": 250,
   "name": "Tartaruga",
   "max_hp": 151000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun02": [
+    "Tartaruga"
+   ]
+  }
  },
  "1628": {
   "species_id": 1628,
@@ -726,7 +812,12 @@
   "walk_speed_ms": 2000,
   "name": "Planta",
   "max_hp": 72000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun01": [
+    "Planta"
+   ]
+  }
  },
  "1783": {
   "species_id": 1783,
@@ -739,7 +830,12 @@
   "walk_speed_ms": 150,
   "name": "Filhote de Katsuyu",
   "max_hp": 70,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "kakashi": [
+    "Filhote de Katsuyu"
+   ]
+  }
  },
  "1787": {
   "species_id": 1787,

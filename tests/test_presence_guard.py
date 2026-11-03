@@ -12,6 +12,34 @@ def appearance_22c(entity_id, species, option=0):
     return bytes(packet)
 
 
+def appearance_idle(entity_id, species, option=0, opcode=0x22a):
+    packet = bytearray(58 if opcode == 0x22a else 57)
+    struct.pack_into('<HIHHHIH', packet, 0, opcode, entity_id, 150, 0, 0, option, species)
+    packet[50:53] = bytes([2, 129, 64])  # [10, 20]
+    return bytes(packet)
+
+
+def test_standing_player_is_detected_without_walking():
+    for opcode in (0x22a, 0x22b):
+        event = decode(appearance_idle(2003137, 26, 0x40, opcode))
+        assert event['kind'] == 'appearance' and event['entity_id'] == 2003137
+        assert event['species_id'] == 26 and event['option'] == 0x40
+        assert event['position'] == [10, 20] and event['walk_speed_ms'] == 150
+    guard = PresenceGuard()
+    guard.observe([decode(appearance_idle(2003137, 26))], 2000001, 0)
+    assert guard.players == {2003137}
+    assert 'jogador 2003137' in guard.reason([12, 20], 0)
+
+
+def test_standing_player_who_hides_leaves_a_shadow_at_its_cell():
+    guard = PresenceGuard()
+    guard.observe([decode(appearance_idle(2003137, 26))], 2000001, 0)
+    for option, gm in ((0x2, False), (0x40, True)):
+        guard.observe([decode(struct.pack('<HIHHIB', 0x229, 2003137, 0, 0, option, 0))], 2000001, 1)
+        shadow, = guard.snapshot([12, 20], 1)['shadow_details']
+        assert shadow['position'] == [10, 20] and shadow['gm_invisible'] is gm
+
+
 def test_option_bits_are_decoded_from_appearance_and_option_change():
     assert decode(appearance_22c(2003137, 1037, 0x40))['option'] == 0x40
     event = decode(struct.pack('<HIHHIB', 0x229, 2003137, 0, 0, 0x2, 0))

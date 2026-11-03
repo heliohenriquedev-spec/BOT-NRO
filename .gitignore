@@ -15,6 +15,7 @@ data/rede/painel_config.json
 data/rede/buffs_aprendidos.json
 *.etl
 data/monstros/
+data/jogadores/
 perfis/painel_ui.json
 
 data/rede/invocacoes_aprendidas.json

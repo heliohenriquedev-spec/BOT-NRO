@@ -205,6 +205,11 @@ class PacketPanel(QMainWindow):
         pvp_layout.addWidget(self.pvp_list)
         self.pvp_list.itemChanged.connect(self.pvp_target_changed)
         tabs.addTab(pvp, 'PvP')
+        from .player_panel import PlayerPanel
+        self.player_panel = PlayerPanel()
+        tabs.addTab(self.player_panel, 'Jogadores')
+        from .watch_alert import WatchAlert
+        self.watch_alert = WatchAlert()
         from .update_panel import UpdatePanel
         self.update_panel = UpdatePanel(relay_running=lambda: self.process.state() != QProcess.NotRunning)
         self.update_panel.restart_requested.connect(self.restart_after_update)
@@ -561,6 +566,8 @@ class PacketPanel(QMainWindow):
     def refresh(self):
         if self.session is None or self.process.state() == QProcess.NotRunning:
             self.refresh_pvp([])
+            if self.player_panel.isVisible():
+                self.player_panel.update_state({})  # the history stays readable offline
             return
         try:
             state = json.loads((self.session/'estado.json').read_text(encoding='utf-8'))
@@ -568,6 +575,14 @@ class PacketPanel(QMainWindow):
             self.targets.show_map(state.get('map_name'), {m['species_id']: m for m in state.get('map_monsters', [])},
                                   variants=state.get('map_monster_names', []))
             self.refresh_pvp(state.get('players_nearby', []))
+            self.player_panel.check_watch(state)  # status line of the lista de observação
+            # The relay stops itself on a watched character or anyone in @hide; this shows it.
+            emergency = state.get('emergency_stop')
+            if emergency and emergency['id'] != getattr(self, 'emergency_seen', None):
+                self.emergency_seen = emergency['id']
+                if not emergency.get('released'):
+                    self.watch_alert.show_alert(emergency['detections'], stopped=emergency['reason'])
+                    self.log.appendPlainText(f"[PARADA] {emergency['at']}: {emergency['reason']}")
             if self.monster_panel.isVisible():
                 self.monster_panel.reload()
 

@@ -151,7 +151,7 @@ def reassemble(segments: list[Segment]):
 
 
 # Fixed lengths observed here, not a packet database for arbitrary RO servers.
-LENGTHS = {0x78: 55, 0x7c: 42, 0x7f: 6, 0x80: 7, 0x86: 16, 0x87: 12,
+LENGTHS = {0x78: 55, 0x7c: 42, 0x22a: 58, 0x22b: 57, 0xc3: 8, 0x1d7: 11, 0x7f: 6, 0x80: 7, 0x86: 16, 0x87: 12,
            0x88: 10, 0x8a: 29, 0x91: 22, 0x95: 30, 0xb0: 8, 0xb1: 8,
            0x195: 102, 0x1f3: 10, 0x22c: 65, 0x2d4: 29, 0x229: 15, 0xd8: 6,
            0x13e: 24, 0x1b9: 6, 0x114: 31, 0x117: 18, 0x11a: 15,
@@ -240,12 +240,23 @@ def decode(message: bytes) -> dict:
             event['position'], event['destination'] = movement(message[55:61])
         else:
             event['position'] = position(message[37:40] if op == 0x7c else message[47:50])
+    elif op in (0x22a, 0x22b):
+        # Characters standing still (022A) or spawning/warping in (022B): unlike 022C these
+        # carry no object-type byte, so a player is known on sight, before it walks.
+        event.update(kind='appearance', entity_id=u32(2), species_id=u16(16), option=u32(12),
+                     position=position(message[50:53]))
+        if 50 <= u16(6) <= 2000:
+            event['walk_speed_ms'] = u16(6)
     elif op in (0x86, 0x87):
         event['kind'] = 'player_move' if op == 0x87 else 'move'
         if op == 0x86:
             event['entity_id'] = u32(2)
         event['position'], event['destination'] = movement(message[6:12])
         event['server_tick'] = u32(12) if op == 0x86 else u32(2)  # REDE-69: walk start
+    elif op in (0xc3, 0x1d7):
+        # Look change (class = 0, hair = 1, ...), sent to the own character too.
+        event.update(kind='look_change', entity_id=u32(2), look_type=message[6],
+                     value=message[7] if op == 0xc3 else u16(7))
     elif op == 0x7f:
         event.update(kind='server_time', server_tick=u32(2))
     elif op == 0x88:
@@ -271,6 +282,16 @@ def decode(message: bytes) -> dict:
             entries.append({'skill_id': u16(2), 'level': u16(4), 'sp_cost': u16(6), 'range': u16(8)})
         event.update(kind='skills_info' if entries or (op == 0x10f and len(message) == 4) else 'other',
                      skills=entries, replace=op == 0x10f)
+    elif op == 0x8d:
+        # Public chat from an actor: only the speaker is kept ("Name : text"), never the text.
+        text = message[8:].split(b'\0')[0].decode('cp1252', 'replace')
+        event.update(kind='actor_signal', signal='chat', entity_id=u32(4))
+        if ' : ' in text:
+            event['name'] = text.split(' : ', 1)[0].strip()
+    elif op == 0xc0:
+        event.update(kind='actor_signal', signal='emote', entity_id=u32(2))
+    elif op == 0x9c:
+        event.update(kind='actor_signal', signal='direction', entity_id=u32(2))
     elif op in (0x9a, 0x8e):
         # REDE-51: retain only the exact cooldown notice, never arbitrary chat text.
         text = message[4:].split(b'\0')[0].decode('cp1252', 'replace')
@@ -337,6 +358,9 @@ def decode(message: bytes) -> dict:
         event.update(kind='name', entity_id=u32(2),
                      name=message[6:30].split(b'\0')[0].decode('cp1252', 'replace'))
         if op == 0x195:
+            guild = message[54:78].split(b'\0')[0].decode('cp1252', 'replace').strip()
+            if guild:
+                event['guild'] = guild
             # NRO customizes the party/guild display with textual HP.
             match = re.search(rb'HP:\s*(\d+)/(\d+)', message[30:54])
             if match:
@@ -359,6 +383,24 @@ def decode(message: bytes) -> dict:
     else:
         event['kind'] = 'other'
     return event
+
+
+def character_look(char_list: bytes, character_id: int):
+    """Class, hair and name of one character from the char server's list (006B).
+
+    Entries start with the character id and keep the classic offsets for the first 106
+    bytes (class 52, hair 54, name 74) whatever extra fields the server appends, so the
+    entry is found by its id instead of trusting a fixed entry size."""
+    key = struct.pack('<I', character_id)
+    start = char_list.find(key, 4)
+    while start != -1:
+        if start+98 <= len(char_list):
+            name = char_list[start+74:start+98].split(b'\0')[0]
+            job, hair = struct.unpack_from('<HH', char_list, start+52)
+            if name and all(c >= 32 for c in name) and (job < 1000 or 4001 <= job < 5000):
+                return {'job': job, 'hair': hair, 'name': name.decode('cp1252', 'replace')}
+        start = char_list.find(key, start+1)
+    return None
 
 
 def analyze(path: Path, connection: dict):

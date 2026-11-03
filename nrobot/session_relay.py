@@ -138,6 +138,17 @@ class SessionRelay:
         self.player_names = {}  # REDE-76: names of characters (0195 replies to the client's 008C)
         self.player_first_seen = {}
         self.own_option = 0  # REDE-73: own hide/cloak/@hide bits, for the in-game shadow
+        self.own_look = {}  # class, sex and hairstyle for the shadow's real sprite
+        from .portals import PortalGuard
+        self.portals = PortalGuard()  # warps are never walked into
+        from .player_registry import PlayerRegistry
+        self.registry = PlayerRegistry()  # aba Jogadores: everyone ever seen
+        self.registry_saved = 0
+        # Lista de observação / @hide: stop everything until the user starts again.
+        self.watch_entries, self.watch_stamp = [], None
+        self.emergency = None  # {'id', 'reason', 'detections', 'at'} of the last stop
+        self.emergency_current = set()  # (id, kind) found now; only a new one stops again
+        self.char_list = b''
         self.manual_until = 0  # REDE-76: the bot yields while the player walks by hand
         self.manual_active = False
         self.trails = {}  # REDE-76: walked cells per map, for the minimap
@@ -497,7 +508,8 @@ class SessionRelay:
             where = f", {round(math.dist(player, position))} células" if player and position else ''
             text = {'player': f'Jogador por perto: {name} (ID {identity}{where})',
                     'disguised': f"Jogador disfarçado de monstro: {name} (ID {identity}, sprite {alert.get('species_id')}{where})",
-                    'hidden': f"Jogador {'em @hide' if alert.get('option', 0) & 0x40 else 'escondido'}: {name} (ID {identity}{where})"}[alert['kind']]
+                    'hidden': f"Jogador {'em @hide' if alert.get('option', 0) & 0x40 else 'escondido'}: {name} (ID {identity}{where})",
+                    'ghost': f"Jogador INVISIVEL ao seu lado: {name} (ID {identity}) {alert.get('signal')} sem aparecer na tela"}[alert['kind']]
             allowed = self.presence.ignored(identity)
             self.record_hunt({'kind': 'presence_alert', **alert, 'name': name, 'allowed': allowed})
             print(('[PERMITIDO] ' if allowed else '[ALERTA] ')+text+(' (whitelist; nao pausa)' if allowed else ''))
@@ -768,6 +780,8 @@ class SessionRelay:
                 self.commands_blocked = False
                 self.hunt.start()
                 self.defer_until_manual_walk_finishes()
+                if self.emergency is not None:
+                    self.emergency['released'] = True
             elif command == 'capture_player':
                 if self.settings and not self.settings.get('pvp_enabled'):
                     raise ValueError('Ative PvP para selecionar um jogador')
@@ -806,6 +820,8 @@ class SessionRelay:
             return None
         name = self.tracker.observer.map_name
         collision = self.map_repository.get(name)
+        if collision is not None:
+            collision.set_forbidden(self.portals.cells(name))
         if name not in self.reported_maps:
             self.reported_maps.add(name)
             result = {'kind': 'map_collision', 'map': name, 'available': collision is not None,
@@ -1015,6 +1031,13 @@ class SessionRelay:
             (self.folder/'teste_ataque.json').write_text(json.dumps(self.last_test, ensure_ascii=False, indent=2), encoding='utf-8')
 
     def status(self):
+        if time.monotonic()-self.registry_saved > 3:
+            self.registry_saved = time.monotonic()
+            try:
+                self.portals.save()
+                self.registry.save()
+            except OSError as error:
+                print(f'Registro de jogadores nao salvo: {error}')
         if self.last_test is not None and self.last_test['status'] == 'sent_waiting_response' and time.monotonic() >= self.test_deadline:
             self.last_test['status'] = 'no_confirmation'
             self.record_test()
@@ -1037,6 +1060,9 @@ class SessionRelay:
                      players_nearby=self.players_nearby(), captured_player=self.captured_player,
                      capture_armed=time.monotonic() < self.capture_armed_until,
                      own_motion=self.own_motion(), clock_now=time.monotonic(),
+                     own_look=self.own_look or None,
+                     emergency_stop=self.emergency,
+                     portals=[{'position': list(cell), 'margin': margin} for cell, margin in self.portals.portals(self.tracker.observer.map_name)],
                      own_hidden=({'option': self.own_option & 0x4046, 'gm_invisible': bool(self.own_option & 0x40)}
                                  if self.own_option & 0x4046 else None),
                      native_frame_error=self.native_frames.error,
@@ -1175,6 +1201,10 @@ class SessionRelay:
             self.presence.observe(events, self.tracker.observer.player_id, time.monotonic(),
                                   own_position=self.tracker.observer.player)
             self.track_players(events)
+            if self.portals.observe(events, self.tracker.observer.map_name, self.tracker.observer.player):
+                self.collision_map()  # apply the new portal area right away
+            self.registry.observe(events, self.tracker.observer.player_id,
+                                  self.inventory.map_name or self.tracker.observer.map_name)
             self.sync_pvp_targets()
             if self.group_follower():
                 self.group.observe(events, self.group_leader_id(), time.monotonic())
@@ -1183,7 +1213,10 @@ class SessionRelay:
             for event in events:
                 if event['kind'] in ('option_change', 'appearance') and event.get('entity_id') == own and own is not None:
                     self.own_option = event.get('option', 0)
+                if event['kind'] == 'look_change' and event['entity_id'] == own and own is not None and event['look_type'] in (0, 1):
+                    self.own_look['job' if event['look_type'] == 0 else 'hair'] = event['value']
             self.announce_presence()
+            self.check_emergency()
             for event in events:
                 if event['kind'] == 'stream_resync':
                     self.record_hunt(event)
@@ -1380,8 +1413,13 @@ class SessionRelay:
                             op, packet = frame
                             if op == 0x69:
                                 self.account = packet[8:12]  # in memory only
+                                self.own_look = {'sex': packet[46]} if len(packet) > 46 else {}
+                            elif op == 0x6b:
+                                self.char_list = packet
                             elif op == 0x71:
                                 self.select_character(struct.unpack_from('<I', packet, 2)[0])
+                                from .packet_reader import character_look
+                                self.own_look.update(character_look(self.char_list, self.character_id) or {})
                                 self.next_map = packet[6:22].split(b'\0')[0].decode('cp1252', 'replace')
                             packet = await rewrite_endpoints(op, packet, self.register)
                             client_writer.write(packet)
@@ -1472,6 +1510,70 @@ class SessionRelay:
         self.account = None
         self.stage = 'stopped'
         self.status()
+
+    def load_watchlist(self):
+        from . import watchlist
+        try:
+            info = watchlist.FILE.stat()
+            stamp = (info.st_mtime_ns, info.st_size)
+        except OSError:
+            stamp = None
+        if stamp != self.watch_stamp:
+            self.watch_stamp, self.watch_entries = stamp, watchlist.load()
+        return self.watch_entries
+
+    def emergency_detections(self):
+        """Watched characters found (any way, @hide included) and anyone in @hide / invisible."""
+        from . import watchlist
+        from .presence_guard import OPTION_INVISIBLE
+        now = time.monotonic()
+        entries = self.load_watchlist()
+        hidden_gm = any(h['option'] & OPTION_INVISIBLE for h in self.presence.hidden.values())
+        if not entries and not self.presence.ghosts and not hidden_gm:
+            return []
+        self.sync_presence_names()
+        state = {'presence': self.presence.snapshot(self.tracker.observer.player, now),
+                 'players_nearby': self.players_nearby()}
+        found = {d['entity_id']: {**d, 'watched': True} for d in watchlist.detections(entries, state, self.registry.players)}
+        # Not on the list: a character in @hide is enough, seen switching it on or acting invisible.
+        everyone = watchlist.detections(['*'], state, self.registry.players, match_all=True)
+        for d in everyone:
+            if d['kind'] in ('invisible', 'gm_hide') and d['entity_id'] not in found and not self.presence.ignored(d['entity_id']):
+                found[d['entity_id']] = {**d, 'watched': False}
+        return list(found.values())
+
+    def check_emergency(self):
+        found = self.emergency_detections()
+        current = {(d['entity_id'], d['kind']) for d in found}
+        new = [d for d in found if (d['entity_id'], d['kind']) not in self.emergency_current]
+        self.emergency_current = current  # someone who left stops the bot again on return
+        if not new:
+            return
+        first = new[0]
+        who = first['name'] or f"ID {first['entity_id']}"
+        reason = ('jogador da lista de observacao' if first['watched'] else 'personagem em @hide')+f": {who} {first['text']}"
+        self.emergency = {'id': (self.emergency or {}).get('id', 0)+1, 'reason': reason,
+                          'detections': found, 'at': datetime.now().isoformat(timespec='seconds')}
+        self.record_hunt({'kind': 'emergency_stop', 'reason': reason, 'detections': found})
+        print(f'[PARADA] Bot parado ate voce iniciar novamente: {reason}.')
+        self.commands_blocked = True
+        if self.hunt is not None:
+            self.hunt.pause(f'PARADO: {reason}; inicie novamente pelo painel')
+        try:
+            asyncio.get_running_loop().create_task(self.stop_walking())
+        except RuntimeError:
+            pass
+
+    async def stop_walking(self):
+        """A walk already sent would carry on for a few cells: stop on the current cell."""
+        player = self.tracker.observer.player
+        if player is None or self.upstream is None or not self.native_frames.ready or not self.walking_now():
+            return
+        async with self.send_lock:
+            payload = move(*player)
+            self.trace_map_send('bot', struct.unpack_from('<H', payload)[0], len(payload))
+            self.upstream.write(payload)
+            await self.upstream.drain()
 
     async def update_presence_hold(self):
         """REDE-61: True while the bot must stay still; stops an in-flight walk once."""

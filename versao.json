@@ -1,7 +1,7 @@
 {
- "version": "2026.11.03.6",
- "published_at": "2026-11-03T02:35:15",
- "notes": "Nova att",
+ "version": "2026.11.03.7",
+ "published_at": "2026-11-03T08:16:16",
+ "notes": "A",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -1404,6 +1404,7 @@
   "nrobot/ammo.py",
   "nrobot/capture_guard.py",
   "nrobot/catalog.py",
+  "nrobot/character_sprite.py",
   "nrobot/client_frame_guard.py",
   "nrobot/combat_rotation.py",
   "nrobot/continuous_observer.py",
@@ -1415,6 +1416,7 @@
   "nrobot/grf_header.py",
   "nrobot/group_hunt.py",
   "nrobot/kuchiyose_dialog.py",
+  "nrobot/lua_tables.py",
   "nrobot/manual_skill_diagnostic.py",
   "nrobot/map_monsters.py",
   "nrobot/map_navigation.py",
@@ -1432,7 +1434,10 @@
   "nrobot/packet_reader.py",
   "nrobot/packet_settings.py",
   "nrobot/patrol_tour.py",
+  "nrobot/player_panel.py",
+  "nrobot/player_registry.py",
   "nrobot/port_guard.py",
+  "nrobot/portals.py",
   "nrobot/presence_guard.py",
   "nrobot/priority_panel.py",
   "nrobot/radar_overlay.py",
@@ -1449,11 +1454,13 @@
   "nrobot/summon_queue.py",
   "nrobot/update_panel.py",
   "nrobot/updater.py",
+  "nrobot/watch_alert.py",
+  "nrobot/watchlist.py",
   "requirements.txt",
   "third_party/rathena/LICENCE",
   "third_party/rathena/README.md",
   "third_party/rathena/des.cpp",
   "third_party/rathena/grfio.cpp"
  ],
- "files_digest": "da4d77f48619"
+ "files_digest": "d65f3c9e5bef"
 }
