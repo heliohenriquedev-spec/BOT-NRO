@@ -4,6 +4,8 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushB
                                QListWidget, QListWidgetItem, QAbstractItemView, QTableWidget,
                                QTableWidgetItem, QHeaderView)
 
+from .responsive_ui import WrappingCheckBox as QCheckBox
+
 THROWS = 'throws'
 THROW_IDS = (523, 524)
 

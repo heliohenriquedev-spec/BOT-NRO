@@ -103,3 +103,55 @@ def test_position_changed_before_send_discards_stale_command_without_sending(tmp
             await relay.send_hunt_action(action, game_gate=lambda: True)
         assert relay.hunt.enabled and relay.hunt.pending is None
     asyncio.run(scenario())
+
+def test_server_start_time_removes_extra_ack_latency_without_resending_early():
+    hunt,action=walking(100)
+    event={'kind':'player_move','position':[0,0],'destination':action['destination']}
+    motion={'origin':[0,0],'destination':action['destination'],'at':0,'duration':action['wait_seconds']}
+    hunt.observe([event],1,.1,movement_motion=motion)
+    end=action['wait_seconds']
+    assert hunt.pending['wait_until']==pytest.approx(end)
+    hunt.observe([event],1,.2,movement_motion=motion)
+    assert hunt.pending['wait_until']==pytest.approx(end)
+    assert hunt.plan(state(tuple(action['destination'])),end-.001) is None
+    new=hunt.plan(state(tuple(action['destination'])),end)
+    assert new and new['origin']==action['destination']
+
+
+def test_duplicate_ack_without_server_timing_does_not_restart_walk_wait():
+    hunt,action=walking(100)
+    event={'kind':'player_move','position':[0,0],'destination':action['destination']}
+    hunt.observe([event],1,.1)
+    expected=hunt.pending['wait_until']
+    hunt.observe([event],1,.2)
+    assert hunt.pending['wait_until']==expected
+
+
+def test_shortened_server_path_uses_its_actual_start_and_duration():
+    hunt,action=walking(100)
+    event={'kind':'player_move','position':[0,0],'destination':[2,0]}
+    hunt.observe([event],1,.1,movement_motion={'origin':[0,0],'destination':[2,0],'at':0,'duration':.2})
+    assert hunt.pending['wait_until']==pytest.approx(.2)
+    assert hunt.plan(state((2,0)),.19) is None
+    assert hunt.plan(state((2,0)),.2)['origin']==[2,0]
+
+
+def test_arrival_correction_cannot_be_delayed_by_an_older_walk_ack():
+    hunt,action=walking(100)
+    hunt.observe([{'kind':'position','entity_id':1,'position':action['destination']}],1,.2)
+    assert hunt.pending['arrival_confirmed']
+    hunt.observe([{'kind':'player_move','position':[0,0],'destination':action['destination']}],1,.3,
+                 movement_motion={'destination':action['destination'],'at':0,'duration':.4})
+    assert hunt.pending['wait_until']==.2
+
+
+def test_in_range_combat_does_not_recompute_a_walk_route(monkeypatch):
+    from nrobot.map_navigation import CollisionMap
+    collision=CollisionMap(30,30,bytes([1])*900)
+    def unnecessary(*args,**kwargs):raise AssertionError('unnecessary A* while already in range')
+    monkeypatch.setattr(collision,'route',unnecessary)
+    hunt=PacketHunt();hunt.start()
+    assert hunt.plan(state((10,10),((20,(11,10)),)),0,collision=collision)['kind']=='attack'
+    hunt.auto_attacks=False
+    s=state((10,10),((20,(15,10)),));s['engagement_range']=6
+    assert hunt.plan(s,1,collision=collision) is None

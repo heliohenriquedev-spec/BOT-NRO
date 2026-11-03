@@ -109,6 +109,8 @@ class SessionRelay:
         self.stage = 'starting'
         self.error = None
         self.last_saved = 0
+        self.last_inventory_map = None
+        self.last_inventory_written = 0
         self.last_status_written = 0
         self.game_peer = self.game_local = None
         self.commands_blocked = False
@@ -130,6 +132,8 @@ class SessionRelay:
         self.captured_player = None
         # REDE-72: other characters' server paths.
         self.player_tracks = {}
+        from .group_hunt import GroupHunt
+        self.group = GroupHunt()
         self.player_names = {}  # REDE-76: names of characters (0195 replies to the client's 008C)
         self.player_first_seen = {}
         self.own_option = 0  # REDE-73: own hide/cloak/@hide bits, for the in-game shadow
@@ -183,6 +187,11 @@ class SessionRelay:
         from .packet_patrol import PacketPatrol
         from .network_targets import Entity
         settings = validate(settings)
+        if self.settings is not None and any(self.settings[k] != settings[k] for k in ('group_enabled','group_role','group_leader')):
+            self.group.target_id = None
+            self.group.target_at = 0
+            if self.hunt is not None:
+                self.hunt.priority_target = None
         if self.hunt is None:
             raise ValueError('Modo de caça não está disponível')
         self.hunt.pause('configuração aplicada; iniciar para retomar')
@@ -260,7 +269,8 @@ class SessionRelay:
         self.presence.hold_disguised = settings['pause_on_disguised']
         self.presence.hold_hidden = settings['pause_on_hidden']
         self.presence.resume_delay = settings['resume_delay']
-        self.presence.allowed_names = {n.casefold() for n in settings['allowed_players']}
+        group_names = [settings['group_leader'], *settings['group_members']] if settings['group_enabled'] else []
+        self.presence.allowed_names = {n.casefold() for n in [*settings['allowed_players'], *group_names] if n}
         self.sync_presence_names()
         from .packet_settings import HOTKEYS
         self.hunt_key, self.hunt_key_name = HOTKEYS[settings['hotkey_hunt']], settings['hotkey_hunt']
@@ -375,6 +385,54 @@ class SessionRelay:
                 self.hunt.target = self.hunt.pending = None
         self.record_hunt({'kind': 'player_released', 'entity_id': identity})
         self.captured_player = None
+
+    def group_follower(self):
+        return bool(self.settings and self.settings['group_enabled'] and self.settings['group_role']=='follower')
+
+    def group_leader_id(self):
+        visible = {i:e for i,e in self.player_tracks.items() if i not in self.presence.hidden}
+        return self.group.leader(self.settings or {}, self.player_names, visible)
+
+    def group_combat_allowed(self, target_id=None):
+        if not self.group_follower():
+            return True
+        if self.settings['group_follow_only'] or self.group_leader_id() is None:
+            return False
+        self.group.observe([],self.group_leader_id(),time.monotonic())
+        target_id = self.group.target_id if target_id is None else target_id
+        target=self.tracker.observer.registry.entities.get(target_id)
+        leader=self.player_tracks[self.group_leader_id()].combat_bounds(time.monotonic())[0][0]
+        own=self.tracker.observer.player
+        return bool(target_id==self.group.target_id and target is not None and target.kind=='monster'
+                    and own is not None and math.dist(own,leader)<=12)
+
+    def plan_group_or_hunt(self, state, now, speed, collision):
+        if not self.group_follower():
+            return self.hunt.plan(state,now,speed,collision=collision)
+        leader_id=self.group_leader_id()
+        leader=self.player_tracks[leader_id].combat_bounds(now)[0][0] if leader_id is not None else None
+        self.group.observe([],leader_id,now)
+        target=self.group.target_id
+        combat=self.group_combat_allowed(target) and any(e['entity_id']==target for e in state['recent_entities'])
+        old_patrol=self.hunt.patrol
+        self.hunt.patrol=None  # followers never launch independent exploration
+        try:
+            filtered={**state,'recent_entities':[e for e in state['recent_entities'] if combat and e['entity_id']==target]}
+            self.hunt.priority_target=target if combat else None
+            if not combat:
+                self.hunt.target=self.hunt.engaged=None
+            action=self.hunt.plan(filtered,now,speed,collision=collision)
+            if combat:
+                self.group.reason=f'alvo observado do lider: {target}'
+                return action
+            if self.hunt.pending is not None or now < self.hunt.ready_at:
+                return None
+            blocked={p for p,t in self.hunt.blocked_until.items() if t>now}
+            action=self.group.plan_follow(state,leader,self.settings,collision,blocked,speed)
+            self.hunt.reason=self.group.reason
+            return action
+        finally:
+            self.hunt.patrol=old_patrol
 
     def sync_presence_names(self):
         from .network_targets import is_player_id
@@ -803,6 +861,8 @@ class SessionRelay:
             collision = self.collision_map()
             if self.settings and self.settings['require_collision'] and collision is None:
                 raise ValueError('Mapa de colisão deixou de estar disponível')
+            if self.group_follower() and (not self.group_combat_allowed() or action['role'] in ('offensive','summon') and not self.group_combat_allowed(action.get('combat_target_id',action['target_id']))):
+                return False
             if action['role'] in ('offensive', 'summon'):
                 entity = observer.registry.entities.get(action.get('combat_target_id', action['target_id']))
                 if (entity is None or not entity.alive or entity.species_id not in observer.species
@@ -869,6 +929,9 @@ class SessionRelay:
         state['character_sync'] = {'identity_received': observer.player_id is not None,
             'skills_received': observer.skills_received, 'sp_received': observer.sp is not None,
             'learned_count': sum(s.get('level',0) > 0 for s in observer.skills.values())}
+        state['group'] = {'enabled':bool(self.settings and self.settings['group_enabled']),
+            'leader_id':self.group_leader_id() if self.group_follower() else None, 'target_id':self.group.target_id,
+            'reason':self.group.reason, 'follow_only':bool(self.settings and self.settings['group_follow_only'])}
         state.update(stage=self.stage, relay_error=self.error, ammo=self.ammo.snapshot(time.monotonic()),
                      presence=self.presence.snapshot(self.tracker.observer.player, time.monotonic()),
                      players_nearby=self.players_nearby(), captured_player=self.captured_player,
@@ -918,9 +981,14 @@ class SessionRelay:
                 temp = self.folder/'estado.tmp'
                 temp.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
                 temp.replace(self.folder/'estado.json')
-                inventory_file = self.folder/'entidades_mapa.tmp'
-                inventory_file.write_text(json.dumps(self.inventory.snapshot(time.monotonic()), ensure_ascii=False, indent=2), encoding='utf-8')
-                inventory_file.replace(self.folder/'entidades_mapa.json')
+                # The overlay needs fast status updates; the complete historical
+                # inventory does not need to serialize and rewrite ten times/sec.
+                if time.monotonic()-self.last_inventory_written >= 1 or self.stage == 'stopped' or self.inventory.map_name != self.last_inventory_map:
+                    inventory_file = self.folder/'entidades_mapa.tmp'
+                    inventory_file.write_text(json.dumps(self.inventory.snapshot(time.monotonic()), ensure_ascii=False, indent=2), encoding='utf-8')
+                    inventory_file.replace(self.folder/'entidades_mapa.json')
+                    self.last_inventory_written = time.monotonic()
+                    self.last_inventory_map = self.inventory.map_name
                 self.write_minimap()
                 self.write_monsters()
 
@@ -1006,6 +1074,8 @@ class SessionRelay:
             self.presence.observe(events, self.tracker.observer.player_id, time.monotonic(),
                                   own_position=self.tracker.observer.player)
             self.track_players(events)
+            if self.group_follower():
+                self.group.observe(events, self.group_leader_id(), time.monotonic())
             self.sync_presence_names()
             own = self.tracker.observer.player_id
             for event in events:
@@ -1090,7 +1160,8 @@ class SessionRelay:
                     if self.hunt.patrol is not None:
                         self.hunt.patrol.reset()
                 before = self.hunt.confirmed_attacks
-                self.hunt.observe(events, self.tracker.observer.player_id, time.monotonic())
+                self.hunt.observe(events, self.tracker.observer.player_id, time.monotonic(),
+                                  movement_motion=self.tracker.observer.player_motion)
                 self.flush_hunt_diagnostics()
                 if self.hunt.confirmed_attacks != before:
                     self.record_hunt({'kind': 'attack_confirmed', 'count': self.hunt.confirmed_attacks,
@@ -1149,6 +1220,7 @@ class SessionRelay:
                     raise ValueError('Já existe conexão de mapa neste relay')
                 self.upstream = upstream
                 self.begin_map_observation()
+                self.last_inventory_written = 0
                 self.inventory.reset(self.next_map)
                 self.ammo.reset()
                 self.map_validation = None
@@ -1383,11 +1455,21 @@ class SessionRelay:
             state = self.status()
             observer = self.tracker.observer
             entity = observer.registry.entities.get(action['target_id'])
-            is_patrol = action.get('purpose') == 'patrol'
+            group_follow = action.get('purpose') == 'group_follow'
+            is_patrol = action.get('purpose') in ('patrol','group_follow')
+            move_limit = 4 if group_follow or not is_patrol else self.hunt.patrol.max_step
+            if group_follow and not self.group_follower():
+                raise HuntTargetChanged('Modo seguidor nao esta ativo')
+            if self.group_follower():
+                if group_follow:
+                    if self.group_leader_id() is None:
+                        raise HuntTargetChanged('Lider nao esta mais visivel')
+                elif not self.group_combat_allowed(action['target_id']):
+                    raise HuntTargetChanged('Aguardando alvo atual do lider')
             if (not game_gate() or self.upstream is None or state['state'] != 'tracking'
                 or not observer.player_position_valid(time.monotonic()) or observer.player_id is None):
                 raise ValueError('Foco, personagem ou alvo recente não confirmado')
-            if is_patrol and (action['kind'] != 'move' or self.hunt.patrol is None
+            if is_patrol and (action['kind'] != 'move' or (not group_follow and self.hunt.patrol is None)
                               or action['target_id'] is not None):
                 raise ValueError('Comando de patrulha inválido')
             captured = entity is not None and entity.kind == 'player' and entity.entity_id in observer.pinned
@@ -1398,7 +1480,7 @@ class SessionRelay:
                 raise HuntTargetChanged('Alvo removido, antigo ou temporariamente ignorado')
             player = observer.player
             target = None if is_patrol else entity.combat_bounds(time.monotonic())[0][0]
-            if is_patrol and any(math.dist(player, e['position']) <= self.hunt.SEARCH_RADIUS
+            if is_patrol and not group_follow and any(math.dist(player, e['position']) <= self.hunt.SEARCH_RADIUS
                                  and self.hunt.excluded_until.get(e['entity_id'], 0) <= time.monotonic()
                                  for e in state['recent_entities']):
                 raise HuntTargetChanged('Alvo apareceu; patrulha interrompida')
@@ -1440,11 +1522,16 @@ class SessionRelay:
                     raise ValueError('Movimento bloqueado: mapa de colisão indisponível')
                 if collision is not None:
                     blocked = {p for p, until in self.hunt.blocked_until.items() if until > time.monotonic()}
-                    if not collision.segment(player, destination, blocked, max_steps=self.hunt.patrol.max_step if is_patrol else 4):
+                    if group_follow:
+                        leader = self.player_tracks[self.group_leader_id()].combat_bounds(time.monotonic())[0][0]
+                        expected = self.group.plan_follow(state,leader,self.settings,collision,blocked,observer.walk_speed_ms)
+                        if expected != action:
+                            raise HuntTargetChanged('Lider mudou de posicao; recalculando seguimento')
+                    if not collision.segment(player, destination, blocked, max_steps=move_limit):
                         raise HuntTargetChanged('Rota mudou ou segmento cruza obstáculo')
                 elif action.get('collision_route'):
                     raise HuntTargetChanged('Mapa da rota ficou indisponível')
-                elif (not 1 <= max(abs(destination[i]-player[i]) for i in (0, 1)) <= (self.hunt.patrol.max_step if is_patrol else 4)
+                elif (not 1 <= max(abs(destination[i]-player[i]) for i in (0, 1)) <= (move_limit)
                       or not all(1 <= n <= 1022 for n in destination)
                       or (not is_patrol and action.get('purpose') != 'keep_distance' and math.dist(destination, entity.destination or target)
                           >= math.dist(player, entity.destination or target))):
@@ -1626,16 +1713,15 @@ async def run(args):
                             state = relay.status()
                             if relay.rotation is not None:
                                 state['engagement_range'] = relay.rotation.navigation_range(state, time.monotonic(), relay.hunt.target)
-                            action = relay.hunt.plan(state, time.monotonic(), relay.tracker.observer.walk_speed_ms,
-                                                     collision=relay.collision_map())
+                            action = relay.plan_group_or_hunt(state, time.monotonic(), relay.tracker.observer.walk_speed_ms, relay.collision_map())
                             relay.flush_hunt_diagnostics()
-                            if relay.rotation is not None:
+                            if relay.rotation is not None and relay.group_combat_allowed():
                                 now = time.monotonic()
                                 # Select a combat target even while a patrol leg is in flight.
                                 own = (state.get('combat_player_positions') or [state['player_position']])[0]
                                 candidates = [e for e in state['recent_entities']
                                               if relay.hunt.excluded_until.get(e['entity_id'], 0) <= now]
-                                if candidates and relay.hunt.target not in {e['entity_id'] for e in candidates}:
+                                if not relay.group_follower() and candidates and relay.hunt.target not in {e['entity_id'] for e in candidates}:
                                     candidate = min(candidates, key=lambda e: math.dist(own, e.get('effective_position', e['position'])))
                                     if math.dist(own, candidate.get('effective_position', candidate['position'])) <= relay.hunt.SEARCH_RADIUS:
                                         relay.hunt.target = candidate['entity_id']

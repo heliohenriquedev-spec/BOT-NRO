@@ -343,3 +343,92 @@ Para um usuario que ja estava com lista vazia, atualizar o pacote/painel e entra
 novamente no personagem pelo perfil local reenvia os dados iniciais. Apenas trocar
 a aba ou caminhar nao solicita outra lista ao servidor. Nao ha consultas novas
 nem copia da lista de habilidades de outro usuario.
+
+
+### Combate enquanto nenhuma Kuchiyose esta disponivel
+
+A manutencao tem prioridade apenas quando uma invocacao habilitada e aprendida
+pode ser tentada: recarga local e do servidor encerradas, SP suficiente e nenhuma
+invocacao ativa bloqueando a fila. Sem nenhuma pronta, habilidades ofensivas e
+ataques basicos continuam normalmente; a navegacao tambem usa seu alcance normal.
+Uma tentativa de invocacao ja enviada ainda aguarda a confirmacao por tempo limitado.
+
+Exemplo com apenas uma invocacao de 20 s e recarga 46 s: invoca em t=0; em t=20
+termina e o combate continua; em t=46 ela volta a ter prioridade, se houver SP e
+alvo valido. Nao e necessario habilitar uma segunda invocacao para o bot continuar
+combatendo. Sem nenhuma invocacao marcada, o combate tambem segue normalmente.
+Esta regra substitui a reserva de SP/espera de recarga descrita anteriormente.
+
+
+### Reducao das pequenas esperas locais
+
+Confirmacoes repetidas de caminhada nao reiniciam o temporizador de um trecho.
+Quando o observador tem inicio/duracao do trajeto aceito, a espera usa esse fim
+estimado, em vez de somar novamente o percurso ao instante de recebimento do ACK.
+Uma correcao que confirma chegada prevalece sobre ACKs atrasados. Continua sendo
+necessaria confirmacao da caminhada; a otimiza??o nao antecipa envios sem validacao.
+
+Rotas A* de aproximacao so sao calculadas quando ha necessidade de caminhar: o
+combate ja dentro do alcance nao recalcula a mesma rota a cada passagem do loop.
+O estado rapido do painel permanece separado da lista historica completa de
+entidades: esta lista e gravada em intervalos de um segundo, com atualizacao
+imediata na troca de mapa e repeticao em caso de bloqueio temporario do arquivo.
+O loop de acoes continua em 20 ms. Cooldowns, conjuracoes e pausas configuradas
+por presenca/manual permanecem independentes dessas reducoes de espera local.
+
+
+### Caca em grupo (computadores diferentes)
+
+Em Configuracao, ative **Caca em grupo** em cada computador. No bot que conduz o
+trajeto, selecione **Lider** e configure a caca normal (tambem pode caminhar a mao).
+Nos demais, selecione **Seguidor**, informe o nome completo do mesmo lider e ajuste
+a distancia (2 a 8 celulas). Informe os nomes dos outros membros em **Membros
+permitidos**, um por linha, para que a presenca deles nao suspenda a caca. O lider
+configurado tambem fica permitido. Isso nao cria uma PT no servidor: a PT do jogo
+e organizada pelos jogadores e o lider e explicitamente escolhido no bot.
+
+Sem **Apenas seguir**, o seguidor observa o ID do monstro atacado/conjurado pelo
+lider nos pacotes recebidos e limita seu combate a esse ID. Outro monstro mais
+perto nao substitui o alvo do lider. Configure os mesmos alvos permitidos de monstros
+em todos os bots, ou identificacao automatica do mapa: alvos nao confirmados pelo
+proprio seguidor nao autorizam ataques. Ao perder o alvo, segue o lider em vez de
+iniciar patrulha independente. Se ficar muito distante, volta a seguir antes de
+retomar o combate. Cooldowns, SP, colisao e verificacoes de alvo continuam locais.
+
+Com **Apenas seguir** marcado, ficam bloqueados ataques basicos, habilidades e
+invocacoes, inclusive na validacao imediatamente antes do envio. Pode marcar ou
+desmarcar conforme desejar; aplicar configuracao pausa a caca e Iniciar retoma.
+O movimento usa caminhos livres ate a posicao observada do lider, com passos
+revalidados quando ele muda de celula. Todos os seguidores usam o mesmo nome,
+mas cada um valida seu caminho no proprio cliente.
+
+Nao precisa abrir porta de rede, compartilhar arquivos ou informar senhas de
+outros jogadores. A coordenacao usa apenas o trafego que o proprio jogo ja envia.
+Assim, exige lider visivel no mesmo mapa. Se ele sair da visao, ocultar ou mudar
+de mapa, os seguidores aguardam; nao inventam coordenadas nem seguem teleportes
+sem dados. Um canal entre bots seria outra etapa para coordenacao fora da visao.
+Nomes duplicados/ambiguos nao sao escolhidos automaticamente. O alvo observado
+vem de ataques/conjuracoes/danos recebidos, nao de leitura do cursor do outro PC.
+O modo precisa ser validado em jogo com os membros apos atualizar e reconectar.
+# Interface adaptavel
+
+A roda do mouse apenas rola as paginas: numeros e seletores sao alterados por
+clique, digitacao ou teclado. As cores de foco, selecao e botoes pressionados
+destacam a acao atual. A ajuda das habilidades pode ser expandida sem sair da aba.
+
+Os efeitos aprendidos ficam em `data/rede/buffs_aprendidos.json`, preservado nas
+atualizacoes. A lista restaura esses vinculos mesmo ao reconstruir as habilidades;
+desmarcar um buff desativa seu uso, mas nao apaga o aprendizado. Efeitos ativos sao
+confirmados novamente pelos pacotes do servidor em cada conexao.
+
+O painel usa navegacao lateral em janelas largas e abas com rolagem em janelas
+menores. Em Configuracao, Navegacao, Grupo, Presenca e Atalhos ficam separados;
+Monstros alvo passa para uma aba propria quando falta largura. Os formularios
+rolam verticalmente em vez de comprimir os campos. Tabelas mantem rolagem
+horizontal para suas colunas.
+
+A pasta do jogo fica em Conexao. Iniciar, Pausar e Parar envios permanecem no
+cabecalho. As configuracoes, atalhos e regras de aplicar/pausar continuam iguais.
+Reabra o painel para carregar a nova interface; fechar o painel encerra a conexao
+do jogo que estiver ligada a ele.
+

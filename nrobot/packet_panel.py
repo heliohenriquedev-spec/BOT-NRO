@@ -10,8 +10,9 @@ from PySide6.QtCore import QProcess, QProcessEnvironment, QTimer, Qt
 from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QCheckBox, QSpinBox, QDoubleSpinBox, QFormLayout, QGroupBox, QPlainTextEdit,
-    QTabWidget, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QScrollArea)
+    QTabWidget, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QScrollArea, QComboBox, QLineEdit)
 
+from .responsive_ui import WrappingCheckBox as QCheckBox
 from .packet_settings import ROOT, SPECIES, DEFAULTS, read, save
 
 
@@ -194,9 +195,24 @@ class PacketPanel(QMainWindow):
         QTimer.singleShot(1500, lambda: self.update_panel.run('check'))  # tell about new versions on start
         self.strict_map = QCheckBox('Exigir mapa de colisão válido antes de iniciar')
         form.insertRow(0, self.strict_map)
+        group_box=QGroupBox('Caca em grupo: lider e seguidores')
+        group_form=QFormLayout(group_box)
+        self.group_enabled=QCheckBox('Ativar modo de grupo')
+        self.group_role=QComboBox();self.group_role.addItem('Seguidor','follower');self.group_role.addItem('Lider','leader')
+        self.group_leader=QLineEdit();self.group_leader.setPlaceholderText('Nome exato do lider visivel no jogo')
+        self.group_only=QCheckBox('Apenas seguir (seguidor): sem ataques, habilidades ou invocacoes')
+        self.group_role.currentIndexChanged.connect(lambda: self.group_only.setEnabled(self.group_role.currentData()=='follower'))
+        self.group_distance=QSpinBox();self.group_distance.setRange(2,8)
+        self.group_members=QPlainTextEdit();self.group_members.setMaximumHeight(65)
+        self.group_members.setPlaceholderText('Nomes dos demais membros, um por linha; nao pausam a caca')
+        for label,widget in (('',self.group_enabled),('Papel neste computador',self.group_role),('Lider',self.group_leader),
+                            ('',self.group_only),('Distancia em celulas',self.group_distance),('Membros permitidos',self.group_members)):
+            group_form.addRow(label,widget)
+        note=QLabel('Seguidores usam o caminho e o alvo observado do lider. Se ele sair da visao ou do mapa, aguardam. Todos devem configurar os mesmos alvos de monstros.')
+        note.setWordWrap(True);group_form.addRow(note)
+        form.insertRow(form.rowCount()-1,group_box)
         keys_box = QGroupBox('Teclas (valem com o jogo em primeiro plano)')
         keys_form = QFormLayout(keys_box)
-        from PySide6.QtWidgets import QComboBox
         from .packet_settings import HOTKEYS
         self.hotkey_hunt, self.hotkey_minimap = QComboBox(), QComboBox()
         for combo in (self.hotkey_hunt, self.hotkey_minimap):
@@ -304,6 +320,12 @@ class PacketPanel(QMainWindow):
         self.burst_interval.setValue(settings['skill_burst_interval'])
         self.update_key_notice()
         self.pause_players.setChecked(settings['pause_on_players'])
+        self.group_enabled.setChecked(settings['group_enabled'])
+        self.group_role.setCurrentIndex(self.group_role.findData(settings['group_role']))
+        self.group_leader.setText(settings['group_leader'])
+        self.group_only.setChecked(settings['group_follow_only'])
+        self.group_distance.setValue(settings['group_distance'])
+        self.group_members.setPlainText('\n'.join(settings['group_members']))
         self.pause_disguised.setChecked(settings['pause_on_disguised'])
         self.pause_hidden.setChecked(settings['pause_on_hidden'])
         self.skill_panel.saved = settings['skill_profiles']
@@ -311,8 +333,11 @@ class PacketPanel(QMainWindow):
         self.priority_panel.saved = settings['skill_priority']
         for key, field in self.combat_fields.items():
             field.setValue(settings[key])
+        from .responsive_ui import PanelLayout
+        self.responsive_layout = PanelLayout(self, locals())
         self.watch_settings()
         self.load_ui()
+        self.responsive_layout.fit_to_screen()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.refresh)
         self.timer.start(700)
@@ -322,7 +347,10 @@ class PacketPanel(QMainWindow):
         tabs.currentChanged.connect(lambda index: self.refresh())
 
     def settings(self):
-        return {'species': sorted(self.targets.selected),
+        return {'group_enabled':self.group_enabled.isChecked(),'group_role':self.group_role.currentData(),
+                'group_leader':self.group_leader.text().strip(),'group_follow_only':self.group_only.isChecked(),
+                'group_distance':self.group_distance.value(),'group_members':[n.strip() for n in self.group_members.toPlainText().splitlines() if n.strip()],
+                'species': sorted(self.targets.selected),
                 'radius': self.radius.value(), 'patrol_step': self.step.value(),
                 'patrol': self.patrol.isChecked(), 'skills': self.skills.isChecked(), 'auto_map_targets': self.auto_map_targets.isChecked(),
                 'require_collision': self.strict_map.isChecked(), 'advanced_combat': self.advanced.isChecked(),
@@ -532,6 +560,8 @@ class PacketPanel(QMainWindow):
                     '; identidade '+('recebida' if sync.get('identity_received') else 'ainda nao recebida'),
                 f"Ataques confirmados: {hunt.get('confirmed_attacks', 0)}     Habilidades ofensivas confirmadas: {hunt.get('confirmed_skills', 0)}",
                 f"Candidatos recentes: {len(state.get('recent_entities', []))}     Mensagens recebidas: {state.get('messages', 0)}",
+                'Grupo: '+str((state.get('group') or {}).get('reason') or 'modo normal/lider')+
+                    (' | apenas seguir' if (state.get('group') or {}).get('follow_only') else ''),
                 'Fase: '+hunt.get('phase', 'aguardando')+f" • Espera atual: {hunt.get('wait_seconds', 0)} s",
                 'Motivo: '+(hunt.get('reason') or 'nenhum bloqueio global'),
                 f"Falhas no alvo atual: {hunt.get('target_skill_failures', 0)} • Ajustes aplicados: "+self.applied_combat_text(state.get('settings') or {}),
@@ -652,6 +682,12 @@ class PacketPanel(QMainWindow):
         self.save_timer.setInterval(800)
         self.save_timer.timeout.connect(self.autosave)
         self.allowed_players.textChanged.connect(self.schedule_save)
+        self.group_enabled.toggled.connect(self.schedule_save)
+        self.group_role.currentIndexChanged.connect(self.schedule_save)
+        self.group_leader.editingFinished.connect(self.schedule_save)
+        self.group_only.toggled.connect(self.schedule_save)
+        self.group_distance.valueChanged.connect(self.schedule_save)
+        self.group_members.textChanged.connect(self.schedule_save)
         self.targets.changed.connect(self.schedule_save)
         for combo in (self.hotkey_hunt, self.hotkey_minimap):
             combo.currentTextChanged.connect(self.schedule_save)

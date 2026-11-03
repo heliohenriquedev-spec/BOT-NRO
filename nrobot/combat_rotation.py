@@ -227,9 +227,18 @@ class CombatRotation:
             return False
         if self.summons.waiting is not None:
             return True
-        if self.summons.active is None:
-            return True  # reserve SP even while the next summon is cooling down
-        return any(self.summons.may_invoke(p, now) for p in configured)
+        cooldowns = state.get('skill_cooldowns', {})
+        sp = state.get('player_sp')
+        if sp is None:
+            return False
+        available_sp = sp-sum(p['sp_cost'] for p in self.pending.values())
+        for profile in configured:
+            identity = profile['skill_id']
+            cooldown = cooldowns.get(identity, cooldowns.get(str(identity), 0))
+            if (identity not in self.pending and now >= max(self.ready.get(identity,0), cooldown)
+                and available_sp >= known[identity]['sp_cost'] and self.summons.may_invoke(profile,now)):
+                return True
+        return False
 
     def navigation_range(self, state, now, target_id=None):
         distance = self.engagement_range(state)

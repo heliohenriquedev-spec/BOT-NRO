@@ -2,43 +2,98 @@
  "1010": {
   "species_id": 1010,
   "maps": {
-   "areia": 5
+   "areia": 13
   },
   "walk_speed_ms": 500,
   "captured_sprite": true
  },
+ "1031": {
+  "species_id": 1031,
+  "maps": {
+   "kakashi": 4,
+   "hospital2": 1,
+   "moc_fild13": 1,
+   "yuno_fild05": 14
+  },
+  "walk_speed_ms": 300,
+  "captured_sprite": true,
+  "name": "Namekuji",
+  "max_hp": 33000
+ },
+ "1036": {
+  "species_id": 1036,
+  "maps": {
+   "moc_fild08": 7,
+   "hu_fild07": 8
+  },
+  "walk_speed_ms": 250,
+  "captured_sprite": true,
+  "name": "Nidachou",
+  "max_hp": 81000
+ },
  "1039": {
   "species_id": 1039,
   "maps": {
-   "tur_dun03": 196
+   "tur_dun03": 263
   },
   "walk_speed_ms": 200,
   "name": "Monstro Marinho",
   "max_hp": 385000,
   "captured_sprite": true
  },
+ "1040": {
+  "species_id": 1040,
+  "maps": {
+   "ve_fild04": 6,
+   "ein_fild01": 3
+  },
+  "walk_speed_ms": 300,
+  "captured_sprite": true,
+  "name": "Manmosukas",
+  "max_hp": 157000
+ },
  "1041": {
   "species_id": 1041,
   "maps": {
-   "tur_dun02": 85
+   "tur_dun02": 88
   },
   "walk_speed_ms": 300,
   "name": "Grande Esquilo",
   "max_hp": 149000,
   "captured_sprite": true
  },
- "1062": {
-  "species_id": 1062,
+ "1055": {
+  "species_id": 1055,
   "maps": {
-   "areia": 4
+   "areia": 13
   },
   "walk_speed_ms": 500,
   "captured_sprite": true
  },
+ "1062": {
+  "species_id": 1062,
+  "maps": {
+   "areia": 10
+  },
+  "walk_speed_ms": 500,
+  "captured_sprite": true
+ },
+ "1106": {
+  "species_id": 1106,
+  "maps": {
+   "moc_fild08": 6,
+   "hu_fild07": 13
+  },
+  "walk_speed_ms": 200,
+  "captured_sprite": true,
+  "name": "Akamaru",
+  "max_hp": 69000
+ },
  "1177": {
   "species_id": 1177,
   "maps": {
-   "yuno_fild11": 2
+   "yuno_fild11": 2,
+   "ra_fild03": 5
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,
@@ -50,7 +105,8 @@
   "maps": {
    "hospital2": 3,
    "yuno_in01": 1,
-   "tur_dun03": 6
+   "tur_dun03": 6,
+   "hu_fild07": 2
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,
@@ -66,8 +122,8 @@
  "1212": {
   "species_id": 1212,
   "maps": {
-   "kakashi": 12,
-   "moc_fild01": 74
+   "kakashi": 17,
+   "moc_fild01": 92
   },
   "walk_speed_ms": 350,
   "captured_sprite": true,
@@ -77,73 +133,125 @@
  "1315": {
   "species_id": 1315,
   "maps": {
-   "yuno_fild11": 17
+   "yuno_fild11": 17,
+   "ra_fild03": 7
   },
   "walk_speed_ms": 155,
   "captured_sprite": true,
   "name": "Ninkame",
   "max_hp": 1200000
  },
+ "1402": {
+  "species_id": 1402,
+  "maps": {
+   "moc_fild13": 1,
+   "yuno_fild05": 11
+  },
+  "walk_speed_ms": 160,
+  "captured_sprite": true,
+  "name": "Gama-Kichi",
+  "max_hp": 36000
+ },
  "1447": {
   "species_id": 1447,
   "maps": {
    "yuno_in01": 1,
    "tur_dun02": 1,
-   "tur_dun03": 4
+   "tur_dun03": 7,
+   "cmd_fild09": 2
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,
-  "name": "Boa Hancock",
+  "name": "oxeS",
   "max_hp": 2000000
  },
  "1448": {
   "species_id": 1448,
   "maps": {
-   "tur_dun03": 1
-  },
-  "walk_speed_ms": 150
- },
- "1449": {
-  "species_id": 1449,
-  "maps": {
-   "yuno_in01": 1,
-   "tur_dun03": 3
+   "tur_dun03": 4,
+   "ra_fild03": 2
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,
   "name": "Boa Hancock",
   "max_hp": 2000000
  },
+ "1449": {
+  "species_id": 1449,
+  "maps": {
+   "yuno_in01": 1,
+   "tur_dun03": 6,
+   "ra_fild03": 1
+  },
+  "walk_speed_ms": 150,
+  "captured_sprite": true,
+  "name": "Boa Hancock",
+  "max_hp": 2000000
+ },
+ "1552": {
+  "species_id": 1552,
+  "maps": {
+   "man_fild02": 3
+  },
+  "walk_speed_ms": 100,
+  "captured_sprite": true,
+  "name": "Sacerdotisa Sombria",
+  "max_hp": 500000
+ },
  "1601": {
   "species_id": 1601,
   "maps": {
-   "tur_dun02": 160
+   "tur_dun02": 169
   },
   "walk_speed_ms": 250,
   "name": "Tartaruga",
   "max_hp": 151000,
   "captured_sprite": true
  },
+ "1628": {
+  "species_id": 1628,
+  "maps": {
+   "moc_fild13": 1,
+   "yuno_fild05": 4
+  },
+  "walk_speed_ms": 300,
+  "captured_sprite": true,
+  "name": "Saru",
+  "max_hp": 34000
+ },
  "1634": {
   "species_id": 1634,
   "maps": {
-   "areia": 6,
-   "yuno_fild11": 6
+   "areia": 11,
+   "yuno_fild11": 6,
+   "ra_fild03": 9
   },
   "walk_speed_ms": 500,
   "captured_sprite": true,
-  "name": "Jounin",
-  "max_hp": 1300000
+  "name": "Líder Jounin",
+  "max_hp": 5537991
+ },
+ "1636": {
+  "species_id": 1636,
+  "maps": {
+   "moc_fild08": 26,
+   "hu_fild07": 26
+  },
+  "walk_speed_ms": 180,
+  "captured_sprite": true,
+  "name": "Chunin",
+  "max_hp": 252000
  },
  "1656": {
   "species_id": 1656,
   "maps": {
-   "cmd_fild09": 111
+   "cmd_fild09": 172,
+   "ein_fild08": 15
   },
   "walk_speed_ms": 100,
   "captured_sprite": true,
   "name": "Genin",
-  "max_hp": 12000
+  "max_hp": 36000
  },
  "1772": {
   "species_id": 1772,
@@ -158,8 +266,8 @@
  "1783": {
   "species_id": 1783,
   "maps": {
-   "kakashi": 28,
-   "moc_fild01": 91
+   "kakashi": 29,
+   "moc_fild01": 113
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,
@@ -177,10 +285,21 @@
   "name": "Boa Hancock",
   "max_hp": 2000000
  },
+ "1831": {
+  "species_id": 1831,
+  "maps": {
+   "yuno_fild11": 5,
+   "ra_fild03": 4
+  },
+  "walk_speed_ms": 160,
+  "name": "Camaleon",
+  "max_hp": 307934,
+  "captured_sprite": true
+ },
  "1917": {
   "species_id": 1917,
   "maps": {
-   "tur_dun03": 6
+   "tur_dun03": 7
   },
   "walk_speed_ms": 400,
   "captured_sprite": true,

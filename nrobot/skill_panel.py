@@ -3,6 +3,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QTableWidget, QTableWidgetItem,
                               QCheckBox, QSpinBox, QDoubleSpinBox, QComboBox, QHeaderView, QPushButton, QHBoxLayout, QDialog)
 from .combat_rotation import skill_category
+from .responsive_ui import FlowLayout
 import time
 
 
@@ -21,6 +22,8 @@ class SkillPanel(QWidget):
         self.display_names = {}
         self.candidates = {}
         self.learning_result_id = None
+        from .packet_settings import learned_buff_links
+        self.learned_links = learned_buff_links()
         try:
             from .catalog import load
             catalog = load() or {}
@@ -33,6 +36,13 @@ class SkillPanel(QWidget):
         layout.addWidget(explanation)
         modes_help = QLabel('Papel: ofensivas em si ativam perto do alvo; buffs renovam pelo efeito; invocacoes seguem uma fila exclusiva e aguardam o fim da anterior. Alcance: Jogo usa o padrao recebido; selecione um numero para alterar e volte ao minimo para restaurar o padrao. Em si com alcance 0 usa proximidade de 2 celulas, pois o servidor nao informa o raio de dano.')
         modes_help.setWordWrap(True)
+        modes_help.setVisible(False)
+        help_button = QPushButton("Como configurar as habilidades")
+        help_button.setCheckable(True)
+        help_button.toggled.connect(modes_help.setVisible)
+        help_button.toggled.connect(lambda opened: help_button.setText(
+            'Ocultar ajuda das habilidades' if opened else 'Como configurar as habilidades'))
+        layout.addWidget(help_button)
         layout.addWidget(modes_help)
         self.summon_label = QLabel('Invocacoes: fila vazia')
         self.summon_label.setWordWrap(True)
@@ -43,20 +53,23 @@ class SkillPanel(QWidget):
         fill = QPushButton('Preencher vínculos observados • revisar antes de aplicar')
         fill.clicked.connect(self.fill_candidates)
         fill.hide()
-        offensives = QPushButton('Marcar ofensivas de alvo único compatíveis')
+        offensives = QPushButton('Marcar ofensivas')
         offensives.clicked.connect(self.enable_offensives)
-        layout.addWidget(offensives)
-        apply = QPushButton('Salvar e aplicar habilidades • pausa a caça')
+        actions = FlowLayout()
+        layout.addLayout(actions)
+        actions.addWidget(offensives)
+        apply = QPushButton('Salvar e aplicar • pausa a caça')
         apply.clicked.connect(self.apply_requested.emit)
-        layout.addWidget(apply)
-        probe = QPushButton('Aprender e ativar buff selecionado • exige caça pausada')
+        actions.addWidget(apply)
+        probe = QPushButton('Aprender e ativar buff')
+        probe.setToolTip('Selecione uma habilidade. Exige caça pausada; identifica e armazena o efeito do buff.')
         probe.clicked.connect(self.probe_selected)
-        layout.addWidget(probe)
-        kuchiyose = QPushButton('Marcar Kuchiyose aprendidas para a fila')
+        actions.addWidget(probe)
+        kuchiyose = QPushButton('Configurar Kuchiyose')
         kuchiyose.clicked.connect(self.open_kuchiyose)
-        summon_buttons = QHBoxLayout()
+        summon_buttons = FlowLayout()
         summon_buttons.addWidget(kuchiyose)
-        self.finish_summon = QPushButton('A invocacao terminou no jogo: confirmar fim e aprender duracao')
+        self.finish_summon = QPushButton('Confirmar fim da invocação')
         self.finish_summon.setToolTip('Use somente apos verificar que ela realmente desapareceu. Mede o tempo desta invocacao para os proximos usos quando o servidor nao informa seu termino.')
         self.finish_summon.clicked.connect(self.summon_finished.emit)
         self.finish_summon.setEnabled(False)
@@ -64,6 +77,8 @@ class SkillPanel(QWidget):
         layout.addLayout(summon_buttons)
         queue_note = QLabel('Fila Kuchiyose: menor prioridade numerica primeiro; ao terminar, usa a proxima disponivel. Duracao 0 acompanha o efeito. Sem sinal de termino, informe a duracao ou confirme o fim observado uma vez para aprender. CD nao e duracao.')
         queue_note.setWordWrap(True)
+        queue_note.hide()
+        help_button.toggled.connect(queue_note.setVisible)
         layout.addWidget(queue_note)
         self.table = QTableWidget(0, 14)
         self.table.setHorizontalHeaderLabels(['Usar', 'ID', 'Nome recebido', 'Tipo do servidor', 'Aprendida',
@@ -78,7 +93,7 @@ class SkillPanel(QWidget):
         self.table.setColumnHidden(10, True)
         self.table.setColumnHidden(12, True)
         self.table.setColumnHidden(13, True)
-        layout.addWidget(self.table)
+        layout.addWidget(self.table, 1)
 
     def receive_buff_learning(self, result):
         """REDE-52: synchronize a learning result once, never overwrite live edits."""
@@ -86,6 +101,7 @@ class SkillPanel(QWidget):
             return
         self.learning_result_id = result['id']
         profile = dict(result['profile'])
+        self.learned_links[profile['skill_id']] = profile['effect_id']
         self.saved = [p for p in self.saved if p['skill_id'] != profile['skill_id']]+[profile]
         row = self.rows.get(profile['skill_id'])
         if row is not None:
@@ -111,8 +127,10 @@ class SkillPanel(QWidget):
         self.candidates = candidates or {}
         active = [str(identity) for identity, enabled in effects.items() if enabled]
         names = {skill['skill_id']: self.local_names.get(skill.get('name'), skill.get('name')) or str(skill['skill_id']) for skill in catalog}
-        links = ', '.join(f"{names.get(int(identity), identity)} → efeito {effect}" for identity, effect in self.candidates.items())
-        effects_text = f'{len(catalog)} habilidades aprendidas • Efeitos ativos: '+(', '.join(active) or 'nenhum informado')+' • Vínculos: '+(links or 'nenhum observado')
+        registered = {**self.learned_links, **{p['skill_id']: p['effect_id'] for p in self.profiles()
+                      if p.get('role') == 'buff' and p.get('effect_id')}}
+        links = ', '.join(f"{names[identity]} → efeito {effect}" for identity, effect in registered.items() if identity in names)
+        effects_text = f'{len(catalog)} habilidades aprendidas • Efeitos ativos: '+(', '.join(active) or 'nenhum informado')+' • Buffs registrados: '+(links or 'nenhum')
         if self.effects_label.text() != effects_text:
             self.effects_label.setText(effects_text)
         signature = tuple((s['skill_id'], s['level'], s['sp_cost'], s['range'], s.get('target_flags'), s.get('name')) for s in catalog)
@@ -159,6 +177,12 @@ class SkillPanel(QWidget):
                 continue
             profile = configured.get(identity, {'enabled': identity == 524 and compatible, 'role': 'summon' if 'kuchiyose' in display_name.casefold() else 'buff' if flags in (4, 16) else 'offensive',
                 'level': min(10, metadata['level']) if identity == 524 else max(1, metadata['level']), 'interval': 30 if flags == 2 else .5, 'effect_id': 0})
+            profile = dict(profile)
+            if identity in self.learned_links and (profile['role'] == 'buff' or identity not in configured):
+                if identity not in configured:
+                    profile.update(role='buff', enabled=True)
+                if not profile['effect_id']:
+                    profile['effect_id'] = self.learned_links[identity]
             enabled = QCheckBox()
             enabled.setChecked(profile['enabled'] and compatible)
             enabled.setEnabled(compatible)

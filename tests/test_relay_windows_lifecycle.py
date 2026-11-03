@@ -58,3 +58,23 @@ def test_shutdown_closes_live_bridge_before_waiting_for_listener(tmp_path):
             server.close()
             await server.wait_closed()
     asyncio.run(scenario())
+
+def test_historical_inventory_is_not_rewritten_for_every_fast_status_tick(tmp_path,monkeypatch):
+    import nrobot.session_relay as module
+    clock=[100.0]
+    monkeypatch.setattr(module.time,'monotonic',lambda:clock[0])
+    relay=SessionRelay('127.0.0.1',folder=tmp_path)
+    monkeypatch.setattr(relay,'write_minimap',lambda:None)
+    monkeypatch.setattr(relay,'write_monsters',lambda:None)
+    calls=[]
+    original=relay.inventory.snapshot
+    def snapshot(now):calls.append(now);return original(now)
+    monkeypatch.setattr(relay.inventory,'snapshot',snapshot)
+    relay.status()
+    clock[0]=100.2;relay.status()
+    assert calls==[100.0]
+    clock[0]=101.1;relay.status()
+    assert calls==[100.0,101.1]
+    relay.inventory.map_name='new.gat'
+    clock[0]=101.3;relay.status()
+    assert calls[-1]==101.3  # new maps are still written immediately

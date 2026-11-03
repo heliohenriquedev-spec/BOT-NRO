@@ -223,17 +223,18 @@ def combat_with_summon(sp=100, reach=6):
     return CombatRotation(profiles),s
 
 
-def test_maintenance_reserves_sp_instead_of_spending_it_on_offensives():
+def test_insufficient_summon_sp_does_not_suspend_offensives():
     r,s=combat_with_summon(sp=40)
-    assert r.summon_maintenance_required(s,0,20)
-    assert r.plan(s,0,20) is None
+    assert not r.summon_maintenance_required(s,0,20)
+    assert r.plan(s,0,20)['role']=='offensive'
     s['player_sp']=50
     assert r.plan(s,1,20)['role']=='summon'
 
 
-def test_maintenance_waits_for_summon_cooldown_before_offensives():
+def test_summon_cooldown_allows_offensives_until_summon_is_ready():
     r,s=combat_with_summon();r.ready[700]=5
-    assert r.plan(s,0,20) is None
+    assert not r.summon_maintenance_required(s,0,20)
+    assert r.plan(s,0,20)['role']=='offensive'
     a=r.plan(s,5,20);assert a['role']=='summon';r.sent(a,5)
     assert r.plan(s,5.2,20) is None  # pending summon cannot be starved by another cast
     r.observe([ack(700)],1,5.3)
@@ -371,3 +372,27 @@ def test_explicit_duration_ends_queue_occupation_even_with_manual_link_still_act
     assert r.plan(s,20)['skill_id']==701
     assert r.plan(s,20)['skill_id']==701  # repeated planning cannot restore expired A
     assert r.ready[700]==46
+
+
+def test_single_summon_20_46_keeps_fighting_in_gap_and_prioritizes_again_at_46():
+    r,s=combat_with_summon()
+    r.profiles[0].update(summon_duration=20,interval=46)
+    r.sent(r.plan(s,0,20),0);r.observe([ack(700)],1,0)
+    assert r.plan(s,20,20)['role']=='offensive'
+    assert not r.summon_maintenance_required(s,20,20)
+    assert r.plan(s,45.9,20)['role']=='offensive'
+    assert r.plan(s,46,20)['role']=='summon'
+
+
+def test_server_cooldown_and_no_enabled_summons_do_not_stop_basic_or_skills(tmp_path):
+    from nrobot.session_relay import SessionRelay
+    r,s=combat_with_summon()
+    s['skill_cooldowns']={'700':46}
+    assert not r.summon_maintenance_required(s,20,20)
+    assert r.plan(s,20,20)['role']=='offensive'
+    relay=SessionRelay('127.0.0.1',folder=tmp_path,allow_commands=True);relay.rotation=r
+    attack={'kind':'attack','target_id':20}
+    assert relay.after_rotation_action(attack,now=20,summon_maintenance=False) is attack
+    r.profiles[0]['enabled']=False
+    assert not r.summon_maintenance_required(s,100,20)
+    assert r.plan(s,100,20)['role']=='offensive'

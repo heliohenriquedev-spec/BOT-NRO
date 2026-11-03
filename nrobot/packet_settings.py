@@ -26,6 +26,7 @@ HOTKEYS = {name: code for name, code in (
 DEFAULTS.update(hotkey_hunt='Home', hotkey_minimap='End', sit_on_players=False, resume_delay=10,
                 limit_target_failures=True, defer_failed_targets=True, skill_burst=False, skill_burst_interval=.05)
 DEFAULTS.update(allowed_players=[], summon_queue_mode='cycle')
+DEFAULTS.update(group_enabled=False, group_role='follower', group_leader='', group_members=[], group_follow_only=False, group_distance=3)
 THROWS_TOKEN = 'throws'
 
 
@@ -39,12 +40,26 @@ def learned_buff_links(path=None):
         return {}
 
 
-def validate(data):
+def validate(data, *, links_path=None):
     if not isinstance(data, dict):
         raise ValueError('Configuração deve ser um objeto')
     result = {**DEFAULTS, **data}
     if result['summon_queue_mode'] not in ('cycle', 'priority'):
         raise ValueError('Modo da fila Kuchiyose invalido')
+    if type(result['group_enabled']) is not bool or type(result['group_follow_only']) is not bool:
+        raise ValueError('Configuracao de grupo invalida')
+    if result['group_role'] not in ('leader','follower'):
+        raise ValueError('Papel no grupo invalido')
+    if not isinstance(result['group_leader'], str) or len(result['group_leader'])>64:
+        raise ValueError('Nome do lider invalido')
+    result['group_leader']=result['group_leader'].strip()
+    if result['group_enabled'] and result['group_role']=='follower' and not result['group_leader']:
+        raise ValueError('Informe o nome do lider para seguir')
+    if type(result['group_distance']) is not int or not 2 <= result['group_distance'] <= 8:
+        raise ValueError('Distancia do lider deve estar entre 2 e 8 celulas')
+    if not isinstance(result['group_members'],list) or len(result['group_members'])>100 or any(not isinstance(n,str) or not n.strip() or len(n)>64 for n in result['group_members']):
+        raise ValueError('Nomes dos membros invalidos')
+    result['group_members']=list(dict.fromkeys(n.strip() for n in result['group_members']))
     names = result['allowed_players']
     if not isinstance(names, list) or len(names) > 200 or any(not isinstance(n, str) or not n.strip() or len(n.strip()) > 64 for n in names):
         raise ValueError('Lista de jogadores permitidos inv?lida')
@@ -75,7 +90,7 @@ def validate(data):
     if not isinstance(profiles, list) or len(profiles) > 300:
         raise ValueError('Lista de habilidades inválida')
     normalized, seen = [], set()
-    links = learned_buff_links()
+    links = learned_buff_links(links_path)
     for profile in profiles:
         if not isinstance(profile, dict):
             raise ValueError('Perfil de habilidade inválido')
@@ -127,12 +142,13 @@ def validate(data):
 
 def read(path=CONFIG):
     path = Path(path)
-    return validate(json.loads(path.read_text(encoding='utf-8'))) if path.is_file() else validate({})
+    return validate(json.loads(path.read_text(encoding='utf-8')) if path.is_file() else {},
+                    links_path=path.with_name('buffs_aprendidos.json'))
 
 
 def save(data, path=CONFIG):
-    data = validate(data)
     path = Path(path)
+    data = validate(data, links_path=path.with_name('buffs_aprendidos.json'))
     path.parent.mkdir(parents=True, exist_ok=True)
     temp = path.with_suffix('.tmp')
     temp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')

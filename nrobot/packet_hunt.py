@@ -191,7 +191,7 @@ class PacketHunt:
         self.skill_reason = 'Arremessar Kunai nível 10 disponível'
         return {'kind': 'skill', 'target_id': target_id, 'skill_id': 524, 'level': 10}
 
-    def observe(self, events, player_id, now):
+    def observe(self, events, player_id, now, movement_motion=None):
         events = [{**e, 'kind': 'player_move'} if e['kind'] == 'move' and e.get('entity_id') == player_id and e.get('destination') is not None else e for e in events]
         for event in events:
             kind = event['kind']
@@ -246,6 +246,7 @@ class PacketHunt:
                 position = event['position']
                 if position == self.pending['destination']:
                     self.pending['movement_acknowledged'] = True
+                    self.pending['arrival_confirmed'] = True
                     self.pending['wait_until'] = now
                 elif self.pending.get('origin') is not None:
                     origin, destination = self.pending['origin'], self.pending['destination']
@@ -264,8 +265,9 @@ class PacketHunt:
                 origin, requested = self.pending['origin'], self.pending['destination']
                 destination = event.get('destination')
                 if destination == requested:
+                    if not self.pending['movement_acknowledged']:
+                        self.pending['wait_until'] = now+self.pending['wait_seconds']
                     self.pending['movement_acknowledged'] = True
-                    self.pending['wait_until'] = max(self.pending['wait_until'], now+self.pending['wait_seconds'])
                 elif (destination and event.get('position') == origin and destination != origin
                       and all(min(origin[i], requested[i]) <= destination[i] <= max(origin[i], requested[i])
                               for i in (0, 1))
@@ -284,6 +286,16 @@ class PacketHunt:
                 # A position correction proves arrival; a route acknowledgement does not.
                 if event['kind'] == 'position':
                     self.pending['wait_until'] = now
+            if (self.pending is not None and self.pending['kind'] == 'move'
+                and event['kind'] == 'player_move' and self.pending['movement_acknowledged'] and not self.pending.get('arrival_confirmed')
+                and movement_motion and list(movement_motion.get('destination', [])) == self.pending['destination']
+                and movement_motion.get('at', now+1) <= now+.05
+                and math.isfinite(movement_motion.get('at', float('nan')))
+                and math.isfinite(movement_motion.get('duration', float('nan')))
+                and movement_motion.get('duration', -1) >= 0):
+                # This is the observer's accepted server path/start, not another full
+                # walk duration beginning when the ACK happens to reach the bot.
+                self.pending['wait_until'] = max(self.pending['sent_at'], movement_motion['at']+movement_motion['duration'])
 
     def fail_movement(self, now, reason, position=None):
         action = self.pending
@@ -426,14 +438,6 @@ class PacketHunt:
             if collision is not None and not collision.walkable(chase_position):
                 chase_position = actual_position
         distance = math.dist(player, chase_position)
-        path = collision.route(player, chase_position, blocked) if collision else None
-        if collision and not path and blocked:
-            self.reason = 'rota temporariamente bloqueada; mantendo alvo'
-            self.ready_at = now+.5
-            return None
-        if collision and not path:
-            self.abandon(now, 'sem rota livre até o alvo; procurando outro')
-            return None
         metadata = next((s for s in state.get('learned_skills', []) if s['skill_id'] == 524), {})
         wants_skill = (self.use_skills and not self.skill_disabled and metadata.get('level', 0) >= 10
                        and metadata.get('range', 0) >= 1 and state.get('player_sp') is not None
@@ -472,6 +476,14 @@ class PacketHunt:
                                else 'mantendo alcance; aguardando habilidade disponivel')
                 return None
             return {'kind': 'attack', 'target_id': self.target}
+        path = collision.route(player, chase_position, blocked) if collision else None
+        if collision and not path and blocked:
+            self.reason = 'rota temporariamente bloqueada; mantendo alvo'
+            self.ready_at = now+.5
+            return None
+        if collision and not path:
+            self.abandon(now, 'sem rota livre até o alvo; procurando outro')
+            return None
         # REDE-46: route may contain only the origin when the predicted target
         # is adjacent but its observed position still lies outside combat range.
         if collision and len(path) < 2:
