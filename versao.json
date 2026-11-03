@@ -1,7 +1,7 @@
 {
- "version": "2026.11.03.3",
- "published_at": "2026-11-03T02:25:28",
- "notes": "Mapas e sprites prioritários, Boneco de Treino e atualização de usuários",
+ "version": "2026.11.03.4",
+ "published_at": "2026-11-03T02:27:18",
+ "notes": "Consulta de versão do atualizador pelo ramo publicado",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",

@@ -55,7 +55,7 @@ def version_key(text):
 
 def raw_url(name):
     c = config()
-    return f"https://raw.githubusercontent.com/{c['owner']}/{c['repo']}/{c.get('branch', 'main')}/{name}"
+    return f"https://raw.githubusercontent.com/{c['owner']}/{c['repo']}/refs/heads/{c.get('branch', 'main')}/{name}"
 
 
 def fetch(url):
@@ -68,11 +68,11 @@ def fetch(url):
 
 
 def remote_version():
-    # The contents API is never stale; raw.githubusercontent.com caches for minutes.
+    # The explicit branch ref matches the branch ZIP and avoids a stale short-ref response.
     c = config()
     api = (f"https://api.github.com/repos/{c['owner']}/{c['repo']}/contents/versao.json"
            f"?ref={c.get('branch', 'main')}")
-    for url, accept in ((api, 'application/vnd.github.raw'), (raw_url('versao.json'), '*/*')):
+    for url, accept in ((raw_url('versao.json'), '*/*'), (api, 'application/vnd.github.raw')):
         request = urllib.request.Request(url, headers={'User-Agent': 'BOT-NRO-atualizador', 'Accept': accept,
                                                        'Cache-Control': 'no-cache'})
         try:
