@@ -68,8 +68,17 @@ def fetch(url):
 
 
 def remote_version():
-    # The explicit branch ref matches the branch ZIP and avoids a stale short-ref response.
     c = config()
+    # Branch-based raw links can lag behind the commit endpoint after a push.
+    branch = c.get('branch', 'main')
+    try:
+        latest = json.loads(fetch(f"https://api.github.com/repos/{c['owner']}/{c['repo']}/commits/{branch}"))
+        commit = latest['sha']
+        if len(commit) == 40 and all(ch in '0123456789abcdef' for ch in commit):
+            url = f"https://raw.githubusercontent.com/{c['owner']}/{c['repo']}/{commit}/versao.json"
+            return json.loads(fetch(url))
+    except (UpdateError, ValueError, TypeError, KeyError):
+        pass
     api = (f"https://api.github.com/repos/{c['owner']}/{c['repo']}/contents/versao.json"
            f"?ref={c.get('branch', 'main')}")
     for url, accept in ((raw_url('versao.json'), '*/*'), (api, 'application/vnd.github.raw')):

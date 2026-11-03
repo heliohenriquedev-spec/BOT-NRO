@@ -1,7 +1,7 @@
 {
- "version": "2026.11.03.4",
- "published_at": "2026-11-03T02:27:18",
- "notes": "Consulta de versão do atualizador pelo ramo publicado",
+ "version": "2026.11.03.5",
+ "published_at": "2026-11-03T02:28:54",
+ "notes": "Verificação de versão pelo commit do GitHub",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
