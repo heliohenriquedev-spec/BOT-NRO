@@ -144,8 +144,8 @@ servidor. A medicao manual e recusada se o servidor ainda informa o efeito ativo
 
 O fim observado de um efeito mede sua duracao real naquele uso (podendo terminar
 antes por cancelamento), sem confundir o tempo com cooldown nem afirmar que toda
-invocacao tem o mesmo prazo. Com efeito vinculado, o sinal do servidor prevalece
-sobre o temporizador. Os dados ficam em **data/rede/invocacoes_aprendidas.json**,
+invocacao tem o mesmo prazo. Com duracao 0, o efeito vinculado acompanha o termino. Uma duracao explicitamente
+configurada determina o limite de ocupacao da fila. Os dados ficam em **data/rede/invocacoes_aprendidas.json**,
 separados por habilidade e nivel, protegidos da atualizacao e fora da publicacao.
 Mudancas de configuracao/pausa preservam a invocacao acompanhada; trocar de mapa
 limpa a presenca local e mantem os dados aprendidos. O funcionamento ao vivo das
@@ -241,3 +241,105 @@ de chao de alcance zero nao tiver celula atual segura durante a caminhada, o bot
 aguarda a estabilizacao do trecho, prioriza a invocacao e depois retoma o recuo.
 Estas regras ficam no codigo compartilhado; nao dependem da configuracao observada
 na maquina local. Cada usuario ainda escolhe as Kuchiyose habilitadas no modal.
+
+
+### Whitelist e registros de outros jogadores ocultos
+
+O vinculo nome/ID recebido do servidor fica no cache da sessao e e sincronizado com
+o filtro de presenca, inclusive apos trocar de mapa e antes de avaliar uma pausa.
+A comparacao usa o nome completo, normaliza Unicode, maiusculas/minusculas e espacos;
+nao permite correspondencias parciais. Um nome novo recebido substitui o anterior.
+Antes de receber ou conhecer um nome, o ID continua desconhecido e pode suspender
+a caca ate ser identificado. Nao sao enviadas consultas ativas novas de nomes.
+
+Jogadores permitidos recebem **[PERMITIDO] ... whitelist; nao pausa**, em vez de
+alerta vermelho. A excecao vale para jogador visivel, disfarce, ocultacao e espera
+de saida. Isso nao desfaz pausas manuais nem libera outro jogador nao permitido.
+
+Para outros jogadores, um sinal de ocultacao recebido mantem a ultima celula apos
+a remocao visual. O destino final de uma caminhada nao substitui essa ultima celula
+recebida. Um sinal de retorno, saida confirmada, troca de mapa ou expiracao limpa
+o registro conforme o tipo de evento. O minimapa e um aviso transparente na tela
+mostram nome, estado e ultima celula; nao se desenha uma silhueta sobre uma celula
+de tela inventada, pois a projecao da camera/zoom dos outros personagens e desconhecida.
+A silhueta central continua exclusiva do proprio personagem.
+
+Se o jogador apenas desaparece perto, sem pacote que prove ocultacao, o marcador
+e temporario e diz **@hide nao confirmado** ("?" no minimapa). A remocao isolada
+nao prova @hide. Um jogador que ja entrou invisivel e nunca foi informado pelo
+servidor nao pode ser localizado por estes dados. Os registros indicam ultima
+posicao recebida, nao rastreamento atual de movimentos que o servidor nao envia.
+
+
+### Separacao de duracao e recarga: exemplo 20 s / 46 s
+
+Uma duracao explicita de 20 s libera a fila apos 20 s de atividade. Ela nao fica
+esperando desaparecer um efeito vinculado automaticamente, pois esse efeito pode
+ser um indicador de recarga, e nao da vida da invocacao. Vinculos automaticos antigos
+nao sao importados para habilidades com duracao explicita; um efeito persistente
+nao restaura silenciosamente a invocacao ja encerrada pelo temporizador.
+
+A recarga de 46 s bloqueia somente a mesma habilidade e e contada desde seu envio.
+Com A e B marcadas e prontas: A em t=0, B em t=20. A pode voltar a t=46 (nao t=66).
+Se A e B duram 20 s e ambas recarregam em 46 s, em t=40 nenhuma pode estar pronta:
+essa lacuna nao pode ser removida ignorando o cooldown. Uma terceira habilidade
+pronta pode cobrir o periodo, conforme o modo de prioridade escolhido.
+
+O modal explica a contagem, alerta sobre lacuna local prevista quando so uma esta
+marcada e mostra a recarga restante de cada habilidade da sessao. SP, delay global,
+proximidade de alvos e recarga efetivamente informada pelo servidor continuam
+obrigatorios. O fluxo 20/46, com efeito ainda ativo aos 46, e coberto por testes
+nos modos ciclo e prioridade; isso nao substitui validar o caso do outro usuario.
+
+
+### Erro ao iniciar: No module named PySide6
+
+Esse erro significa que o Python que esta abrindo o painel nao consegue importar
+a biblioteca da interface. Uma pasta .venv existente nao garante instalacao completa.
+Execute **instalar.bat** na pasta extraida do bot e, depois, **INICIAR_BOT.bat**.
+Use os dois arquivos da mesma copia do projeto, sem copiar .venv de outro computador.
+
+O inicializador agora verifica os imports QtCore, QtGui, QtWidgets e numpy com o
+proprio .venv/Scripts/python.exe. Se faltar uma dependencia, chama o instalador
+para reparar. O instalador prefere o launcher py -3.12 ao criar um ambiente e
+aceita python 3.12 ou superior como alternativa. Verifica venv, pip e instalacao
+de requirements; falhas encerram com erro antes de tentar abrir o painel. A
+configuracao do jogo so e chamada depois da verificacao dos imports.
+
+Se o pip nao conseguir baixar/instalar, envie o erro exibido por instalar.bat:
+a mensagem original PySide6 ausente, sozinha, nao mostra a causa desse download.
+A janela fica aberta em falhas na execucao manual; ao ser chamado pelo inicializador,
+o erro volta ao inicializador, que tambem o mantem visivel. Nenhuma dependencia
+e instalada no Python global por estes scripts.
+
+
+### Primeira instalacao: habilidades vazias e SP None
+
+A tabela de pacotes e validada contra **NRO.exe da pasta escolhida neste PC**, e
+nao contra o caminho absoluto registrado na maquina que extraiu a tabela. O caminho
+source_executable do JSON permanece somente como origem historica quando nao ha
+pasta configurada; iniciar pelo painel/instalador usa a pasta escolhida. A verificacao
+SHA-256 continua obrigatoria. Cliente diferente/arquivo ausente produz erro claro,
+sem abrir uma sessao que aparenta funcionar mas perde os dados iniciais.
+
+**instalar.bat** executa a verificacao de dependencias e, depois da configuracao do
+perfil, **python -m nrobot.runtime_check --game**. Essa etapa verifica o executavel
+local e a tabela distribuida. O inicializador do relay tambem verifica a tabela
+antes de abrir a conexao. A tabela completa e runtime_check.py devem estar no pacote.
+
+A lista inicial de habilidades, SP, atalhos, efeitos e velocidade sao preservados
+quando a mesma sessao do personagem abre outra conexao de mapa. Dados espaciais
+antigos sao descartados. Uma nova selecao de personagem ou login limpa os dados
+anteriores para nao mostrar habilidades de outro personagem. A identidade propria
+pode ser restaurada do ID de conta ja recebido no handshake, sem consultas ativas.
+
+Os dois pacotes de parametro B0/B1 atualizam os dados de SP recebidos. Pacotes validos
+antes de um trecho desconhecido nao sao descartados junto com esse trecho; uma
+sequencia ainda desalinhada nao e interpretada como habilidades ou atributos.
+Estado da caca mostra se identidade, lista e SP ja foram recebidos, para separar
+"nenhuma habilidade aprendida" de "lista inicial ainda nao recebida".
+
+Para um usuario que ja estava com lista vazia, atualizar o pacote/painel e entrar
+novamente no personagem pelo perfil local reenvia os dados iniciais. Apenas trocar
+a aba ou caminhar nao solicita outra lista ao servidor. Nao ha consultas novas
+nem copia da lista de habilidades de outro usuario.

@@ -168,15 +168,27 @@ VARIABLE_MINIMUMS = {0x17f: 4, 0xd7: 17, 0xdf: 17,
                      0xa3: 4, 0xa4: 4, 0xa5: 4, 0xa6: 4}
 
 
+CLIENT_LENGTHS_FILE = Path(__file__).resolve().parents[1]/'data/rede/tamanhos_cliente.json'
+CLIENT_GAME_DIR = None
+
+
+def configure_client_game(game_dir):
+    global CLIENT_GAME_DIR
+    CLIENT_GAME_DIR = Path(game_dir) if game_dir is not None else None
+    client_lengths.cache_clear()
+
+
 @lru_cache(maxsize=1)
 def client_lengths():
-    path = Path(__file__).resolve().parents[1]/'data/rede/tamanhos_cliente.json'
+    path = CLIENT_LENGTHS_FILE
     if not path.exists():
         return {}
     data = json.loads(path.read_text(encoding='utf-8'))
-    executable = Path(data['source_executable'])
+    from .game_folder import saved
+    game_dir = CLIENT_GAME_DIR or saved()
+    executable = Path(game_dir)/'NRO.exe' if game_dir is not None else Path(data['source_executable'])
     if not executable.exists() or hashlib.sha256(executable.read_bytes()).hexdigest() != data['sha256']:
-        raise ValueError('A tabela de mensagens não corresponde ao executável do cliente; atualize a extração')
+        raise ValueError(f'Tabela de pacotes incompativel ou NRO.exe ausente em {executable}. Confira a pasta do jogo; nao e possivel validar os dados iniciais.')
     return {int(key, 16): value['length'] for key, value in data['entries'].items()
             if value['length'] == -1 or 2 <= value['length'] <= 32768}
 
@@ -319,7 +331,7 @@ def decode(message: bytes) -> dict:
         event.update(kind='ground_effect_removed', effect_id=u32(2))
     elif op == 0xaf:
         event.update(kind='inventory_removed', inventory_index=u16(2), amount=u16(4))
-    elif op == 0xb0:
+    elif op in (0xb0, 0xb1):
         event.update(kind='player_stat', stat_type=u16(2), value=u32(4))
     elif op in (0x95, 0x195):
         event.update(kind='name', entity_id=u32(2),

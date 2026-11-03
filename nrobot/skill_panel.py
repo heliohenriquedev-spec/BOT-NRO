@@ -15,6 +15,7 @@ class SkillPanel(QWidget):
         super().__init__()
         self.saved = profiles or []
         self.summon_queue_mode = 'cycle'
+        self.summon_state = {}
         self.signature = None
         self.rows = {}
         self.display_names = {}
@@ -215,6 +216,7 @@ class SkillPanel(QWidget):
 
     def update_states(self, effects, rotation):
         summons = rotation.get('summons', {})
+        self.summon_state = summons
         active = summons.get('active') or {}
         entry = summons.get('durations', {}).get(f"{active.get('skill_id')}:{active.get('level')}", {})
         self.finish_summon.setEnabled(bool(active))
@@ -259,7 +261,7 @@ class SkillPanel(QWidget):
         profiles = {p['skill_id']: p for p in self.profiles()}
         entries = [(identity, self.display_names[identity], profiles[identity]) for identity,row in self.rows.items()
                    if 'kuchiyose' in self.display_names.get(identity, '').casefold() and row['target_flags'] in (2,4,16)]
-        dialog = KuchiyoseDialog(entries, self.summon_queue_mode, self)
+        dialog = KuchiyoseDialog(entries, self.summon_queue_mode, self, runtime=self.summon_state)
         if dialog.exec() == QDialog.Accepted:
             self.apply_kuchiyose(dialog.values(), dialog.mode.currentData())
 

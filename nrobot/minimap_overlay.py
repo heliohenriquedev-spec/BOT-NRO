@@ -273,14 +273,14 @@ class MinimapOverlay(QWidget):
                 painter.setBrush(Qt.NoBrush)
                 painter.setPen(QPen(QColor(230, 60, 230), 2))
                 painter.drawEllipse(point, 7, 7)
-        for hidden in presence.get('hidden_details', []):
+        for hidden in presence.get('shadow_details', presence.get('hidden_details', [])):
             if hidden.get('position') is None:
                 continue
             point = self.cell_point(hidden['position'], view)
             painter.setPen(QPen(QColor(255, 50, 50), 2))
             painter.setBrush(QColor(255, 50, 50, 90))
             painter.drawEllipse(point, 5, 5)
-            painter.drawText(point+QPointF(7, -5), '@hide' if hidden.get('gm_invisible') else 'hide')
+            painter.drawText(point+QPointF(7, -5), ('?' if hidden.get('possible_hidden') else '@hide' if hidden.get('gm_invisible') else 'hide')+' '+(hidden.get('name') or str(hidden['entity_id']))+' (ultimo registro)')
         own = self.state.get('player_position')
         if own is not None:
             point = self.cell_point(own, view)

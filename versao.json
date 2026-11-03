@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.17",
- "published_at": "2026-11-02T21:30:40",
- "notes": "Kuchy",
+ "version": "2026.11.02.18",
+ "published_at": "2026-11-02T23:05:12",
+ "notes": "Fusco Burro",
  "files": [
   ".gitattributes",
   ".gitignore",
@@ -247,6 +247,7 @@
   "nrobot/priority_panel.py",
   "nrobot/radar_overlay.py",
   "nrobot/relay_profile.py",
+  "nrobot/runtime_check.py",
   "nrobot/screen_capture.py",
   "nrobot/server_clock.py",
   "nrobot/server_path.py",
@@ -267,6 +268,7 @@
   "tests/test_combat_rotation.py",
   "tests/test_continuous_observer.py",
   "tests/test_entity_inventory.py",
+  "tests/test_first_install_character_sync.py",
   "tests/test_game_folder.py",
   "tests/test_grf.py",
   "tests/test_grf_map_validation.py",
@@ -305,11 +307,13 @@
   "tests/test_summon_queue.py",
   "tests/test_target_priority.py",
   "tests/test_updater.py",
+  "tests/test_whitelist_hidden_players.py",
+  "tests/test_windows_startup.py",
   "third_party/rathena/LICENCE",
   "third_party/rathena/README.md",
   "third_party/rathena/des.cpp",
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "a44fe38ff65f"
+ "files_digest": "350a3f870321"
 }

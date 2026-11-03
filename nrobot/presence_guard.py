@@ -7,6 +7,7 @@ that is already invisible (GM @hide) when it enters the area is not sent to the 
 all, so only the moment it hides inside our view can be detected.
 """
 import math
+import unicodedata
 
 from .network_targets import is_player_id
 
@@ -17,6 +18,10 @@ HIDDEN_OPTIONS = OPTION_HIDE | OPTION_CLOAK | OPTION_INVISIBLE | OPTION_CHASEWAL
 def monster_sprite(species_id):
     # Job classes use 0-999 and 4001-4999; monsters 1001-3999 and 20000+.
     return 1001 <= species_id <= 3999 or species_id >= 20000
+
+
+def normalize_player_name(name):
+    return ' '.join(unicodedata.normalize('NFKC', name).split()).casefold()
 
 
 class PresenceGuard:
@@ -36,6 +41,8 @@ class PresenceGuard:
         # REDE-70: each kind of presence can be set not to hold the bot (alerts still happen).
         self.hold_players = self.hold_disguised = self.hold_hidden = True
         self.alerts = []
+        self.names = {}
+        self.name_labels = {}
         self.reset()
 
     def drain_alerts(self):
@@ -47,7 +54,6 @@ class PresenceGuard:
         self.hidden = {}
         self.positions = {}
         self.last_seen_cells = {}  # kept after removal: a hiding character is cleared first
-        self.names = {}
         self.outside_since = {}
         self.players = set()
         self.departures = {}  # identity -> {'left_at', 'position', 'reason', 'far'}
@@ -62,12 +68,13 @@ class PresenceGuard:
             if identity is None or identity == player_id or not is_player_id(identity):
                 continue
             if kind == 'name' and event.get('name'):
-                self.names[identity] = event['name'].strip().casefold()
+                self.remember_names({identity:event['name']})
             if 'position' in event:
                 self.positions[identity] = event.get('destination') or event['position']
-                self.last_seen_cells[identity] = self.positions[identity]
+                self.last_seen_cells[identity] = list(event['position'])
                 if identity in self.hidden:
                     self.hidden[identity]['seen_at'] = now
+                    self.hidden[identity]['position'] = list(event['position'])
             if kind == 'appearance':
                 self.departures.pop(identity, None)  # back in view
                 if identity not in self.players:
@@ -89,8 +96,8 @@ class PresenceGuard:
                 self.disguised.pop(identity, None)
                 self.positions.pop(identity, None)
                 hidden = self.hidden.get(identity)
-                # Ordinary hiding ends with removal; GM invisibility may also clear the unit.
-                if hidden is not None and not hidden['option'] & OPTION_INVISIBLE:
+                # Removal alone does not prove that a known hidden character reappeared.
+                if hidden is not None and event.get('reason') in (self.REMOVE_LOGOUT, self.REMOVE_TELEPORT):
                     self.hidden.pop(identity)
 
     def departure(self, identity, reason, now, own_position):
@@ -108,12 +115,19 @@ class PresenceGuard:
             if identity not in self.hidden:
                 self.alerts.append({'kind': 'hidden', 'entity_id': identity, 'option': option & HIDDEN_OPTIONS})
             self.hidden[identity] = {'option': option & HIDDEN_OPTIONS, 'seen_at': now,
-                                     'position': self.positions.get(identity) or self.last_seen_cells.get(identity)}
+                                     'position': self.last_seen_cells.get(identity) or self.positions.get(identity)}
         else:
             self.hidden.pop(identity, None)
 
+    def remember_names(self, names):
+        for identity, name in names.items():
+            if is_player_id(identity) and isinstance(name, str) and name.strip():
+                self.names[identity] = normalize_player_name(name)
+                self.name_labels[identity] = name.strip()
+
     def ignored(self, identity):
-        return identity in self.allowed or self.names.get(identity) in self.allowed_names
+        allowed = {normalize_player_name(n) for n in self.allowed_names}
+        return identity in self.allowed or self.names.get(identity) in allowed
 
     def reason(self, player_position, now):
         # A visible actor may walk beyond the radius without a removal packet.
@@ -160,9 +174,20 @@ class PresenceGuard:
         return None
 
     def snapshot(self, player_position, now):
-        hidden = [{'entity_id': identity,
-                   'position': self.positions.get(identity) or entry.get('position') or self.last_seen_cells.get(identity),
+        self.reason(player_position, now)  # expire stale markers before building the drawing list
+        hidden = [{'entity_id': identity, 'name': self.name_labels.get(identity),
+                   'last_known': True, 'allowed': self.ignored(identity),
+                   'position': entry.get('position') or self.last_seen_cells.get(identity) or self.positions.get(identity),
                    'gm_invisible': bool(entry['option'] & OPTION_INVISIBLE), 'age_seconds': round(now-entry['seen_at'], 1)}
                   for identity, entry in self.hidden.items()]
+        shadows = list(hidden)
+        for identity, gone in self.departures.items():
+            if identity in self.hidden or gone['far'] or gone['reason'] != 0 or gone.get('position') is None or now-gone['left_at'] >= self.resume_delay:
+                continue
+            shadows.append({'entity_id': identity, 'name': self.name_labels.get(identity),
+                            'position': self.last_seen_cells.get(identity) or gone['position'],
+                            'last_known': True, 'possible_hidden': True, 'gm_invisible': False,
+                            'allowed': self.ignored(identity), 'age_seconds': round(now-gone['left_at'], 1)})
         return {'reason': self.reason(player_position, now), 'disguised': sorted(self.disguised),
-                'hidden': sorted(self.hidden), 'hidden_details': hidden, 'players': sorted(self.players)}
+                'hidden': sorted(self.hidden), 'hidden_details': hidden, 'shadow_details': shadows,
+                'players': sorted(self.players)}

@@ -105,6 +105,12 @@ def observe_pktmon(chosen, mapping):
     return 0
 
 
+class FrameBoundaryError(ValueError):
+    def __init__(self, message, frames, consumed):
+        super().__init__(message)
+        self.frames, self.consumed = frames, consumed
+
+
 class LiveStream:
     """Remonta uma direção TCP; aguarda reordenação breve, sem saltar lacunas."""
     def __init__(self):
@@ -121,7 +127,10 @@ class LiveStream:
         """Complete messages at the start of buffer; raises ValueError on unknown framing."""
         offset, messages = 0, []
         while offset < len(buffer):
-            length = message_length(buffer, offset)
+            try:
+                length = message_length(buffer, offset)
+            except ValueError as exc:
+                raise FrameBoundaryError(str(exc), messages, offset) from exc
             if length is None or len(buffer)-offset < length:
                 break
             messages.append(bytes(buffer[offset:offset+length]))
@@ -175,11 +184,14 @@ class LiveStream:
             if self.resyncing and (not messages or consumed != len(self.buffer)):
                 raise ValueError('aguardando trecho alinhado')
         except ValueError as exc:
-            head = bytes(self.buffer[:16])
+            prefix = exc.consumed if isinstance(exc, FrameBoundaryError) and not self.resyncing else 0
+            if prefix:
+                events.extend(decode(message) for message in exc.frames)
+            head = bytes(self.buffer[prefix:prefix+16])
             if not self.resyncing:
                 self.resyncs += 1
                 events.append({'kind': 'stream_resync', 'opcode': f'{int.from_bytes(head[:2], "little"):04X}' if len(head) >= 2 else None,
-                               'dropped': len(self.buffer), 'head_hex': head.hex(), 'reason': str(exc)})
+                               'dropped': len(self.buffer)-prefix, 'head_hex': head.hex(), 'reason': str(exc)})
             self.resyncing = True
             self.buffer.clear()
             return events
@@ -208,6 +220,7 @@ class Observer:
         self.map_name = None
         self.sp = None
         self.skills = {}
+        self.skills_received = False
         self.hotkeys = {}
         self.effects = {}
         self.skill_cooldowns = {}
@@ -216,7 +229,7 @@ class Observer:
 
     # REDE-83: the server sends the skill list (and SP, hotkeys, buffs) only when the character
     # logs in, not on every map change: a warp must not forget them.
-    CHARACTER_FIELDS = ('skills', 'hotkeys', 'sp', 'effects', 'walk_speed_ms')
+    CHARACTER_FIELDS = ('skills', 'skills_received', 'hotkeys', 'sp', 'effects', 'walk_speed_ms')
 
     def keep_character(self):
         return {field: getattr(self, field) for field in self.CHARACTER_FIELDS}
@@ -232,6 +245,7 @@ class Observer:
         self.map_name = None
         self.sp = None
         self.skills = {}
+        self.skills_received = False
         self.hotkeys = {}
         self.effects = {}
         self.skill_cooldowns = {}
@@ -296,6 +310,7 @@ class Observer:
             self.player_id = event['entity_id']
         elif kind == 'skills_info':
             if event['replace']:
+                self.skills_received = True
                 self.skills.clear()
             for skill in event['skills']:
                 if skill['skill_id'] > 0:

@@ -158,7 +158,7 @@ def test_character_cleared_before_hiding_keeps_last_cell_for_its_shadow():
     guard.observe([{'kind': 'remove', 'entity_id': 2002899},
                    decode(struct.pack('<HIHHIB', 0x229, 2002899, 0, 0, 0x2, 0))], 1, 1)
     details = guard.snapshot([10, 20], 1)['hidden_details']
-    assert details == [{'entity_id': 2002899, 'position': [10, 20], 'gm_invisible': False, 'age_seconds': 0}]
+    assert details == [{'entity_id': 2002899, 'name': None, 'last_known': True, 'allowed': False, 'position': [10, 20], 'gm_invisible': False, 'age_seconds': 0}]
 
 
 def test_player_who_walked_far_resumes_after_the_configured_delay_and_returning_resets_it():

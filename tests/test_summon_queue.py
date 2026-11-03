@@ -37,8 +37,8 @@ def test_queue_is_exclusive_even_in_burst_and_rotates_after_configured_lifetime(
     a=r.plan(s,20.5);assert a['skill_id']==701
 
 
-def test_effect_end_is_authoritative_even_if_configured_timer_elapsed():
-    profiles=[p(700,0,5,90),p(701,1,5,91)]
+def test_linked_effect_can_end_earlier_than_configured_duration():
+    profiles=[p(700,0,30,90),p(701,1,30,91)]
     r=CombatRotation(profiles);s=state(profiles)
     a=r.plan(s,0);r.sent(a,0)
     r.observe([effect(90,True)],1,.1)
@@ -303,3 +303,71 @@ def test_ground_summon_checks_own_cell_without_requiring_monster_shot_line(tmp_p
     packet=relay.upstream.packets[0]
     point=[struct.unpack_from('<H',packet,12)[0],struct.unpack_from('<H',packet,20)[0]]
     assert collision.walkable(point) and collision.line_clear([10,10],point)
+
+@pytest.mark.parametrize('mode',['cycle','priority'])
+def test_duration_20_cooldown_46_switches_to_other_at_20_not_46(mode):
+    profiles=[p(700,0,20),p(701,1,20)]
+    for entry in profiles:entry['interval']=46
+    r=CombatRotation(profiles);r.summons.mode=mode;s=state(profiles)
+    a=r.plan(s,0);assert a['skill_id']==700;r.sent(a,0);r.observe([ack(700)],1,0)
+    assert r.plan(s,19.99) is None
+    a=r.plan(s,20);assert a['skill_id']==701
+    status=r.snapshot(20)['summons']['cooldowns']
+    assert status['700']['remaining_seconds']==26
+    r.sent(a,20);r.observe([ack(701)],1,20)
+    assert r.plan(s,39.99) is None
+    assert r.plan(s,40) is None  # first recovers at 46, second at 66
+    assert r.plan(s,45.99) is None
+    a=r.plan(s,46);assert a['skill_id']==700  # NOT 66 (20+46)
+
+
+def test_single_duration_20_cooldown_46_has_26_second_gap():
+    entry=p(700,0,20);entry['interval']=46
+    r=CombatRotation([entry]);s=state([entry])
+    r.sent(r.plan(s,0),0);r.observe([ack(700)],1,0)
+    assert r.plan(s,20) is None
+    assert r.summons.active is None
+    assert r.snapshot(20)['summons']['cooldowns']['700']['remaining_seconds']==26
+    assert r.plan(s,46)['skill_id']==700
+
+
+def test_modal_explains_single_summon_gap_and_displays_individual_cooldown():
+    import os,time
+    os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
+    from PySide6.QtWidgets import QApplication
+    from nrobot.kuchiyose_dialog import KuchiyoseDialog
+    app=QApplication.instance() or QApplication([])
+    entry=p(700,0,20);entry['interval']=46
+    dialog=KuchiyoseDialog([(700,'Kuchiyose A',entry)],runtime={'cooldowns':{'700':{'ready_at':time.monotonic()+26}}})
+    assert '26s' in dialog.timing_note.text()
+    assert float(dialog.table.item(0,5).text().split()[0]) > 25
+    dialog.close()
+
+
+@pytest.mark.parametrize('mode',['cycle','priority'])
+def test_configured_duration_20_does_not_wait_for_cooldown_effect_46(mode):
+    profiles=[p(700,0,20),p(701,1,20)]
+    for entry in profiles:entry['interval']=46
+    r=CombatRotation(profiles);r.summons.mode=mode
+    # Historical automatic link might actually represent a 46s cooldown status.
+    r.summons.learned={'700:1':{'effect_id':90},'701:1':{'effect_id':91}}
+    s=state(profiles)
+    r.sent(r.plan(s,0),0)
+    r.observe([effect(90,True),ack(700)],1,0);s['own_effects'][90]=True
+    assert r.plan(s,19.99) is None
+    a=r.plan(s,20);assert a['skill_id']==701
+    r.sent(a,20);r.observe([effect(91,True),ack(701)],1,20);s['own_effects'][91]=True
+    assert r.plan(s,40) is None
+    assert r.summons.active is None  # stale effect must not resurrect A or B
+    assert r.plan(s,46)['skill_id']==700
+
+
+def test_explicit_duration_ends_queue_occupation_even_with_manual_link_still_active():
+    profiles=[p(700,0,20,90),p(701,1,20,91)]
+    for entry in profiles:entry['interval']=46
+    r=CombatRotation(profiles);s=state(profiles)
+    r.sent(r.plan(s,0),0);r.observe([effect(90,True),ack(700)],1,0)
+    s['own_effects'][90]=True
+    assert r.plan(s,20)['skill_id']==701
+    assert r.plan(s,20)['skill_id']==701  # repeated planning cannot restore expired A
+    assert r.ready[700]==46

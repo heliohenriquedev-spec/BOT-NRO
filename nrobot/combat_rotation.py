@@ -456,8 +456,13 @@ class CombatRotation:
         self.log.append({'kind': 'rotation_skill_sent', 'skill_id': action['skill_id'],
                          'target_id': action['target_id'], 'role': action['role']})
 
-    def snapshot(self):
-        return {'summons': self.summons.snapshot(self.profiles, time.monotonic()),
+    def snapshot(self, now=None):
+        now = time.monotonic() if now is None else now
+        summons = self.summons.snapshot(self.profiles, now)
+        summons['cooldowns'] = {str(p['skill_id']): {'ready_at': self.ready.get(p['skill_id'], 0),
+            'remaining_seconds': round(max(0, self.ready.get(p['skill_id'], 0)-now), 2)}
+            for p in self.profiles if p['enabled'] and p['role'] == 'summon'}
+        return {'summons': summons,
                 'reason': self.reason, 'confirmed_skills': self.confirmed, 'confirmed_buffs': self.buff_confirmed,
                 'pending': list(self.pending.values()), 'ready_at': dict(self.ready),
                 'global_ready_at': self.next_send, 'local_global_delay': self.global_delay,

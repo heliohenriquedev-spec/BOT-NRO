@@ -10,7 +10,7 @@
  "1039": {
   "species_id": 1039,
   "maps": {
-   "tur_dun03": 78
+   "tur_dun03": 196
   },
   "walk_speed_ms": 200,
   "name": "Monstro Marinho",
@@ -49,7 +49,8 @@
   "species_id": 1188,
   "maps": {
    "hospital2": 3,
-   "yuno_in01": 1
+   "yuno_in01": 1,
+   "tur_dun03": 6
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,
@@ -87,18 +88,26 @@
   "species_id": 1447,
   "maps": {
    "yuno_in01": 1,
-   "tur_dun02": 1
+   "tur_dun02": 1,
+   "tur_dun03": 4
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,
   "name": "Boa Hancock",
   "max_hp": 2000000
  },
+ "1448": {
+  "species_id": 1448,
+  "maps": {
+   "tur_dun03": 1
+  },
+  "walk_speed_ms": 150
+ },
  "1449": {
   "species_id": 1449,
   "maps": {
    "yuno_in01": 1,
-   "tur_dun03": 1
+   "tur_dun03": 3
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,
@@ -171,7 +180,7 @@
  "1917": {
   "species_id": 1917,
   "maps": {
-   "tur_dun03": 5
+   "tur_dun03": 6
   },
   "walk_speed_ms": 400,
   "captured_sprite": true,

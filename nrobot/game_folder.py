@@ -45,6 +45,8 @@ def save(folder):
         raise ValueError(f'{folder} não é a pasta do jogo (falta DATA.INI ou os arquivos .grf)')
     SETTINGS.parent.mkdir(parents=True, exist_ok=True)
     SETTINGS.write_text(json.dumps({'game_dir': str(folder)}, ensure_ascii=False, indent=1), encoding='utf-8')
+    from .packet_reader import configure_client_game
+    configure_client_game(None)
     return folder
 
 

@@ -232,7 +232,7 @@ class PacketPanel(QMainWindow):
         presence_layout.addWidget(self.edit_allowed_players)
         self.allowed_players.setPlaceholderText('Nome exato do personagem')
         presence_layout.addWidget(self.allowed_players)
-        presence_layout.addWidget(QLabel('Os alertas em vermelho no Diagnóstico aparecem sempre.'))
+        presence_layout.addWidget(QLabel('Jogadores permitidos geram aviso informativo; nao suspendem a caca.'))
         form.insertRow(form.rowCount()-1, presence_box)
         self.advanced = QCheckBox('Combinar habilidades configuradas e buffs por intervalos individuais')
         combat_form.addRow(self.advanced)
@@ -520,12 +520,16 @@ class PacketPanel(QMainWindow):
                 label = 'Arremessar Kunai' if binding['id'] == 524 and binding['type_raw'] == 1 else f"ID {binding['id']} (tipo {binding['type_raw']})"
                 learned = next((skill['level'] for skill in state.get('learned_skills', []) if skill['skill_id'] == 524), 'não recebido')
                 f2_description = f"{label}, nível no atalho: {level}. "+('Rotação usa os perfis da aba Habilidades.' if state.get('rotation') is not None else f'Bot: Kunai nível 10; nível aprendido: {learned}')
+            sync = state.get('character_sync', {})
             self.details.setText('\n\n'.join([
                 f"Posição: {state.get('player_position') or '—'}     SP: {state['player_sp'] if state.get('player_sp') is not None else '—'}     Alvo: {hunt.get('target_id') or '—'}",
                 'Alvo em combate: '+(f"{state['combat_target']['name']} • {state['combat_target']['distance']} células • posição {state['combat_target']['position']}"+
                                       (' (posição estimada)' if state['combat_target'].get('position_estimated', state['combat_target']['arrival_estimated']) else '') if state.get('combat_target') else 'nenhum'),
                 'Posicao do alvo recebida: '+str((state.get('combat_target') or {}).get('last_received_position', '-'))+
                     ' | Destino anunciado: '+str((state.get('combat_target') or {}).get('announced_destination', '-')),
+                'Dados iniciais: lista de habilidades '+('recebida' if sync.get('skills_received') else 'ainda nao recebida')+
+                    '; SP '+('recebido' if sync.get('sp_received') else 'ainda nao recebido')+
+                    '; identidade '+('recebida' if sync.get('identity_received') else 'ainda nao recebida'),
                 f"Ataques confirmados: {hunt.get('confirmed_attacks', 0)}     Habilidades ofensivas confirmadas: {hunt.get('confirmed_skills', 0)}",
                 f"Candidatos recentes: {len(state.get('recent_entities', []))}     Mensagens recebidas: {state.get('messages', 0)}",
                 'Fase: '+hunt.get('phase', 'aguardando')+f" • Espera atual: {hunt.get('wait_seconds', 0)} s",
@@ -620,7 +624,7 @@ class PacketPanel(QMainWindow):
             self.overlay.hide()
         # Shadow on the own character while hidden; other hidden characters are on the minimap.
         self.game_overlay.update_state(state)
-        if state.get('own_hidden'):
+        if self.game_overlay.has_content():
             self.game_overlay.follow_game()
             if not self.game_overlay.isVisible():
                 self.game_overlay.show()

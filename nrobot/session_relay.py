@@ -96,6 +96,7 @@ class SessionRelay:
         self.folder.mkdir(parents=True, exist_ok=True)
         self.listeners = {}
         self.tasks = set()
+        self.character_id = None
         self.account = None
         self.upstream = None
         self.send_lock = asyncio.Lock()
@@ -260,7 +261,7 @@ class SessionRelay:
         self.presence.hold_hidden = settings['pause_on_hidden']
         self.presence.resume_delay = settings['resume_delay']
         self.presence.allowed_names = {n.casefold() for n in settings['allowed_players']}
-        self.presence.names.update({i: n.strip().casefold() for i, n in self.player_names.items() if n})
+        self.sync_presence_names()
         from .packet_settings import HOTKEYS
         self.hunt_key, self.hunt_key_name = HOTKEYS[settings['hotkey_hunt']], settings['hotkey_hunt']
         self.sit_on_players = settings['sit_on_players']
@@ -375,8 +376,15 @@ class SessionRelay:
         self.record_hunt({'kind': 'player_released', 'entity_id': identity})
         self.captured_player = None
 
+    def sync_presence_names(self):
+        from .network_targets import is_player_id
+        names = {i: e['name'] for i, e in self.inventory.entities.items() if is_player_id(i) and e.get('name')}
+        names.update(self.player_names)
+        self.presence.remember_names(names)
+
     def announce_presence(self):
-        """REDE-70: red console line ([ALERTA]) whenever a character shows up nearby."""
+        """Known allowed characters get an informational notice, never a pause alert."""
+        self.sync_presence_names()
         player = self.tracker.observer.player
         for alert in self.presence.drain_alerts():
             identity = alert['entity_id']
@@ -386,8 +394,9 @@ class SessionRelay:
             text = {'player': f'Jogador por perto: {name} (ID {identity}{where})',
                     'disguised': f"Jogador disfarçado de monstro: {name} (ID {identity}, sprite {alert.get('species_id')}{where})",
                     'hidden': f"Jogador {'em @hide' if alert.get('option', 0) & 0x40 else 'escondido'}: {name} (ID {identity}{where})"}[alert['kind']]
-            self.record_hunt({'kind': 'presence_alert', **alert, 'name': name})
-            print('[ALERTA] '+text)
+            allowed = self.presence.ignored(identity)
+            self.record_hunt({'kind': 'presence_alert', **alert, 'name': name, 'allowed': allowed})
+            print(('[PERMITIDO] ' if allowed else '[ALERTA] ')+text+(' (whitelist; nao pausa)' if allowed else ''))
 
     def own_motion(self):
         observer = self.tracker.observer
@@ -856,6 +865,10 @@ class SessionRelay:
             self.record_test()
             print('O ataque de teste foi enviado, mas não houve confirmação de dano no prazo. Não repetirei automaticamente.')
         state = self.tracker.snapshot(time.monotonic())
+        observer = self.tracker.observer
+        state['character_sync'] = {'identity_received': observer.player_id is not None,
+            'skills_received': observer.skills_received, 'sp_received': observer.sp is not None,
+            'learned_count': sum(s.get('level',0) > 0 for s in observer.skills.values())}
         state.update(stage=self.stage, relay_error=self.error, ammo=self.ammo.snapshot(time.monotonic()),
                      presence=self.presence.snapshot(self.tracker.observer.player, time.monotonic()),
                      players_nearby=self.players_nearby(), captured_player=self.captured_player,
@@ -993,6 +1006,7 @@ class SessionRelay:
             self.presence.observe(events, self.tracker.observer.player_id, time.monotonic(),
                                   own_position=self.tracker.observer.player)
             self.track_players(events)
+            self.sync_presence_names()
             own = self.tracker.observer.player_id
             for event in events:
                 if event['kind'] in ('option_change', 'appearance') and event.get('entity_id') == own and own is not None:
@@ -1099,6 +1113,25 @@ class SessionRelay:
             (self.folder/'mapa-diagnostico.bin').write_bytes(data[:262144])
             print(f'Leitura dos alvos suspensa: {exc}. O encaminhamento do jogo continua.')
 
+    def select_character(self, identity):
+        if self.character_id != identity:
+            self.tracker.observer.clear()
+            self.own_option = 0
+        self.character_id = identity
+
+    def begin_map_observation(self):
+        old = self.tracker.observer
+        kept, pinned = old.keep_character(), old.pinned
+        identity = int.from_bytes(self.account, 'little') if self.account else old.player_id
+        self.tracker = ContinuousTracker(old.species, player_ttl=None, idle_timeout=None, entity_ttl=None)
+        observer = self.tracker.observer
+        observer.restore_character(kept)
+        observer.player_id = identity
+        observer.free_cast_movement = True
+        observer.collision_provider = self.collision_map
+        observer.pinned = pinned
+        observer.map_name = self.next_map
+
     async def bridge(self, stage, host, port, client_reader, client_writer):
         upstream = None
         jobs = []
@@ -1108,16 +1141,14 @@ class SessionRelay:
             self.stage = stage
             if stage == 'login':
                 self.account = None
+                self.character_id = None
+                self.tracker.observer.clear()
+                self.own_option = 0
             if stage == 'map':
                 if self.upstream is not None:
                     raise ValueError('Já existe conexão de mapa neste relay')
                 self.upstream = upstream
-                pinned = self.tracker.observer.pinned
-                self.tracker = ContinuousTracker(self.tracker.observer.species, player_ttl=None, idle_timeout=None, entity_ttl=None)
-                self.tracker.observer.free_cast_movement = True
-                self.tracker.observer.collision_provider = self.collision_map
-                self.tracker.observer.pinned = pinned
-                self.tracker.observer.map_name = self.next_map
+                self.begin_map_observation()
                 self.inventory.reset(self.next_map)
                 self.ammo.reset()
                 self.map_validation = None
@@ -1170,6 +1201,7 @@ class SessionRelay:
                             if op == 0x69:
                                 self.account = packet[8:12]  # in memory only
                             elif op == 0x71:
+                                self.select_character(struct.unpack_from('<I', packet, 2)[0])
                                 self.next_map = packet[6:22].split(b'\0')[0].decode('cp1252', 'replace')
                             packet = await rewrite_endpoints(op, packet, self.register)
                             client_writer.write(packet)
@@ -1263,6 +1295,7 @@ class SessionRelay:
 
     async def update_presence_hold(self):
         """REDE-61: True while the bot must stay still; stops an in-flight walk once."""
+        self.sync_presence_names()
         reason = self.presence.reason(self.tracker.observer.player, time.monotonic())
         if reason is None:
             if self.presence_hold is not None:
@@ -1489,11 +1522,25 @@ async def run(args):
             game_dir = args.game_dir or find()
             if game_dir is None:
                 raise GrfError('pasta do jogo não encontrada; escolha a pasta do jogo no painel')
+            from .packet_reader import configure_client_game
+            configure_client_game(game_dir)
             relay.map_repository = MapRepository(game_dir)
             from .ammo import names_from_grfs
             relay.ammo.names = names_from_grfs(relay.map_repository.grfs)
         except (OSError, ValueError, GrfError) as exc:
             print(f'Colisão indisponível: {exc}. Aproximação anterior mantida.')
+    from .packet_reader import client_lengths
+    try:
+        sizes = client_lengths()
+        if not sizes:
+            raise ValueError('Tabela de pacotes ausente; baixe o pacote completo do bot.')
+        print(f'Tabela de pacotes validada para este cliente: {len(sizes)} mensagens.')
+    except (OSError, ValueError) as exc:
+        relay.error = str(exc)
+        relay.stage = 'stopped'
+        relay.status()
+        print(f'Nao foi possivel abrir a conexao: {exc}')
+        return
     controls = None
     if active_test or hunt_mode:
         from .packet_controls import GameControls

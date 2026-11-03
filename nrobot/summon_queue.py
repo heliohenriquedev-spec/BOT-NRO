@@ -55,7 +55,9 @@ class SummonQueue:
 
     def effect(self, profile):
         learned = self.learned.get(self.key(profile['skill_id'], profile['level']), {})
-        return profile.get('effect_id', 0) or learned.get('effect_id', 0)
+        # An observed status may be the skill's cooldown icon, not summon lifetime.
+        # Explicit duration must not inherit that automatic association.
+        return profile.get('effect_id', 0) or (0 if profile.get('summon_duration', 0) else learned.get('effect_id', 0))
 
     def may_invoke(self, profile, now):
         if self.waiting is not None:
@@ -86,6 +88,7 @@ class SummonQueue:
             now = entry['sent_at']
         self.active = {'skill_id': entry['skill_id'], 'level': entry['level'], 'started_at': now,
                        'effect_id': entry['effect_id'], 'expires_at': now+duration if duration else None,
+                       'duration_source': 'configured' if entry.get('summon_duration', 0) else 'user_observed' if duration else 'effect',
                        'evidence': evidence, 'candidates': set(entry['candidates']),
                        'learn_until': now+.5, 'initial_effects': entry.get('initial_effects', []),
                        'confirmed': evidence != 'unconfirmed', 'last_attempt_at': entry['sent_at']}
@@ -166,9 +169,10 @@ class SummonQueue:
             profile = next((p for p in profiles if p['skill_id'] == active['skill_id']), {})
             if profile.get('summon_duration', 0) and active['started_at'] is not None:
                 active['expires_at'] = active['started_at']+profile['summon_duration']
+                active['duration_source'] = 'configured'
         effects = state.get('own_effects', {})
         if active:
-            if not active['effect_id'] and not active.get('learning_done') and now > active.get('learn_until', 0) and active['evidence'] == 'skill_ack':
+            if not active['effect_id'] and not active.get('learning_done') and now > active.get('learn_until', 0) and active['evidence'] == 'skill_ack' and active.get('duration_source') != 'configured':
                 candidates = active['candidates']
                 if len(candidates) == 1 and next(iter(candidates)) > 0:
                     effect = next(iter(candidates))
@@ -183,12 +187,12 @@ class SummonQueue:
             effect = active['effect_id']
             if effect and effects.get(effect, effects.get(str(effect))) is False:
                 self.finish(now, 'effect_ended')
-            elif not effect and active['expires_at'] is not None and now >= active['expires_at']:
+            elif active['expires_at'] is not None and now >= active['expires_at'] and (not effect or active.get('duration_source') == 'configured'):
                 self.finish(now, 'configured_duration')
         elif self.waiting is None:
             # An already active linked summon survives pause/configuration application.
             for profile in profiles:
-                if profile['role'] != 'summon':
+                if profile['role'] != 'summon' or profile.get('summon_duration', 0):
                     continue
                 effect = self.effect(profile)
                 if effect and effects.get(effect, effects.get(str(effect))) is True:
