@@ -127,3 +127,39 @@ def test_hunt_attacks_captured_character_before_closer_monster(tmp_path):
         return relay.upstream.packets
     packets = asyncio.run(send())
     assert len(packets) == 1 and struct.unpack_from('<I', packets[0], 5)[0] == 2003137
+
+
+def test_pvp_targets_are_opt_in_and_cleared_on_map_change(tmp_path):
+    from nrobot.packet_settings import DEFAULTS
+
+    relay = _relay(tmp_path)
+    relay.apply_settings({**DEFAULTS, 'pvp_enabled': True, 'pvp_targets': [2003137],
+                          'pvp_first': True})
+    now = time.monotonic()
+    players = [{'kind': 'appearance', 'entity_id': identity, 'species_id': 26,
+                'position': [13, 10], 'object_type': 0}
+               for identity in (2003137, 2003138)]
+    relay.presence.observe(players, 1, now)
+    relay.track_players(players)
+    relay.sync_pvp_targets()
+    assert relay.player_target_allowed(2003137)
+    assert not relay.player_target_allowed(2003138)
+    assert len(relay.players_nearby()) == 2
+    state = {'player_position': [10, 10], 'recent_entities': [
+        {'entity_id': 2003137, 'position': [13, 10]},
+        {'entity_id': 110830885, 'position': [11, 10]},
+    ]}
+    assert relay.prioritize_pvp(state)['recent_entities'] == state['recent_entities'][:1]
+
+    relay.begin_map_observation()
+    relay.track_players([{'kind': 'move', 'entity_id': 2003137, 'position': [12, 10]}])
+    assert not relay.players_nearby()
+    assert not relay.player_target_allowed(2003137)
+
+    relay.presence.observe(players, 1, now)
+    relay.track_players(players)
+    relay.apply_settings({**DEFAULTS, 'pvp_enabled': True, 'pvp_all': True})
+    assert relay.player_target_allowed(2003138)
+    relay.apply_settings(DEFAULTS)
+    assert not relay.player_target_allowed(2003138)
+    assert 2003138 not in relay.tracker.observer.registry.entities

@@ -34,6 +34,7 @@ class PacketHunt:
         self.skill_failures = 0
         self.skill_attempts = {}
         from .packet_patrol import PacketPatrol
+        self.auto_movement = True
         self.patrol = PacketPatrol(max_step=patrol_step) if patrol else None
         self.enabled = False
         self.reason = 'aguardando Home'
@@ -407,7 +408,7 @@ class PacketHunt:
         if entity is None:
             if not nearby:
                 self.target = None
-                if self.patrol is not None:
+                if self.auto_movement and self.patrol is not None:
                     search_goal = state.get('search_goal')
                     if collision is not None:
                         search_goal = None  # coverage cycle owns exploration; old sightings cannot reorder it
@@ -450,7 +451,7 @@ class PacketHunt:
         # The configured rotation supplies engagement_range and handles shooting while
         # retreating. The legacy Kunai planner must reach its cast/response checks first;
         # otherwise a nearby target always produces a walk instead of a ready skill.
-        elif not self.auto_attacks and combat_range >= 3:
+        elif self.auto_movement and not self.auto_attacks and combat_range >= 3:
             spacing = max(1, combat_range-1)
             if closest < spacing-.25:
                 retreat = self.step_back(player, actual_position, combat_range, collision, walk_speed_ms, blocked)
@@ -476,6 +477,9 @@ class PacketHunt:
                                else 'mantendo alcance; aguardando habilidade disponivel')
                 return None
             return {'kind': 'attack', 'target_id': self.target}
+        if not self.auto_movement:
+            self.reason = 'Movimentação automática desativada; aguardando alvo ao alcance'
+            return None
         path = collision.route(player, chase_position, blocked) if collision else None
         if collision and not path and blocked:
             self.reason = 'rota temporariamente bloqueada; mantendo alvo'

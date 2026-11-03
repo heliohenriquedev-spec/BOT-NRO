@@ -18,6 +18,19 @@ def monster_assets():
         return {}
 
 
+def is_confirmed_monster(entity, player_id=None):
+    from .monster_db import is_known_player
+
+    identity = entity['entity_id']
+    # The client can receive a disguise as the negated account ID in an unsigned field.
+    if identity == player_id or is_player_id(identity) or is_player_id((-identity) & 0xffffffff):
+        return False
+    if entity.get('object_type_raw') not in (None, 0, 5) or entity.get('owner_id') or entity.get('summoned'):
+        return False
+    name = entity.get('name')
+    return bool(name and not is_known_player(name) and entity.get('max_hp', 0) > 0)
+
+
 def confirmed_types(inventory, player_id=None):
     result = {}
     assets = monster_assets()
@@ -25,8 +38,7 @@ def confirmed_types(inventory, player_id=None):
         identity = entity['species_id']
         # REDE-63: HP text in the name reply is sent by the server only for monsters, so
         # custom monsters (e.g. training dummies) missing from the client catalog still count.
-        if (entity['entity_id'] == player_id or is_player_id(entity['entity_id'])
-            or not entity.get('name') or not entity.get('max_hp', 0) > 0):
+        if not is_confirmed_monster(entity, player_id):
             continue
         evidence = ('aparencia do catalogo de monstros e HP recebido do servidor' if identity in assets
                     else 'HP de monstro recebido do servidor (fora do catalogo do cliente)')

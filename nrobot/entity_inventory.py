@@ -27,6 +27,7 @@ class EntityInventory:
                     'entity_id': identity, 'species_id': event['species_id'],
                     'correlated_name': self.names.get(str(event['species_id'])),
                     'object_type_raw': event.get('object_type'),
+                    'owner_id': event.get('owner_id'), 'summoned': event.get('summoned', False),
                     'walk_speed_ms': event.get('walk_speed_ms'),
                     'position': event['position'], 'destination': event.get('destination'),
                     'present_last_observation': True, 'removal_reason': None,

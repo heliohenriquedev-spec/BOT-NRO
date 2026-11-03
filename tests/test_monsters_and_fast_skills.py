@@ -84,7 +84,11 @@ def test_relay_records_monsters_and_captures_a_missing_sprite_when_the_mouse_res
     appearance = {'kind': 'appearance', 'entity_id': 110000001, 'species_id': 21999, 'position': [5, 5],
                   'object_type': 5, 'walk_speed_ms': 180}
     relay.inventory.observe([appearance], time.monotonic())
-    relay.learn_monsters([appearance, {'kind': 'name', 'entity_id': 110000001, 'name': 'Raro', 'hp': 50, 'max_hp': 50}])
+    relay.learn_monsters([appearance])
+    assert not relay.monsters_seen
+    name = {'kind': 'name', 'entity_id': 110000001, 'name': 'Raro', 'hp': 50, 'max_hp': 50}
+    relay.inventory.observe([name], time.monotonic())
+    relay.learn_monsters([name])
     assert relay.monsters_seen[21999]['name'] == 'Raro' and relay.monsters_dirty
     shots = []
     monkeypatch.setattr(screen_capture, 'capture_under_cursor', lambda path: shots.append(path) or path.write_bytes(b'png') or True)
@@ -99,17 +103,24 @@ def test_targets_show_only_the_current_map_and_keep_other_maps_choices(monkeypat
     from PySide6.QtWidgets import QApplication
     app = QApplication.instance() or QApplication([])
     from nrobot.monster_panel import MapTargets
-    monkeypatch.setattr(monster_db, 'load_captured', lambda path=None: {})
+    monkeypatch.setattr(monster_db, 'load_base', lambda: {})
+    monkeypatch.setattr(monster_db, 'load_captured', lambda path=None: {
+        1037: {'name': 'Filhote de cobra', 'maps': {'moc_fild13': 1}},
+        1034: {'name': 'Girino', 'maps': {'outro_mapa': 1}},
+    })
     targets = MapTargets()
     targets.selected = {9999}  # chosen on another map
     targets.show_map('moc_fild13.gat', {1836: {'name': 'Boneco de Treino', 'present': 2}})
     shown = {targets.list.item(i).data(Qt.UserRole) for i in range(targets.list.count())}
-    assert 1836 in shown and 9999 not in shown
+    assert shown == {1037, 1836}
     item = next(targets.list.item(i) for i in range(targets.list.count()) if targets.list.item(i).data(Qt.UserRole) == 1836)
     item.setCheckState(Qt.Checked)
     assert targets.selected == {9999, 1836}
     targets.set_all(False)
     assert targets.selected == {9999}
+    targets.show_map('moc_fild13.gat')
+    assert targets.list.count() == 1
+    assert targets.list.item(0).data(Qt.UserRole) == 1037
     targets.close()
 
 
@@ -132,13 +143,14 @@ def test_publishing_moves_custom_monsters_to_the_shared_base(tmp_path):
     captured = {}
     monster_db.record(captured, 21999, 'campo.gat', name='Custom', max_hp=500, new_entity=True)
     captured[21999]['captured_sprite'] = True
-    monster_db.record(captured, 1138, 'moc_fild13.gat', name='Magnólia', max_hp=80)  # catalog: not exported
+    monster_db.record(captured, 1138, 'moc_fild13.gat', name='Magnólia', max_hp=80)  # a recorded map should also be shared for catalog monsters
     monster_db.save_captured(captured)
     monster_db.SPRITES.mkdir(parents=True)
     write_png(monster_db.sprite_path(21999), np.zeros((4, 4, 4), dtype=np.uint8))
-    assert monster_db.export_base(log=lambda text: None) == (1, 0, 1)
+    assert monster_db.export_base(log=lambda text: None) == (2, 0, 1)
     base = monster_db.load_base()
-    assert set(base) == {21999} and base[21999]['name'] == 'Custom' and base[21999]['maps'] == {'campo': 1}
+    assert set(base) == {1138, 21999} and base[21999]['name'] == 'Custom' and base[21999]['maps'] == {'campo': 1}
+    assert base[1138]['maps'] == {'moc_fild13': 0}
     assert (monster_db.BASE_SPRITES/'21999.png').is_file()
     # Another PC without that monster sees it through the base.
     monster_db.save_captured({})

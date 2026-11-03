@@ -6,6 +6,7 @@ import os
 import struct
 import zlib
 from dataclasses import dataclass
+from pathlib import Path, PureWindowsPath
 
 HEADER_SIZE = 46
 MAGIC = b"Master of Magic"
@@ -66,18 +67,25 @@ class GrfSet:
         data = parser["Data"]
         names = [data[k] for k in sorted(data, key=int)]
         self.entries: dict[str, Entry] = {}
+        self.alternates: dict[str, list[Entry]] = {}
         for name in names:
             grf = os.path.join(game_dir, name)
             if not os.path.isfile(grf):
                 continue
             for key, entry in read_index(grf).items():
-                self.entries.setdefault(key, entry)
+                if key in self.entries:
+                    self.alternates.setdefault(key, []).append(entry)
+                else:
+                    self.entries[key] = entry
 
     def __contains__(self, name: str) -> bool:
         return name.lower() in self.entries
 
     def read(self, name: str) -> bytes:
-        entry = self.entries[name.lower()]
+        return self.read_entry(self.entries[name.lower()])
+
+    @staticmethod
+    def read_entry(entry: Entry) -> bytes:
         with open(entry.path, "rb") as f:
             f.seek(HEADER_SIZE + entry.offset)
             raw = f.read(entry.aligned)
@@ -90,9 +98,21 @@ class GrfSet:
         try:
             return zlib.decompress(raw)[:entry.size]
         except zlib.error as error:
+            resource = PureWindowsPath(entry.name)
+            if (not resource.anchor and '..' not in resource.parts
+                    and resource.parts and resource.parts[0].lower() == 'data'):
+                suffix = resource.suffix.lower()
+                category = ('mapas' if suffix in ('.gat', '.gnd', '.rsw') else
+                            'monstros' if suffix in ('.spr', '.act') else 'outros')
+                base = Path(__file__).resolve().parents[1]/'Arquivos_grf'
+                recovered = base/Path(entry.path).name/category/Path(*resource.parts)
+                if recovered.is_file():
+                    data = recovered.read_bytes()
+                    if len(data) == entry.size:
+                        return data
             if entry.compressed == entry.size:
                 return raw[:entry.size]
-            raise GrfError(f"{name}: dados inválidos em {os.path.basename(entry.path)}") from error
+            raise GrfError(f"{entry.name}: dados inválidos em {os.path.basename(entry.path)}") from error
 
     def find(self, prefix: str, suffix: str = "") -> list[str]:
         prefix, suffix = prefix.lower(), suffix.lower()

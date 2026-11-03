@@ -37,7 +37,7 @@ def icon_for(species_id, path=None):
 def data_stamp():
     """Cheap change check: the monster files and sprite folders."""
     stamp = []
-    for path in (monster_db.CAPTURED, monster_db.BASE_INFO, monster_db.SPRITES, monster_db.BASE_SPRITES):
+    for path in (monster_db.CAPTURED, monster_db.BASE_INFO, monster_db.SPRITES, monster_db.BASE_SPRITES, monster_db.ROOT/'Arquivos_grf'/'prioridade.tsv'):
         try:
             info = os.stat(path)
             stamp.append((info.st_mtime_ns, info.st_size))
@@ -211,11 +211,12 @@ class MapTargets(QWidget):
     def show_map(self, map_name, seen=None, force=False):
         """seen: {species_id: {'name', 'present'}} confirmed on this map by the server."""
         seen = seen or {}
-        key = (monster_db.map_key(map_name), tuple(sorted((i, v.get('present', 0)) for i, v in seen.items())))
+        key = (monster_db.map_key(map_name), data_stamp(),
+               tuple(sorted((i, v.get('name'), v.get('present', 0)) for i, v in seen.items())))
         if key == self.shown and not force:
             return
         captured = monster_db.load_captured()
-        ids = monster_db.monsters_of_map(map_name, captured=captured, seen=seen)
+        ids = monster_db.monsters_of_map(map_name, captured=captured, seen=seen, include_catalog=False, catalog_fallback=True)
         self.shown, self.map_name = key, map_name
         self.list.blockSignals(True)
         self.list.clear()
@@ -229,7 +230,7 @@ class MapTargets(QWidget):
             self.list.addItem(item)
         self.list.blockSignals(False)
         key_name = monster_db.map_key(map_name)
-        self.title.setText(f'Monstros do mapa {key_name}: marque os que deseja caçar.' if ids else
+        self.title.setText(f'Monstros registrados em {key_name}: marque os que deseja caçar.' if ids else
                            (f'Nenhum monstro conhecido em {key_name} ainda; eles aparecem aqui assim que forem vistos.'
                             if key_name else 'Conecte e entre no mapa para ver os monstros dele.'))
 

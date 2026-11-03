@@ -10,10 +10,14 @@ from __future__ import annotations
 
 from datetime import datetime
 from functools import lru_cache
+import csv
 import json
 import os
 from pathlib import Path
 import shutil
+import struct
+
+from .grf import GrfError
 
 ROOT = Path(__file__).resolve().parents[1]
 FOLDER = ROOT/'data'/'monstros'
@@ -22,6 +26,24 @@ SPRITES = FOLDER/'sprites'
 BASE = ROOT/'data'/'monstros_base'
 BASE_INFO = BASE/'monstros.json'
 BASE_SPRITES = BASE/'sprites'
+PLAYER_NAMES = {'boa hancock', 'uadaweu2', 'oxes', 'barra mal'}
+
+
+def is_known_player(name):
+    return ' '.join((name or '').casefold().split()) in PLAYER_NAMES
+
+
+NRO_SPRITES = {
+    1188: 'bon_gun', 1032: 'vorit', 1057: 'yoyo', 1381: 'grizzly',
+    1418: 'dark_snake_lord', 1635: 'eremes', 1788: 'gama-bunta',
+    1031: 'Namekuji', 1034: 'Girino', 1106: 'Akamaru1', 1212: 'Akino',
+    1214: 'Onba', 1315: 'Ninkame', 1402: 'Gama_Kichi', 1628: 'Saru',
+    1636: 'Chunin', 1656: 'Genin', 1783: 'galion',
+    1041: 'mummy', 1177: 'zenorc', 1836: 'deviling',
+    1036: 'pecopeco', 1039: 'aqua_elemental', 1040: 'hardrock_mommoth',
+    1296: 'Pakkun', 1405: 'tendrilrion', 1601: 'permeter', 1634: 'Jounin',
+    1831: 'Salamandra', 1917: 'md_giant_octopus',
+}
 
 
 def is_monster_species(identity):
@@ -98,6 +120,8 @@ def load_base():
 def record(captured, species_id, map_name, *, name=None, max_hp=None, walk_speed_ms=None, new_entity=False,
            now=None):
     """Remember what the game showed about a monster; True when something new was learned."""
+    if is_known_player(name):
+        return False
     entry = captured.setdefault(species_id, {'species_id': species_id, 'maps': {}, 'first_seen': None})
     entry.setdefault('maps', {})
     stamp = (now or datetime.now()).isoformat(timespec='seconds')
@@ -125,6 +149,32 @@ def sprite_path(species_id):
     return SPRITES/f'{species_id}.png'
 
 
+def priority_sprites():
+    for folder in (ROOT/'Arquivos_grf', ROOT/'data'/'recursos'):
+        index = folder/'prioridade.tsv'
+        try:
+            return _read_priority_sprites(index, index.stat().st_mtime_ns)
+        except OSError:
+            continue
+    return {}
+
+
+@lru_cache(maxsize=1)
+def _read_priority_sprites(index, stamp):
+    sprites = {}
+    with index.open(encoding='utf8', newline='') as stream:
+        for row in csv.DictReader(stream, delimiter='\t'):
+            name = row['nome']
+            if row['tipo'] != '.spr' or row['estado'] not in ('extraido', 'descriptografado'):
+                continue
+            if not name or any(c in name for c in '/\\:'):
+                continue
+            path = index.parent/'sprites_por_nome'/f'{name}.png'
+            if path.is_file():
+                sprites[name] = path
+    return sprites
+
+
 def sprite_index():
     """species_id -> PNG path, local first, then the shared base (one directory scan each)."""
     found = {}
@@ -137,10 +187,20 @@ def sprite_index():
                         found[int(stem)] = Path(entry.path)
         except OSError:
             continue
+    priority = priority_sprites()
+    for identity in set(identities()) | set(catalog()) | set(NRO_SPRITES) | found.keys():
+        name = sprite_name(identity)
+        if name and name.casefold() in priority:
+            found[identity] = priority[name.casefold()]
     return found
 
 
 def find_sprite(species_id):
+    name = sprite_name(species_id)
+    if name:
+        preferred = priority_sprites().get(name.casefold())
+        if preferred is not None:
+            return preferred
     for path in (sprite_path(species_id), BASE_SPRITES/f'{species_id}.png'):
         if path.is_file():
             return path
@@ -148,6 +208,10 @@ def find_sprite(species_id):
 
 
 def sprite_name(species_id):
+    # NRO reuses stock species IDs for these custom resources.
+    custom = NRO_SPRITES.get(species_id)
+    if custom is not None:
+        return custom
     entry = catalog().get(species_id)
     if entry is not None:
         return entry['sprite']
@@ -160,22 +224,42 @@ def sprite_from_grf(grfs, species_id):
     name = sprite_name(species_id)
     if name is None or grfs is None:
         return None
+    key = MONSTER_DIR+name.lower()+'.spr'
     try:
-        image = decode_first_frame(grfs.read(MONSTER_DIR+name.lower()+'.spr'))
-    except Exception:  # missing, encrypted or malformed resource
-        return None
-    return crop(image) if image is not None else None
+        image = decode_first_frame(grfs.read(key))
+    except (KeyError, ValueError, OSError, struct.error, GrfError):
+        image = None
+    if image is not None:
+        return crop(image)
+    preferred = getattr(grfs, 'entries', {}).get(key)
+    for entry in getattr(grfs, 'alternates', {}).get(key, ()):
+        if preferred is None or entry.size != preferred.size:
+            continue
+        try:
+            image = decode_first_frame(grfs.read_entry(entry))
+        except (ValueError, OSError, struct.error, GrfError):
+            continue
+        if image is not None:
+            return crop(image)
+    return None
 
 
-def ensure_sprite(grfs, species_id):
+def ensure_sprite(grfs, species_id, *, observed_name=None):
     """'exists' / 'grf' (written from the client files) / None (the game must be captured)."""
     if find_sprite(species_id) is not None:
         return 'exists'
+    path = sprite_path(species_id)
+    name = (sprite_name(species_id) or observed_name or '').strip().casefold()
+    if name and all(char.isalnum() or char in ' _-@' for char in name):
+        indexed = priority_sprites().get(name)
+        if indexed is not None:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(indexed, path)
+            return 'grf'
     image = sprite_from_grf(grfs, species_id)
     if image is None:
         return None
     from .screen_capture import write_png
-    path = sprite_path(species_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     write_png(path, image)
     return 'grf'
@@ -201,6 +285,8 @@ def all_monsters(captured=None):
             row['seen_maps'] = sorted(set(row['seen_maps']) | set(entry.get('maps', {})))
             if entry.get('captured_sprite'):
                 row['sprite_source'] = 'tela do jogo'
+            elif entry.get('sprite_source'):
+                row['sprite_source'] = entry['sprite_source']
     sprites = sprite_index()
     for row in rows.values():
         row['name'] = row['name'] or (row['symbol'] or f"Monstro {row['species_id']}").replace('_', ' ').title()
@@ -208,16 +294,18 @@ def all_monsters(captured=None):
     return sorted(rows.values(), key=lambda row: (row['name'].lower(), row['species_id']))
 
 
-def monsters_of_map(map_name, captured=None, seen=()):
+def monsters_of_map(map_name, captured=None, seen=(), *, include_catalog=True, catalog_fallback=False):
     """species ids that live on a map: Navi list of the client, plus the ones seen there."""
     key = map_key(map_name)
     if not key:
         return []
     captured = load_captured() if captured is None else captured
-    ids = {identity for identity, entry in catalog().items() if key in entry['maps']}
+    ids = {identity for identity, entry in catalog().items() if key in entry['maps']} if include_catalog else set()
     for data in (load_base(), captured):
-        ids |= {identity for identity, entry in data.items() if key in entry.get('maps', {})}
+        ids |= {identity for identity, entry in data.items() if key in entry.get('maps', {}) and not is_known_player(entry.get('name'))}
     ids |= set(seen)
+    if catalog_fallback and not ids:
+        ids = {identity for identity, entry in catalog().items() if key in entry['maps']}
     return sorted(ids)
 
 
@@ -241,7 +329,7 @@ def extract_all(grfs, log=print):
     ids = sorted(set(catalog()) | set(identities()))
     written = custom = 0
     for index, identity in enumerate(ids, 1):
-        if identity not in known:
+        if identity not in known or captured.get(identity, {}).get('captured_sprite'):
             image = sprite_from_grf(grfs, identity)
             if image is not None:
                 from .screen_capture import write_png
@@ -249,6 +337,9 @@ def extract_all(grfs, log=print):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 write_png(path, image)
                 known[identity] = path
+                if identity in captured:
+                    captured[identity].pop('captured_sprite', None)
+                    captured[identity]['sprite_source'] = 'dados do jogo'
                 written += 1
         if identity not in catalog() and identity in known and identity not in captured:
             # A custom monster of this server: its sprite came from the game data.
@@ -266,13 +357,20 @@ def export_base(log=print):
     """Developer publishing: custom monsters learned on this PC go to the shared base."""
     base, captured, sprites = load_base(), load_captured(), sprite_index()
     added = updated = images = 0
+    priority_paths = set(priority_sprites().values())
     for identity, entry in captured.items():
-        if identity in catalog() and not entry.get('captured_sprite'):
-            continue  # everyone extracts these from their own client files
+        if is_known_player(entry.get('name')):
+            continue
+        if identity in catalog() and not entry.get('captured_sprite') and not entry.get('maps') and identity not in base:
+            continue
         merged = {**base.get(identity, {}), **{k: v for k, v in entry.items() if v not in (None, {}, [])}}
         merged['maps'] = {**base.get(identity, {}).get('maps', {}), **entry.get('maps', {})}
         merged.pop('first_seen', None)
         merged.pop('last_seen', None)
+        indexed = sprites.get(identity) in priority_paths
+        if indexed:
+            merged.pop('captured_sprite', None)
+            merged['sprite_source'] = 'GRF prioritário'
         if identity not in base:
             added += 1
         elif merged != base[identity]:
@@ -280,7 +378,7 @@ def export_base(log=print):
         base[identity] = merged
         local = sprite_path(identity)
         target = BASE_SPRITES/f'{identity}.png'
-        if local.is_file() and identity in sprites and (not target.is_file() or entry.get('captured_sprite')):
+        if not indexed and local.is_file() and identity in sprites and (not target.is_file() or entry.get('captured_sprite')):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(local, target)
             images += 1

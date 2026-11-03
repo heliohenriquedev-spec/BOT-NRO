@@ -1,104 +1,312 @@
 {
+ "1009": {
+  "species_id": 1009,
+  "maps": {
+   "ve_fild04": 32,
+   "ein_fild01": 13
+  },
+  "walk_speed_ms": 150,
+  "name": "Condor",
+  "max_hp": 150000,
+  "sprite_source": "GRF prioritário"
+ },
  "1010": {
   "species_id": 1010,
   "maps": {
-   "areia": 13
+   "areia": 18
   },
   "walk_speed_ms": 500,
-  "captured_sprite": true
+  "sprite_source": "GRF prioritário"
+ },
+ "1025": {
+  "species_id": 1025,
+  "maps": {
+   "moc_fild13": 5,
+   "yuno_fild05": 14,
+   "um_fild01": 0
+  },
+  "walk_speed_ms": 200,
+  "name": "Kyodaija",
+  "max_hp": 36500,
+  "sprite_source": "GRF prioritário"
+ },
+ "1027": {
+  "species_id": 1027,
+  "maps": {
+   "moc_fild08": 10,
+   "hu_fild07": 10
+  },
+  "walk_speed_ms": 200,
+  "name": "Togashiro",
+  "max_hp": 75500,
+  "sprite_source": "GRF prioritário"
  },
  "1031": {
   "species_id": 1031,
   "maps": {
-   "kakashi": 4,
    "hospital2": 1,
-   "moc_fild13": 1,
+   "moc_fild13": 6,
    "yuno_fild05": 14
   },
   "walk_speed_ms": 300,
-  "captured_sprite": true,
   "name": "Namekuji",
-  "max_hp": 33000
+  "max_hp": 33000,
+  "sprite_source": "Namekuji.spr (Naruto Ultimate)",
+  "captured_sprite": true
+ },
+ "1032": {
+  "species_id": 1032,
+  "maps": {
+   "ve_fild03": 14
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 240,
+  "name": "Baru",
+  "max_hp": 2468000
+ },
+ "1034": {
+  "species_id": 1034,
+  "maps": {
+   "kakashi": 46,
+   "moc_fild01": 153,
+   "pvp_n_1-1": 7,
+   "gef_fild04": 0
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 200,
+  "name": "Girino",
+  "max_hp": 50
  },
  "1036": {
   "species_id": 1036,
   "maps": {
-   "moc_fild08": 7,
+   "moc_fild08": 12,
    "hu_fild07": 8
   },
   "walk_speed_ms": 250,
-  "captured_sprite": true,
   "name": "Nidachou",
-  "max_hp": 81000
+  "max_hp": 81000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1037": {
+  "species_id": 1037,
+  "maps": {
+   "kakashi": 24,
+   "moc_fild01": 93,
+   "pvp_n_1-1": 7,
+   "gef_fild04": 0
+  },
+  "walk_speed_ms": 200,
+  "name": "Filhote de Cobra",
+  "max_hp": 45,
+  "sprite_source": "GRF prioritário"
  },
  "1039": {
   "species_id": 1039,
   "maps": {
-   "tur_dun03": 263
+   "tur_dun03": 283
   },
   "walk_speed_ms": 200,
   "name": "Monstro Marinho",
   "max_hp": 385000,
-  "captured_sprite": true
+  "sprite_source": "GRF prioritário"
  },
  "1040": {
   "species_id": 1040,
   "maps": {
-   "ve_fild04": 6,
+   "ve_fild04": 16,
    "ein_fild01": 3
   },
   "walk_speed_ms": 300,
-  "captured_sprite": true,
   "name": "Manmosukas",
-  "max_hp": 157000
+  "max_hp": 157000,
+  "sprite_source": "GRF prioritário"
  },
  "1041": {
   "species_id": 1041,
   "maps": {
-   "tur_dun02": 88
+   "tur_dun02": 91
   },
   "walk_speed_ms": 300,
   "name": "Grande Esquilo",
   "max_hp": 149000,
-  "captured_sprite": true
+  "sprite_source": "GRF prioritário"
+ },
+ "1051": {
+  "species_id": 1051,
+  "maps": {
+   "kakashi": 33,
+   "cmd_fild09": 194,
+   "poring_w01": 71,
+   "ein_fild08": 3,
+   "pvp_n_1-1": 5
+  },
+  "walk_speed_ms": 150,
+  "name": "Bikouchuu",
+  "max_hp": 900,
+  "sprite_source": "GRF prioritário"
  },
  "1055": {
   "species_id": 1055,
   "maps": {
-   "areia": 13
+   "areia": 17
   },
   "walk_speed_ms": 500,
-  "captured_sprite": true
+  "sprite_source": "GRF prioritário"
+ },
+ "1057": {
+  "species_id": 1057,
+  "maps": {
+   "ve_fild03": 6
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 200,
+  "name": "Enma",
+  "max_hp": 2468000
  },
  "1062": {
   "species_id": 1062,
   "maps": {
-   "areia": 10
+   "areia": 15
   },
   "walk_speed_ms": 500,
-  "captured_sprite": true
+  "sprite_source": "GRF prioritário"
+ },
+ "1066": {
+  "species_id": 1066,
+  "maps": {
+   "tur_dun03": 389
+  },
+  "walk_speed_ms": 300,
+  "name": "Crustáceo",
+  "max_hp": 350000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1067": {
+  "species_id": 1067,
+  "maps": {
+   "tur_dun01": 89
+  },
+  "walk_speed_ms": 200,
+  "name": "Cornutus",
+  "max_hp": 103000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1073": {
+  "species_id": 1073,
+  "maps": {
+   "tur_dun02": 212
+  },
+  "walk_speed_ms": 200,
+  "name": "Caranguejo",
+  "max_hp": 156000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1078": {
+  "species_id": 1078,
+  "maps": {
+   "moc_fild01": 4
+  },
+  "walk_speed_ms": 2000,
+  "name": "Planta de Suna",
+  "max_hp": 10,
+  "sprite_source": "GRF prioritário"
+ },
+ "1082": {
+  "species_id": 1082,
+  "maps": {
+   "cmd_fild09": 85,
+   "yuno_fild11": 1,
+   "moc_fild08": 7,
+   "ve_fild04": 11,
+   "ra_fild03": 12,
+   "ein_fild01": 4,
+   "hu_fild07": 7,
+   "yuno_fild05": 4,
+   "ein_fild08": 3,
+   "moc_fild13": 4,
+   "ve_fild03": 3,
+   "pay_fild10": 0
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 2000,
+  "name": "Planta Medicinal ",
+  "max_hp": 10
+ },
+ "1093": {
+  "species_id": 1093,
+  "maps": {
+   "ve_fild04": 29,
+   "ein_fild01": 8,
+   "pay_fild10": 0
+  },
+  "walk_speed_ms": 200,
+  "name": "Coelho",
+  "max_hp": 151000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1099": {
+  "species_id": 1099,
+  "maps": {
+   "anthell01": 11
+  },
+  "walk_speed_ms": 300,
+  "name": "Verme Chefe",
+  "max_hp": 296000,
+  "sprite_source": "GRF prioritário"
  },
  "1106": {
   "species_id": 1106,
   "maps": {
-   "moc_fild08": 6,
+   "moc_fild08": 10,
    "hu_fild07": 13
   },
   "walk_speed_ms": 200,
-  "captured_sprite": true,
   "name": "Akamaru",
-  "max_hp": 69000
+  "max_hp": 69000,
+  "sprite_source": "Akamaru1.spr (Naruto Ultimate)",
+  "captured_sprite": true
+ },
+ "1118": {
+  "species_id": 1118,
+  "maps": {
+   "tur_dun02": 111
+  },
+  "walk_speed_ms": 1000,
+  "name": "Planta Carnívora",
+  "max_hp": 133000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1139": {
+  "species_id": 1139,
+  "maps": {
+   "anthell02": 24
+  },
+  "walk_speed_ms": 200,
+  "name": "Louva-a-Deus",
+  "max_hp": 390000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1159": {
+  "species_id": 1159,
+  "maps": {
+   "gld_dun03": 2
+  },
+  "walk_speed_ms": 200,
+  "name": "Inseto Guardião",
+  "max_hp": 753000,
+  "sprite_source": "GRF prioritário"
  },
  "1177": {
   "species_id": 1177,
   "maps": {
    "yuno_fild11": 2,
-   "ra_fild03": 5
+   "ra_fild03": 43
   },
   "walk_speed_ms": 150,
-  "captured_sprite": true,
   "name": "Doki",
-  "max_hp": 980100
+  "max_hp": 980100,
+  "sprite_source": "GRF prioritário"
  },
  "1188": {
   "species_id": 1188,
@@ -106,87 +314,295 @@
    "hospital2": 3,
    "yuno_in01": 1,
    "tur_dun03": 6,
-   "hu_fild07": 2
+   "hu_fild07": 2,
+   "moc_fild01": 1
   },
   "walk_speed_ms": 150,
-  "captured_sprite": true,
   "name": "Tronco de madeira",
-  "max_hp": 10
+  "max_hp": 10,
+  "sprite_source": "GRF prioritário"
+ },
+ "1194": {
+  "species_id": 1194,
+  "maps": {
+   "anthell01": 18
+  },
+  "walk_speed_ms": 100,
+  "name": "Verme Maldito",
+  "max_hp": 292000,
+  "sprite_source": "GRF prioritário"
  },
  "1210": {
   "species_id": 1210,
   "symbol": "FILAMENTOUS",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
+ },
+ "1211": {
+  "species_id": 1211,
+  "maps": {
+   "anthell01": 15
+  },
+  "walk_speed_ms": 200,
+  "name": "Escaravelho",
+  "max_hp": 298000,
+  "sprite_source": "GRF prioritário"
  },
  "1212": {
   "species_id": 1212,
   "maps": {
-   "kakashi": 17,
-   "moc_fild01": 92
+   "kakashi": 23,
+   "moc_fild01": 100,
+   "pvp_n_1-1": 5,
+   "gef_fild04": 0
   },
   "walk_speed_ms": 350,
-  "captured_sprite": true,
   "name": "Akino",
-  "max_hp": 50
+  "max_hp": 50,
+  "sprite_source": "GRF prioritário"
+ },
+ "1214": {
+  "species_id": 1214,
+  "maps": {
+   "kakashi": 44,
+   "moc_fild01": 132,
+   "pvp_n_1-1": 5,
+   "gef_fild04": 0
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 200,
+  "name": "Onbba",
+  "max_hp": 55
+ },
+ "1262": {
+  "species_id": 1262,
+  "maps": {
+   "anthell02": 14
+  },
+  "walk_speed_ms": 250,
+  "name": "Dragão Mutante",
+  "max_hp": 423000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1266": {
+  "species_id": 1266,
+  "maps": {
+   "tur_dun02": 101
+  },
+  "walk_speed_ms": 400,
+  "name": "Estrela-do-Mar",
+  "max_hp": 130000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1289": {
+  "species_id": 1289,
+  "maps": {
+   "gld_dun03": 1
+  },
+  "walk_speed_ms": 100,
+  "name": "Inseto Rei",
+  "max_hp": 755000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1294": {
+  "species_id": 1294,
+  "maps": {
+   "anthell02": 23
+  },
+  "walk_speed_ms": 175,
+  "name": "Inseto Assassino",
+  "max_hp": 408000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1296": {
+  "species_id": 1296,
+  "maps": {
+   "moc_fild13": 11,
+   "yuno_fild05": 3
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 200,
+  "name": "Pakkun",
+  "max_hp": 33500
+ },
+ "1303": {
+  "species_id": 1303,
+  "maps": {
+   "cmd_fild09": 71,
+   "ein_fild08": 3
+  },
+  "walk_speed_ms": 280,
+  "name": "Abelha Rainha Gigante",
+  "max_hp": 9200,
+  "sprite_source": "GRF prioritário"
+ },
+ "1304": {
+  "species_id": 1304,
+  "maps": {
+   "cmd_fild09": 152,
+   "ein_fild08": 16
+  },
+  "walk_speed_ms": 290,
+  "name": "Kyodaigumo",
+  "max_hp": 9000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1305": {
+  "species_id": 1305,
+  "maps": {
+   "anthell01": 12
+  },
+  "walk_speed_ms": 165,
+  "name": "Verme Mestre",
+  "max_hp": 282000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1312": {
+  "species_id": 1312,
+  "maps": {
+   "tur_dun03": 307
+  },
+  "walk_speed_ms": 200,
+  "name": "General Tartaruga",
+  "max_hp": 280000,
+  "sprite_source": "GRF prioritário"
  },
  "1315": {
   "species_id": 1315,
   "maps": {
    "yuno_fild11": 17,
-   "ra_fild03": 7
+   "ra_fild03": 37
   },
   "walk_speed_ms": 155,
-  "captured_sprite": true,
   "name": "Ninkame",
-  "max_hp": 1200000
+  "max_hp": 1200000,
+  "sprite_source": "Ninkame.spr (Naruto Ultimate)",
+  "captured_sprite": true
+ },
+ "1318": {
+  "species_id": 1318,
+  "maps": {
+   "tur_dun01": 122
+  },
+  "walk_speed_ms": 250,
+  "name": "Pequena Tartaruga",
+  "max_hp": 118000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1322": {
+  "species_id": 1322,
+  "maps": {
+   "moc_fild08": 10,
+   "hu_fild07": 7
+  },
+  "walk_speed_ms": 160,
+  "name": "Usagiburaun",
+  "max_hp": 35000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1368": {
+  "species_id": 1368,
+  "maps": {
+   "tur_dun01": 132,
+   "tur_dun02": 1
+  },
+  "walk_speed_ms": 2000,
+  "name": "Pequena Planta Carnívor",
+  "max_hp": 92000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1372": {
+  "species_id": 1372,
+  "maps": {
+   "lhz_fild02": 0
+  },
+  "name": "Bandido",
+  "max_hp": 1000000,
+  "walk_speed_ms": 165,
+  "sprite_source": "GRF prioritário"
+ },
+ "1381": {
+  "species_id": 1381,
+  "maps": {
+   "ve_fild03": 8
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 165,
+  "name": "Katsuyo",
+  "max_hp": 2468000
  },
  "1402": {
   "species_id": 1402,
   "maps": {
-   "moc_fild13": 1,
-   "yuno_fild05": 11
+   "moc_fild13": 6,
+   "yuno_fild05": 11,
+   "um_fild01": 0
   },
   "walk_speed_ms": 160,
-  "captured_sprite": true,
   "name": "Gama-Kichi",
-  "max_hp": 36000
+  "max_hp": 36000,
+  "sprite_source": "Gama_Kichi.spr (Naruto Ultimate)",
+  "captured_sprite": true
+ },
+ "1405": {
+  "species_id": 1405,
+  "maps": {
+   "ve_fild04": 22,
+   "ein_fild01": 6
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 200,
+  "name": "Chamu",
+  "max_hp": 152000
+ },
+ "1418": {
+  "species_id": 1418,
+  "maps": {
+   "ve_fild03": 18
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 200,
+  "name": "Manda",
+  "max_hp": 2468000
  },
  "1447": {
   "species_id": 1447,
-  "maps": {
-   "yuno_in01": 1,
-   "tur_dun02": 1,
-   "tur_dun03": 7,
-   "cmd_fild09": 2
-  },
-  "walk_speed_ms": 150,
-  "captured_sprite": true,
-  "name": "oxeS",
-  "max_hp": 2000000
+  "symbol": "G_GRYPHON",
+  "sprite_source": "dados do jogo",
+  "maps": {}
  },
  "1448": {
   "species_id": 1448,
-  "maps": {
-   "tur_dun03": 4,
-   "ra_fild03": 2
-  },
-  "walk_speed_ms": 150,
-  "captured_sprite": true,
-  "name": "Boa Hancock",
-  "max_hp": 2000000
+  "symbol": "G_DARK_FRAME",
+  "sprite_source": "dados do jogo",
+  "maps": {}
  },
  "1449": {
   "species_id": 1449,
+  "symbol": "G_MUTANT_DRAGON",
+  "sprite_source": "dados do jogo",
+  "maps": {}
+ },
+ "1499": {
+  "species_id": 1499,
   "maps": {
-   "yuno_in01": 1,
-   "tur_dun03": 6,
-   "ra_fild03": 1
+   "tur_dun03": 288
   },
-  "walk_speed_ms": 150,
-  "captured_sprite": true,
-  "name": "Boa Hancock",
-  "max_hp": 2000000
+  "walk_speed_ms": 200,
+  "name": "Gorila",
+  "max_hp": 390000,
+  "sprite_source": "GRF prioritário"
+ },
+ "1517": {
+  "species_id": 1517,
+  "maps": {
+   "ve_fild04": 35,
+   "ein_fild01": 6
+  },
+  "walk_speed_ms": 165,
+  "name": "Sanjuu Kyodaireo",
+  "max_hp": 154000,
+  "sprite_source": "GRF prioritário"
  },
  "1552": {
   "species_id": 1552,
@@ -198,1156 +614,1213 @@
   "name": "Sacerdotisa Sombria",
   "max_hp": 500000
  },
+ "1597": {
+  "species_id": 1597,
+  "symbol": "G_GARGOYLE",
+  "sprite_source": "GRF prioritário",
+  "maps": {}
+ },
  "1601": {
   "species_id": 1601,
   "maps": {
-   "tur_dun02": 169
+   "tur_dun02": 179
   },
   "walk_speed_ms": 250,
   "name": "Tartaruga",
   "max_hp": 151000,
-  "captured_sprite": true
+  "sprite_source": "GRF prioritário"
  },
  "1628": {
   "species_id": 1628,
   "maps": {
-   "moc_fild13": 1,
-   "yuno_fild05": 4
+   "moc_fild13": 8,
+   "yuno_fild05": 4,
+   "um_fild01": 0
   },
   "walk_speed_ms": 300,
-  "captured_sprite": true,
   "name": "Saru",
-  "max_hp": 34000
+  "max_hp": 34000,
+  "sprite_source": "Saru.spr (Naruto Ultimate)",
+  "captured_sprite": true
+ },
+ "1632": {
+  "species_id": 1632,
+  "maps": {
+   "anthell02": 10
+  },
+  "walk_speed_ms": 140,
+  "name": "Gremlin",
+  "max_hp": 399000,
+  "sprite_source": "GRF prioritário"
  },
  "1634": {
   "species_id": 1634,
   "maps": {
-   "areia": 11,
+   "areia": 15,
    "yuno_fild11": 6,
-   "ra_fild03": 9
+   "ra_fild03": 38,
+   "lhz_fild02": 0
   },
-  "walk_speed_ms": 500,
-  "captured_sprite": true,
-  "name": "Líder Jounin",
-  "max_hp": 5537991
+  "walk_speed_ms": 170,
+  "name": "Jounin",
+  "max_hp": 5537991,
+  "sprite_source": "Jounin.spr (Naruto Ultimate)",
+  "captured_sprite": true
+ },
+ "1635": {
+  "species_id": 1635,
+  "maps": {
+   "ve_fild03": 10
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 180,
+  "name": "Anbu",
+  "max_hp": 1200000
  },
  "1636": {
   "species_id": 1636,
   "maps": {
-   "moc_fild08": 26,
-   "hu_fild07": 26
+   "moc_fild08": 33,
+   "hu_fild07": 26,
+   "lhz_fild02": 0
   },
   "walk_speed_ms": 180,
-  "captured_sprite": true,
   "name": "Chunin",
-  "max_hp": 252000
+  "max_hp": 252000,
+  "sprite_source": "Chunin.spr (Naruto Ultimate)",
+  "captured_sprite": true
  },
  "1656": {
   "species_id": 1656,
   "maps": {
-   "cmd_fild09": 172,
+   "cmd_fild09": 192,
    "ein_fild08": 15
   },
   "walk_speed_ms": 100,
-  "captured_sprite": true,
   "name": "Genin",
-  "max_hp": 36000
+  "max_hp": 36000,
+  "sprite_source": "Genin.spr (Naruto Ultimate)",
+  "captured_sprite": true
  },
- "1772": {
-  "species_id": 1772,
+ "1780": {
+  "species_id": 1780,
   "maps": {
-   "kakashi": 2
+   "tur_dun01": 121
   },
-  "walk_speed_ms": 150,
-  "captured_sprite": true,
-  "name": "Barra Mal",
-  "max_hp": 2000000
+  "walk_speed_ms": 2000,
+  "name": "Planta",
+  "max_hp": 72000,
+  "sprite_source": "GRF prioritário"
  },
  "1783": {
   "species_id": 1783,
   "maps": {
-   "kakashi": 29,
-   "moc_fild01": 113
+   "kakashi": 40,
+   "moc_fild01": 128,
+   "pvp_n_1-1": 7,
+   "gef_fild04": 0
   },
   "walk_speed_ms": 150,
-  "captured_sprite": true,
   "name": "Filhote de Katsuyu",
-  "max_hp": 70
+  "max_hp": 70,
+  "sprite_source": "GRF prioritário"
+ },
+ "1787": {
+  "species_id": 1787,
+  "symbol": "G_ECHIO",
+  "sprite_source": "GRF prioritário",
+  "maps": {}
+ },
+ "1788": {
+  "species_id": 1788,
+  "maps": {
+   "ve_fild03": 11
+  },
+  "sprite_source": "GRF prioritário",
+  "walk_speed_ms": 120,
+  "name": "Gama-Bunta",
+  "max_hp": 2468000
  },
  "1790": {
   "species_id": 1790,
-  "maps": {
-   "cmd_fild09": 1,
-   "yuno_in01": 2
-  },
-  "walk_speed_ms": 150,
-  "captured_sprite": true,
-  "name": "Boa Hancock",
-  "max_hp": 2000000
+  "symbol": "G_RAFFLESIA",
+  "sprite_source": "dados do jogo",
+  "maps": {}
  },
  "1831": {
   "species_id": 1831,
   "maps": {
    "yuno_fild11": 5,
-   "ra_fild03": 4
+   "ra_fild03": 19
   },
   "walk_speed_ms": 160,
   "name": "Camaleon",
   "max_hp": 307934,
+  "sprite_source": "Salamandra.spr (Naruto Ultimate)",
   "captured_sprite": true
+ },
+ "1836": {
+  "species_id": 1836,
+  "maps": {
+   "yuno_in01": 43
+  },
+  "walk_speed_ms": 300,
+  "name": "Boneco de Treino",
+  "max_hp": 4294967295,
+  "sprite_source": "GRF prioritário"
  },
  "1917": {
   "species_id": 1917,
   "maps": {
-   "tur_dun03": 7
+   "tur_dun03": 8
   },
   "walk_speed_ms": 400,
-  "captured_sprite": true,
   "name": "Polvo Gigante",
-  "max_hp": 4690000
+  "max_hp": 4690000,
+  "sprite_source": "GRF prioritário"
  },
  "2407": {
   "species_id": 2407,
   "symbol": "SAILOR_SKELETON",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2443": {
   "species_id": 2443,
   "symbol": "AIRA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2444": {
   "species_id": 2444,
   "symbol": "KULUNA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2445": {
   "species_id": 2445,
   "symbol": "MALLINA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2446": {
   "species_id": 2446,
   "symbol": "EZELLA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2447": {
   "species_id": 2447,
   "symbol": "LUNE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2448": {
   "species_id": 2448,
   "symbol": "MORIN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2449": {
   "species_id": 2449,
   "symbol": "NASARIN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2473": {
   "species_id": 2473,
   "symbol": "MG_M_UNDEAD_KNIGHT",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2474": {
   "species_id": 2474,
   "symbol": "MG_F_UNDEAD_KNIGHT",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2475": {
   "species_id": 2475,
   "symbol": "MG_CORRUPTION_ROOT",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2476": {
   "species_id": 2476,
   "symbol": "MG_AMDARAIS",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2489": {
   "species_id": 2489,
   "symbol": "GM_WOMAN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2490": {
   "species_id": 2490,
   "symbol": "GM_SAY",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2491": {
   "species_id": 2491,
   "symbol": "GM_SMOKIE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2492": {
   "species_id": 2492,
   "symbol": "GM_PHOENIX",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2493": {
   "species_id": 2493,
   "symbol": "GM_MEN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2494": {
   "species_id": 2494,
   "symbol": "GM_HINALLE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2528": {
   "species_id": 2528,
   "symbol": "FACEWORM",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2529": {
   "species_id": 2529,
   "symbol": "FACEWORM_QUEEN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2530": {
   "species_id": 2530,
   "symbol": "FACEWORM_DARK",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2531": {
   "species_id": 2531,
   "symbol": "VENOM_BUG",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2532": {
   "species_id": 2532,
   "symbol": "FACEWORM_QUEEN_R",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2533": {
   "species_id": 2533,
   "symbol": "FACEWORM_QUEEN_G",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2534": {
   "species_id": 2534,
   "symbol": "FACEWORM_QUEEN_B",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2535": {
   "species_id": 2535,
   "symbol": "FACEWORM_QUEEN_Y",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2540": {
   "species_id": 2540,
   "symbol": "FACEWORM_EGG",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2541": {
   "species_id": 2541,
   "symbol": "FACEWORM_LARVA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2542": {
   "species_id": 2542,
   "symbol": "IRENE_ELDER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2543": {
   "species_id": 2543,
   "symbol": "PAYONSOLDIER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2544": {
   "species_id": 2544,
   "symbol": "PAYONSOLDIER2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2549": {
   "species_id": 2549,
   "symbol": "GEFFEN_MAGE_1",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2550": {
   "species_id": 2550,
   "symbol": "GEFFEN_MAGE_2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2551": {
   "species_id": 2551,
   "symbol": "GEFFEN_MAGE_3_1",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2552": {
   "species_id": 2552,
   "symbol": "GEFFEN_MAGE_3_2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2553": {
   "species_id": 2553,
   "symbol": "GEFFEN_MAGE_3_3",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2554": {
   "species_id": 2554,
   "symbol": "GEFFEN_MAGE_4",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2555": {
   "species_id": 2555,
   "symbol": "GEFFEN_MAGE_5",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2556": {
   "species_id": 2556,
   "symbol": "GEFFEN_MAGE_6",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2557": {
   "species_id": 2557,
   "symbol": "GEFFEN_MAGE_7",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2558": {
   "species_id": 2558,
   "symbol": "GEFFEN_MAGE_8",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2559": {
   "species_id": 2559,
   "symbol": "GEFFEN_MAGE_9",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2560": {
   "species_id": 2560,
   "symbol": "GEFFEN_MAGE_10",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2561": {
   "species_id": 2561,
   "symbol": "GEFFEN_MAGE_11",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2562": {
   "species_id": 2562,
   "symbol": "GEFFEN_MAGE_12",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2563": {
   "species_id": 2563,
   "symbol": "FEI_KANABIAN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2916": {
   "species_id": 2916,
   "symbol": "BIG_BEN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2917": {
   "species_id": 2917,
   "symbol": "BIG_BELL",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2918": {
   "species_id": 2918,
   "symbol": "TIME_KEEPER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2919": {
   "species_id": 2919,
   "symbol": "NEO_PUNK",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2920": {
   "species_id": 2920,
   "symbol": "ARC_ELDER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2921": {
   "species_id": 2921,
   "symbol": "OWL_VISCOUNT",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2923": {
   "species_id": 2923,
   "symbol": "OWL_MARQUEES",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2937": {
   "species_id": 2937,
   "symbol": "M_LOKI",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2938": {
   "species_id": 2938,
   "symbol": "MM_MAGIC_SEAL",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2939": {
   "species_id": 2939,
   "symbol": "MM_EVIL_SHADOW1",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2940": {
   "species_id": 2940,
   "symbol": "MM_EVIL_SHADOW2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2941": {
   "species_id": 2941,
   "symbol": "MM_EVIL_SHADOW3",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2942": {
   "species_id": 2942,
   "symbol": "MM_EVIL_FANATICS",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2943": {
   "species_id": 2943,
   "symbol": "MM_ICE_MINE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2959": {
   "species_id": 2959,
   "symbol": "TORTUROUS_REDEEMER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2960": {
   "species_id": 2960,
   "symbol": "MM_FLAMECROSS",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2985": {
   "species_id": 2985,
   "symbol": "E_MYSTERIOUS_BUG",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2987": {
   "species_id": 2987,
   "symbol": "XM_TREE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2989": {
   "species_id": 2989,
   "symbol": "XM_COOKIE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2990": {
   "species_id": 2990,
   "symbol": "XM_CRUISER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2991": {
   "species_id": 2991,
   "symbol": "XM_MYSTCASE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2992": {
   "species_id": 2992,
   "symbol": "XM_LUDE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2993": {
   "species_id": 2993,
   "symbol": "XM_HYLOZOIST",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2994": {
   "species_id": 2994,
   "symbol": "XM_MARIONETTE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2995": {
   "species_id": 2995,
   "symbol": "XM_TEDDY_BEAR",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2996": {
   "species_id": 2996,
   "symbol": "XM_CELINE_KIMI",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2998": {
   "species_id": 2998,
   "symbol": "EP14_MORS_EVENT",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "2999": {
   "species_id": 2999,
   "symbol": "EP14_MORS_BOSSA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3000": {
   "species_id": 3000,
   "symbol": "EP14_MORS_BOSSB",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3001": {
   "species_id": 3001,
   "symbol": "EP14_MORS_MOB1",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3002": {
   "species_id": 3002,
   "symbol": "EP14_MORS_MOB2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3003": {
   "species_id": 3003,
   "symbol": "EP14_MORS_MOB3",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3004": {
   "species_id": 3004,
   "symbol": "EP14_MORS_MOB4",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3005": {
   "species_id": 3005,
   "symbol": "EP14_MORS_MOB5",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3006": {
   "species_id": 3006,
   "symbol": "EP14_MORS_MOB6",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3007": {
   "species_id": 3007,
   "symbol": "EP14_MORS_DUMMY",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3008": {
   "species_id": 3008,
   "symbol": "EP14_MORS_HIDDEN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3009": {
   "species_id": 3009,
   "symbol": "EP14_3_DEATH_BOSS",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3010": {
   "species_id": 3010,
   "symbol": "EP14_3_DEATH_A_MOB1",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3011": {
   "species_id": 3011,
   "symbol": "EP14_3_DEATH_A_MOB2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3012": {
   "species_id": 3012,
   "symbol": "EP14_3_DEATH_A_MOB3",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3013": {
   "species_id": 3013,
   "symbol": "EP14_3_DEATH_B_MOB1",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3014": {
   "species_id": 3014,
   "symbol": "EP14_3_DEATH_B_MOB2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3015": {
   "species_id": 3015,
   "symbol": "EP14_3_DEATH_B_MOB3",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3016": {
   "species_id": 3016,
   "symbol": "EP14_3_DEATH_C_MOB1",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3017": {
   "species_id": 3017,
   "symbol": "EP14_3_DEATH_C_MOB2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3018": {
   "species_id": 3018,
   "symbol": "EP14_3_DEATH_C_MOB3",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3019": {
   "species_id": 3019,
   "symbol": "CELINE_KIMI",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3024": {
   "species_id": 3024,
   "symbol": "14_3_MERCENARY_A",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3025": {
   "species_id": 3025,
   "symbol": "14_3_MERCENARY_B",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3029": {
   "species_id": 3029,
   "symbol": "GRIM_REAPER_ANKOU",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3030": {
   "species_id": 3030,
   "symbol": "STANDING_SOUL",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3031": {
   "species_id": 3031,
   "symbol": "MUTANT_NECROMANCER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3032": {
   "species_id": 3032,
   "symbol": "MUTANT_GHOUL",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3033": {
   "species_id": 3033,
   "symbol": "MUTANT_OSIRIS",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3034": {
   "species_id": 3034,
   "symbol": "MUTANT_ARCHER_SKELETON",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3035": {
   "species_id": 3035,
   "symbol": "MUTANT_WRAITH_DEAD",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3036": {
   "species_id": 3036,
   "symbol": "MUTANT_VERIT",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3037": {
   "species_id": 3037,
   "symbol": "MUTANT_LUDE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3068": {
   "species_id": 3068,
   "symbol": "E_PYTHON_SKIN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3069": {
   "species_id": 3069,
   "symbol": "PERE1",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3070": {
   "species_id": 3070,
   "symbol": "PERE2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3071": {
   "species_id": 3071,
   "symbol": "PERE3",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3072": {
   "species_id": 3072,
   "symbol": "PERE4",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3073": {
   "species_id": 3073,
   "symbol": "GRAND_PERE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3074": {
   "species_id": 3074,
   "symbol": "TIMEHOLDER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3091": {
   "species_id": 3091,
   "symbol": "MM_BRINARANEA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3092": {
   "species_id": 3092,
   "symbol": "MM_MUSPELLSKOLL",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3096": {
   "species_id": 3096,
   "symbol": "MM_MOROCC_KID",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3097": {
   "species_id": 3097,
   "symbol": "MM_MOROCC_ADT",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3108": {
   "species_id": 3108,
   "symbol": "JITTERBUG1",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3109": {
   "species_id": 3109,
   "symbol": "JITTERBUG2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3124": {
   "species_id": 3124,
   "symbol": "CHARLESTON3",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3125": {
   "species_id": 3125,
   "symbol": "STEP",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3126": {
   "species_id": 3126,
   "symbol": "ROCK_STEP",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3127": {
   "species_id": 3127,
   "symbol": "KICK_STEP",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3128": {
   "species_id": 3128,
   "symbol": "KICK_AND_KICK",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3150": {
   "species_id": 3150,
   "symbol": "MG_AMDARAIS_H",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3151": {
   "species_id": 3151,
   "symbol": "MG_CORRUPTION_ROOT_H",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3208": {
   "species_id": 3208,
   "symbol": "V_EREMES",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3209": {
   "species_id": 3209,
   "symbol": "V_MAGALETA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3210": {
   "species_id": 3210,
   "symbol": "V_KATRINN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3211": {
   "species_id": 3211,
   "symbol": "V_SHECIL",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3212": {
   "species_id": 3212,
   "symbol": "V_HARWORD",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3213": {
   "species_id": 3213,
   "symbol": "V_SEYREN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3226": {
   "species_id": 3226,
   "symbol": "V_RANDEL",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3227": {
   "species_id": 3227,
   "symbol": "V_FLAMEL",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3228": {
   "species_id": 3228,
   "symbol": "V_CELIA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3229": {
   "species_id": 3229,
   "symbol": "V_CHEN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3230": {
   "species_id": 3230,
   "symbol": "V_GERTIE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3231": {
   "species_id": 3231,
   "symbol": "V_ALPHOCCIO",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3232": {
   "species_id": 3232,
   "symbol": "V_TRENTINI",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3251": {
   "species_id": 3251,
   "symbol": "GC109",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3252": {
   "species_id": 3252,
   "symbol": "DR815",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3253": {
   "species_id": 3253,
   "symbol": "SYS_MSG",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3254": {
   "species_id": 3254,
   "symbol": "T_W_O",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3445": {
   "species_id": 3445,
   "symbol": "P_ARCHER_SKELETON",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3446": {
   "species_id": 3446,
   "symbol": "P_SKELETON",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3447": {
   "species_id": 3447,
   "symbol": "P_SOLDIER_SKELETON",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3448": {
   "species_id": 3448,
   "symbol": "P_AMDARAIS",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3449": {
   "species_id": 3449,
   "symbol": "G_P_AMDARAIS",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3450": {
   "species_id": 3450,
   "symbol": "BIJOU",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3454": {
   "species_id": 3454,
   "symbol": "HEART_HUNTER_N",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3473": {
   "species_id": 3473,
   "symbol": "AS_RAGGED_GOLEM",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3474": {
   "species_id": 3474,
   "symbol": "AS_BLOODY_KNIGHT",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3475": {
   "species_id": 3475,
   "symbol": "AS_WIND_GHOST",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3621": {
   "species_id": 3621,
   "symbol": "EP16_2_MM_CUTIE",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3622": {
   "species_id": 3622,
   "symbol": "EP16_2_MM_S_GUARDS",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3628": {
   "species_id": 3628,
   "symbol": "EP16_2_H_HUNTER_EV",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3629": {
   "species_id": 3629,
   "symbol": "EP16_2_BROKEN_GUN",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3630": {
   "species_id": 3630,
   "symbol": "EP16_2_E_BOLKOBA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3740": {
   "species_id": 3740,
   "symbol": "GASTER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3741": {
   "species_id": 3741,
   "symbol": "MECHASPIDER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3756": {
   "species_id": 3756,
   "symbol": "ILL_BOMI",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3757": {
   "species_id": 3757,
   "symbol": "ILL_DRACULA",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3758": {
   "species_id": 3758,
   "symbol": "ILL_MOONLIGHT",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3764": {
   "species_id": 3764,
   "symbol": "ILL_HIGHWIZARD",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3805": {
   "species_id": 3805,
   "symbol": "E_HAPPY_EGG",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3807": {
   "species_id": 3807,
   "symbol": "E_LUNATIC_CLOVER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3819": {
   "species_id": 3819,
   "symbol": "E_MAGIC_PLANT",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3820": {
   "species_id": 3820,
   "symbol": "MILD_IMP",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3821": {
   "species_id": 3821,
   "symbol": "MILD_EXPLOSION",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3822": {
   "species_id": 3822,
   "symbol": "E_PICKY",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3823": {
   "species_id": 3823,
   "symbol": "E_IMP",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3824": {
   "species_id": 3824,
   "symbol": "E_EXPLOSION",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "3825": {
   "species_id": 3825,
   "symbol": "E_SALAMANDER",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "20571": {
   "species_id": 20571,
   "symbol": "ORK_HERO2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  },
  "20619": {
   "species_id": 20619,
   "symbol": "GLOOMUNDERNIGHT2",
-  "sprite_source": "dados do jogo",
+  "sprite_source": "GRF prioritário",
   "maps": {}
  }
 }

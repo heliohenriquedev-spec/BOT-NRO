@@ -10,7 +10,7 @@ from PySide6.QtCore import QProcess, QProcessEnvironment, QTimer, Qt
 from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QCheckBox, QSpinBox, QDoubleSpinBox, QFormLayout, QGroupBox, QPlainTextEdit,
-    QTabWidget, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QScrollArea, QComboBox, QLineEdit)
+    QTabWidget, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QScrollArea, QComboBox, QLineEdit, QListWidget, QListWidgetItem)
 
 from .responsive_ui import WrappingCheckBox as QCheckBox
 from .packet_settings import ROOT, SPECIES, DEFAULTS, read, save
@@ -110,6 +110,9 @@ class PacketPanel(QMainWindow):
         self.step.setRange(1, 8)
         self.step.setSuffix(' células')
         form.addRow('Trecho da patrulha', self.step)
+        self.auto_movement = QCheckBox('Movimentação automática pelo mapa')
+        self.auto_movement.setToolTip('Desmarque para atacar e usar habilidades ao alcance sem caminhada automática.')
+        form.addRow(self.auto_movement)
         self.patrol = QCheckBox('Explorar áreas menos visitadas, variando trajetos e diagonais')
         form.addRow(self.patrol)
         self.skills = QCheckBox('Ativar habilidades configuradas')
@@ -188,6 +191,20 @@ class PacketPanel(QMainWindow):
         from .monster_panel import MonsterPanel
         self.monster_panel = MonsterPanel()
         tabs.addTab(self.monster_panel, 'Monstros')
+        pvp = QWidget()
+        pvp_layout = QVBoxLayout(pvp)
+        self.pvp_enabled = QCheckBox('Ativar PvP')
+        self.pvp_all = QCheckBox('Atacar todos os jogadores visíveis')
+        self.pvp_first = QCheckBox('Priorizar jogadores sobre monstros')
+        self.pvp_list = QListWidget()
+        self.pvp_targets = set()
+        self.pvp_rows = None
+        for box in (self.pvp_enabled, self.pvp_all, self.pvp_first):
+            pvp_layout.addWidget(box)
+        pvp_layout.addWidget(QLabel('Jogadores visíveis no mapa atual'))
+        pvp_layout.addWidget(self.pvp_list)
+        self.pvp_list.itemChanged.connect(self.pvp_target_changed)
+        tabs.addTab(pvp, 'PvP')
         from .update_panel import UpdatePanel
         self.update_panel = UpdatePanel(relay_running=lambda: self.process.state() != QProcess.NotRunning)
         self.update_panel.restart_requested.connect(self.restart_after_update)
@@ -304,6 +321,12 @@ class PacketPanel(QMainWindow):
         self.radius.setValue(settings['radius'])
         self.step.setValue(settings['patrol_step'])
         self.patrol.setChecked(settings['patrol'])
+        self.auto_movement.setChecked(settings['auto_movement'])
+        self.pvp_enabled.setChecked(settings['pvp_enabled'])
+        self.pvp_all.setChecked(settings['pvp_all'])
+        self.pvp_first.setChecked(settings['pvp_first'])
+        self.pvp_targets = set(settings['pvp_targets'])
+        self.pvp_rows = None
         self.skills.setChecked(settings['skills'])
         self.strict_map.setChecked(settings['require_collision'])
         self.advanced.setChecked(settings['advanced_combat'])
@@ -353,7 +376,9 @@ class PacketPanel(QMainWindow):
                 'species': sorted(self.targets.selected),
                 'radius': self.radius.value(), 'patrol_step': self.step.value(),
                 'patrol': self.patrol.isChecked(), 'skills': self.skills.isChecked(), 'auto_map_targets': self.auto_map_targets.isChecked(),
-                'require_collision': self.strict_map.isChecked(), 'advanced_combat': self.advanced.isChecked(),
+                'require_collision': self.strict_map.isChecked(), 'auto_movement': self.auto_movement.isChecked(),
+                'pvp_enabled': self.pvp_enabled.isChecked(), 'pvp_all': self.pvp_all.isChecked(),
+                'pvp_first': self.pvp_first.isChecked(), 'pvp_targets': sorted(self.pvp_targets), 'advanced_combat': self.advanced.isChecked(),
                 'auto_attacks': self.auto_attacks.isChecked(), 'skill_profiles': self.skill_panel.profiles(),
                 'skill_priority': self.priority_panel.priority(),
                 'summon_queue_mode': self.skill_panel.summon_queue_mode,
@@ -509,13 +534,37 @@ class PacketPanel(QMainWindow):
                 self.process.kill()
                 self.process.waitForFinished(500)
 
+    def pvp_target_changed(self, item):
+        identity = item.data(Qt.UserRole)
+        if item.checkState() == Qt.Checked:
+            self.pvp_targets.add(identity)
+        else:
+            self.pvp_targets.discard(identity)
+        self.schedule_save()
+
+    def refresh_pvp(self, players):
+        rows = [(row['entity_id'], row.get('name')) for row in players]
+        if rows == self.pvp_rows:
+            return
+        self.pvp_rows = rows
+        self.pvp_list.blockSignals(True)
+        self.pvp_list.clear()
+        for identity, name in rows:
+            item = QListWidgetItem(f'{name or "Jogador"} (ID {identity})', self.pvp_list)
+            item.setData(Qt.UserRole, identity)
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setCheckState(Qt.Checked if identity in self.pvp_targets else Qt.Unchecked)
+        self.pvp_list.blockSignals(False)
+
     def refresh(self):
         if self.session is None or self.process.state() == QProcess.NotRunning:
+            self.refresh_pvp([])
             return
         try:
             state = json.loads((self.session/'estado.json').read_text(encoding='utf-8'))
             hunt = state.get('hunt', {})
             self.targets.show_map(state.get('map_name'), {m['species_id']: m for m in state.get('map_monsters', [])})
+            self.refresh_pvp(state.get('players_nearby', []))
             if self.monster_panel.isVisible():
                 self.monster_panel.reload()
 
@@ -694,7 +743,7 @@ class PacketPanel(QMainWindow):
             combo.currentTextChanged.connect(lambda text: self.update_key_notice())
         for field in (self.resume_delay, self.burst_interval):
             field.valueChanged.connect(self.schedule_save)
-        for box in (self.auto_map_targets, self.patrol, self.skills, self.strict_map, self.fast_offensives,
+        for box in (self.pvp_enabled, self.pvp_all, self.pvp_first, self.auto_map_targets, self.auto_movement, self.patrol, self.skills, self.strict_map, self.fast_offensives,
                     self.sit_on_players, self.limit_failures, self.defer_failed, self.skill_burst,
                     self.advanced, self.auto_attacks, self.pause_players, self.pause_disguised, self.pause_hidden):
             box.toggled.connect(self.schedule_save)

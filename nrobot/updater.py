@@ -27,7 +27,7 @@ VERSION_FILE = ROOT/'versao.json'
 PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/monstros',
              'data/rede/invocacoes_aprendidas.json', 'data/rede/painel_config.json', 'data/rede/buffs_aprendidos.json')
 # Kept in the repository for development, not needed to run the bot.
-NOT_DISTRIBUTED = ('tests', 'tools', '.gitignore', '.gitattributes')
+NOT_DISTRIBUTED = ('tests', 'tools', 'Arquivos_grf', '.gitignore', '.gitattributes')
 TIMEOUT = 30
 
 
@@ -97,8 +97,11 @@ def is_protected(relative):
 
 
 def distributed(relative):
-    first = PurePosixPath(relative).parts[0]
-    return first not in NOT_DISTRIBUTED and not is_protected(relative)
+    path = PurePosixPath(relative)
+    if not path.parts or path.is_absolute() or '..' in path.parts or '\\' in relative or ':' in relative:
+        return False
+    excluded = {name.casefold() for name in NOT_DISTRIBUTED}
+    return path.parts[0].casefold() not in excluded and not is_protected(relative)
 
 
 def apply(log=print, root=ROOT, archive=None):
@@ -184,7 +187,14 @@ def publish(message, log=print, run_tests=True):
         raise UpdateError('escreva o que mudou nesta atualização')
     if not can_publish():
         raise UpdateError('esta cópia não é a do desenvolvedor (sem git ou sem repositório de origem)')
+    if git('ls-files', '--', 'Arquivos_grf'):
+        raise UpdateError('Remova Arquivos_grf do índice Git antes de publicar; mantenha a pasta local.')
     from .monster_db import export_base
+    from .release_assets import prepare
+    try:
+        prepare(log)
+    except (OSError, ValueError) as exc:
+        raise UpdateError(f'Falha ao preparar os recursos: {exc}') from exc
     export_base(log)  # custom monsters learned here reach every user with this version
     if run_tests and (ROOT/'tests').is_dir():
         log('Rodando os testes antes de publicar...')
@@ -199,7 +209,7 @@ def publish(message, log=print, run_tests=True):
             raise UpdateError('os testes falharam; nada foi publicado:\n'+result.stdout[-2000:]+result.stderr[-1000:])
         log(result.stdout.strip().splitlines()[-1])
     version = next_version(local_version().get('version'))
-    files = tracked_files()
+    files = [name for name in tracked_files() if distributed(name)]
     digest = hashlib.sha256('\n'.join(files).encode()).hexdigest()[:12]
     VERSION_FILE.write_text(json.dumps({'version': version, 'published_at': datetime.now().isoformat(timespec='seconds'),
                                         'notes': message, 'files': files, 'files_digest': digest},

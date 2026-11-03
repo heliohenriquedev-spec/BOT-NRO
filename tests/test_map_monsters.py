@@ -75,3 +75,30 @@ def test_truncated_training_dummy_hp_is_read():
     assert event['name'] == 'Boneco de Treino' and event['hp'] == event['max_hp'] == 4294967295
     closed = struct.pack('<HI', 0x195, 7)+b'X'.ljust(24, b'\0')+b'HP: 50/40)'.ljust(24, b'\0')+bytes(48)
     assert 'hp' not in decode(closed)  # complete but inconsistent values stay rejected
+
+
+def test_discovery_rejects_disguises_summons_and_known_players():
+    inventory = EntityInventory()
+    entities = [
+        appearance((-2002551) & 0xffffffff, 1772),
+        {**appearance(110000002, 1031), 'owner_id': 2002551},
+        {**appearance(110000003, 1031), 'summoned': True},
+        appearance(110000004, 1772),
+        appearance(110000005, 1034),
+    ]
+    inventory.observe(entities, 0)
+    inventory.observe([
+        {'kind': 'name', 'entity_id': row['entity_id'], 'name': name, 'max_hp': 50}
+        for row, name in zip(entities, ('Disfarce', 'Namekuji', 'Namekuji', 'Barra Mal', 'Girino'))
+    ], 1)
+    assert set(confirmed_types(inventory)) == {1034}
+
+
+def test_missing_collision_starts_stationary_without_disabling_setting(tmp_path):
+    relay = SessionRelay('127.0.0.1', folder=tmp_path)
+    relay.hunt = PacketHunt()
+    relay.apply_settings(DEFAULTS)
+    relay.tracker.observer.map_name = 'kakashi.gat'
+    relay.validate_navigation_start()
+    assert relay.navigation_stationary and not relay.hunt.auto_movement
+    assert relay.settings['auto_movement']

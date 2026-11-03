@@ -132,6 +132,7 @@ class SessionRelay:
         self.captured_player = None
         # REDE-72: other characters' server paths.
         self.player_tracks = {}
+        self.pvp_registered = set()
         from .group_hunt import GroupHunt
         self.group = GroupHunt()
         self.player_names = {}  # REDE-76: names of characters (0195 replies to the client's 008C)
@@ -155,6 +156,7 @@ class SessionRelay:
         self.skill_trace_count = 0
         self.control_result = None
         self.settings = None
+        self.navigation_stationary = False
         self.rotation = None
         self.buff_probe_request = None
         self.map_validation = None
@@ -246,7 +248,10 @@ class SessionRelay:
         if self.rotation is not None:
             self.rotation.summons.mode = settings['summon_queue_mode']
             self.hunt.use_skills = False
-        if settings['patrol']:
+        self.hunt.auto_movement = settings['auto_movement'] and not self.navigation_stationary
+        if not self.hunt.auto_movement and self.hunt.pending and self.hunt.pending['kind'] == 'move':
+            self.hunt.pending = None
+        if settings['patrol'] and settings['auto_movement']:
             if self.hunt.patrol is None:
                 self.hunt.patrol = PacketPatrol(settings['patrol_step'])
             else:
@@ -265,6 +270,10 @@ class SessionRelay:
                     destination=tuple(e['destination']) if e.get('destination') else None, walk_speed_ms=e.get('walk_speed_ms'))
                 observer.registry.update(entity)
         self.settings = settings
+        if not settings['pvp_enabled']:
+            self.release_player()
+            self.capture_armed_until = 0
+        self.sync_pvp_targets()
         self.presence.hold_players = settings['pause_on_players']
         self.presence.hold_disguised = settings['pause_on_disguised']
         self.presence.hold_hidden = settings['pause_on_hidden']
@@ -339,7 +348,8 @@ class SessionRelay:
     def capture_player(self, identity, origin):
         from .network_targets import Entity, is_player_id
         observer = self.tracker.observer
-        if not is_player_id(identity) or identity == observer.player_id:
+        if (not is_player_id(identity) or identity == observer.player_id
+                or self.settings and not self.settings.get('pvp_enabled')):
             return False
         self.release_player()
         self.capture_armed_until = 0
@@ -406,6 +416,42 @@ class SessionRelay:
         return bool(target_id==self.group.target_id and target is not None and target.kind=='monster'
                     and own is not None and math.dist(own,leader)<=12)
 
+    def sync_pvp_targets(self):
+        observer = self.tracker.observer
+        settings = self.settings or {}
+        eligible = set()
+        if settings.get('pvp_enabled') and not self.group_follower():
+            eligible = set(self.player_tracks) & self.presence.players
+            eligible.difference_update(self.presence.hidden)
+            eligible.discard(observer.player_id)
+            if not settings.get('pvp_all'):
+                eligible.intersection_update(settings.get('pvp_targets', ()))
+        for identity in self.pvp_registered - eligible:
+            if identity not in observer.pinned:
+                observer.registry.remove(identity)
+                self.presence.allowed.discard(identity)
+        for identity in eligible:
+            observer.registry.update(self.player_tracks[identity])
+        self.presence.allowed.update(eligible)
+        self.pvp_registered = eligible
+
+    def player_target_allowed(self, identity):
+        observer = self.tracker.observer
+        if self.settings is None:
+            return identity in observer.pinned
+        return (self.settings.get('pvp_enabled') and identity in self.presence.players
+                and identity in self.player_tracks and identity not in self.presence.hidden
+                and (identity in self.pvp_registered or identity in observer.pinned))
+
+    def prioritize_pvp(self, state):
+        candidates = state['recent_entities']
+        players = self.pvp_registered
+        preferred = [row for row in candidates if
+                     (row['entity_id'] in players) == self.settings['pvp_first']
+                     and self.hunt.excluded_until.get(row['entity_id'], 0) <= time.monotonic()
+                     and math.dist(state['player_position'], row['position']) <= self.hunt.SEARCH_RADIUS]
+        return {**state, 'recent_entities': preferred} if preferred else state
+
     def plan_group_or_hunt(self, state, now, speed, collision):
         if not self.group_follower():
             return self.hunt.plan(state,now,speed,collision=collision)
@@ -425,7 +471,7 @@ class SessionRelay:
             if combat:
                 self.group.reason=f'alvo observado do lider: {target}'
                 return action
-            if self.hunt.pending is not None or now < self.hunt.ready_at:
+            if not self.hunt.auto_movement or self.hunt.pending is not None or now < self.hunt.ready_at:
                 return None
             blocked={p for p,t in self.hunt.blocked_until.items() if t>now}
             action=self.group.plan_follow(state,leader,self.settings,collision,blocked,speed)
@@ -468,21 +514,23 @@ class SessionRelay:
     # -- monsters seen in the game (REDE-79) ----------------------------------------------
     def learn_monsters(self, events):
         from .monster_db import record
-        from .network_targets import is_player_id
-        from .presence_guard import monster_sprite
-        map_name = self.tracker.observer.map_name
-        for event in events:
-            identity = event.get('entity_id')
-            if event['kind'] not in ('appearance', 'name') or identity is None or is_player_id(identity):
+        from .map_monsters import is_confirmed_monster
+
+        observer = self.tracker.observer
+        map_name = self.inventory.map_name or observer.map_name
+        if not map_name:
+            return
+        last_transition = max((i for i, event in enumerate(events)
+                               if event['kind'] in ('map_change', 'map_transfer')), default=-1)
+        for event in events[last_transition+1:]:
+            if event['kind'] != 'name' or not event.get('max_hp'):
                 continue
-            entity = self.inventory.entities.get(identity) or {}
-            species = event.get('species_id', entity.get('species_id'))
-            if species is None or not monster_sprite(species):
+            entity = self.inventory.entities.get(event.get('entity_id'))
+            if not entity or not entity.get('present_last_observation') or not is_confirmed_monster(entity, observer.player_id):
                 continue
-            changed = record(self.monsters_seen, species, map_name, name=event.get('name') if event.get('max_hp') else None,
-                             max_hp=event.get('max_hp'), walk_speed_ms=event.get('walk_speed_ms'),
-                             new_entity=event['kind'] == 'appearance' and not entity.get('movements'))
-            self.monsters_dirty |= changed
+            self.monsters_dirty |= record(self.monsters_seen, entity['species_id'], map_name,
+                                          name=entity['name'], max_hp=entity['max_hp'],
+                                          walk_speed_ms=entity.get('walk_speed_ms'))
 
     def write_monsters(self):
         if not self.monsters_dirty or time.monotonic()-self.monsters_written < 5:
@@ -503,7 +551,8 @@ class SessionRelay:
         if species is None or not monster_sprite(species) or self.sprite_state.get(species):
             return
         grfs = self.map_repository.grfs if self.map_repository is not None else None
-        state = ensure_sprite(grfs, species)
+        name = (self.monsters_seen.get(species) or {}).get('name')
+        state = ensure_sprite(grfs, species, observed_name=name) if name else ensure_sprite(grfs, species)
         if state is None:
             from .screen_capture import capture_under_cursor
             path = sprite_path(species)
@@ -563,6 +612,7 @@ class SessionRelay:
         for event in events:
             kind, identity = event['kind'], event.get('entity_id')
             if kind in ('map_change', 'map_transfer'):
+                self.release_player()
                 self.player_tracks.clear()
                 self.player_first_seen.clear()
                 continue
@@ -580,6 +630,8 @@ class SessionRelay:
                 self.player_tracks.pop(identity, None)
                 self.player_first_seen.pop(identity, None)
                 continue
+            if kind != 'appearance' and old is None:
+                continue
             if kind not in ('appearance', 'move', 'position'):
                 continue
             speed = event.get('walk_speed_ms') or (old.walk_speed_ms if old else None) or 150
@@ -596,7 +648,7 @@ class SessionRelay:
     def players_nearby(self):
         player = self.tracker.observer.player
         rows = []
-        for identity in sorted(self.presence.players):
+        for identity in sorted(self.presence.players & self.player_tracks.keys()):
             position = self.presence.positions.get(identity)
             known = self.inventory.entities.get(identity, {})
             track = self.player_tracks.get(identity)
@@ -638,15 +690,28 @@ class SessionRelay:
     def validate_navigation_start(self):
         if self.native_frames.error:
             raise ValueError(self.native_frames.error+'; reconecte para sincronizar novamente')
-        if not self.settings or not self.settings['require_collision']:
+        self.navigation_stationary = False
+        if not self.settings:
+            return
+        self.hunt.auto_movement = self.settings['auto_movement']
+        if not self.hunt.auto_movement or not self.settings['require_collision']:
             return
         collision = self.collision_map()
         position = self.tracker.observer.player
-        if collision is None or position is None:
-            raise ValueError('Mapa de colisão indisponível; navegação validada não pode iniciar')
+        name = self.tracker.observer.map_name
+        if collision is None:
+            self.navigation_stationary = True
+            self.hunt.auto_movement = False
+            self.map_validation = None
+            print(f'Mapa de colisão indisponível para {name or "o mapa atual"}; caça em modo estacionário.')
+            return
+        if position is None:
+            raise ValueError('Aguardando posição própria confirmada para iniciar a navegação')
         reachable = collision.reachable(position)
         if not reachable:
-            raise ValueError('Posição própria não corresponde a uma célula livre do mapa; confira o recurso GAT')
+            source = self.map_repository.sources.get((name or '').lower()) if self.map_repository else None
+            raise ValueError(f'Posição própria não corresponde a uma célula livre do mapa; posição {position}, mapa '
+                             f'{name or "atual"}; confira o recurso GAT ({source or "origem indisponível"})')
         self.map_validation = {'map': self.tracker.observer.map_name, 'width': collision.width,
                                'height': collision.height, 'reachable_cells': len(reachable), 'origin': list(position)}
         self.record_hunt({'kind': 'map_validated', **self.map_validation})
@@ -678,6 +743,8 @@ class SessionRelay:
                 self.hunt.start()
                 self.defer_until_manual_walk_finishes()
             elif command == 'capture_player':
+                if self.settings and not self.settings.get('pvp_enabled'):
+                    raise ValueError('Ative PvP para selecionar um jogador')
                 self.capture_armed_until = time.monotonic()+20
             elif command == 'set_player_target':
                 if not self.capture_player(int(request['entity_id']), 'painel'):
@@ -859,14 +926,15 @@ class SessionRelay:
             if not observer.player_alive or observer.player_id is None:
                 return False
             collision = self.collision_map()
-            if self.settings and self.settings['require_collision'] and collision is None:
+            if self.settings and self.hunt.auto_movement and self.settings['require_collision'] and collision is None:
                 raise ValueError('Mapa de colisão deixou de estar disponível')
             if self.group_follower() and (not self.group_combat_allowed() or action['role'] in ('offensive','summon') and not self.group_combat_allowed(action.get('combat_target_id',action['target_id']))):
                 return False
             if action['role'] in ('offensive', 'summon'):
                 entity = observer.registry.entities.get(action.get('combat_target_id', action['target_id']))
-                if (entity is None or not entity.alive or entity.species_id not in observer.species
-                    or not observer.registry.current(entity, now)):
+                if (entity is None or not entity.alive or not observer.registry.current(entity, now)
+                    or (entity.kind == 'player' and not self.player_target_allowed(entity.entity_id))
+                    or (entity.kind == 'monster' and entity.species_id not in observer.species)):
                     return False
                 if action['role'] == 'summon' and (entity.kind != 'monster' or max(math.dist(own, p) for own in observer.combat_positions(now) for p in entity.combat_bounds(now)[0]) > 12):
                     return False
@@ -1074,6 +1142,7 @@ class SessionRelay:
             self.presence.observe(events, self.tracker.observer.player_id, time.monotonic(),
                                   own_position=self.tracker.observer.player)
             self.track_players(events)
+            self.sync_pvp_targets()
             if self.group_follower():
                 self.group.observe(events, self.group_leader_id(), time.monotonic())
             self.sync_presence_names()
@@ -1191,6 +1260,12 @@ class SessionRelay:
         self.character_id = identity
 
     def begin_map_observation(self):
+        self.release_player()
+        self.player_tracks.clear()
+        self.player_first_seen.clear()
+        self.presence.reset()
+        self.sync_pvp_targets()
+        self.discovered_monsters.clear()
         old = self.tracker.observer
         kept, pinned = old.keep_character(), old.pinned
         identity = int.from_bytes(self.account, 'little') if self.account else old.player_id
@@ -1455,6 +1530,8 @@ class SessionRelay:
             state = self.status()
             observer = self.tracker.observer
             entity = observer.registry.entities.get(action['target_id'])
+            if action['kind'] == 'move' and not self.hunt.auto_movement:
+                raise HuntTargetChanged('Movimentação automática desativada')
             group_follow = action.get('purpose') == 'group_follow'
             is_patrol = action.get('purpose') in ('patrol','group_follow')
             move_limit = 4 if group_follow or not is_patrol else self.hunt.patrol.max_step
@@ -1472,7 +1549,7 @@ class SessionRelay:
             if is_patrol and (action['kind'] != 'move' or (not group_follow and self.hunt.patrol is None)
                               or action['target_id'] is not None):
                 raise ValueError('Comando de patrulha inválido')
-            captured = entity is not None and entity.kind == 'player' and entity.entity_id in observer.pinned
+            captured = entity is not None and entity.kind == 'player' and self.player_target_allowed(entity.entity_id)
             if not is_patrol and (entity is None or not entity.alive
                 or not (captured or (entity.kind == 'monster' and entity.species_id in observer.species))
                 or not observer.registry.current(entity, time.monotonic())
@@ -1711,6 +1788,8 @@ async def run(args):
                             pass
                         else:
                             state = relay.status()
+                            if relay.pvp_registered and state.get('player_position') is not None:
+                                state = relay.prioritize_pvp(state)
                             if relay.rotation is not None:
                                 state['engagement_range'] = relay.rotation.navigation_range(state, time.monotonic(), relay.hunt.target)
                             action = relay.plan_group_or_hunt(state, time.monotonic(), relay.tracker.observer.walk_speed_ms, relay.collision_map())

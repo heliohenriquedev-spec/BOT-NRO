@@ -10,7 +10,8 @@ SPECIES = {1212: 'Akino', 1051: 'Bikouchuu', 1783: 'Filhote de Katsuyu',
 DEFAULTS = {'species': [1037], 'radius': 28, 'patrol': True, 'patrol_step': 8, 'skills': True,
             'skill_interval': .5, 'skill_timeout': 1.5, 'skill_attempts': 3, 'target_defer': 8,
             'switch_distance': 6, 'switch_saving': 3, 'switch_ratio_percent': 65}
-DEFAULTS.update(auto_map_targets=True, skill_global_delay=.12, require_collision=True, skill_profiles=[], auto_attacks=True, advanced_combat=True)
+DEFAULTS.update(pvp_enabled=False, pvp_all=False, pvp_first=False, pvp_targets=[])
+DEFAULTS.update(auto_map_targets=True, skill_global_delay=.12, require_collision=True, auto_movement=True, skill_profiles=[], auto_attacks=True, advanced_combat=True)
 # REDE-68: user-defined skill order; 'throws' is the alternating Shuriken/Kunai pair.
 DEFAULTS.update(skill_priority=[])
 # REDE-70: which presences hold the bot.
@@ -81,11 +82,15 @@ def validate(data, *, links_path=None):
             raise ValueError(f'{key}: valor deve estar entre {minimum} e {maximum}')
     if result['skill_timeout'] < result['skill_interval']:
         raise ValueError('Espera por resposta deve ser maior ou igual ao intervalo da habilidade')
-    for key in ('patrol', 'skills', 'require_collision', 'auto_attacks', 'advanced_combat', 'auto_map_targets',
+    for key in ('pvp_enabled', 'pvp_all', 'pvp_first', 'patrol', 'skills', 'require_collision', 'auto_movement', 'auto_attacks', 'advanced_combat', 'auto_map_targets',
                 'pause_on_players', 'pause_on_disguised', 'pause_on_hidden', 'fast_offensives', 'sit_on_players',
                 'limit_target_failures', 'defer_failed_targets', 'skill_burst'):
         if type(result[key]) is not bool:
             raise ValueError(f'{key}: valor deve ser booleano')
+    targets = result['pvp_targets']
+    if not isinstance(targets, list) or any(type(i) is not int or i <= 0 for i in targets):
+        raise ValueError('Seleção PvP inválida')
+    result['pvp_targets'] = sorted(set(targets))
     profiles = result['skill_profiles']
     if not isinstance(profiles, list) or len(profiles) > 300:
         raise ValueError('Lista de habilidades inválida')

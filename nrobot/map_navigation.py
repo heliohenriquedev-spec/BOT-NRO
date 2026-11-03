@@ -1,7 +1,9 @@
 """REDE-31: read-only GAT maps and bounded collision-aware routing."""
 from __future__ import annotations
 
+import base64
 import heapq
+import json
 import math
 from pathlib import Path, PureWindowsPath
 import struct
@@ -59,6 +61,18 @@ def read_map_caches(folder):
                 except (struct.error, zlib.error):
                     continue
     return maps
+
+
+BUNDLED_MAPS = Path(__file__).resolve().parents[1]/'data'/'recursos'/'colisoes.json'
+
+
+def read_bundled_maps(path):
+    try:
+        payload = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return {}
+    return {name: (width, height, base64.b64decode(cells))
+            for name, (width, height, cells) in payload.items()}
 
 
 class CollisionMap:
@@ -222,7 +236,9 @@ class MapRepository:
     def __init__(self, game_dir, cache_folder=None):
         self.root = Path(game_dir)
         self.grfs = GrfSet(str(self.root))
-        self.server_maps = read_map_caches(cache_folder or self.CACHE_FOLDER)
+        self.cache_folder = Path(cache_folder or self.CACHE_FOLDER)
+        self.server_maps = read_map_caches(self.cache_folder)
+        self.bundled_maps = read_bundled_maps(BUNDLED_MAPS)
         self.cache = {}
         self.errors = {}
         self.sources = {}
@@ -236,11 +252,51 @@ class MapRepository:
         loose = self.root.joinpath(*path.parts)
         return loose.read_bytes() if loose.is_file() else self.grfs.read(str(path).lower())
 
+    def collision_resource(self, key):
+        try:
+            return CollisionMap.from_gat(self.resource(key)), key
+        except (GrfError, ValueError, OSError, zlib.error):
+            bundled = self.bundled_collision(PureWindowsPath(key).stem)
+            if bundled is not None:
+                return bundled, 'colisão distribuída com o bot'
+            for entry in getattr(self.grfs, 'alternates', {}).get(key, ()):
+                try:
+                    collision = CollisionMap.from_gat(self.grfs.read_entry(entry))
+                except (GrfError, ValueError, OSError, zlib.error):
+                    continue
+                return collision, f'{key} ({Path(entry.path).name})'
+            recovered = self.cache_folder/'recuperados'/PureWindowsPath(key).name
+            expected = getattr(self.grfs, 'entries', {}).get(key)
+            if expected is not None and recovered.is_file():
+                data = recovered.read_bytes()
+                if len(data) == expected.size:
+                    return CollisionMap.from_gat(data), str(recovered)
+            raise
+
+    def bundled_collision(self, name):
+        bundled = self.bundled_maps.get(name)
+        if bundled is None:
+            return None
+        width, height, packed = bundled
+        return CollisionMap.from_cell_types(width, height, zlib.decompress(packed))
+
     def resolve_alias(self, key):
         if self.aliases is None:
             self.aliases = {}
             try:
-                text = self.resource('data\\resnametable.txt').decode('cp949', 'replace')
+                table_key = 'data\\resnametable.txt'
+                try:
+                    raw = self.resource(table_key)
+                except GrfError as original:
+                    for entry in getattr(self.grfs, 'alternates', {}).get(table_key, ()):
+                        try:
+                            raw = self.grfs.read_entry(entry)
+                            break
+                        except GrfError:
+                            continue
+                    else:
+                        raise original
+                text = raw.decode('cp949', 'replace')
                 for line in text.splitlines():
                     fields = line.split('//', 1)[0].strip().split('#')
                     if len(fields) >= 2 and fields[0] and fields[1]:
@@ -276,12 +332,17 @@ class MapRepository:
             else:
                 resource = 'data\\'+key
                 try:
-                    data = self.resource(resource)
-                except KeyError:
-                    resource = self.resolve_alias(resource)
-                    data = self.resource(resource)
-                result = CollisionMap.from_gat(data)
-                self.sources[name] = resource
+                    try:
+                        result, source = self.collision_resource(resource)
+                    except KeyError:
+                        resource = self.resolve_alias(resource)
+                        result, source = self.collision_resource(resource)
+                except (GrfError, KeyError, ValueError, OSError, zlib.error):
+                    result = self.bundled_collision(p.stem)
+                    if result is None:
+                        raise
+                    source = 'colisão distribuída com o bot'
+                self.sources[name] = source
         except (GrfError, KeyError, ValueError, OSError, zlib.error) as exc:
             self.errors[name] = str(exc)+('' if self.server_maps else
                 f'; copie o map_cache.dat (rAthena) ou os .mcache (Hercules) do servidor para {self.CACHE_FOLDER}')
