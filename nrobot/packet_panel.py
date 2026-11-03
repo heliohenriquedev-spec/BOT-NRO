@@ -90,11 +90,11 @@ class PacketPanel(QMainWindow):
         self.species_layout = species_layout
         self.auto_map_targets = QCheckBox('Identificar monstros pelos dados recebidos do mapa')
         species_layout.addWidget(self.auto_map_targets)
-        self.auto_map_targets.setToolTip('No modo automatico, os monstros confirmados do mapa sao incluidos. Para escolher especies manualmente, desative esta opcao.')
+        self.auto_map_targets.setToolTip('O modo automático inclui monstros do mapa. Você pode desmarcar cada nome confirmado pelo servidor.')
         from .monster_panel import MapTargets
         self.targets = MapTargets()  # REDE-79: only the monsters of the current map
         species_layout.addWidget(self.targets, 1)
-        self.auto_map_targets.toggled.connect(lambda enabled: self.targets.setEnabled(not enabled))
+        self.auto_map_targets.toggled.connect(self.targets.set_automatic)
         species_scroll = QScrollArea()
         species_scroll.setWidgetResizable(True)
         species_scroll.setWidget(species_box)
@@ -317,6 +317,8 @@ class PacketPanel(QMainWindow):
             self.notice.setText('Configuração inválida: '+str(exc))
             settings = DEFAULTS.copy()
         self.targets.selected = set(settings['species'])
+        self.targets.name_choices = dict(settings['monster_name_choices'])
+        self.targets.shown = ()
         self.auto_map_targets.setChecked(settings['auto_map_targets'])
         self.radius.setValue(settings['radius'])
         self.step.setValue(settings['patrol_step'])
@@ -373,7 +375,7 @@ class PacketPanel(QMainWindow):
         return {'group_enabled':self.group_enabled.isChecked(),'group_role':self.group_role.currentData(),
                 'group_leader':self.group_leader.text().strip(),'group_follow_only':self.group_only.isChecked(),
                 'group_distance':self.group_distance.value(),'group_members':[n.strip() for n in self.group_members.toPlainText().splitlines() if n.strip()],
-                'species': sorted(self.targets.selected),
+                'species': sorted(self.targets.selected), 'monster_name_choices': dict(self.targets.name_choices),
                 'radius': self.radius.value(), 'patrol_step': self.step.value(),
                 'patrol': self.patrol.isChecked(), 'skills': self.skills.isChecked(), 'auto_map_targets': self.auto_map_targets.isChecked(),
                 'require_collision': self.strict_map.isChecked(), 'auto_movement': self.auto_movement.isChecked(),
@@ -563,7 +565,8 @@ class PacketPanel(QMainWindow):
         try:
             state = json.loads((self.session/'estado.json').read_text(encoding='utf-8'))
             hunt = state.get('hunt', {})
-            self.targets.show_map(state.get('map_name'), {m['species_id']: m for m in state.get('map_monsters', [])})
+            self.targets.show_map(state.get('map_name'), {m['species_id']: m for m in state.get('map_monsters', [])},
+                                  variants=state.get('map_monster_names', []))
             self.refresh_pvp(state.get('players_nearby', []))
             if self.monster_panel.isVisible():
                 self.monster_panel.reload()

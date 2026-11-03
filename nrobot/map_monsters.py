@@ -31,7 +31,7 @@ def is_confirmed_monster(entity, player_id=None):
     return bool(name and not is_known_player(name) and entity.get('max_hp', 0) > 0)
 
 
-def confirmed_types(inventory, player_id=None):
+def confirmed_types(inventory, player_id=None, *, by_name=False):
     result = {}
     assets = monster_assets()
     for entity in inventory.entities.values():
@@ -42,7 +42,8 @@ def confirmed_types(inventory, player_id=None):
             continue
         evidence = ('aparencia do catalogo de monstros e HP recebido do servidor' if identity in assets
                     else 'HP de monstro recebido do servidor (fora do catalogo do cliente)')
-        entry = result.setdefault(identity, {'species_id': identity, 'name': entity['name'], 'present': 0,
+        key = (identity, entity['name']) if by_name else identity
+        entry = result.setdefault(key, {'species_id': identity, 'name': entity['name'], 'present': 0,
                                               'evidence': evidence})
         entry['present'] += int(entity['present_last_observation'] and entity.get('hp', 1) > 0)
     return result

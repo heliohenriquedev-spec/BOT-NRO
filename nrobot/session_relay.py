@@ -670,6 +670,13 @@ class SessionRelay:
         selected = set((self.settings or {}).get('species', observer.species))
         if self.settings and self.settings['auto_map_targets']:
             selected.update(self.discovered_monsters)
+        from .monster_db import map_key
+        current_map = map_key(observer.map_name)
+        for key, enabled in (self.settings or {}).get('monster_name_choices', {}).items():
+            map_id, _, rest = key.partition(':')
+            species, _, name = rest.partition(':')
+            if enabled and map_id == current_map and species.isascii() and species.isdecimal() and name:
+                selected.add(int(species))
         if selected != observer.species:
             observer.species = selected
             for identity, actor in list(observer.registry.entities.items()):
@@ -682,6 +689,25 @@ class SessionRelay:
                     observer.registry.update(Entity(entity['entity_id'], entity['species_id'], *entity['position'],
                         entity['last_seen'], 'monster', destination=tuple(entity['destination']) if entity.get('destination') else None,
                         walk_speed_ms=entity.get('walk_speed_ms')))
+
+    def monster_name_allowed(self, identity, species):
+        from .monster_db import monster_choice_key
+
+        settings = self.settings or {}
+        choices = settings.get('monster_name_choices', {})
+        if not choices:
+            return True
+        prefix = monster_choice_key(self.tracker.observer.map_name, species, '')
+        if not any(key.startswith(prefix) for key in choices):
+            return True
+        entity = self.inventory.entities.get(identity)
+        from .map_monsters import is_confirmed_monster
+        if not entity or not is_confirmed_monster(entity, self.tracker.observer.player_id):
+            return False
+        name = entity['name']
+        if prefix+name in choices:
+            return choices[prefix+name]
+        return settings.get('auto_map_targets', False) or species in settings.get('species', ())
 
     def trace_map_send(self, source, opcode, size):
         self.recent_map_sends.append({'time': datetime.now().isoformat(), 'source': source,
@@ -934,7 +960,8 @@ class SessionRelay:
                 entity = observer.registry.entities.get(action.get('combat_target_id', action['target_id']))
                 if (entity is None or not entity.alive or not observer.registry.current(entity, now)
                     or (entity.kind == 'player' and not self.player_target_allowed(entity.entity_id))
-                    or (entity.kind == 'monster' and entity.species_id not in observer.species)):
+                    or (entity.kind == 'monster' and (entity.species_id not in observer.species
+                    or not self.monster_name_allowed(entity.entity_id, entity.species_id)))):
                     return False
                 if action['role'] == 'summon' and (entity.kind != 'monster' or max(math.dist(own, p) for own in observer.combat_positions(now) for p in entity.combat_bounds(now)[0]) > 12):
                     return False
@@ -993,6 +1020,11 @@ class SessionRelay:
             self.record_test()
             print('O ataque de teste foi enviado, mas não houve confirmação de dano no prazo. Não repetirei automaticamente.')
         state = self.tracker.snapshot(time.monotonic())
+        if (self.settings or {}).get('monster_name_choices'):
+            state['recent_entities'] = [entity for entity in state['recent_entities']
+                                        if entity.get('kind') == 'player' or self.monster_name_allowed(
+                                            entity['entity_id'], entity.get('species_id'))]
+        from .map_monsters import confirmed_types
         observer = self.tracker.observer
         state['character_sync'] = {'identity_received': observer.player_id is not None,
             'skills_received': observer.skills_received, 'sp_received': observer.sp is not None,
@@ -1009,6 +1041,7 @@ class SessionRelay:
                                  if self.own_option & 0x4046 else None),
                      native_frame_error=self.native_frames.error,
                      map_monsters=list(self.discovered_monsters.values()),
+                     map_monster_names=list(confirmed_types(self.inventory, observer.player_id, by_name=True).values()),
                      buff_candidates=dict(self.buff_candidates), buff_learning_result=self.buff_learning_result,
                      map_validation=self.map_validation,
                      control_result=self.control_result, settings=self.settings,
@@ -1551,7 +1584,8 @@ class SessionRelay:
                 raise ValueError('Comando de patrulha inválido')
             captured = entity is not None and entity.kind == 'player' and self.player_target_allowed(entity.entity_id)
             if not is_patrol and (entity is None or not entity.alive
-                or not (captured or (entity.kind == 'monster' and entity.species_id in observer.species))
+                or not (captured or (entity.kind == 'monster' and entity.species_id in observer.species
+                    and self.monster_name_allowed(entity.entity_id, entity.species_id)))
                 or not observer.registry.current(entity, time.monotonic())
                 or self.hunt.excluded_until.get(action['target_id'], 0) > time.monotonic()):
                 raise HuntTargetChanged('Alvo removido, antigo ou temporariamente ignorado')

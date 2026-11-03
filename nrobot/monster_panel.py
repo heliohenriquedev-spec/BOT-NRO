@@ -190,6 +190,8 @@ class MapTargets(QWidget):
     def __init__(self):
         super().__init__()
         self.selected = set()
+        self.name_choices = {}
+        self.automatic = False
         self.map_name = None
         self.shown = ()
         layout = QVBoxLayout(self)
@@ -208,11 +210,13 @@ class MapTargets(QWidget):
             buttons.addWidget(button)
         layout.addLayout(buttons)
 
-    def show_map(self, map_name, seen=None, force=False):
+    def show_map(self, map_name, seen=None, force=False, variants=()):
         """seen: {species_id: {'name', 'present'}} confirmed on this map by the server."""
         seen = seen or {}
-        key = (monster_db.map_key(map_name), data_stamp(),
-               tuple(sorted((i, v.get('name'), v.get('present', 0)) for i, v in seen.items())))
+        variants = {(row['species_id'], row['name']): row.get('present', 0) for row in variants}
+        key = (monster_db.map_key(map_name), data_stamp(), self.automatic,
+               tuple(sorted((i, v.get('name'), v.get('present', 0)) for i, v in seen.items())),
+               tuple(sorted(variants.items())))
         if key == self.shown and not force:
             return
         captured = monster_db.load_captured()
@@ -220,14 +224,27 @@ class MapTargets(QWidget):
         self.shown, self.map_name = key, map_name
         self.list.blockSignals(True)
         self.list.clear()
-        for identity in ids:
-            name = seen.get(identity, {}).get('name') or monster_db.name_of(identity, captured)
-            present = seen.get(identity, {}).get('present')
-            item = QListWidgetItem(icon_for(identity), f'{name}  (ID {identity})'+(f' • {present} por perto' if present else ''))
-            item.setData(Qt.UserRole, identity)
-            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-            item.setCheckState(Qt.Checked if identity in self.selected else Qt.Unchecked)
-            self.list.addItem(item)
+        names = monster_db.names_for_map(map_name, captured)
+        for identity, name in variants:
+            names.setdefault(identity, set()).add(name)
+        for identity in sorted(set(ids) | names.keys()):
+            named = names.get(identity)
+            labels = sorted(named, key=str.casefold) if named else [
+                seen.get(identity, {}).get('name') or monster_db.name_of(identity, captured)]
+            for name in labels:
+                choice = monster_db.monster_choice_key(map_name, identity, name) if named else None
+                present = variants.get((identity, name)) if named else seen.get(identity, {}).get('present')
+                item = QListWidgetItem(icon_for(identity), f'{name}  (ID {identity})'+(f' • {present} por perto' if present else ''))
+                item.setData(Qt.UserRole, identity)
+                item.setData(Qt.UserRole+1, choice)
+                item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                if self.automatic and choice is None:
+                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
+                checked = self.automatic or identity in self.selected
+                if choice is not None:
+                    checked = self.name_choices.get(choice, checked)
+                item.setCheckState(Qt.Checked if checked else Qt.Unchecked)
+                self.list.addItem(item)
         self.list.blockSignals(False)
         key_name = monster_db.map_key(map_name)
         self.title.setText(f'Monstros registrados em {key_name}: marque os que deseja caçar.' if ids else
@@ -236,7 +253,10 @@ class MapTargets(QWidget):
 
     def item_changed(self, item):
         identity = item.data(Qt.UserRole)
-        if item.checkState() == Qt.Checked:
+        choice = item.data(Qt.UserRole+1)
+        if choice is not None:
+            self.name_choices[choice] = item.checkState() == Qt.Checked
+        elif item.checkState() == Qt.Checked:
             self.selected.add(identity)
         else:
             self.selected.discard(identity)
@@ -244,7 +264,10 @@ class MapTargets(QWidget):
 
     def set_all(self, value):
         for index in range(self.list.count()):
-            self.list.item(index).setCheckState(Qt.Checked if value else Qt.Unchecked)
+            item = self.list.item(index)
+            if item.flags() & Qt.ItemIsEnabled:
+                item.setCheckState(Qt.Checked if value else Qt.Unchecked)
 
-    def setEnabled(self, enabled):
-        self.list.setEnabled(enabled)
+    def set_automatic(self, enabled):
+        self.automatic = enabled
+        self.shown = ()

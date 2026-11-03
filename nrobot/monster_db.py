@@ -117,6 +117,21 @@ def load_base():
     return _load(BASE_INFO)
 
 
+def monster_choice_key(map_name, species_id, name):
+    return f'{map_key(map_name)}:{species_id}:{name}'
+
+
+def names_for_map(map_name, captured=None):
+    key = map_key(map_name)
+    names = {}
+    for records in (load_base(), load_captured() if captured is None else captured):
+        for identity, entry in records.items():
+            for name in entry.get('names_by_map', {}).get(key, ()):
+                if not is_known_player(name):
+                    names.setdefault(identity, set()).add(name)
+    return names
+
+
 def record(captured, species_id, map_name, *, name=None, max_hp=None, walk_speed_ms=None, new_entity=False,
            now=None):
     """Remember what the game showed about a monster; True when something new was learned."""
@@ -137,10 +152,16 @@ def record(captured, species_id, map_name, *, name=None, max_hp=None, walk_speed
     if walk_speed_ms:
         entry['walk_speed_ms'] = walk_speed_ms
     key = map_key(map_name)
+    new_name = False
+    if key and name:
+        names = entry.setdefault('names_by_map', {}).setdefault(key, [])
+        if name not in names:
+            names.append(name)
+            new_name = True
     if key:
         entry['maps'][key] = entry['maps'].get(key, 0)+int(new_entity)  # sightings on that map
     entry['last_seen'] = stamp
-    return facts() != before
+    return new_name or facts() != before
 
 
 # -- sprites ------------------------------------------------------------------------------
@@ -365,6 +386,11 @@ def export_base(log=print):
             continue
         merged = {**base.get(identity, {}), **{k: v for k, v in entry.items() if v not in (None, {}, [])}}
         merged['maps'] = {**base.get(identity, {}).get('maps', {}), **entry.get('maps', {})}
+        names = {m: list(values) for m, values in base.get(identity, {}).get('names_by_map', {}).items()}
+        for m, values in entry.get('names_by_map', {}).items():
+            names[m] = sorted(set(names.get(m, ())) | set(values))
+        if names:
+            merged['names_by_map'] = names
         merged.pop('first_seen', None)
         merged.pop('last_seen', None)
         indexed = sprites.get(identity) in priority_paths

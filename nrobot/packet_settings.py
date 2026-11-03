@@ -10,6 +10,7 @@ SPECIES = {1212: 'Akino', 1051: 'Bikouchuu', 1783: 'Filhote de Katsuyu',
 DEFAULTS = {'species': [1037], 'radius': 28, 'patrol': True, 'patrol_step': 8, 'skills': True,
             'skill_interval': .5, 'skill_timeout': 1.5, 'skill_attempts': 3, 'target_defer': 8,
             'switch_distance': 6, 'switch_saving': 3, 'switch_ratio_percent': 65}
+DEFAULTS.update(monster_name_choices={})
 DEFAULTS.update(pvp_enabled=False, pvp_all=False, pvp_first=False, pvp_targets=[])
 DEFAULTS.update(auto_map_targets=True, skill_global_delay=.12, require_collision=True, auto_movement=True, skill_profiles=[], auto_attacks=True, advanced_combat=True)
 # REDE-68: user-defined skill order; 'throws' is the alternating Shuriken/Kunai pair.
@@ -65,11 +66,16 @@ def validate(data, *, links_path=None):
     if not isinstance(names, list) or len(names) > 200 or any(not isinstance(n, str) or not n.strip() or len(n.strip()) > 64 for n in names):
         raise ValueError('Lista de jogadores permitidos inv?lida')
     result['allowed_players'] = list(dict.fromkeys(n.strip() for n in names))
+    choices = result['monster_name_choices']
+    if (not isinstance(choices, dict) or len(choices) > 10000
+            or any(not isinstance(key, str) or len(key) > 300 or type(value) is not bool
+                   for key, value in choices.items())):
+        raise ValueError('Seleção de nomes de monstros inválida')
     ids = result['species']
     from .map_monsters import monster_assets
     from .presence_guard import monster_sprite
     # Monsters discovered by server HP may be missing from the client catalog (REDE-63).
-    if (not isinstance(ids, list) or (not ids and not result['auto_map_targets'])
+    if (not isinstance(ids, list) or (not ids and not result['auto_map_targets'] and not any(choices.values()))
         or any(type(i) is not int or (i not in SPECIES and i not in monster_assets() and not monster_sprite(i)) for i in ids)):
         raise ValueError('Selecione ao menos um monstro conhecido')
     for key, minimum, maximum in (('radius', 8, 60), ('patrol_step', 1, 8), ('skill_attempts', 1, 5),

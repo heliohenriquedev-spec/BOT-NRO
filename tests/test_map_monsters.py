@@ -102,3 +102,29 @@ def test_missing_collision_starts_stationary_without_disabling_setting(tmp_path)
     relay.validate_navigation_start()
     assert relay.navigation_stationary and not relay.hunt.auto_movement
     assert relay.settings['auto_movement']
+
+
+def test_names_with_same_species_are_saved_and_selectable_individually(tmp_path, monkeypatch):
+    from nrobot import monster_db
+    monkeypatch.setattr(monster_db, 'load_base', lambda: {})
+    relay = SessionRelay('127.0.0.1', folder=tmp_path)
+    relay.hunt = PacketHunt()
+    relay.monsters_seen = {}
+    relay.tracker.observer.map_name = 'poring_w01.gat'
+    relay.inventory.reset('poring_w01.gat')
+    appearances = [appearance(i, 1051) for i in (110000001, 110000002, 110000003)]
+    names = [{'kind': 'name', 'entity_id': i, 'name': name, 'max_hp': 900}
+             for i, name in [(110000001, 'Bikouchuu'), (110000002, 'Bicouchuu')]]
+    relay.inventory.observe(appearances + names, 0)
+    relay.learn_monsters(appearances + names)
+    assert monster_db.names_for_map('poring_w01', relay.monsters_seen) == {
+        1051: {'Bikouchuu', 'Bicouchuu'}}
+    assert set(confirmed_types(relay.inventory, by_name=True)) == {
+        (1051, 'Bikouchuu'), (1051, 'Bicouchuu')}
+    choices = {'poring_w01:1051:Bikouchuu': True, 'poring_w01:1051:Bicouchuu': False}
+    relay.apply_settings({**DEFAULTS, 'species': [], 'auto_map_targets': False,
+                          'monster_name_choices': choices})
+    assert 1051 in relay.tracker.observer.species
+    assert relay.monster_name_allowed(110000001, 1051)
+    assert not relay.monster_name_allowed(110000002, 1051)
+    assert not relay.monster_name_allowed(110000003, 1051)

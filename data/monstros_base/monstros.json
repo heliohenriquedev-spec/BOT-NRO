@@ -142,9 +142,20 @@
    "pvp_n_1-1": 5
   },
   "walk_speed_ms": 150,
-  "name": "Bikouhuu",
+  "name": "Bikouchuu",
   "max_hp": 900,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "poring_w01": [
+    "Bicouchuu",
+    "Bikochuu",
+    "Bikouhuu",
+    "Bikouchuu"
+   ],
+   "kakashi": [
+    "Bikouchuu"
+   ]
+  }
  },
  "1055": {
   "species_id": 1055,
@@ -359,7 +370,12 @@
   "walk_speed_ms": 350,
   "name": "Akino",
   "max_hp": 50,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "kakashi": [
+    "Akino"
+   ]
+  }
  },
  "1214": {
   "species_id": 1214,
