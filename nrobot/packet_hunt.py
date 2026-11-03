@@ -57,6 +57,12 @@ class PacketHunt:
         self.aggressors = {}
         self.priority_target = None  # REDE-67: captured character
 
+    def replan_action(self, now, reason):
+        self.pending = None
+        self.ready_at = now+.05
+        self.reason = 'recalculando aproximacao: '+reason
+        self.record('action_replanned', target_id=self.target, reason=reason)
+
     def engage(self, target_id, now):
         if self.engaged != target_id:
             self.record('target_engaged', target_id=target_id)
@@ -105,7 +111,8 @@ class PacketHunt:
         elif self.enabled and self.target is None and self.patrol is not None:
             phase = 'procurando alvos por setores'
         wait_until = self.pending.get('deadline', self.pending.get('wait_until', now)) if self.pending else self.ready_at
-        return {'enabled': self.enabled, 'reason': self.reason, 'target_id': self.target,
+        return {'auto_attacks': self.auto_attacks, 'combat_mode': 'aproximar para ataque basico' if self.auto_attacks else 'manter alcance das habilidades',
+                'enabled': self.enabled, 'reason': self.reason, 'target_id': self.target,
                 'pending': self.pending, 'confirmed_attacks': self.confirmed_attacks,
                 'move_commands': self.moves, 'search_radius': self.SEARCH_RADIUS,
                 'approach_steps': self.attempts, 'temporarily_ignored': list(self.excluded_until),
@@ -119,42 +126,40 @@ class PacketHunt:
                 'target_skill_failures': self.skill_attempts.get(self.target, 0),
                 'last_decision': self.last_decision, 'engaged_target_id': self.engaged}
 
-    def step_back(self, player, monster, combat_range, collision, walk_speed_ms):
+    def step_back(self, player, monster, combat_range, collision, walk_speed_ms, blocked=frozenset()):
         """Run from a monster inside the skill distance: the free spot farthest from it, ideally
         still inside skill range. Walls are walked around by trying other directions."""
         dx, dy = player[0]-monster[0], player[1]-monster[1]
         length = math.hypot(dx, dy)
-        base = math.atan2(dy, dx) if length else 0.0
-        want = combat_range-.5  # stay just inside the reach of the skills
+        want = max(1, combat_range-1)
         best = None
-        for turn in (0, 45, -45, 90, -90, 135, -135, 180):
-            angle = base+math.radians(turn)
-            for cells in (4, 3, 2, 1):
-                destination = [round(player[0]+math.cos(angle)*cells), round(player[1]+math.sin(angle)*cells)]
-                if destination == list(player):
-                    continue
-                if collision is not None and not collision.segment(player, destination, max_steps=self.patrol.max_step
-                                                                    if self.patrol else 5):
+        # Search the nearby grid, including slopes such as 3/4, so a diagonal
+        # retreat can actually end at range-1 rather than oscillating around it.
+        for ox in range(-4,5):
+            for oy in range(-4,5):
+                destination = [player[0]+ox, player[1]+oy]
+                if (ox == 0 and oy == 0) or tuple(destination) in blocked:
                     continue
                 distance = math.dist(destination, monster)
-                if distance > combat_range or (collision is not None and not collision.line_clear(destination, monster)):
+                if not length < distance <= want:
                     continue
-                if distance <= length:
-                    continue  # not away from it
-                score = -abs(distance-want)  # as close as possible to the wanted distance
+                if collision is not None and (not collision.segment(player, destination, blocked, max_steps=4)
+                                               or not collision.line_clear(destination, monster)):
+                    continue
+                heading = (ox*dx+oy*dy)/max(1, math.hypot(ox,oy))
+                clearance = collision.clearance(destination) if collision is not None else 0
+                score = (distance, heading, clearance, -max(abs(ox),abs(oy)))
                 if best is None or score > best[0]:
                     best = (score, destination)
-                # Evaluate shorter steps too: they can preserve shooting range.
-            if best is not None and best[0] > -1:
-                break  # a good spot straight away: no need to turn
         if best is None:
             return None
         destination = best[1]
         steps = max(abs(destination[i]-player[i]) for i in (0, 1))
         seconds = max(50, min(walk_speed_ms, 2000))/1000
+        duration = (steps+.4*min(abs(destination[i]-player[i]) for i in (0,1)))*seconds
         self.reason = 'monstro dentro da distância: correndo para manter o alcance das habilidades'
-        return {'kind': 'move', 'target_id': self.target, 'destination': destination, 'wait_seconds': steps*seconds,
-                'origin': list(player), 'collision_route': collision is not None, 'seconds_per_step': seconds,
+        return {'kind': 'move', 'target_id': self.target, 'destination': destination, 'wait_seconds': duration,
+                'origin': list(player), 'collision_route': collision is not None, 'seconds_per_step': duration/steps,
                 'purpose': 'keep_distance'}
 
     def retry_skill(self, now, reason):
@@ -187,6 +192,7 @@ class PacketHunt:
         return {'kind': 'skill', 'target_id': target_id, 'skill_id': 524, 'level': 10}
 
     def observe(self, events, player_id, now):
+        events = [{**e, 'kind': 'player_move'} if e['kind'] == 'move' and e.get('entity_id') == player_id and e.get('destination') is not None else e for e in events]
         for event in events:
             kind = event['kind']
             if kind in ('map_change', 'map_transfer'):
@@ -440,11 +446,16 @@ class PacketHunt:
         # The configured rotation supplies engagement_range and handles shooting while
         # retreating. The legacy Kunai planner must reach its cast/response checks first;
         # otherwise a nearby target always produces a walk instead of a ready skill.
-        elif (not wants_skill or not self.auto_attacks) and combat_range >= 3 and closest < combat_range-self.KITE_MARGIN:
-            retreat = self.step_back(player, actual_position, combat_range, collision, walk_speed_ms)
-            if retreat is not None:
-                return retreat
+        elif not self.auto_attacks and combat_range >= 3:
+            spacing = max(1, combat_range-1)
+            if closest < spacing-.25:
+                retreat = self.step_back(player, actual_position, combat_range, collision, walk_speed_ms, blocked)
+                if retreat is not None:
+                    return retreat
+            combat_range = spacing
         in_range = max(math.dist(player, point) for point in range_positions) <= combat_range
+        if melee and collision is not None:
+            in_range = in_range and all(collision.melee_reachable(player, point) for point in range_positions)
         # With collision data, retain adjacent-cell combat until ranged line-of-sight is supported.
         if in_range and (collision is None or all(collision.line_clear(player, point) for point in range_positions)):
             skill_action = self.skill_action(state, self.target, now)
@@ -482,6 +493,7 @@ class PacketHunt:
             # Stop the current segment when ranged combat becomes possible.
             for step in range(1, index+1):
                 if (max(math.dist(path[step], point) for point in range_positions) <= combat_range
+                    and (not melee or all(collision.melee_reachable(path[step], point) for point in range_positions))
                     and collision.segment(player, path[step], blocked, max_steps=4)
                     and collision.line_clear(path[step], actual_position) and collision.line_clear(path[step], chase_position)):
                     index = step

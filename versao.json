@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.15",
- "published_at": "2026-11-02T20:36:21",
- "notes": "Kuchy",
+ "version": "2026.11.02.16",
+ "published_at": "2026-11-02T21:11:04",
+ "notes": "Cait",
  "files": [
   ".gitattributes",
   ".gitignore",
@@ -23,6 +23,7 @@
   "data/monstros_base/sprites/1210.png",
   "data/monstros_base/sprites/1212.png",
   "data/monstros_base/sprites/1315.png",
+  "data/monstros_base/sprites/1447.png",
   "data/monstros_base/sprites/1601.png",
   "data/monstros_base/sprites/1634.png",
   "data/monstros_base/sprites/1656.png",
@@ -269,12 +270,14 @@
   "tests/test_grf.py",
   "tests/test_grf_map_validation.py",
   "tests/test_keys_sit_burst.py",
+  "tests/test_kite_received_position.py",
   "tests/test_kuchiyose_modal_combat.py",
   "tests/test_manual_skill_diagnostic.py",
   "tests/test_map_monsters.py",
   "tests/test_map_navigation.py",
   "tests/test_map_search.py",
   "tests/test_map_skills_melee.py",
+  "tests/test_melee_approach_toggle.py",
   "tests/test_monsters_and_fast_skills.py",
   "tests/test_movement_recovery.py",
   "tests/test_native_capture_minimap.py",
@@ -307,5 +310,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "29974240fabc"
+ "files_digest": "8a8d651fd457"
 }

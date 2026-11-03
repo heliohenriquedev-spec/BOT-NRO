@@ -64,7 +64,8 @@ def test_without_basic_attacks_the_bot_keeps_its_skill_distance():
     hunt = PacketHunt()
     hunt.auto_attacks = False
     hunt.start()
-    assert hunt.plan(hunt_state([10, 10], [16, 10]), 0) is None  # at the edge of skill range: stays there
+    assert hunt.plan(hunt_state([10, 10], [16, 10]), 0)['destination'] == [11,10]  # approaches range minus one
+    assert hunt.plan(hunt_state([10, 10], [15, 10]), .1) is None
     assert 'só habilidades' in hunt.reason
     for monster in ([11, 10], [13, 12]):  # REDE-84: inside the skill distance it runs away
         hunt.target, hunt.pending = None, None

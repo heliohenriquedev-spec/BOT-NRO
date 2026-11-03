@@ -350,9 +350,12 @@ class Observer:
                 # Categoria aqui é um candidato configurado por aparência correlacionada.
                 # Não é uma prova de categoria ou autorização de combate.
                 x, y = event['position']
+                destination = tuple(event['destination']) if event.get('destination') else None
+                path = self.walk_path((x,y), destination) if destination is not None else None
                 self.registry.update(Entity(identity, event['species_id'], x, y, now, 'monster',
-                                            destination=tuple(event['destination']) if event.get('destination') else None,
-                                            walk_speed_ms=event.get('walk_speed_ms')))
+                                            destination=destination, walk_speed_ms=event.get('walk_speed_ms'),
+                                            path=path, walk_started=now if path else None,
+                                            motion_uncertain=destination is not None and destination != (x,y) and path is None))
             else:
                 self.registry.remove(identity)
         elif kind == 'remove':
@@ -369,8 +372,11 @@ class Observer:
             if not self.player_alive:
                 self.player = None
         elif kind in ('move', 'position') and event.get('entity_id') == self.player_id and self.player_id is not None:
-            self.player, self.player_at = event['position'], now
-            self.player_motion = None
+            if kind == 'move' and event.get('destination') is not None:
+                self.apply({**event, 'kind': 'player_move'}, now)
+            else:
+                self.player, self.player_at = event['position'], now
+                self.player_motion = None
         elif event.get('entity_id') in self.registry.entities:
             old = self.registry.entities[event['entity_id']]
             if kind in ('move', 'position'):
@@ -383,7 +389,9 @@ class Observer:
                         self.clock.observe(event['server_tick'], now)
                         started = self.clock.to_local(event['server_tick'], now)
                 self.registry.update(replace(old, x=x, y=y, seen_at=now, path=path, walk_started=started,
-                                             destination=tuple(event['destination']) if event.get('destination') else None))
+                                             destination=tuple(event['destination']) if event.get('destination') else None,
+                                             motion_uncertain=kind == 'move' and bool(event.get('destination'))
+                                                 and tuple(event['destination']) != (x,y) and path is None))
             elif kind == 'name' and event.get('hp') == 0:
                 self.registry.remove(old.entity_id)
 

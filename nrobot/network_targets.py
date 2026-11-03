@@ -19,6 +19,7 @@ class Entity:
     # REDE-69: the server's own walk path and its start on the local clock.
     path: tuple | None = None
     walk_started: float | None = None
+    motion_uncertain: bool = False
 
     def path_cells(self, moment):
         from .server_path import step_durations, cells_at
@@ -33,7 +34,7 @@ class Entity:
         start = [self.x, self.y]
         if self.destination is None:
             return [start], False
-        if self.walk_speed_ms is not None:
+        if self.walk_speed_ms is not None and not self.motion_uncertain:
             dx, dy = abs(self.destination[0]-self.x), abs(self.destination[1]-self.y)
             duration = (max(dx, dy)+.4*min(dx, dy))*self.walk_speed_ms/1000+.15
             if now-self.seen_at >= duration:
@@ -48,7 +49,7 @@ class Entity:
                 if cell not in points:
                     points.append(cell)
             return points, True
-        if self.destination is None or self.walk_speed_ms is None:
+        if self.destination is None or self.walk_speed_ms is None or self.motion_uncertain:
             return self.position_bounds(now)
         dx, dy = abs(self.destination[0]-self.x), abs(self.destination[1]-self.y)
         duration = (max(dx, dy)+.4*min(dx, dy))*self.walk_speed_ms/1000

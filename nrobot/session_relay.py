@@ -892,7 +892,11 @@ class SessionRelay:
                 bounds, estimated = entity.combat_bounds(time.monotonic())
                 state['combat_target'] = {'entity_id': entity.entity_id,
                     'name': self.inventory.names.get(str(entity.species_id), str(entity.species_id)),
-                    'position': bounds[-1], 'distance': round(math.dist(player, bounds[-1]), 2),
+                    'position': bounds[0], 'distance': round(math.dist(self.tracker.observer.combat_positions(time.monotonic())[0], bounds[0]), 2),
+                    'last_received_position': [entity.x, entity.y],
+                    'announced_destination': list(entity.destination) if entity.destination is not None else None,
+                    'position_estimated': entity.destination is not None,
+                    'motion_uncertain': entity.motion_uncertain,
                     'arrival_estimated': estimated}
             state['command_sending_enabled'] = self.allow_commands and not self.commands_blocked and self.hunt.enabled
         # The control loop reads state frequently; disk persistence is telemetry only.
@@ -1377,8 +1381,7 @@ class SessionRelay:
                             and not collision.line_clear([entity.x, entity.y], entity.destination)):
                             raise HuntTargetChanged('Trajeto estimado do alvo cruza obstaculo')
                     else:
-                        path = collision.route(player, target)
-                        if path is None or len(path) != 1:
+                        if not all(collision.melee_reachable(player, point) for point in positions):
                             raise HuntTargetChanged('Alvo nao esta adjacente por caminho livre')
                 if action['kind'] == 'skill':
                     persistent_position = observer.registry.ttl is None and (entity.destination is None or arrival_estimated)
@@ -1612,7 +1615,7 @@ async def run(args):
                                         gap = relay.rotation.burst_interval if relay.rotation.burst else .12
                                         relay.rotation.next_send = max(relay.rotation.next_send, time.monotonic()+gap)
                                 except HuntTargetChanged as exc:
-                                    relay.hunt.abandon(time.monotonic(), str(exc))
+                                    relay.hunt.replan_action(time.monotonic(), str(exc))
                                     relay.flush_hunt_diagnostics()
                                 except (OSError, ValueError) as exc:
                                     relay.hunt.pause(str(exc))

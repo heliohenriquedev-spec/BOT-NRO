@@ -10,7 +10,7 @@
  "1039": {
   "species_id": 1039,
   "maps": {
-   "tur_dun03": 47
+   "tur_dun03": 63
   },
   "walk_speed_ms": 200,
   "name": "Monstro Marinho",
@@ -20,7 +20,7 @@
  "1041": {
   "species_id": 1041,
   "maps": {
-   "tur_dun02": 71
+   "tur_dun02": 85
   },
   "walk_speed_ms": 300,
   "name": "Grande Esquilo",
@@ -66,7 +66,7 @@
   "species_id": 1212,
   "maps": {
    "kakashi": 12,
-   "moc_fild01": 67
+   "moc_fild01": 74
   },
   "walk_speed_ms": 350,
   "captured_sprite": true,
@@ -83,10 +83,28 @@
   "name": "Ninkame",
   "max_hp": 1200000
  },
+ "1447": {
+  "species_id": 1447,
+  "maps": {
+   "yuno_in01": 1,
+   "tur_dun02": 1
+  },
+  "walk_speed_ms": 150,
+  "captured_sprite": true,
+  "name": "Boa Hancock",
+  "max_hp": 2000000
+ },
+ "1449": {
+  "species_id": 1449,
+  "maps": {
+   "yuno_in01": 1
+  },
+  "walk_speed_ms": 150
+ },
  "1601": {
   "species_id": 1601,
   "maps": {
-   "tur_dun02": 122
+   "tur_dun02": 160
   },
   "walk_speed_ms": 250,
   "name": "Tartaruga",
@@ -128,7 +146,7 @@
   "species_id": 1783,
   "maps": {
    "kakashi": 28,
-   "moc_fild01": 84
+   "moc_fild01": 91
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,
@@ -138,7 +156,8 @@
  "1790": {
   "species_id": 1790,
   "maps": {
-   "cmd_fild09": 1
+   "cmd_fild09": 1,
+   "yuno_in01": 2
   },
   "walk_speed_ms": 150,
   "captured_sprite": true,

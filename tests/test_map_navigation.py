@@ -195,11 +195,11 @@ def test_ranged_cooldown_wait_does_not_walk_into_melee_or_past_target():
     snapshot = {'state': 'tracking', 'player_position_recent': True, 'player_position': [1, 2],
                 'engagement_range': 6, 'recent_entities': [{'entity_id': 20, 'position': [9, 2]}]}
     action = hunt.plan(snapshot, 0, 100, collision)
-    assert action['kind'] == 'move' and action['destination'] == [3, 2]
-    snapshot['player_position'] = [3, 2]
+    assert action['kind'] == 'move' and action['destination'] == [4, 2]
+    snapshot['player_position'] = [4, 2]
     assert hunt.plan(snapshot, 1, 100, collision) is None
     snapshot['recent_entities'][0]['position'] = [10, 2]
-    assert hunt.plan(snapshot, 2, 100, collision)['destination'] == [4, 2]
+    assert hunt.plan(snapshot, 2, 100, collision)['destination'] == [5, 2]
 
 
 def test_pulled_slope_segment_does_not_cut_diagonal_corner():

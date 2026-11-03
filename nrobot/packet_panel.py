@@ -523,7 +523,9 @@ class PacketPanel(QMainWindow):
             self.details.setText('\n\n'.join([
                 f"Posição: {state.get('player_position') or '—'}     SP: {state['player_sp'] if state.get('player_sp') is not None else '—'}     Alvo: {hunt.get('target_id') or '—'}",
                 'Alvo em combate: '+(f"{state['combat_target']['name']} • {state['combat_target']['distance']} células • posição {state['combat_target']['position']}"+
-                                      (' (posição estimada)' if state['combat_target']['arrival_estimated'] else '') if state.get('combat_target') else 'nenhum'),
+                                      (' (posição estimada)' if state['combat_target'].get('position_estimated', state['combat_target']['arrival_estimated']) else '') if state.get('combat_target') else 'nenhum'),
+                'Posicao do alvo recebida: '+str((state.get('combat_target') or {}).get('last_received_position', '-'))+
+                    ' | Destino anunciado: '+str((state.get('combat_target') or {}).get('announced_destination', '-')),
                 f"Ataques confirmados: {hunt.get('confirmed_attacks', 0)}     Habilidades ofensivas confirmadas: {hunt.get('confirmed_skills', 0)}",
                 f"Candidatos recentes: {len(state.get('recent_entities', []))}     Mensagens recebidas: {state.get('messages', 0)}",
                 'Fase: '+hunt.get('phase', 'aguardando')+f" • Espera atual: {hunt.get('wait_seconds', 0)} s",

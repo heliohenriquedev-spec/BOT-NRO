@@ -184,3 +184,35 @@ sprite nao bloqueia a rotacao configurada. Cooldown, delay entre habilidades,
 conjuracao ainda em andamento para iniciar outro uso e verificacao de alcance
 continuam independentes. As alteracoes precisam de reinicio do painel e reconexao;
 os testes locais nao substituem a validacao de movimentacao livre no servidor.
+
+
+### Correcao da aproximacao ao alternar ataque basico
+
+Com colisao carregada, planejamento e envio do ataque basico usam a mesma regra:
+celula adjacente com passagem livre (sem atravessar canto bloqueado), ou a mesma
+celula. Estar a duas celulas nao basta para planejar ataque: o bot da o passo que
+falta. A escolha do final de cada segmento usa a mesma verificacao. Habilidades
+mantem seus alcances configurados. Ataque basico desligado continua usando recuo;
+ligado continua aproximando para intercalar ataques. A validacao de um pacote
+que ficou desatualizado recalcula a acao sem excluir o alvo temporariamente.
+
+
+### Recuo em alcance menos uma celula e origem da posicao
+
+Com ataque basico desligado, habilidades de alcance 6 usam distancia de navegacao
+5 (alcance configurado menos 1); a autorizacao da habilidade continua respeitando
+seu alcance original. O recuo procura celulas livres nessa distancia e nao reutiliza
+segmentos/celulas de falha recente. A duracao estimada da caminhada considera o
+custo diagonal para nao iniciar o proximo trecho cedo demais.
+
+A celula recebida no ultimo pacote e mantida separada do destino anunciado e da
+estimativa durante o movimento. Uma correcao 0088 substitui a previsao anterior.
+Uma caminhada propria recebida por 0086 preserva destino/trajeto e pode confirmar
+o passo pendente; nao e tratada como parada. Aparicoes em movimento calculam rota
+sobre a colisao; sem rota resolvida, o bot mantem os extremos recebidos e indica
+incerteza em vez de inventar uma celula em linha reta atraves de paredes.
+
+Em Estado da caca, a distancia do alvo usa a estimativa atual do personagem, nao
+seu destino de caminhada futuro. Os campos de posicao recebida e destino anunciado
+permitem comparar a origem dos dados. O servidor nao envia cada celula intermediaria:
+previsoes de trajetoria continuam sendo estimativas, mesmo quando baseadas em pacotes.

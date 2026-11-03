@@ -100,6 +100,11 @@ class CollisionMap:
                        for p in ((start[0]+dx, start[1]), (start[0], start[1]+dy)))
         return True
 
+    def melee_reachable(self, start, target):
+        """The same adjacent-cell rule is used to plan and authorize a basic attack."""
+        start, target = tuple(start), tuple(target)
+        return self.walkable(start) and self.walkable(target) and (start == target or self.edge(start, target))
+
     def clearance(self, point):
         point = tuple(point)
         if point in self.clearances:
