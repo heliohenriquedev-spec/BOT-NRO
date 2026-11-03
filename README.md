@@ -216,3 +216,28 @@ Em Estado da caca, a distancia do alvo usa a estimativa atual do personagem, nao
 seu destino de caminhada futuro. Os campos de posicao recebida e destino anunciado
 permitem comparar a origem dos dados. O servidor nao envia cada celula intermediaria:
 previsoes de trajetoria continuam sendo estimativas, mesmo quando baseadas em pacotes.
+
+
+### Prioridade da manutencao Kuchiyose durante o recuo
+
+Para Kuchiyose habilitadas e aprendidas, sem invocacao ativa ou na hora de uma
+nova tentativa, a manutencao tem prioridade sobre ofensivas e ataques basicos.
+Os pedidos ofensivos aguardam a invocacao, inclusive quando e necessario reservar
+SP ou esperar a recarga. Depois da execucao/confirmacao ou da tentativa acompanhada,
+o combate continua. Isso nao garante atividade quando faltam SP, recarga ou uma
+confirmacao reconhecida; tentativas sem duracao conhecida seguem o intervalo ja
+configurado, sem registrar como fato que a invocacao terminou.
+
+Se o alcance ofensivo permitir recuar alem da proximidade de invocacao, o alcance
+de navegacao e limitado temporariamente a 11 celulas ate a manutencao, mantendo a
+exigencia de monstro alvo a ate 12 celulas. Uma vez acompanhada a invocacao, volta
+a distancia ofensiva configurada. Um alvo antigo/longe nao impede escolher outro
+monstro alvo proximo e recente para autorizar a invocacao.
+
+Para invocacoes no chao, a validacao de tiro do monstro nao e aplicada como se ele
+fosse o destino da habilidade: validam-se a proximidade do monstro e a celula de
+conjuracao proxima ao personagem, com colisao e alcance proprios. Se uma habilidade
+de chao de alcance zero nao tiver celula atual segura durante a caminhada, o bot
+aguarda a estabilizacao do trecho, prioriza a invocacao e depois retoma o recuo.
+Estas regras ficam no codigo compartilhado; nao dependem da configuracao observada
+na maquina local. Cada usuario ainda escolhe as Kuchiyose habilitadas no modal.

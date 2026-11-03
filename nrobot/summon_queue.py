@@ -57,7 +57,21 @@ class SummonQueue:
         learned = self.learned.get(self.key(profile['skill_id'], profile['level']), {})
         return profile.get('effect_id', 0) or learned.get('effect_id', 0)
 
+    def may_invoke(self, profile, now):
+        if self.waiting is not None:
+            return False
+        if self.active is None:
+            return True
+        active = self.active
+        if active['effect_id'] or active['expires_at'] is not None or active['skill_id'] != profile['skill_id']:
+            return False
+        # An unknown lifetime must not suspend maintenance forever. Probe only the
+        # same summon, at its configured interval; this is not proof it has expired.
+        return now-active.get('last_attempt_at', active['started_at'] or now) >= max(2, profile['interval'])
+
     def reserve(self, action, now):
+        if self.active is not None:
+            self.active['last_attempt_at'] = now
         self.waiting = {**copy.deepcopy(action), 'sent_at': now, 'candidates': set(), 'ack_at': None,
                         'effect_id': self.effect(action)}
         self.reason = 'aguardando confirmacao da invocacao; fila reservada'
@@ -74,7 +88,7 @@ class SummonQueue:
                        'effect_id': entry['effect_id'], 'expires_at': now+duration if duration else None,
                        'evidence': evidence, 'candidates': set(entry['candidates']),
                        'learn_until': now+.5, 'initial_effects': entry.get('initial_effects', []),
-                       'confirmed': evidence != 'unconfirmed'}
+                       'confirmed': evidence != 'unconfirmed', 'last_attempt_at': entry['sent_at']}
         self.waiting = None
         self.log.append({'kind': 'summon_started', 'skill_id': entry['skill_id'], 'evidence': evidence})
 

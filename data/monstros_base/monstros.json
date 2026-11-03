@@ -10,7 +10,7 @@
  "1039": {
   "species_id": 1039,
   "maps": {
-   "tur_dun03": 63
+   "tur_dun03": 78
   },
   "walk_speed_ms": 200,
   "name": "Monstro Marinho",
@@ -97,9 +97,13 @@
  "1449": {
   "species_id": 1449,
   "maps": {
-   "yuno_in01": 1
+   "yuno_in01": 1,
+   "tur_dun03": 1
   },
-  "walk_speed_ms": 150
+  "walk_speed_ms": 150,
+  "captured_sprite": true,
+  "name": "Boa Hancock",
+  "max_hp": 2000000
  },
  "1601": {
   "species_id": 1601,
@@ -167,7 +171,7 @@
  "1917": {
   "species_id": 1917,
   "maps": {
-   "tur_dun03": 4
+   "tur_dun03": 5
   },
   "walk_speed_ms": 400,
   "captured_sprite": true,

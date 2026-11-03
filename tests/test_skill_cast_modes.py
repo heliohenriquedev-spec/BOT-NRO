@@ -66,7 +66,7 @@ def test_invocation_needs_ground_type_but_no_enemy_and_respects_interval():
     assert a['cast_mode']=='ground' and a['target_id']==1
     r.sent(a,0)
     assert r.plan(s,2) is None  # no acknowledgement: still respects the 30s interval
-    assert r.plan(s,30.1) is None  # unknown lifetime never creates a second summon blindly
+    assert r.plan(s,30.1)['skill_id']==1001  # unknown lifetime permits a bounded retry of the same summon
     s['learned_skills'][0]['target_flags']=1
     assert CombatRotation([p]).plan(s,0) is None
 

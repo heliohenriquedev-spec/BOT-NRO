@@ -801,7 +801,7 @@ class SessionRelay:
                     return False
                 if action['role'] == 'summon' and (entity.kind != 'monster' or max(math.dist(own, p) for own in observer.combat_positions(now) for p in entity.combat_bounds(now)[0]) > 12):
                     return False
-                if collision is not None:
+                if collision is not None and action['role'] == 'offensive':
                     bounds, _ = entity.combat_bounds(now)
                     if (entity.destination is not None and not entity.position_bounds(now)[1]
                         and not collision.line_clear([entity.x, entity.y], entity.destination)):
@@ -1303,9 +1303,13 @@ class SessionRelay:
             self.hunt.reason = 'suspensa: '+reason+(' • sentado' if self.sitting else '')
         return True
 
-    def after_rotation_action(self, action, *, skill_sent=False, attack_turn=False, now=None):
-        if action is None or action['kind'] == 'move':
-            return action
+    def after_rotation_action(self, action, *, skill_sent=False, attack_turn=False, now=None, summon_maintenance=False, hold_movement=False):
+        if action is None:
+            return None
+        if action['kind'] == 'move':
+            return None if hold_movement else action
+        if summon_maintenance:
+            return None
         if skill_sent:
             return None
         now = time.monotonic() if now is None else now
@@ -1574,7 +1578,7 @@ async def run(args):
                         else:
                             state = relay.status()
                             if relay.rotation is not None:
-                                state['engagement_range'] = relay.rotation.engagement_range(state)
+                                state['engagement_range'] = relay.rotation.navigation_range(state, time.monotonic(), relay.hunt.target)
                             action = relay.hunt.plan(state, time.monotonic(), relay.tracker.observer.walk_speed_ms,
                                                      collision=relay.collision_map())
                             relay.flush_hunt_diagnostics()
@@ -1590,7 +1594,8 @@ async def run(args):
                                         relay.hunt.target = candidate['entity_id']
                                 # REDE-84: with basic attacks on, a basic attack follows every skill
                                 # (skill, attack, skill...); with no skill ready it keeps attacking.
-                                attack_turn = (relay.attack_turn(action) and relay.last_combat_packet == 'skill'
+                                summon_maintenance = relay.rotation.summon_maintenance_required(state, now, relay.hunt.target)
+                                attack_turn = (not summon_maintenance and relay.attack_turn(action) and relay.last_combat_packet == 'skill'
                                                and now >= relay.tracker.observer.cast_until)
                                 skill_sent = False
                                 rotation_action = None if attack_turn else relay.rotation.plan(state, now, relay.hunt.target)
@@ -1601,7 +1606,10 @@ async def run(args):
                                             relay.last_combat_packet = 'skill'
                                     except (OSError, ValueError) as exc:
                                         relay.hunt.pause(str(exc))
-                                action = relay.after_rotation_action(action, skill_sent=skill_sent, attack_turn=attack_turn, now=now)
+                                action = relay.after_rotation_action(action, skill_sent=skill_sent, attack_turn=attack_turn, now=now,
+                                    summon_maintenance=summon_maintenance,
+                                    hold_movement=not skill_sent and rotation_action is not None and rotation_action.get('cast_mode') == 'ground'
+                                        and rotation_action.get('role') == 'summon' and rotation_action.get('cast_range', 1) == 0)
                                 relay.flush_rotation_diagnostics()
                             if action is not None and action['kind'] == 'attack' and relay.settings and not relay.settings['auto_attacks']:
                                 action = None

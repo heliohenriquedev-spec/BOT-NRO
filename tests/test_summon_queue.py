@@ -83,7 +83,8 @@ def test_ground_animation_removal_is_not_summon_death():
     a=r.plan(s,0);a['ground_position']=[11,10];r.sent(a,0)
     r.observe([dict(kind='ground_effect',effect_id=77,source_id=1,position=[11,10])],1,.1)
     r.observe([dict(kind='ground_effect_removed',effect_id=77)],1,.3)
-    assert r.plan(s,100) is None
+    assert r.plan(s,100) is None  # process the unanswered request
+    assert r.plan(s,100.5)['skill_id']==700  # bounded probe, not an inferred death
     assert r.summons.active['skill_id']==700 and not r.summons.learned
 
 
@@ -95,7 +96,7 @@ def test_refusal_tries_next_ready_summon_unknown_execution_does_not_duplicate():
     r.sent(r.plan(s,.2),.2)
     assert r.plan(s,10) is None
     assert r.summons.active['confirmed'] is False
-    assert r.plan(s,50) is None
+    assert r.plan(s,50)['skill_id']==701  # retry only the same unconfirmed summon
 
 
 def test_existing_linked_summon_survives_disabled_profile_and_config_changes():
@@ -189,3 +190,116 @@ def test_configuration_toggle_preserves_one_active_summon(tmp_path):
     assert relay.rotation is None
     relay.apply_settings({'skills':True,'skill_profiles':[p(700)]})
     assert relay.rotation.summons is q and q.active['skill_id']==700
+
+def test_summon_maintenance_not_starved_by_unconfirmed_offensive_during_kite():
+    profiles=[p(700,0,10)]
+    offensive=dict(skill_id=800,role='offensive',enabled=True,level=1,interval=.1,effect_id=0)
+    r=CombatRotation(profiles+[offensive]);s=state(profiles+[offensive])
+    s['learned_skills'][1]['target_flags']=1
+    r.sent({**offensive,'kind':'skill','target_id':20,'sp_cost':1},0)
+    # Current position is near the enemy while the acknowledged destination is far away.
+    s['player_position']=[30,30];s['combat_player_positions']=[[10,10],[10,11]]
+    a=r.plan(s,.2,20)
+    assert a['skill_id']==700 and a['cast_mode']=='ground'
+
+
+def test_unknown_lifetime_probes_same_summon_only_after_interval():
+    profiles=[p(700),p(701,1)]
+    profiles[0]['interval']=30
+    r=CombatRotation(profiles);s=state(profiles)
+    r.sent(r.plan(s,0),0);r.plan(s,2)
+    assert r.plan(s,29) is None
+    a=r.plan(s,30.1)
+    assert a['skill_id']==700
+    r.sent(a,30.1)
+    assert r.plan(s,31) is None
+    assert r.plan(s,35) is None
+
+def combat_with_summon(sp=100, reach=6):
+    profiles=[p(700,0,10),dict(skill_id=800,role='offensive',enabled=True,level=1,interval=.1,effect_id=0)]
+    s=state(profiles,sp=sp)
+    s['learned_skills'][0]['sp_cost']=50
+    s['learned_skills'][1].update(target_flags=1,range=reach,sp_cost=1)
+    return CombatRotation(profiles),s
+
+
+def test_maintenance_reserves_sp_instead_of_spending_it_on_offensives():
+    r,s=combat_with_summon(sp=40)
+    assert r.summon_maintenance_required(s,0,20)
+    assert r.plan(s,0,20) is None
+    s['player_sp']=50
+    assert r.plan(s,1,20)['role']=='summon'
+
+
+def test_maintenance_waits_for_summon_cooldown_before_offensives():
+    r,s=combat_with_summon();r.ready[700]=5
+    assert r.plan(s,0,20) is None
+    a=r.plan(s,5,20);assert a['role']=='summon';r.sent(a,5)
+    assert r.plan(s,5.2,20) is None  # pending summon cannot be starved by another cast
+    r.observe([ack(700)],1,5.3)
+    assert not r.summon_maintenance_required(s,6,20)
+    assert r.plan(s,6,20)['role']=='offensive'
+
+
+def test_long_range_kite_approaches_summon_radius_then_resumes_offensive_range():
+    from nrobot.packet_hunt import PacketHunt
+    r,s=combat_with_summon(reach=24)
+    s['recent_entities'][0]['position']=[30,10]
+    assert r.engagement_range(s)==24
+    assert r.navigation_range(s,0,20)==11
+    s['engagement_range']=r.navigation_range(s,0,20)
+    hunt=PacketHunt();hunt.auto_attacks=False;hunt.start()
+    a=hunt.plan(s,0)
+    assert a['kind']=='move' and a['destination'][0]>10
+    # A confirmed summon restores ordinary ranged spacing.
+    entry={**r.profiles[0],'kind':'skill','target_id':1,'sp_cost':50}
+    r.sent(entry,0);r.observe([ack(700)],1,.1)
+    assert r.navigation_range(s,1,20)==24
+
+
+def test_summon_chooses_nearby_fresh_monster_if_locked_one_is_far():
+    r,s=combat_with_summon()
+    s['recent_entities'][0]['position']=[30,10]
+    s['recent_entities'].append(dict(entity_id=21,kind='monster',position=[12,10],position_age_seconds=.1))
+    assert r.plan(s,0,20)['combat_target_id']==21
+
+
+def test_maintenance_blocks_basic_attack_but_keeps_retrieving_and_free_cast_movement(tmp_path):
+    from nrobot.session_relay import SessionRelay
+    relay=SessionRelay('127.0.0.1',folder=tmp_path,allow_commands=True)
+    relay.rotation=CombatRotation([p(700)])
+    assert relay.after_rotation_action({'kind':'attack'},summon_maintenance=True,attack_turn=True,now=0) is None
+    move={'kind':'move','purpose':'keep_distance'}
+    assert relay.after_rotation_action(move,summon_maintenance=True,now=0) is move
+    assert relay.after_rotation_action(move,summon_maintenance=True,hold_movement=True,now=0) is None
+    assert relay.after_rotation_action(move,summon_maintenance=True,skill_sent=True,now=0) is move
+
+
+def test_ground_summon_checks_own_cell_without_requiring_monster_shot_line(tmp_path,monkeypatch):
+    import asyncio,time,struct
+    from nrobot.session_relay import SessionRelay
+    from nrobot.packet_hunt import PacketHunt
+    from nrobot.network_targets import Entity
+    from nrobot.map_navigation import CollisionMap
+    relay=SessionRelay('127.0.0.1',folder=tmp_path,allow_commands=True)
+    relay.hunt=PacketHunt();relay.hunt.start();relay.hunt.target=111000001
+    relay.rotation=CombatRotation([p(700,0,10)])
+    o=relay.tracker.observer;now=time.monotonic()
+    o.player_id,o.player,o.player_at,o.sp=1,[10,10],now,100
+    o.skills={700:dict(skill_id=700,level=1,sp_cost=1,range=4,target_flags=2)}
+    o.registry.update(Entity(111000001,1051,12,10,now,'monster'))
+    cells=bytearray([1])*900
+    for y in range(30):cells[y*30+11]=0
+    collision=CollisionMap(30,30,cells)
+    assert not collision.line_clear([10,10],[12,10])
+    monkeypatch.setattr(relay,'collision_map',lambda:collision)
+    class Writer:
+        def __init__(self):self.packets=[]
+        def write(self,p):self.packets.append(p)
+        async def drain(self):pass
+    relay.upstream=Writer()
+    action=relay.rotation.plan(relay.status(),now,111000001)
+    assert asyncio.run(relay.send_rotation_action(action,game_gate=lambda:True))
+    packet=relay.upstream.packets[0]
+    point=[struct.unpack_from('<H',packet,12)[0],struct.unpack_from('<H',packet,20)[0]]
+    assert collision.walkable(point) and collision.line_clear([10,10],point)

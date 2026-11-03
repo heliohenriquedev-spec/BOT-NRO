@@ -203,6 +203,39 @@ class CombatRotation:
                        state['ammo']['options'].get(p['skill_id'], state['ammo']['options'].get(str(p['skill_id']))))]
         return max(ranges, default=2)
 
+    def summon_monster(self, state, target_id=None, *, near_only=True):
+        own = state.get('combat_player_positions') or ([state['player_position']] if state.get('player_position') else [])
+        if not own:
+            return None
+        candidates = []
+        for e in state.get('recent_entities', []):
+            if e.get('kind', 'monster') != 'monster' or (e.get('position_age_seconds', 0) > 1.5 and not e.get('position_usable')):
+                continue
+            bounds = e.get('attack_positions') or [e.get('effective_position', e['position'])]
+            distance = max(math.dist(a,b) for a in own for b in bounds)
+            if not near_only or distance <= 12:
+                candidates.append((e['entity_id'] != target_id, distance, e['entity_id'], e))
+        return min(candidates, key=lambda x:x[:3])[-1] if candidates else None
+
+    def summon_maintenance_required(self, state, now, target_id=None):
+        self.summons.update(state, self.profiles, now)
+        known = {s['skill_id']:s for s in state.get('learned_skills', [])}
+        configured = [p for p in self.profiles if p['enabled'] and p['role'] == 'summon'
+                      and p['skill_id'] in known and known[p['skill_id']]['level'] >= p['level']
+                      and known[p['skill_id']].get('target_flags') in (2,4,16)]
+        if not configured or self.summon_monster(state, target_id, near_only=False) is None:
+            return False
+        if self.summons.waiting is not None:
+            return True
+        if self.summons.active is None:
+            return True  # reserve SP even while the next summon is cooling down
+        return any(self.summons.may_invoke(p, now) for p in configured)
+
+    def navigation_range(self, state, now, target_id=None):
+        distance = self.engagement_range(state)
+        # A long-range offensive must not kite beyond the 12-cell summon proximity.
+        return min(distance, 11) if self.summon_maintenance_required(state, now, target_id) else distance
+
     def plan(self, state, now, target_id=None):
         self.summons.update(state, self.profiles, now)
         # Keep the half-second attribution window free of another bot skill.
@@ -219,9 +252,7 @@ class CombatRotation:
         if now < max(self.next_send, state.get('own_cast_until', 0)):
             self.reason = 'aguardando intervalo global ou conjuração'
             return None
-        if not self.burst and any(p['role'] == 'offensive' for p in self.pending.values()):
-            self.reason = 'aguardando confirmação da habilidade anterior'
-            return None
+        offensive_pending = not self.burst and any(p['role'] == 'offensive' for p in self.pending.values())
         if state.get('state') != 'tracking' or not state.get('player_position_recent'):
             self.reason = 'personagem/conexão indisponível'
             return None
@@ -254,9 +285,17 @@ class CombatRotation:
             if p['role'] == 'summon':
                 return (0, summon_order.get(p['skill_id'], 999), 0, 0)
             return (1, *priority(p))
+        maintenance = self.summon_maintenance_required(state, now, target_id)
+        if maintenance:
+            self.reason = 'prioridade Kuchiyose: aguardando invocacao, recarga ou SP; ofensivas suspensas'
         profiles = sorted(self.profiles, key=rotation_priority)
         turn = self.throw_turn(state, known, now, available_sp)
         for profile in profiles:
+            if maintenance and profile['role'] != 'summon':
+                continue
+            if offensive_pending and profile['role'] != 'summon':
+                self.reason = 'aguardando confirmação da habilidade anterior'
+                continue
             identity = profile['skill_id']
             meta = known.get(identity)
             cooldown = state.get('skill_cooldowns', {}).get(identity, state.get('skill_cooldowns', {}).get(str(identity), 0))
@@ -284,19 +323,10 @@ class CombatRotation:
                 if target is None:
                     continue
             elif profile['role'] == 'summon':
-                nearby = entities.get(target_id)
-                own = state.get('combat_player_positions') or [state['player_position']]
-                monsters = [e for e in entities.values() if e.get('kind', 'monster') == 'monster']
-                if nearby is not None and nearby.get('kind', 'monster') != 'monster':
-                    nearby = None
-                if nearby is None and monsters:
-                    nearby = min(monsters, key=lambda e: math.dist(own[0], e.get('effective_position', e['position'])))
-                if nearby is None or (nearby.get('position_age_seconds', 0) > 1.5 and not nearby.get('position_usable')):
+                nearby = self.summon_monster(state, target_id)
+                if nearby is None:
                     continue
-                bounds = nearby.get('attack_positions') or [nearby.get('effective_position', nearby['position'])]
-                if max(math.dist(a,b) for a in own for b in bounds) > 12:
-                    continue
-                if self.summons.active is not None or self.summons.waiting is not None:
+                if not self.summons.may_invoke(profile, now):
                     continue
                 if flags not in (2, 4, 16):
                     self.reason = f'Habilidade {identity}: invocacao exige tipo de chao'

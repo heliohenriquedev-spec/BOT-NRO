@@ -1,7 +1,7 @@
 {
- "version": "2026.11.02.16",
- "published_at": "2026-11-02T21:11:04",
- "notes": "Cait",
+ "version": "2026.11.02.17",
+ "published_at": "2026-11-02T21:30:40",
+ "notes": "Kuchy",
  "files": [
   ".gitattributes",
   ".gitignore",
@@ -24,6 +24,7 @@
   "data/monstros_base/sprites/1212.png",
   "data/monstros_base/sprites/1315.png",
   "data/monstros_base/sprites/1447.png",
+  "data/monstros_base/sprites/1449.png",
   "data/monstros_base/sprites/1601.png",
   "data/monstros_base/sprites/1634.png",
   "data/monstros_base/sprites/1656.png",
@@ -310,5 +311,5 @@
   "third_party/rathena/grfio.cpp",
   "tools/validar_patrulha.py"
  ],
- "files_digest": "8a8d651fd457"
+ "files_digest": "a44fe38ff65f"
 }
