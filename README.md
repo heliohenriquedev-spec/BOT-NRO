@@ -1,5 +1,11 @@
 # BOT NRO
 
+O painel inclui **Rota de quests**: gravacao de percursos por mapas, NPCs e
+portais, fila ordenada com quests opcionais e meta editavel de monstros mortos.
+Em **Quadros e missoes compartilhados**, cadastre uma vez os acessos aos quadros
+e as opcoes de pegar/entregar cada missao; as rotas apenas selecionam os cadastros.
+Veja o [guia de rotas e gravacao](docs/ROTAS_QUESTS.md).
+
 Bot de caça para o Naruto Redemption Online que funciona por pacotes: o jogo conecta no
 bot (no próprio PC) e o bot repassa a conexão ao servidor, lendo o que acontece e enviando
 as ações de combate e movimento.

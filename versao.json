@@ -1,7 +1,7 @@
 {
- "version": "2026.11.03.7",
- "published_at": "2026-11-03T08:16:16",
- "notes": "A",
+ "version": "2026.11.03.8",
+ "published_at": "2026-11-03T13:00:36",
+ "notes": "Att",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -1399,6 +1399,7 @@
   "data/rede/habilidades_chao_validacao.json",
   "data/rede/identidades_cliente.json",
   "data/rede/tamanhos_cliente.json",
+  "docs/ROTAS_QUESTS.md",
   "instalar.bat",
   "nrobot/__init__.py",
   "nrobot/ammo.py",
@@ -1422,10 +1423,12 @@
   "nrobot/map_navigation.py",
   "nrobot/map_search.py",
   "nrobot/minimap_overlay.py",
+  "nrobot/mission_details.py",
   "nrobot/monster_db.py",
   "nrobot/monster_panel.py",
   "nrobot/network_observer.py",
   "nrobot/network_targets.py",
+  "nrobot/npc_labels.py",
   "nrobot/packet_controls.py",
   "nrobot/packet_encoder.py",
   "nrobot/packet_hunt.py",
@@ -1440,6 +1443,14 @@
   "nrobot/portals.py",
   "nrobot/presence_guard.py",
   "nrobot/priority_panel.py",
+  "nrobot/quest_library.py",
+  "nrobot/quest_library_panel.py",
+  "nrobot/quest_library_relay.py",
+  "nrobot/quest_panel.py",
+  "nrobot/quest_relay.py",
+  "nrobot/quest_routes.py",
+  "nrobot/quest_slots.py",
+  "nrobot/quest_targets.py",
   "nrobot/radar_overlay.py",
   "nrobot/relay_profile.py",
   "nrobot/release_assets.py",
@@ -1462,5 +1473,5 @@
   "third_party/rathena/des.cpp",
   "third_party/rathena/grfio.cpp"
  ],
- "files_digest": "d65f3c9e5bef"
+ "files_digest": "30655ce751d8"
 }

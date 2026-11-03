@@ -25,7 +25,8 @@ CONFIG = ROOT/'atualizacao.json'
 VERSION_FILE = ROOT/'versao.json'
 # Never replaced or removed by an update: belongs to the person using the bot.
 PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/monstros',
-             'data/rede/invocacoes_aprendidas.json', 'data/rede/painel_config.json', 'data/rede/buffs_aprendidos.json')
+             'data/rede/invocacoes_aprendidas.json', 'data/rede/painel_config.json', 'data/rede/buffs_aprendidos.json',
+             'data/rede/rotas_quests.json', 'data/rede/quadros_missoes.json')
 # Kept in the repository for development, not needed to run the bot.
 NOT_DISTRIBUTED = ('tests', 'tools', 'Arquivos_grf', '.gitignore', '.gitattributes')
 TIMEOUT = 30

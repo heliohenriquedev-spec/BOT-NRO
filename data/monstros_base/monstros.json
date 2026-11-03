@@ -79,6 +79,9 @@
   "names_by_map": {
    "kakashi": [
     "Girino"
+   ],
+   "pvp_n_1-1": [
+    "Girino"
    ]
   }
  },
@@ -107,6 +110,9 @@
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "kakashi": [
+    "Filhote de cobra"
+   ],
+   "pvp_n_1-1": [
     "Filhote de cobra"
    ]
   }
@@ -175,6 +181,9 @@
     "Bikouhuu"
    ],
    "kakashi": [
+    "Bikouchuu"
+   ],
+   "pvp_n_1-1": [
     "Bikouchuu"
    ]
   }
@@ -301,7 +310,12 @@
   "walk_speed_ms": 300,
   "name": "Verme Chefe",
   "max_hp": 296000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "anthell01": [
+    "Verme Chefe"
+   ]
+  }
  },
  "1106": {
   "species_id": 1106,
@@ -338,7 +352,12 @@
   "walk_speed_ms": 200,
   "name": "Louva-a-Deus",
   "max_hp": 390000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "anthell02": [
+    "Louva-a-Deus"
+   ]
+  }
  },
  "1159": {
   "species_id": 1159,
@@ -392,7 +411,12 @@
   "walk_speed_ms": 100,
   "name": "Verme Maldito",
   "max_hp": 292000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "anthell01": [
+    "Verme Maldito"
+   ]
+  }
  },
  "1210": {
   "species_id": 1210,
@@ -408,7 +432,12 @@
   "walk_speed_ms": 200,
   "name": "Escaravelho",
   "max_hp": 298000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "anthell01": [
+    "Escaravelho"
+   ]
+  }
  },
  "1212": {
   "species_id": 1212,
@@ -424,6 +453,9 @@
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "kakashi": [
+    "Akino"
+   ],
+   "pvp_n_1-1": [
     "Akino"
    ]
   }
@@ -443,6 +475,9 @@
   "names_by_map": {
    "kakashi": [
     "Onbba"
+   ],
+   "pvp_n_1-1": [
+    "Onbba"
    ]
   }
  },
@@ -454,7 +489,12 @@
   "walk_speed_ms": 250,
   "name": "Dragão Mutante",
   "max_hp": 423000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "anthell02": [
+    "Dragão Mutante"
+   ]
+  }
  },
  "1266": {
   "species_id": 1266,
@@ -489,7 +529,12 @@
   "walk_speed_ms": 175,
   "name": "Inseto Assassino",
   "max_hp": 408000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "anthell02": [
+    "Inseto Assassino"
+   ]
+  }
  },
  "1296": {
   "species_id": 1296,
@@ -532,7 +577,12 @@
   "walk_speed_ms": 165,
   "name": "Verme Mestre",
   "max_hp": 282000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "anthell01": [
+    "Verme Mestre"
+   ]
+  }
  },
  "1312": {
   "species_id": 1312,
@@ -833,6 +883,9 @@
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "kakashi": [
+    "Filhote de Katsuyu"
+   ],
+   "pvp_n_1-1": [
     "Filhote de Katsuyu"
    ]
   }

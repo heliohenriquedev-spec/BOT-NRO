@@ -312,6 +312,10 @@ class PacketPanel(QMainWindow):
         self.log.setReadOnly(True)
         self.log.setMaximumBlockCount(1200)
         tabs.addTab(self.log, 'Diagnóstico')
+        from .quest_panel import QuestPanel
+        self.quest_panel=QuestPanel()
+        self.quest_panel.command_requested.connect(lambda command,values:self.command(command,**values))
+        tabs.addTab(self.quest_panel,'Rota de quests')
         self.notice = QLabel('Home inicia/pausa • F12 bloqueia envios • Alt+Tab mantém a caça')
         self.notice.setWordWrap(True)
         layout.addWidget(self.notice)
@@ -589,6 +593,7 @@ class PacketPanel(QMainWindow):
             if self.skill_panel.isVisible():
                 self.skill_panel.update_catalog(state.get('learned_skills', []), state.get('own_effects', {}), state.get('buff_candidates', {}), state.get('rotation'))
             self.skill_panel.receive_buff_learning(state.get('buff_learning_result'))
+            self.quest_panel.update_state(state)
             self.last_state = state
             self.update_overlay()
             if self.priority_panel.isVisible():
@@ -604,6 +609,10 @@ class PacketPanel(QMainWindow):
                      'login': 'Conectando login', 'char': 'Seleção de personagem',
                      'map_disconnected': 'Personagem desconectado', 'stopped': 'Encerrado'}.get(state['stage'], state['stage'])
             self.status_label.setText(f"{stage} • {'Caça ativa' if hunt.get('enabled') else 'Caça pausada'} • Mapa: {state.get('map_name') or '—'}")
+            quest=state.get('quests',{})
+            if quest.get('phase') in ('pickup','travel','hunt','delivery','return'):
+                phase={'pickup':'Pegando quests','travel':'Viajando','hunt':'Matando monstros','delivery':'Entregando quests','return':'Retornando ao ponto salvo'}[quest['phase']]
+                self.status_label.setText(f"{stage} • {phase}: {quest.get('quest') or ''} • Mapa: {state.get('map_name') or '—'}")
             if (datetime.now()-datetime.fromisoformat(state['updated_at'])).total_seconds() > 5:
                 self.status_label.setText('Sem atualização recente do relay • verifique Diagnóstico ou encerre a conexão')
             if state.get('native_frame_error'):

@@ -20,6 +20,7 @@ from .continuous_observer import ContinuousTracker
 from .packet_encoder import attack, skill, move, body_action, SIT, STAND
 from .packet_reader import position
 from .entity_inventory import EntityInventory
+from .quest_relay import QuestRelay
 
 
 class HuntTargetChanged(ValueError):
@@ -88,7 +89,7 @@ async def rewrite_endpoints(op, packet, register):
     return bytes(result)
 
 
-class SessionRelay:
+class SessionRelay(QuestRelay):
     def __init__(self, remote_host, remote_port=6900, local_port=16900, *, folder,
                  species=None, allow_commands=False):
         self.remote_host, self.remote_port, self.local_port = remote_host, remote_port, local_port
@@ -100,6 +101,7 @@ class SessionRelay:
         self.account = None
         self.upstream = None
         self.send_lock = asyncio.Lock()
+        self.init_quests()
         self.allow_commands = allow_commands
         self.tracker = ContinuousTracker(species or {1051}, player_ttl=None, idle_timeout=None, entity_ttl=None)
         self.tracker.observer.collision_provider = self.collision_map
@@ -311,6 +313,7 @@ class SessionRelay:
         if 0x89 in completed:
             self.tracker.observer.clock.request_sent(time.monotonic())  # answered by 007F
         for opcode, frame in self.native_frames.frames:
+            self.quests.native(opcode,frame,self.tracker.observer.map_name)
             if opcode == 0x8c and len(frame) == 11:
                 self.capture_monster_sprite(struct.unpack_from('<I', frame, 7)[0])
         if time.monotonic() < self.capture_armed_until:
@@ -766,14 +769,20 @@ class SessionRelay:
             if self.control_result and identity == self.control_result['id']:
                 return
             command = request['command']
-            if command == 'apply':
+            if command.startswith('quest_'):
+                self.quest_control(command,request,game_gate)
+            elif command == 'apply':
                 self.apply_settings(request['settings'])
             elif command == 'pause':
+                if self.quests.active:self.quest_stop('Fila pausada pelo painel')
                 self.hunt.pause('pausada pelo painel')
             elif command == 'stop':
+                if self.quests.active:self.quest_stop('Envios parados pelo painel')
                 self.commands_blocked = True
                 self.hunt.pause('parada pelo painel')
             elif command == 'start':
+                if self.quests.recording:raise ValueError('Salve ou descarte a gravacao antes de iniciar a caca')
+                if self.quests.active:self.quest_stop('Controle transferido para caca manual')
                 if not game_gate() or self.upstream is None:
                     raise ValueError('Entre no personagem pelo perfil local antes de iniciar; libere F12')
                 self.validate_navigation_start()
@@ -1056,6 +1065,7 @@ class SessionRelay:
             'leader_id':self.group_leader_id() if self.group_follower() else None, 'target_id':self.group.target_id,
             'reason':self.group.reason, 'follow_only':bool(self.settings and self.settings['group_follow_only'])}
         state.update(stage=self.stage, relay_error=self.error, ammo=self.ammo.snapshot(time.monotonic()),
+                     quests=self.quests.snapshot(),
                      presence=self.presence.snapshot(self.tracker.observer.player, time.monotonic()),
                      players_nearby=self.players_nearby(), captured_player=self.captured_player,
                      capture_armed=time.monotonic() < self.capture_armed_until,
@@ -1194,6 +1204,10 @@ class SessionRelay:
                 data = bytes(self.mirror)
                 self.mirror.clear()
             events = self.tracker.feed(self.mirror_sequence, data, time.monotonic())
+            self.quests.observe(events,self.tracker.observer.player_id,self.tracker.observer.map_name,time.monotonic())
+            for transition in events:
+                if transition['kind'] in ('map_change','map_transfer') and transition.get('map'):
+                    self.next_map=transition['map']
             self.mirror_sequence += len(data)
             self.inventory.observe(events, time.monotonic())
             self.learn_monsters(events)
@@ -1899,7 +1913,11 @@ async def run(args):
                 if hunt_mode:
                     hunt_key = controls.hunt_pressed(relay.hunt_key)
                     if hunt_key and not previous_hunt_key:
-                        if relay.hunt.enabled:
+                        if relay.quests.recording:
+                            print('Gravacao em andamento: salve ou descarte antes de iniciar a caca.')
+                        elif relay.quests.active:
+                            relay.quest_stop('Fila pausada pelo atalho')
+                        elif relay.hunt.enabled:
                             relay.hunt.pause('pausada pelo usuário')
                             print('Caça pausada.')
                         elif controls.connected(relay.game_peer, relay.game_local):
@@ -1916,7 +1934,8 @@ async def run(args):
                             print('Para iniciar a caça, mantenha o NRO conectado.')
                         relay.status()
                     previous_hunt_key = hunt_key
-                    if relay.hunt.enabled:
+                    route_travel = await relay.quest_tick(lambda: controls.connected(relay.game_peer,relay.game_local))
+                    if relay.hunt.enabled and not route_travel:
                         if not controls.connected(relay.game_peer, relay.game_local):
                             relay.hunt.pause('conexão do jogo indisponível')
                             print(f'Caça pausada: conexão do jogo indisponível. {relay.hunt_key_name} retoma.')

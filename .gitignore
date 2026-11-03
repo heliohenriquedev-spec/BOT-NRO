@@ -13,6 +13,8 @@ data/mapas/*
 !data/mapas/LEIA-ME.txt
 data/rede/painel_config.json
 data/rede/buffs_aprendidos.json
+data/rede/rotas_quests.json
+data/rede/quadros_missoes.json
 *.etl
 data/monstros/
 data/jogadores/

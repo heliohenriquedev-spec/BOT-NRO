@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (QLayout, QWidgetItem, QWidget, QCheckBox, QStyleO
 
 
 THEME = '''
-QMainWindow, QWidget#AppRoot { background: #0c1423; color: #e5edf7; }
+QMainWindow, QDialog, QMessageBox, QWidget#AppRoot { background: #0c1423; color: #e5edf7; }
 QWidget { color: #e5edf7; font-family: 'Segoe UI'; font-size: 10pt; }
 QLabel { background: transparent; }
 QLabel#AppTitle { font-size: 22pt; font-weight: 650; color: #f4f8ff; }
@@ -201,7 +201,11 @@ class PanelLayout(QObject):
         panel.group_members.setMinimumHeight(74);panel.allowed_players.setMinimumHeight(92)
         tabs=panel.tabs
         # Preserve the tab indexes/signals used by the existing controller.
-        for index in (0,1,2,3,6):
+        scroll_indexes=[0,1,2,3,6]
+        if hasattr(panel,'quest_panel'):
+            quest_index=tabs.indexOf(panel.quest_panel)
+            if quest_index>=0 and quest_index not in scroll_indexes:scroll_indexes.append(quest_index)
+        for index in scroll_indexes:
             page=tabs.widget(index);text=tabs.tabText(index)
             tabs.removeTab(index);tabs.insertTab(index,scroll_page(page),text)
         tabs.addTab(scroll_page(connection),'Conexao')
@@ -214,7 +218,9 @@ class PanelLayout(QObject):
         self.layout.insertLayout(self.layout.count()-2,body,1)
         for label in panel.findChildren(QLabel):
             label.setWordWrap(True)
-            label.setSizePolicy(QSizePolicy.Preferred,QSizePolicy.Preferred)
+            policy=QSizePolicy(QSizePolicy.Preferred,QSizePolicy.Preferred)
+            policy.setHeightForWidth(True)
+            label.setSizePolicy(policy)
         for table in panel.findChildren(QTableWidget):
             table.setAlternatingRowColors(True);table.verticalHeader().setDefaultSectionSize(42)
             table.setMinimumHeight(190)

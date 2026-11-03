@@ -373,13 +373,21 @@ def decode(message: bytes) -> dict:
                     event.update(hp=hp, max_hp=maximum)
     elif op == 0x81:
         event.update(kind='server_disconnect', reason_raw=message[2])
+    elif op in (0xb4, 0xb7) and len(message)>=8:
+        contents=message[8:].split(b'\0')[0].decode('cp1252','replace')
+        event.update(kind='npc_dialog',entity_id=u32(4),action='menu' if op==0xb7 else 'text')
+        if op==0xb7:event['options']=contents.split(':')
+        else:event['text']=contents
+    elif op in (0xb5, 0xb6) and len(message)==6:
+        event.update(kind='npc_dialog',entity_id=u32(2),action='next' if op==0xb5 else 'close')
     elif op == 0x80:
         event.update(kind='remove', entity_id=u32(2), reason=message[6])
     elif op == 0x91:
         event.update(kind='map_change', map=message[2:18].split(b'\0')[0].decode('cp1252', 'replace'),
                      position=[u16(18), u16(20)])
     elif op == 0x92:
-        event.update(kind='map_transfer')
+        event.update(kind='map_transfer', map=message[2:18].split(b'\0')[0].decode('cp1252','replace'),
+                     position=[u16(18),u16(20)])
     else:
         event['kind'] = 'other'
     return event
