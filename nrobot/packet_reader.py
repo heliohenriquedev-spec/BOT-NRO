@@ -355,8 +355,9 @@ def decode(message: bytes) -> dict:
                 del event['length']
                 break
     elif op in (0xa0, 0x29a, 0x2d4) and len(message) in (23, 27, 29):
+        # 00A0/029A/02D4: ... cards 11-18, equip location 19 (where it is worn), type 21, result 22.
         event.update(kind='inventory_added', index=u16(2), amount=u16(4), item_id=u16(6),
-                     type=message[21], success=message[22] == 0)
+                     type=message[21], success=message[22] == 0, equip_location=u16(19))
     elif op in (0xaa, 0xac) and len(message) == 7:
         event.update(kind='equipment_ack', index=u16(2), position=u16(4), success=message[6] == 1, equipped=op == 0xaa)
     elif op == 0x13c and len(message) == 4:

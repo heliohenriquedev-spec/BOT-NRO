@@ -99,7 +99,7 @@ class QuestRoutes:
     def __init__(self):
         self.recording=None;self.routes=[];self.index=0;self.step=0;self.phase='idle'
         self.reason='Fila parada';self.dialog=None;self.npc=None;self.sent_at=0;self.pending=None
-        self.killed=set();self.hit={};self.kills=0;self.kill_counts={};self.actors={};self.map=None;self.progress_at=0;self.last_position=None
+        self.killed=set();self.hit={};self.kills=0;self.kill_counts={};self.name_counts={};self.actors={};self.map=None;self.progress_at=0;self.last_position=None
         self.known_routes=[];self.steps=None
         self.stage_confirmed=False;self.last_npc_text=''
         self.library=None;self.mission_index=0;self.completed_missions={'pickup':[],'delivery':[]}
@@ -191,7 +191,7 @@ class QuestRoutes:
         self.reason='Teste concluido: '+self.validation['label']+self.skipped_note()
 
     def begin(self,now):
-        self.kills=0;self.kill_counts={};self.killed.clear();self.hit.clear();self.aggressors=set()
+        self.kills=0;self.kill_counts={};self.name_counts={};self.killed.clear();self.hit.clear();self.aggressors=set()
         self.completed_missions={'pickup':[],'delivery':[]};self.deferred_check=None;self.skipped=[];self.skipped_ids=set()
         chain=self.chain_indices(self.index)
         if len(chain)>1 and self.library:
@@ -306,7 +306,7 @@ class QuestRoutes:
             if following:
                 # This map is done: on to the next map of the chain, no delivery yet.
                 print('[ROTA] Mapa concluido; seguindo para '+self.routes[following[0]]['target_map']+' ('+self.routes[following[0]]['name']+')')
-                self.index=following[0];self.kills=0;self.kill_counts={};self.killed.clear();self.hit.clear();self.aggressors=set()
+                self.index=following[0];self.kills=0;self.kill_counts={};self.name_counts={};self.killed.clear();self.hit.clear();self.aggressors=set()
                 self.enter_stage('travel',now);return
             # Last map: every mission of the chain is delivered together.
             self.route['mission_ids']=self.chain_missions(self.chain['indices'][0])
@@ -425,7 +425,7 @@ class QuestRoutes:
             phase,index=self.return_context['phase'],self.return_context['next_index']
         return dict(route_id=self.route['id'],route_name=self.route['name'],index=self.index,phase=phase,mission_index=index,
                     mission_ids=list(self.route['mission_ids']),kill_targets=copy.deepcopy(self.route['kill_targets']),
-                    species=list(self.route['species']),kill_counts={str(k):v for k,v in self.kill_counts.items()},kills=self.kills,
+                    species=list(self.route['species']),kill_counts={str(k):v for k,v in self.kill_counts.items()},name_counts=dict(self.name_counts),kills=self.kills,
                     completed_missions=copy.deepcopy(self.completed_missions),skipped=list(self.skipped),
                     skipped_ids=sorted(self.skipped_ids),prefetched=copy.deepcopy({str(k):v for k,v in self.prefetched.items()}),
                     aggressors=sorted(self.aggressors),chain=copy.deepcopy(self.chain),
@@ -443,6 +443,7 @@ class QuestRoutes:
         if saved.get('kill_targets'):route['kill_targets']=copy.deepcopy(saved['kill_targets'])
         if saved.get('species'):route['species']=list(saved['species'])
         self.kill_counts={int(k):v for k,v in (saved.get('kill_counts') or {}).items()};self.kills=saved.get('kills',0)
+        self.name_counts=dict(saved.get('name_counts') or {})
         self.completed_missions=copy.deepcopy(saved.get('completed_missions') or {'pickup':[],'delivery':[]})
         self.skipped=list(saved.get('skipped') or []);self.skipped_ids=set(saved.get('skipped_ids') or [])
         self.prefetched={int(k):v for k,v in (saved.get('prefetched') or {}).items()}
@@ -523,11 +524,13 @@ class QuestRoutes:
                 self.hit.clear();self.killed.clear()
             elif kind=='appearance':
                 self.actors[identity]=dict(e);self.killed.discard(identity)
+                if e.get('name'):self.learn_target_species(e.get('species_id'),e['name'],identity)
                 if self.recording and not self.recording.get('finished_at_transition'):
                     cache=self.recording.setdefault('npc_cache',{});cache[identity]=dict(map=current,actor=dict(e))
                     if len(cache)>1000:self.recording['npc_cache']=dict(list(cache.items())[-1000:])
             elif kind=='name' and identity in self.actors:
                 self.actors[identity]['name']=e.get('name','')
+                self.learn_target_species(self.actors[identity].get('species_id'),e.get('name',''),identity)
                 if self.recording and identity in self.recording.get('npc_cache',{}):self.recording['npc_cache'][identity]['actor']['name']=e.get('name','')
             elif kind=='remove':
                 if (self.phase=='hunt' and e.get('reason')==1 and identity in self.hit
@@ -536,7 +539,9 @@ class QuestRoutes:
                     actor=self.actors.get(identity,{});species=actor.get('species_id')
                     if self.counts_for_quest(species,actor.get('name')):
                         self.kills+=1
-                        if species:self.kill_counts[species]=self.kill_counts.get(species,0)+1
+                        named=self.target_named(actor.get('name'))
+                        if named:self.name_counts[named]=self.name_counts.get(named,0)+1  # by name: exact even with shared sprites
+                        elif species:self.kill_counts[species]=self.kill_counts.get(species,0)+1
                 self.actors.pop(identity,None)
             elif kind in ('normal_attack','skill_damage') and self.phase=='hunt' and e.get('damage_raw',0)>0:
                 target=e.get('target_id');actor=self.actors.get(target,{})
@@ -1053,6 +1058,27 @@ class QuestRoutes:
             self.start_return(board_id,now,dict(phase=phase,next_index=next_index));return
         self.after_board(phase,next_index,now)
 
+    def learn_target_species(self,species,name,identity=None):
+        """The server names every monster: one called like a quest target is that target, whatever
+        sprite id this PC's monster list gave the name (another PC, or a game/GRF update that
+        changed sprites). Its sprite joins the target, so it is hunted and counted."""
+        from .npc_labels import plain
+        from .network_targets import is_player_id
+        if not species or not name or not self.route or (identity is not None and is_player_id(identity)):return False
+        for target in self.route.get('kill_targets',[]):
+            if plain(target['name'])==plain(name) and species not in target['species']:
+                target['species']=sorted(set(target['species'])|{species})
+                self.route['species']=sorted(set(self.route.get('species',[]))|{species})
+                print(f"[ROTA] {target['name']}: sprite {species} reconhecido pelo nome no mapa; passa a ser cacado e contado")
+                return True
+        return False
+
+    def target_named(self,name):
+        """The counter key of the quest target with this name (plain), or None."""
+        from .npc_labels import plain
+        if not name:return None
+        return next((plain(t['name']) for t in (self.route or {}).get('kill_targets',[]) if plain(t['name'])==plain(name)),None)
+
     def counts_for_quest(self,species,name):
         """A kill counts unless its name shows it is another monster with the same sprite."""
         from .npc_labels import plain
@@ -1067,8 +1093,9 @@ class QuestRoutes:
         if not route['kill_targets']:
             return [dict(name='Total',count=route['kills'],done=self.kills,complete=self.kills>=route['kills'])]
         result=[]
+        from .npc_labels import plain
         for t in route['kill_targets']:
-            done=sum(self.kill_counts.get(s,0) for s in t['species'])
+            done=self.name_counts.get(plain(t['name']),0)+sum(self.kill_counts.get(s,0) for s in t['species'])
             result.append(dict(name=t['name'],count=t['count'],done=min(done,t['count']),complete=done>=t['count']))
         return result
 

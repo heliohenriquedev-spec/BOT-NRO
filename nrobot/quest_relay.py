@@ -290,6 +290,8 @@ class QuestRelay(SharedQuestRelay):
                 if any(plain(n)==plain(target['name']) for n in names):
                     for name in names:
                         choices[monster_choice_key(q.route['target_map'],species,name)]=plain(name)==plain(target['name'])
+                    # The exact name the server sends: also when this PC saw it spelled another way.
+                    choices[monster_choice_key(q.route['target_map'],species,target['name'])]=True
         return choices
 
     def quest_species(self,q):

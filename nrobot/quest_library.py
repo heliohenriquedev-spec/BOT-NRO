@@ -204,7 +204,9 @@ def kill_targets(data,mission_ids,require=False):
         for target in m.get('monster_targets',[]):
             key=plain(target['name'])
             species=lookup.get(key,set())
-            if not species and len(m.get('monster_targets',[]))==1:species=set(m.get('monster_ids',[]))
+            # Name unknown on this PC (other PC, game update): the mission's sprites to start with; the
+            # name the server sends on the map then corrects it (QuestRoutes.learn_target_species).
+            if not species:species=set(m.get('monster_ids',[]))
             if not species:raise ValueError('Vincule o ID do monstro '+target['name']+' em Configurar rank e monstros ('+m['name']+')')
             entry=result.setdefault(key,dict(name=target['name'],count=0,species=set()))
             entry['count']=max(entry['count'],int(target['count']));entry['species']|=species

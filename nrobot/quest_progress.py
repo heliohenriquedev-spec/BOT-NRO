@@ -36,8 +36,9 @@ def describe(state):
         return 'Nenhum progresso salvo.'
     stage = {'pickup': 'pegando missoes', 'travel': 'indo ao mapa', 'hunt': 'cacando', 'delivery': 'entregando'}.get(
         state.get('phase'), state.get('phase'))
-    counts = state.get('kill_counts') or {}
-    kills = ', '.join(f"{t['name']} {min(sum(counts.get(str(s), 0) for s in t['species']), t['count'])}/{t['count']}"
+    from .npc_labels import plain
+    counts, named = state.get('kill_counts') or {}, state.get('name_counts') or {}
+    kills = ', '.join(f"{t['name']} {min(named.get(plain(t['name']), 0)+sum(counts.get(str(s), 0) for s in t['species']), t['count'])}/{t['count']}"
                       for t in state.get('kill_targets') or [])
     return (f"Progresso salvo ({state.get('saved_at', '')[11:16]}): {state.get('route_name')} - {stage}"
             + (f" - {kills}" if kills else ''))

@@ -138,7 +138,7 @@ class Body:
                 if old and old['item_id'] == e['item_id']:
                     old['amount'] = old.get('amount', 0)+e['amount']
                 else:
-                    self.gear[e['index']] = dict(item_id=e['item_id'], equip_location=0, worn=0, type=e.get('type'),
+                    self.gear[e['index']] = dict(item_id=e['item_id'], equip_location=e.get('equip_location', 0), worn=0, type=e.get('type'),
                                                  amount=e['amount'], stackable=e.get('type') not in (4, 5, 8, 12))
             elif kind == 'inventory_removed':
                 item = self.gear.get(e['inventory_index'])
@@ -307,22 +307,41 @@ class Errand:
         return ('equip', (index, mount.get('location') or body.position_of(index) or MOUNT_SLOTS))
 
     def gear(self, body, now):
-        """Put back what the mount took off, one item at a time."""
+        """Put back what the mount took off, one item at a time.
+
+        While the mount is on, the server can refuse the hand items and accept only the one that
+        takes the mount off (the scroll, below): a refused item is tried again after the others,
+        up to 4 times each, instead of being given up at the first refusal."""
+        failed = self.__dict__.setdefault('failures', {})
         if self.pending:
             ack = next((a for a in body.acks if a[0] >= self.pending[0] and a[1] == self.pending[1] and a[4]), None)
             if not ack and now-self.pending[0] <= 3:
                 return ('wait', None)
-            if not (ack and ack[3]):
-                self.failed = getattr(self, 'failed', set()) | {self.pending[2]}
+            if ack and ack[3]:
+                failed.clear()  # something changed (the mount came off): the refused ones may work now
+            else:
+                failed[self.pending[2]] = failed.get(self.pending[2], 0)+1
+                self.retry_at = now+.6
             self.pending = None
+        if now < getattr(self, 'retry_at', 0):
+            return ('wait', None)
         chosen = [dict(item_id=i, position=None) for i in self.config.get('combat_items') or []]
+        missing = []
         for item in chosen or self.config.get('displaced') or []:
-            if item['item_id'] in getattr(self, 'failed', set()) or body.wearing(item['item_id']):
+            if body.wearing(item['item_id']):
                 continue
             index = body.index_of(item['item_id'], worn=False)
             if index is None:
                 continue
+            missing.append((failed.get(item['item_id'], 0), item, index))
+        for tries, item, index in sorted(missing, key=lambda m: m[0]):  # the least refused first
+            if tries >= 4:
+                continue
             self.pending = (now, index, item['item_id']); self.reason = 'equipando os itens de combate'
             return ('equip', (index, item['position'] or body.position_of(index)))
-        self.reason = 'itens de combate equipados'
+        if missing:
+            self.reason = 'o servidor recusou '+str(len(missing))+' item(ns) de combate: '+', '.join(str(m[1]['item_id']) for m in missing)
+            print('[ROTA] '+self.reason)
+        else:
+            self.reason = 'itens de combate equipados'
         return ('done', None)
