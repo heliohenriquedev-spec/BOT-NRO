@@ -1,7 +1,7 @@
 {
- "version": "2026.11.04.11",
- "published_at": "2026-11-04T12:21:41",
- "notes": "fix",
+ "version": "2026.11.04.12",
+ "published_at": "2026-11-04T12:26:03",
+ "notes": "Fix",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -10,6 +10,7 @@
   "RESTAURAR_CONEXAO_ORIGINAL.bat",
   "atualizacao.json",
   "data/catalogo/catalogo.json",
+  "data/compartilhado/alvos_monstros.json",
   "data/compartilhado/buffs_aprendidos.json",
   "data/compartilhado/gm_sinais.json",
   "data/compartilhado/manifesto.json",
@@ -2104,5 +2105,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "268ef3bd2490"
+ "files_digest": "578ddd1c342a"
 }
