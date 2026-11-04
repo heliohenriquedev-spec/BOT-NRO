@@ -246,78 +246,6 @@
   ],
   "steps": [
    {
-    "kind": "walk",
-    "map": "hospital2.gat",
-    "position": [
-     53,
-     79
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "hospital2.gat",
-    "position": [
-     70,
-     72
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "hospital2.gat",
-    "position": [
-     86,
-     70
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "hospital2.gat",
-    "position": [
-     101,
-     62
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "hospital2.gat",
-    "position": [
-     99,
-     53
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "hospital2.gat",
-    "position": [
-     100,
-     45
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "hospital2.gat",
-    "position": [
-     101,
-     35
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "hospital2.gat",
-    "position": [
-     103,
-     25
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "hospital2.gat",
-    "position": [
-     103,
-     13
-    ]
-   },
-   {
     "kind": "portal",
     "map": "hospital2.gat",
     "position": [
@@ -328,54 +256,6 @@
    {
     "kind": "wait_map",
     "map": "areia.gat"
-   },
-   {
-    "kind": "walk",
-    "map": "areia.gat",
-    "position": [
-     178,
-     155
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "areia.gat",
-    "position": [
-     171,
-     155
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "areia.gat",
-    "position": [
-     162,
-     163
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "areia.gat",
-    "position": [
-     157,
-     170
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "areia.gat",
-    "position": [
-     152,
-     179
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "areia.gat",
-    "position": [
-     150,
-     192
-    ]
    },
    {
     "kind": "npc",
@@ -446,134 +326,6 @@
     "map": "anthell01.gat"
    },
    {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     257,
-     194
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     255,
-     183
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     251,
-     174
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     250,
-     165
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     253,
-     153
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     260,
-     141
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     260,
-     129
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     257,
-     117
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     251,
-     105
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     244,
-     100
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     240,
-     91
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     243,
-     82
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     250,
-     73
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     255,
-     64
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     256,
-     55
-    ]
-   },
-   {
-    "kind": "walk",
-    "map": "anthell01.gat",
-    "position": [
-     256,
-     43
-    ]
-   },
-   {
     "kind": "portal",
     "map": "anthell01.gat",
     "position": [
@@ -605,7 +357,151 @@
   "delivery_confirmation": "",
   "ignore_finished": false,
   "always_attack": [],
-  "chain_next": false
+  "chain_next": true
+ },
+ {
+  "name": "Kami 2 - Andar 3",
+  "enabled": true,
+  "kills": 1,
+  "species": [
+   1058,
+   1147,
+   1159,
+   1289
+  ],
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Esconderijo do Clã Kamizuru Nível 2"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "anthell01.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "anthell01.gat",
+    "position": [
+     253,
+     32
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "anthell02.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "anthell02.gat",
+    "position": [
+     33,
+     265
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "gld_dun03.gat"
+   },
+   {
+    "kind": "walk",
+    "map": "gld_dun03.gat",
+    "position": [
+     238,
+     271
+    ]
+   }
+  ],
+  "target_map": "gld_dun03.gat",
+  "lifecycle_enabled": true,
+  "ignore_finished": false,
+  "always_attack": [],
+  "chain_next": false,
+  "mission_ids": [
+   "e9cfb145843748d280a8a4bf4eeb2659",
+   "1e3a512a82bf4f5899249484bad4b186",
+   "5002f3bba47f43218171022c71750607",
+   "df1efe9806e94c649bd47f76f51bb407"
+  ],
+  "kill_targets": [],
+  "map_route_id": "5f4c1da98245421ab3fca0971483dc9c",
+  "needs_recording": false,
+  "id": "76aaa3993a094714aedf53ececa91aab",
+  "pickup_steps": [],
+  "delivery_steps": [],
+  "pickup_confirmation": "",
+  "delivery_confirmation": ""
  },
  {
   "name": "Kami 1 - Andar 1",
@@ -999,6 +895,73 @@
   "delivery_confirmation": ""
  },
  {
+  "name": "Esgoto Suna - Andar 2",
+  "enabled": true,
+  "kills": 1,
+  "species": [
+   1053,
+   1201,
+   1209
+  ],
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "areia.gat",
+    "position": [
+     108,
+     250
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb2.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "prt_sewb2.gat",
+    "position": [
+     180,
+     24
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb4.gat"
+   }
+  ],
+  "target_map": "prt_sewb4.gat",
+  "lifecycle_enabled": true,
+  "ignore_finished": true,
+  "always_attack": [],
+  "chain_next": false,
+  "mission_ids": [
+   "d6fc67897ce24b7e8dd65b5a25302814",
+   "70c7d5cbc4e54424904c2e578196832b",
+   "e3c0c99565ac49dbb96aae08fcf563a0",
+   "52ffae21e4424a7faaf31c2ae1c86673"
+  ],
+  "kill_targets": [],
+  "map_route_id": "77b71b566e1447208032da830d4dd734",
+  "needs_recording": false,
+  "id": "e56bee673198469489ddeee384cd0195",
+  "pickup_steps": [],
+  "delivery_steps": [],
+  "pickup_confirmation": "",
+  "delivery_confirmation": ""
+ },
+ {
   "name": "Esgoto Suna - Andar 3",
   "enabled": true,
   "kills": 1,
@@ -1071,73 +1034,6 @@
   "map_route_id": "2ba464836fa04502a78a5cd9bb842832",
   "needs_recording": false,
   "id": "aef2d2b459794c6aa1b7e676be324456",
-  "pickup_steps": [],
-  "delivery_steps": [],
-  "pickup_confirmation": "",
-  "delivery_confirmation": ""
- },
- {
-  "name": "Esgoto Suna - Andar 2",
-  "enabled": true,
-  "kills": 1,
-  "species": [
-   1053,
-   1201,
-   1209
-  ],
-  "steps": [
-   {
-    "kind": "portal",
-    "map": "hospital2.gat",
-    "position": [
-     103,
-     3
-    ]
-   },
-   {
-    "kind": "wait_map",
-    "map": "areia.gat"
-   },
-   {
-    "kind": "portal",
-    "map": "areia.gat",
-    "position": [
-     108,
-     250
-    ]
-   },
-   {
-    "kind": "wait_map",
-    "map": "prt_sewb2.gat"
-   },
-   {
-    "kind": "portal",
-    "map": "prt_sewb2.gat",
-    "position": [
-     180,
-     24
-    ]
-   },
-   {
-    "kind": "wait_map",
-    "map": "prt_sewb4.gat"
-   }
-  ],
-  "target_map": "prt_sewb4.gat",
-  "lifecycle_enabled": true,
-  "ignore_finished": true,
-  "always_attack": [],
-  "chain_next": false,
-  "mission_ids": [
-   "d6fc67897ce24b7e8dd65b5a25302814",
-   "70c7d5cbc4e54424904c2e578196832b",
-   "e3c0c99565ac49dbb96aae08fcf563a0",
-   "52ffae21e4424a7faaf31c2ae1c86673"
-  ],
-  "kill_targets": [],
-  "map_route_id": "77b71b566e1447208032da830d4dd734",
-  "needs_recording": false,
-  "id": "e56bee673198469489ddeee384cd0195",
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
@@ -1262,6 +1158,368 @@
   "map_route_id": "9a03cb0c62bf473fbd2cf8aadb6c3b01",
   "needs_recording": false,
   "id": "b3e10b47b4da468f8fb31e0102edb4d0",
+  "pickup_steps": [],
+  "delivery_steps": [],
+  "pickup_confirmation": "",
+  "delivery_confirmation": ""
+ },
+ {
+  "name": "GT - 1",
+  "enabled": true,
+  "kills": 1,
+  "species": [
+   1067,
+   1318
+  ],
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Garganta da Nuvem"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun01.gat"
+   }
+  ],
+  "target_map": "tur_dun01.gat",
+  "lifecycle_enabled": true,
+  "ignore_finished": true,
+  "always_attack": [],
+  "chain_next": true,
+  "mission_ids": [
+   "8630eb38e2614743a30baf7750efbd29",
+   "0dfae17d988a4b0f8db9365a06da1711"
+  ],
+  "kill_targets": [],
+  "map_route_id": "cd65fd7697ce490898f7a68405c2edfe",
+  "needs_recording": false,
+  "id": "8b4d3445c4a04595a99019640833abbd",
+  "pickup_steps": [],
+  "delivery_steps": [],
+  "pickup_confirmation": "",
+  "delivery_confirmation": ""
+ },
+ {
+  "name": "GT - 2",
+  "enabled": true,
+  "kills": 1,
+  "species": [
+   1041,
+   1601
+  ],
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Garganta da Nuvem"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun01.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "tur_dun01.gat",
+    "position": [
+     154,
+     242
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun02.gat"
+   }
+  ],
+  "target_map": "tur_dun02.gat",
+  "lifecycle_enabled": true,
+  "ignore_finished": true,
+  "always_attack": [],
+  "chain_next": true,
+  "mission_ids": [
+   "2084fc7a7a55454e8ca93ccf2459c335",
+   "164c9a9bd32b4dcba2ed813da5316686"
+  ],
+  "kill_targets": [],
+  "map_route_id": "fceadc29a0c0418baab9f7d26f6dc925",
+  "needs_recording": false,
+  "id": "a4a1be608cdf4fd1a87b292e850c6e69",
+  "pickup_steps": [],
+  "delivery_steps": [],
+  "pickup_confirmation": "",
+  "delivery_confirmation": ""
+ },
+ {
+  "name": "GT - 3",
+  "enabled": true,
+  "kills": 1,
+  "species": [
+   1039,
+   1312,
+   1499
+  ],
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Garganta da Nuvem"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun01.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "tur_dun01.gat",
+    "position": [
+     154,
+     242
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun02.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "tur_dun02.gat",
+    "position": [
+     148,
+     267
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun03.gat"
+   }
+  ],
+  "target_map": "tur_dun03.gat",
+  "lifecycle_enabled": true,
+  "ignore_finished": true,
+  "always_attack": [],
+  "chain_next": false,
+  "mission_ids": [
+   "934a940131134cde902c814ec31db971",
+   "7edf13bcbbc4444aa0bb0eaeb04ded60",
+   "10b827fb04084c3ea8836d83b2145bd9"
+  ],
+  "kill_targets": [],
+  "map_route_id": "4f250b0129bf4e75bea7fb2809908973",
+  "needs_recording": false,
+  "id": "a789a119895b4244a084a08c9ea2af06",
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",

@@ -1,6 +1,6 @@
 [
  {
-  "name": "Kami 2",
+  "name": "Kami 2 - Andar 2",
   "target_map": "anthell02.gat",
   "steps": [
    {
@@ -97,7 +97,15 @@
    }
   ],
   "id": "19e0287b6eda4c87b04299e939088168",
-  "start_map": "hospital2.gat"
+  "start_map": "hospital2.gat",
+  "inner_portals": {
+   "areia": {
+    "177,164": [
+     96,
+     231
+    ]
+   }
+  }
  },
  {
   "name": "Mamute Suna",
@@ -532,7 +540,7 @@
   }
  },
  {
-  "name": "hospital2.gat → areia.gat",
+  "name": "Vila Areia",
   "target_map": "areia.gat",
   "steps": [
    {
@@ -549,7 +557,15 @@
    }
   ],
   "id": "d481e5454a044a2c83ac643d489234c3",
-  "start_map": "hospital2.gat"
+  "start_map": "hospital2.gat",
+  "inner_portals": {
+   "areia": {
+    "177,164": [
+     96,
+     231
+    ]
+   }
+  }
  },
  {
   "name": "hospital2.gat → prt_sewb2.gat",
@@ -922,5 +938,747 @@
     ]
    }
   }
+ },
+ {
+  "name": "Sala Vip",
+  "target_map": "ra_in01.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   }
+  ],
+  "inner_portals": {
+   "areia": {
+    "177,164": [
+     96,
+     231
+    ]
+   }
+  },
+  "id": "d0cf14561e5c4455ab28f872f2e9fe7c",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "Kami 2 - Andar 1",
+  "target_map": "anthell01.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Esconderijo do Clã Kamizuru Nível 2"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "anthell01.gat"
+   }
+  ],
+  "inner_portals": {
+   "areia": {
+    "177,164": [
+     96,
+     231
+    ]
+   }
+  },
+  "id": "e49914536f75470ca8dbf0f44a0df8f4",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "Kami 2 - Andar 3",
+  "target_map": "gld_dun03.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Esconderijo do Clã Kamizuru Nível 2"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "anthell01.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "anthell01.gat",
+    "position": [
+     253,
+     32
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "anthell02.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "anthell02.gat",
+    "position": [
+     33,
+     265
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "gld_dun03.gat"
+   },
+   {
+    "kind": "walk",
+    "map": "gld_dun03.gat",
+    "position": [
+     238,
+     271
+    ]
+   }
+  ],
+  "inner_portals": {
+   "areia": {
+    "177,164": [
+     96,
+     231
+    ]
+   }
+  },
+  "id": "5f4c1da98245421ab3fca0971483dc9c",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "GT - 1",
+  "target_map": "tur_dun01.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Garganta da Nuvem"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun01.gat"
+   }
+  ],
+  "inner_portals": {
+   "areia": {
+    "177,164": [
+     96,
+     231
+    ]
+   }
+  },
+  "id": "cd65fd7697ce490898f7a68405c2edfe",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "GT - 2",
+  "target_map": "tur_dun02.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Garganta da Nuvem"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun01.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "tur_dun01.gat",
+    "position": [
+     154,
+     242
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun02.gat"
+   }
+  ],
+  "inner_portals": {
+   "areia": {
+    "177,164": [
+     96,
+     231
+    ]
+   }
+  },
+  "id": "fceadc29a0c0418baab9f7d26f6dc925",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "GT - 3",
+  "target_map": "tur_dun03.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Garganta da Nuvem"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun01.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "tur_dun01.gat",
+    "position": [
+     154,
+     242
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun02.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "tur_dun02.gat",
+    "position": [
+     148,
+     267
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun03.gat"
+   }
+  ],
+  "inner_portals": {
+   "areia": {
+    "177,164": [
+     96,
+     231
+    ]
+   }
+  },
+  "id": "4f250b0129bf4e75bea7fb2809908973",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "GT - 4",
+  "target_map": "hu_fild05.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Garganta da Nuvem"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun01.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "tur_dun01.gat",
+    "position": [
+     154,
+     242
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun02.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "tur_dun02.gat",
+    "position": [
+     148,
+     267
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "tur_dun03.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "tur_dun03.gat",
+    "position": [
+     45,
+     205
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "hu_fild05.gat"
+   },
+   {
+    "kind": "walk",
+    "map": "hu_fild05.gat",
+    "position": [
+     308,
+     153
+    ]
+   }
+  ],
+  "inner_portals": {
+   "areia": {
+    "177,164": [
+     96,
+     231
+    ]
+   }
+  },
+  "id": "e5e2d6bfe72741d9a3ab626015f78262",
+  "start_map": "hospital2.gat"
  }
 ]

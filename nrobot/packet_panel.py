@@ -797,7 +797,7 @@ class PacketPanel(QMainWindow):
             for row, entity in enumerate(rows):
                 values = [entity['entity_id'], entity.get('correlated_name') or entity.get('name') or 'Não identificada',
                           entity['species_id'], entity['position'], entity.get('destination'), entity['position_age_seconds'],
-                          'Sim (último registro)' if entity['present_last_observation'] else 'Removida']
+                          (entity.get('origin_note') or 'Sim (último registro)') if entity['present_last_observation'] else 'Removida']
                 for column, value in enumerate(values):
                     text = str(value)
                     item = self.entities.item(row, column)

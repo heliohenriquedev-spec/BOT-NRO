@@ -23,11 +23,14 @@ class EntityInventory:
             identity = event.get('entity_id')
             if kind == 'appearance':
                 old = self.entities.get(identity, {})
+                if old.get('species_id') != event['species_id'] or not old.get('present_last_observation', True):
+                    old = {}
                 self.entities[identity] = {
                     'entity_id': identity, 'species_id': event['species_id'],
                     'correlated_name': self.names.get(str(event['species_id'])),
                     'object_type_raw': event.get('object_type'),
-                    'owner_id': event.get('owner_id'), 'summoned': event.get('summoned', False),
+                    'owner_id': event.get('owner_id', old.get('owner_id')),
+                    'summoned': event.get('summoned', old.get('summoned', False)),
                     'walk_speed_ms': event.get('walk_speed_ms'),
                     'position': event['position'], 'destination': event.get('destination'),
                     'present_last_observation': True, 'removal_reason': None,
@@ -49,8 +52,10 @@ class EntityInventory:
                                   removed_at=now)
 
     def snapshot(self, now):
+        from .monster_origin import temporary_reason
         return {'map': self.map_name, 'map_epoch': self.epoch,
                 'note': 'Aparições recebidas pelo cliente; não é uma lista completa do mapa. Dados antigos não autorizam ataques. Remoção não prova morte.',
                 'entities': [{**{k: v for k, v in e.items() if k not in ('last_seen', 'removed_at')},
+                              'origin_note': temporary_reason(e),
                               'position_age_seconds': round(max(0, now-e['last_seen']), 3)}
                              for e in self.entities.values()]}

@@ -791,6 +791,292 @@
    "pickup_confirmation": "",
    "delivery_steps": [],
    "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank S-1",
+   "rank": "Rank S-1",
+   "description": "[Quadro de missões] Rank S-1 Descrição: Derrote Gafanhotos no Kamizuro 2 (3) Status : Incompleta Monstros necessários : 50 Gafanhoto [Limitações] Pode realizar : Todo dia Base Level : 700~999 Limite de tempo : 1 horas [Recompensas] Zeny : 35,000 Item : 1 Ranking S",
+   "monster_targets": [
+    {
+     "name": "Gafanhoto",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Gafanhoto"
+   ],
+   "monster_ids": [
+    1058
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank S-1",
+   "id": "e9cfb145843748d280a8a4bf4eeb2659",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank S-2",
+   "rank": "Rank S-2",
+   "description": "[Quadro de missões] Rank S-2 Descrição: Status : Incompleta Monstros necessários : 50 Inseto Guardião [Limitações] Pode realizar : Todo dia Base Level : 700~999 Limite de tempo : 1 horas [Recompensas] Zeny : 35,000 Item : 1 Ranking S",
+   "monster_targets": [
+    {
+     "name": "Inseto Guardião",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Inseto Guardião"
+   ],
+   "monster_ids": [
+    1159
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank S-2",
+   "id": "1e3a512a82bf4f5899249484bad4b186",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank S-3",
+   "rank": "Rank S-3",
+   "description": "[Quadro de missões] Rank S-3 Descrição: Derrote Insetos Reis no Kamizuro 2 (3) Status : Incompleta Monstros necessários : 50 Inseto Rei [Limitações] Pode realizar : Todo dia Base Level : 700~999 Limite de tempo : 1 horas [Recompensas] Zeny : 35,000 Item : 1 Ranking S",
+   "monster_targets": [
+    {
+     "name": "Inseto Rei",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Inseto Rei"
+   ],
+   "monster_ids": [
+    1289
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank S-3",
+   "id": "5002f3bba47f43218171022c71750607",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank S-7",
+   "rank": "Rank S-7",
+   "description": "[Quadro de missões] Rank S-7 Descrição: Derrote Insetos Rainhas em Kamizuro 2 (3) Status : Incompleta Monstros necessários : 50 Inseto Rainha [Limitações] Pode realizar : Todo dia Base Level : 700~999 Limite de tempo : 1 horas [Recompensas] Zeny : 35,000 Item : 1 Ranking S",
+   "monster_targets": [
+    {
+     "name": "Inseto Rainha",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Inseto Rainha"
+   ],
+   "monster_ids": [
+    1147
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank S-7",
+   "id": "df1efe9806e94c649bd47f76f51bb407",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank S-10",
+   "rank": "Rank S-10",
+   "description": "[Quadro de missões] Rank S-10 Descrição: Status : Completa Monstros necessários : 50 General Tartaruga [Limitações] Pode realizar : Todo dia Base Level : 700~999 Limite de tempo : 1 horas [Recompensas] Zeny : 35,000 Item : 1 Ranking S",
+   "monster_targets": [
+    {
+     "name": "General Tartaruga",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "General Tartaruga"
+   ],
+   "monster_ids": [
+    1312
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank S-10",
+   "id": "934a940131134cde902c814ec31db971",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank S-11",
+   "rank": "Rank S-11",
+   "description": "[Quadro de missões] Rank S-11 Descrição: Status : Completa Monstros necessários : 50 Gorila [Limitações] Pode realizar : Todo dia Base Level : 700~999 Limite de tempo : 1 horas [Recompensas] Zeny : 35,000 Item : 1 Ranking S",
+   "monster_targets": [
+    {
+     "name": "Gorila",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Gorila"
+   ],
+   "monster_ids": [
+    1499
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank S-11",
+   "id": "7edf13bcbbc4444aa0bb0eaeb04ded60",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank S-12",
+   "rank": "Rank S-12",
+   "description": "[Quadro de missões] Rank S-12 Descrição: Status : Completa Monstros necessários : 50 Monstro Marinho [Limitações] Pode realizar : Todo dia Base Level : 700~999 Limite de tempo : 1 horas [Recompensas] Zeny : 35,000 Item : 1 Ranking S",
+   "monster_targets": [
+    {
+     "name": "Monstro Marinho",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Monstro Marinho"
+   ],
+   "monster_ids": [
+    1039
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank S-12",
+   "id": "10b827fb04084c3ea8836d83b2145bd9",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-5",
+   "rank": "Rank B-5",
+   "description": "[Quadro de missões] Rank B-5 Descrição: Status : Incompleta Monstros necessários : 50 Pequena Tartaruga [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B",
+   "monster_targets": [
+    {
+     "name": "Pequena Tartaruga",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Pequena Tartaruga"
+   ],
+   "monster_ids": [
+    1318
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank B-5",
+   "id": "8630eb38e2614743a30baf7750efbd29",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-6",
+   "rank": "Rank B-6",
+   "description": "[Quadro de missões] Rank B-6 Descrição: Status : Incompleta Monstros necessários : 50 Cornutus [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B",
+   "monster_targets": [
+    {
+     "name": "Cornutus",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Cornutus"
+   ],
+   "monster_ids": [
+    1067
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank B-6",
+   "id": "0dfae17d988a4b0f8db9365a06da1711",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank A-7",
+   "rank": "Rank A-7",
+   "description": "[Quadro de missões] Rank A-7 Descrição: Status : Incompleta Monstros necessários : 50 Tartaruga [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A",
+   "monster_targets": [
+    {
+     "name": "Tartaruga",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Tartaruga"
+   ],
+   "monster_ids": [
+    1601
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank A-7",
+   "id": "2084fc7a7a55454e8ca93ccf2459c335",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank A-8",
+   "rank": "Rank A-8",
+   "description": "[Quadro de missões] Rank A-8 Descrição: Status : Incompleta Monstros necessários : 50 Grande Esquilo [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A",
+   "monster_targets": [
+    {
+     "name": "Grande Esquilo",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Grande Esquilo"
+   ],
+   "monster_ids": [
+    1041
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank A-8",
+   "id": "164c9a9bd32b4dcba2ed813da5316686",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
   }
  ],
  "menus": {

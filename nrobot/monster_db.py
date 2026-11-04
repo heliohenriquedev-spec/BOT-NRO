@@ -106,7 +106,8 @@ def _save(data, path):
 
 
 def load_captured(path=None):
-    return _load(path or CAPTURED)
+    from .monster_origin import clean_records
+    return clean_records(_load(path or CAPTURED))
 
 
 def save_captured(captured, path=None):
@@ -114,7 +115,8 @@ def save_captured(captured, path=None):
 
 
 def load_base():
-    return _load(BASE_INFO)
+    from .monster_origin import clean_records
+    return clean_records(_load(BASE_INFO))
 
 
 def monster_choice_key(map_name, species_id, name):
@@ -131,7 +133,8 @@ def maps_for_name(name, captured=None):
     for records in (load_base(), load_captured() if captured is None else captured):
         for entry in records.values():
             for map_name, names in entry.get('names_by_map', {}).items():
-                if any(plain(n) == wanted for n in names):
+                from .monster_origin import excluded_spawn
+                if any(plain(n) == wanted and not excluded_spawn(entry.get('species_id'), map_name, n) for n in names):
                     maps.add(map_name)
     return maps
 
@@ -142,15 +145,17 @@ def names_for_map(map_name, captured=None):
     for records in (load_base(), load_captured() if captured is None else captured):
         for identity, entry in records.items():
             for name in entry.get('names_by_map', {}).get(key, ()):
-                if not is_known_player(name):
+                from .monster_origin import excluded_spawn
+                if not is_known_player(name) and not excluded_spawn(identity, key, name):
                     names.setdefault(identity, set()).add(name)
     return names
 
 
 def record(captured, species_id, map_name, *, name=None, max_hp=None, walk_speed_ms=None, new_entity=False,
-           now=None):
+           now=None, owner_id=None, summoned=False):
     """Remember what the game showed about a monster; True when something new was learned."""
-    if is_known_player(name):
+    from .monster_origin import excluded_spawn
+    if is_known_player(name) or owner_id or summoned or excluded_spawn(species_id, map_name, name):
         return False
     entry = captured.setdefault(species_id, {'species_id': species_id, 'maps': {}, 'first_seen': None})
     entry.setdefault('maps', {})
@@ -342,7 +347,8 @@ def monsters_of_map(map_name, captured=None, seen=(), *, include_catalog=True, c
     ids |= set(seen)
     if catalog_fallback and not ids:
         ids = {identity for identity, entry in catalog().items() if key in entry['maps']}
-    return sorted(ids)
+    from .monster_origin import excluded_spawn
+    return sorted(i for i in ids if not excluded_spawn(i, key, name_of(i, captured)))
 
 
 def name_of(species_id, captured=None):
@@ -392,6 +398,7 @@ def extract_all(grfs, log=print):
 def export_base(log=print):
     """Developer publishing: custom monsters learned on this PC go to the shared base."""
     base, captured, sprites = load_base(), load_captured(), sprite_index()
+    corrected = base != _load(BASE_INFO)
     added = updated = images = 0
     priority_paths = set(priority_sprites().values())
     for identity, entry in captured.items():
@@ -423,7 +430,7 @@ def export_base(log=print):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(local, target)
             images += 1
-    if added or updated or images:
+    if added or updated or images or corrected:
         _save(base, BASE_INFO)
     log(f'Base de monstros: {added} novos, {updated} atualizados, {images} sprites.')
     return added, updated, images

@@ -187,6 +187,9 @@ class RouteEditor(QDialog):
         names=m.get('monster_names') or [t['name'] for t in m.get('monster_targets',[])]
         unseen=False
         for name in names:
+            from .monster_origin import excluded_spawn
+            if excluded_spawn(None, map_name, name):
+                continue
             where=maps_for_name(name)
             if where:
                 if map_key(map_name) in where:return True

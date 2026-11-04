@@ -1,7 +1,7 @@
 {
- "version": "2026.11.04.9",
- "published_at": "2026-11-04T08:11:15",
- "notes": "fix",
+ "version": "2026.11.04.10",
+ "published_at": "2026-11-04T08:39:46",
+ "notes": "Fix + Quest",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -1449,6 +1449,7 @@
   "nrobot/minimap_overlay.py",
   "nrobot/mission_details.py",
   "nrobot/monster_db.py",
+  "nrobot/monster_origin.py",
   "nrobot/monster_panel.py",
   "nrobot/network_observer.py",
   "nrobot/network_targets.py",
@@ -2087,5 +2088,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "443487b01bd0"
+ "files_digest": "c75c9d989743"
 }

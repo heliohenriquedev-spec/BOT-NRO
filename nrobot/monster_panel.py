@@ -232,6 +232,9 @@ class MapTargets(QWidget):
             labels = sorted(named, key=str.casefold) if named else [
                 seen.get(identity, {}).get('name') or monster_db.name_of(identity, captured)]
             for name in labels:
+                from .monster_origin import excluded_spawn
+                if excluded_spawn(identity, map_name, name):
+                    continue
                 choice = monster_db.monster_choice_key(map_name, identity, name) if named else None
                 present = variants.get((identity, name)) if named else seen.get(identity, {}).get('present')
                 item = QListWidgetItem(icon_for(identity), f'{name}  (ID {identity})'+(f' • {present} por perto' if present else ''))

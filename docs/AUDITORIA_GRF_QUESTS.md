@@ -1,5 +1,28 @@
 # Compatibilidade entre computadores — 04/11/2026
 
+## Correções de origem dos monstros
+
+- `hospital2`: os registros antigos de 1031 (Mula sem Cabesa/Cabeça) e 1188
+  (Tronco de madeira) não alimentam mais a lista de caça. A correção da Mula é
+  específica desse mapa; não prova que toda entidade com essa aparência é invocada.
+- `tur_dun03`: Ninkame não entra na lista de monstros nem no destaque de missões
+  compatíveis com o mapa. Sua missão continua disponível para outros mapas.
+- Tronco de madeira é tratado como entidade temporária de substituição/hide:
+  aparece em Aparições recebidas e gera informação no diagnóstico, sem autorizar
+  ataque, registrar respawn ou atribuir um dono sem evidência.
+- Entidades com `owner_id` ou `summoned` confirmado não são aprendidas como respawn
+  nem atacadas pela caça de monstros. O vínculo de dono é preservado em aparições
+  repetidas da mesma entidade e descartado em troca de mapa/reutilização de ID.
+  Sem informação de dono nos pacotes, aparência e HP sozinhos não provam invocação;
+  não se infere que todo monstro com a mesma aparência pertence a um jogador.
+- As correções também filtram cadastros antigos carregados do computador do usuário
+  e da base distribuída. Publicar grava a base compartilhada já limpa.
+
+As GRFs descriptografadas em `Arquivos_grf` continuam privadas e excluídas da
+distribuição. Podem servir à extração de ícones pelo desenvolvedor, mas caça e
+quests usam os arquivos operacionais distribuídos. Usuários não precisam dessa
+pasta para identificar munição, carregar colisões ou executar os percursos.
+
 ## Independência das GRFs visuais
 
 Na execução da caça e das quests, o relay usa `MapRepository(independent=True)`:
@@ -80,7 +103,7 @@ Os arquivos do cliente do jogo (GRF/DATA.INI) não são sobrescritos pelo atuali
 
 Neste computador, todas as GRFs listadas existem e os mapas testados carregam.
 Foram preparados 35 nomes de munição e colisões de 1.085 mapas; os cadastros
-compartilhados atuais dependem de 15 mapas. As referências das oito quests atuais
+compartilhados atuais dependem de 20 mapas. As referências das doze quests atuais
 e as conversas das missões utilizadas passaram na conferência.
 
 Sem logs dos computadores afetados, não é possível atribuir a falha deles a uma

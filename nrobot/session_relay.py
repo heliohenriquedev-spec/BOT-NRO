@@ -612,7 +612,8 @@ class SessionRelay(QuestRelay):
                 continue
             self.monsters_dirty |= record(self.monsters_seen, entity['species_id'], map_name,
                                           name=entity['name'], max_hp=entity['max_hp'],
-                                          walk_speed_ms=entity.get('walk_speed_ms'))
+                                          walk_speed_ms=entity.get('walk_speed_ms'),
+                                          owner_id=entity.get('owner_id'), summoned=entity.get('summoned', False))
 
     def write_monsters(self):
         if not self.monsters_dirty or time.monotonic()-self.monsters_written < 5:
@@ -774,6 +775,11 @@ class SessionRelay(QuestRelay):
 
     def monster_name_allowed(self, identity, species):
         from .monster_db import monster_choice_key
+        from .monster_origin import excluded_spawn, temporary_reason
+
+        entity = self.inventory.entities.get(identity) or {}
+        if temporary_reason(entity) or excluded_spawn(species, self.tracker.observer.map_name, entity.get('name')):
+            return False
 
         settings = self.settings or {}
         choices = settings.get('monster_name_choices', {})
@@ -1144,10 +1150,9 @@ class SessionRelay(QuestRelay):
             self.record_test()
             print('O ataque de teste foi enviado, mas não houve confirmação de dano no prazo. Não repetirei automaticamente.')
         state = self.tracker.snapshot(time.monotonic())
-        if (self.settings or {}).get('monster_name_choices'):
-            state['recent_entities'] = [entity for entity in state['recent_entities']
-                                        if entity.get('kind') == 'player' or self.monster_name_allowed(
-                                            entity['entity_id'], entity.get('species_id'))]
+        state['recent_entities'] = [entity for entity in state['recent_entities']
+                                   if entity.get('kind') == 'player' or self.monster_name_allowed(
+                                       entity['entity_id'], entity.get('species_id'))]
         from .map_monsters import confirmed_types
         observer = self.tracker.observer
         state['character_sync'] = {'identity_received': observer.player_id is not None,
@@ -1303,6 +1308,19 @@ class SessionRelay(QuestRelay):
                     self.next_map=transition['map']
             self.mirror_sequence += len(data)
             self.inventory.observe(events, time.monotonic())
+            from .monster_origin import temporary_reason
+            if getattr(self, 'origin_epoch', None) != self.inventory.epoch:
+                self.origin_epoch = self.inventory.epoch
+                self.origin_notified = set()
+            for event in events:
+                if event['kind'] not in ('appearance', 'name'):
+                    continue
+                entity = self.inventory.entities.get(event.get('entity_id')) or {}
+                note = temporary_reason(entity)
+                identity = entity.get('entity_id')
+                if note and identity not in self.origin_notified:
+                    self.origin_notified.add(identity)
+                    print(f'[INFO] {note} | ID {identity} | celula {entity.get("position")}')
             self.learn_monsters(events)
             self.ammo.observe(events, time.monotonic())
             self.presence.observe(events, self.tracker.observer.player_id, time.monotonic(),

@@ -20,6 +20,10 @@ def monster_assets():
 
 def is_confirmed_monster(entity, player_id=None):
     from .monster_db import is_known_player
+    from .monster_origin import temporary_reason
+
+    if temporary_reason(entity):
+        return False
 
     identity = entity['entity_id']
     # The client can receive a disguise as the negated account ID in an unsigned field.
@@ -46,6 +50,9 @@ def confirmed_types(inventory, player_id=None, *, by_name=False):
     assets = monster_assets()
     for entity in inventory.entities.values():
         identity = entity['species_id']
+        from .monster_origin import excluded_spawn
+        if excluded_spawn(identity, inventory.map_name, entity.get('name')):
+            continue
         # REDE-63: HP text in the name reply is sent by the server only for monsters, so
         # custom monsters (e.g. training dummies) missing from the client catalog still count.
         if not is_confirmed_monster(entity, player_id):
