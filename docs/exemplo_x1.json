@@ -1,0 +1,16 @@
+{
+  "nome": "Exemplo de X1",
+  "versao": 1,
+  "descricao": "Lido de cima para baixo: a primeira regra cujas condicoes valem decide a acao.",
+  "regras": [
+    {"nome": "Fugir com pouca vida", "se": {"minha_vida_pct": {"<": 25}}, "faca": {"acao": "afastar", "celulas": 6}},
+    {"nome": "Esperar o inimigo terminar de conjurar", "se": {"inimigo_conjurando": true, "distancia_inimigo": {">": 5}},
+     "faca": {"acao": "esperar", "segundos": 0.5}},
+    {"nome": "Kunai de perto", "se": {"distancia_inimigo": {"<=": 3}, "habilidade_pronta": 524},
+     "faca": {"acao": "habilidade", "id": 524, "nivel": 10}},
+    {"nome": "Shuriken de longe", "se": {"distancia_inimigo": {">": 3, "<=": 9}, "habilidade_pronta": 523},
+     "faca": {"acao": "habilidade", "id": 523, "nivel": 10}},
+    {"nome": "Chegar perto", "se": {"distancia_inimigo": {">": 9}}, "faca": {"acao": "aproximar"}},
+    {"nome": "Padrao", "faca": {"acao": "atacar"}}
+  ]
+}

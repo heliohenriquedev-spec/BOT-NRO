@@ -81,6 +81,7 @@ class CollisionMap:
         self.components = {}
         self.clearances = {}
         self.forbidden = frozenset()  # portal areas: walking in would change the map
+        self.links = ()  # inner portals: (cell, arrival) on this same map
         if not 1 <= width <= 1024 or not 1 <= height <= 1024 or len(cells) != width*height:
             raise ValueError('Dimensões de colisão inválidas')
 
@@ -156,7 +157,7 @@ class CollisionMap:
         return True
 
     def route(self, start, target, blocked=frozenset(), max_nodes=6000, *, exact=False, visited_sectors=frozenset(),
-              revisit_cost=2.5, greed=1.0, partial=False):
+              revisit_cost=2.5, greed=1.0, partial=False, wall_cost=2):
         """A* path. greed > 1 weights the heuristic (much faster, slightly longer paths);
         partial returns the path to the expanded cell closest to target when the budget runs out."""
         start, target = tuple(start), tuple(target)
@@ -190,7 +191,7 @@ class CollisionMap:
                 if not self.edge(point, nxt, blocked):
                     continue
                 new_cost = cost+(math.sqrt(2) if dx and dy else 1)
-                new_cost += max(0, 3-self.clearance(nxt))*2
+                new_cost += max(0, 3-self.clearance(nxt))*wall_cost
                 if (nxt[0]//4, nxt[1]//4) in visited_sectors and (nxt[0]//4, nxt[1]//4) != (start[0]//4, start[1]//4):
                     new_cost += revisit_cost
                 if new_cost < costs.get(nxt, float('inf')):

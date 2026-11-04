@@ -32,17 +32,19 @@ def restart(relay):
     relay.hunt.start()
 
 
-def test_hidden_gm_acting_stops_everything_until_started_again(tmp_path, monkeypatch):
+def test_only_a_confirmed_hide_stops_everything_until_started_again(tmp_path, monkeypatch):
     async def scenario():
         relay = relay_for(tmp_path, monkeypatch)
-        see(relay, [decode(struct.pack('<HIB', 0xc0, GM, 3))], 0)  # emote from nobody visible
-        assert relay.commands_blocked and not relay.hunt.enabled
-        assert '@hide' in relay.emergency['reason'] and relay.emergency['detections'][0]['kind'] == 'invisible'
-        restart(relay)
-        see(relay, [decode(struct.pack('<HIB', 0xc0, GM, 3))], 5)  # the same one again: user already knows
-        assert relay.hunt.enabled and relay.emergency['id'] == 1
+        see(relay, [decode(struct.pack('<HIB', 0xc0, GM, 3))], 0)  # someone unseen acting: pause only, no stop
+        assert not relay.commands_blocked and relay.emergency is None
         see(relay, [decode(struct.pack('<HIHHIB', 0x229, 2000999, 0, 0, 0x40, 0))], 6)  # @hide switched on
-        assert not relay.hunt.enabled and relay.emergency['id'] == 2
+        assert relay.commands_blocked and not relay.hunt.enabled and relay.emergency['id'] == 1
+        assert '@hide' in relay.emergency['reason']
+        restart(relay)
+        see(relay, [decode(struct.pack('<HIHHIB', 0x229, 2000999, 0, 0, 0x40, 0))], 7)  # same one: user already knows
+        assert relay.hunt.enabled and relay.emergency['id'] == 1
+        see(relay, [decode(struct.pack('<HIHHIB', 0x229, 2000998, 0, 0, 0x02, 0))], 8)  # common hide: no stop
+        assert relay.hunt.enabled and relay.emergency['id'] == 1
     asyncio.run(scenario())
 
 
@@ -69,3 +71,28 @@ def test_whitelisted_friend_in_hide_does_not_stop(tmp_path, monkeypatch):
         see(relay, [decode(struct.pack('<HIB', 0xc0, FRIEND, 3))], 0)
         assert relay.hunt.enabled and relay.emergency is None
     asyncio.run(scenario())
+
+
+def test_a_gm_on_screen_by_name_really_stops_everything(tmp_path, monkeypatch):
+    async def scenario():
+        relay = relay_for(tmp_path, monkeypatch)
+        relay.player_names[2000444] = '[GM] Hokage'
+        see(relay, [{'kind': 'appearance', 'entity_id': 2000444, 'species_id': 25, 'position': [15, 10], 'option': 0},
+                    {'kind': 'name', 'entity_id': 2000444, 'name': '[GM] Hokage'}], 0)
+        assert relay.commands_blocked and not relay.hunt.enabled
+        assert relay.emergency['detections'][0]['kind'] == 'gm' and 'GM' in relay.emergency['reason']
+    asyncio.run(scenario())
+
+
+def test_gm_signs_speed_guild_teleports_and_listed_visuals(tmp_path):
+    from nrobot.gm_signs import GmSigns
+    signs = GmSigns(); signs.config = {'visuais': {5038}, 'marcas': ['Hokage']}
+    row = {'entity_id': 2000444, 'name': 'Fulano'}
+    assert signs.reasons(row, {}, 150, 0) == []  # an ordinary character
+    assert signs.reasons(row, {}, 20, 0) == ['velocidade anormal (20 ms/celula)']
+    assert signs.reasons(row, {'guild': 'Equipe GM'}, 150, 0) == ['guilda de GM/staff']
+    assert signs.reasons({**row, 'name': 'Hokage Sombra'}, {}, 150, 0) == ['nome de GM/staff']
+    assert signs.reasons(row, {'look': {'head_top': 5038}}, 150, 0) == ['visual marcado como de GM (5038)']
+    for t in (1, 10):
+        signs.observe([{'kind': 'appearance', 'entity_id': 2000444, 'position': [12, 10], 'spawned': True}], [10, 10], t)
+    assert signs.teleported_often(2000444, 11) and signs.reasons(row, {}, 150, 11) == []  # portals: a note, never a stop

@@ -59,6 +59,8 @@ class SharedQuestRelay:
             elif recording['scope']=='access':
                 steps=lib.validate_access(recording['steps'],b,o.map_name,o.player)
                 if steps[-1].get('position')!=list(o.player):steps.append(dict(kind='walk',map=o.map_name,position=list(o.player)))
+                from .map_routes import compact
+                steps=compact(steps)  # the walk to each NPC/portal is computed, not replayed
                 data['access_paths'].append(dict(id=uuid.uuid4().hex,board_id=b['id'],
                     name=steps[0]['map']+' → '+b['name'],steps=steps))
             else:
@@ -105,11 +107,11 @@ class SharedQuestRelay:
                 identities=request.get('mission_ids') or [request['mission_id']]
                 if len(set(identities))!=len(identities):raise ValueError('Missao repetida na selecao')
                 # Missions of the same board are taken in one visit; Retorno only when leaving the board.
-                identities=sorted(identities,key=lambda i:[m['board_id'] for m in data['missions']].index(lib.mission(data,i)['board_id']))
+                identities=sorted(identities,key=lambda i:lib.board_rank(data,i))
                 for identity in identities:
                     m=lib.mission(data,identity);b=lib.board(data,m['board_id'])
                     steps=effective_steps(data,m,mode);lib.validate_conversation(steps,b)
-                    if not any(s['kind']=='verify_slot' for s in steps) and not text(confirmation(data,m,mode)):
+                    if not any(s['kind'] in ('verify_slot','verify_slot_absent') for s in steps) and not text(confirmation(data,m,mode)):
                         raise ValueError('Grave antes as opcoes e a confirmacao de '+('pegar' if mode=='pickup' else 'entregar')+': '+m['name'])
                 m=lib.mission(data,identities[0]);b=lib.board(data,m['board_id'])
                 names=', '.join(lib.mission(data,i)['name'] for i in identities)

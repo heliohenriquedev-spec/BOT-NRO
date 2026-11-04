@@ -65,3 +65,65 @@ def lua50_chunk():
 
 def test_compiled_lua_tables_are_read_without_running_them():
     assert tables(lua50_chunk()) == {'T': {'JT_NINJA': 'Ninja'}}
+
+
+def test_players_tab_is_not_rebuilt_when_nothing_visible_changed(tmp_path, monkeypatch):
+    import os
+    os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
+    from PySide6.QtWidgets import QApplication, QHeaderView
+    from nrobot import player_registry
+    from nrobot.player_panel import PlayerPanel
+    app = QApplication.instance() or QApplication([])
+    panel = PlayerPanel()
+    panel.players = {str(i): dict(entity_id=2000000+i, name=f'P{i}', sightings=1) for i in range(30)}
+    panel.show(); panel.fill()
+    assert panel.table.rowCount() == 30
+    assert panel.table.horizontalHeader().sectionResizeMode(0) == QHeaderView.Interactive
+    first = panel.table.item(0, 2)
+    panel.fill()
+    assert panel.table.item(0, 2) is first  # same rows: table left as it was
+    panel.present = {2000005}; panel.fill()
+    assert panel.table.item(0, 0).text() == '● sim'
+    panel.close()
+
+
+def idle_character(identity, *, level, sex, weapon, shield, top, guild_id):
+    message = bytearray(58)
+    struct.pack_into('<HIH', message, 0, 0x22a, identity, 150)
+    struct.pack_into('<HH', message, 16, 4010, 12)  # class, hair
+    struct.pack_into('<HHHHH', message, 20, weapon, shield, 0, top, 0)
+    struct.pack_into('<I', message, 36, guild_id)
+    message[49] = sex
+    message[50:53] = bytes([25, 1, 0x40])  # cell (100,20)
+    struct.pack_into('<H', message, 56, level)
+    return bytes(message)
+
+
+def name_all(identity, name, party, guild, title):
+    message = bytearray(102)
+    struct.pack_into('<HI', message, 0, 0x195, identity)
+    for offset, text in ((6, name), (30, party), (54, guild), (78, title)):
+        message[offset:offset+len(text)] = text.encode('cp1252')
+    return bytes(message)
+
+
+def test_level_sex_look_party_and_guild_title_are_kept(tmp_path):
+    from nrobot.packet_reader import decode
+    from nrobot.player_registry import PlayerRegistry
+    registry = PlayerRegistry(tmp_path/'r.json')
+    events = [decode(idle_character(2000555, level=812, sex=0, weapon=1224, shield=0, top=5038, guild_id=77)),
+              decode(name_all(2000555, 'Sakura', 'Time 7', 'Konoha', 'Lider'))]
+    registry.observe(events, 2000001, 'konoha')
+    entry = registry.players['2000555']
+    assert (entry['level'], entry['sex'], entry['guild_id']) == (812, 'F', 77)
+    assert entry['look']['weapon'] == 1224 and entry['look']['head_top'] == 5038
+    assert (entry['name'], entry['party'], entry['guild'], entry['guild_title']) == ('Sakura', 'Time 7', 'Konoha', 'Lider')
+
+
+def test_public_chat_names_the_speaker_and_a_rename_is_remembered(tmp_path):
+    from nrobot.player_registry import PlayerRegistry
+    registry = PlayerRegistry(tmp_path/'r.json')
+    registry.observe([dict(kind='actor_signal', signal='chat', entity_id=2000556, name='Naruto')], 2000001, 'konoha')
+    registry.observe([dict(kind='name', entity_id=2000556, name='Naruto2')], 2000001, 'konoha')
+    entry = registry.players['2000556']
+    assert entry['name'] == 'Naruto2' and entry['former_names'] == ['Naruto']

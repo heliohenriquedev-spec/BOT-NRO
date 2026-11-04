@@ -78,18 +78,20 @@ def test_legacy_routes_keep_saved_travel_steps():
     assert not normalized['lifecycle_enabled'] and normalized['steps']==data['steps']
 
 
-def test_editor_preserves_independent_segments():
+def test_editor_preserves_independent_segments(tmp_path,monkeypatch):
+    # Older routes keep their own recorded segments when edited in the simplified editor.
     os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
     from PySide6.QtWidgets import QApplication
     from nrobot.quest_panel import RouteEditor
+    from nrobot import quest_library as lib, map_routes
+    monkeypatch.setattr(lib,'FILE',tmp_path/'library.json');monkeypatch.setattr(map_routes,'FILE',tmp_path/'maps.json')
+    lib.save(dict(missions=[dict(id='A',name='Rank A-1',board_id='vip')]))
     app=QApplication.instance() or QApplication([])
-    route=lifecycle();editor=RouteEditor(route,{})
-    assert editor.read_steps('pickup')==route['pickup_steps']
-    assert editor.read_steps('travel')==route['steps']
-    assert editor.read_steps('delivery')==route['delivery_steps']
-    editor.kills.setValue(60);editor.accept()
-    assert editor.route['kills']==60 and editor.route['delivery_confirmation']=='Recompensa recebida'
-    assert editor.route['pickup_steps']==route['pickup_steps']
+    route={**lifecycle(),'mission_ids':['A']};editor=RouteEditor(route,{})
+    assert editor.map_route.currentData()==''  # "percurso gravado nesta rota"
+    editor.accept()
+    assert editor.route['steps']==route['steps'] and editor.route['pickup_steps']==route['pickup_steps']
+    assert editor.route['delivery_confirmation']=='Recompensa recebida'
     editor.close()
 
 

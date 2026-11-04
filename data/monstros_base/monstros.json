@@ -1,4 +1,19 @@
 {
+ "1005": {
+  "species_id": 1005,
+  "maps": {
+   "prt_sewb2": 0
+  },
+  "name": "Morcego",
+  "max_hp": 300,
+  "walk_speed_ms": 100,
+  "names_by_map": {
+   "prt_sewb2": [
+    "Morcego"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1009": {
   "species_id": 1009,
   "maps": {
@@ -8,7 +23,12 @@
   "walk_speed_ms": 150,
   "name": "Condor",
   "max_hp": 150000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "ve_fild04": [
+    "Condor"
+   ]
+  }
  },
  "1010": {
   "species_id": 1010,
@@ -16,6 +36,21 @@
    "areia": 18
   },
   "walk_speed_ms": 500,
+  "sprite_source": "GRF prioritário"
+ },
+ "1018": {
+  "species_id": 1018,
+  "maps": {
+   "um_dun01": 0
+  },
+  "name": "Borboleta",
+  "max_hp": 392000,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "um_dun01": [
+    "Borboleta"
+   ]
+  },
   "sprite_source": "GRF prioritário"
  },
  "1025": {
@@ -82,6 +117,9 @@
    ],
    "pvp_n_1-1": [
     "Girino"
+   ],
+   "moc_fild01": [
+    "Girino"
    ]
   }
  },
@@ -114,6 +152,9 @@
    ],
    "pvp_n_1-1": [
     "Filhote de cobra"
+   ],
+   "moc_fild01": [
+    "Filhote de Cobra"
    ]
   }
  },
@@ -141,7 +182,12 @@
   "walk_speed_ms": 300,
   "name": "Manmosukas",
   "max_hp": 157000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "ve_fild04": [
+    "Manmosukas"
+   ]
+  }
  },
  "1041": {
   "species_id": 1041,
@@ -158,6 +204,21 @@
    ]
   }
  },
+ "1042": {
+  "species_id": 1042,
+  "maps": {
+   "prt_sewb2": 0
+  },
+  "captured_sprite": true,
+  "name": "Mosquito",
+  "max_hp": 610,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "prt_sewb2": [
+    "Mosquito"
+   ]
+  }
+ },
  "1051": {
   "species_id": 1051,
   "maps": {
@@ -168,7 +229,7 @@
    "pvp_n_1-1": 5
   },
   "walk_speed_ms": 150,
-  "name": "Bikouchuu",
+  "name": "Bicouchuu",
   "max_hp": 900,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -185,6 +246,24 @@
    ],
    "pvp_n_1-1": [
     "Bikouchuu"
+   ],
+   "cmd_fild09": [
+    "Bikouchuu"
+   ]
+  }
+ },
+ "1053": {
+  "species_id": 1053,
+  "maps": {
+   "prt_sewb4": 0
+  },
+  "captured_sprite": true,
+  "name": "Barata Macho",
+  "max_hp": 12300,
+  "walk_speed_ms": 200,
+  "names_by_map": {
+   "prt_sewb4": [
+    "Barata Macho"
    ]
   }
  },
@@ -205,6 +284,36 @@
   "walk_speed_ms": 200,
   "name": "Enma",
   "max_hp": 2468000
+ },
+ "1058": {
+  "species_id": 1058,
+  "maps": {
+   "gld_dun03": 0
+  },
+  "name": "Gafanhoto",
+  "max_hp": 750000,
+  "walk_speed_ms": 200,
+  "names_by_map": {
+   "gld_dun03": [
+    "Gafanhoto"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1059": {
+  "species_id": 1059,
+  "maps": {
+   "um_dun02": 0
+  },
+  "name": "Abelha Chefe",
+  "max_hp": 451000,
+  "walk_speed_ms": 100,
+  "names_by_map": {
+   "um_dun02": [
+    "Abelha Chefe"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
  },
  "1062": {
   "species_id": 1062,
@@ -243,6 +352,21 @@
     "Cornutus"
    ]
   }
+ },
+ "1070": {
+  "species_id": 1070,
+  "maps": {
+   "prt_sewb2": 0
+  },
+  "name": "Verme",
+  "max_hp": 310,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "prt_sewb2": [
+    "Verme"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
  },
  "1073": {
   "species_id": 1073,
@@ -288,7 +412,12 @@
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 2000,
   "name": "Planta Medicinal ",
-  "max_hp": 10
+  "max_hp": 10,
+  "names_by_map": {
+   "ve_fild04": [
+    "Planta Medicinal "
+   ]
+  }
  },
  "1093": {
   "species_id": 1093,
@@ -300,7 +429,12 @@
   "walk_speed_ms": 200,
   "name": "Coelho",
   "max_hp": 151000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "ve_fild04": [
+    "Coelho"
+   ]
+  }
  },
  "1099": {
   "species_id": 1099,
@@ -329,6 +463,21 @@
   "sprite_source": "Akamaru1.spr (Naruto Ultimate)",
   "captured_sprite": true
  },
+ "1114": {
+  "species_id": 1114,
+  "maps": {
+   "um_dun02": 0
+  },
+  "name": "Abelha",
+  "max_hp": 390000,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "um_dun02": [
+    "Abelha"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1118": {
   "species_id": 1118,
   "maps": {
@@ -343,6 +492,21 @@
     "Planta Carnívora"
    ]
   }
+ },
+ "1128": {
+  "species_id": 1128,
+  "maps": {
+   "yggdrasil01": 0
+  },
+  "name": "Besouro",
+  "max_hp": 300000,
+  "walk_speed_ms": 200,
+  "names_by_map": {
+   "yggdrasil01": [
+    "Besouro"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
  },
  "1139": {
   "species_id": 1139,
@@ -359,6 +523,36 @@
    ]
   }
  },
+ "1147": {
+  "species_id": 1147,
+  "maps": {
+   "gld_dun03": 0
+  },
+  "name": "Inseto Rainha",
+  "max_hp": 870000,
+  "walk_speed_ms": 200,
+  "names_by_map": {
+   "gld_dun03": [
+    "Inseto Rainha"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1154": {
+  "species_id": 1154,
+  "maps": {
+   "gl_prison": 0
+  },
+  "name": "Nukenin Ladrão ",
+  "max_hp": 2111230,
+  "walk_speed_ms": 300,
+  "names_by_map": {
+   "gl_prison": [
+    "Nukenin Ladrão "
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1159": {
   "species_id": 1159,
   "maps": {
@@ -367,7 +561,12 @@
   "walk_speed_ms": 200,
   "name": "Inseto Guardião",
   "max_hp": 753000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "gld_dun03": [
+    "Inseto Guardião"
+   ]
+  }
  },
  "1177": {
   "species_id": 1177,
@@ -417,6 +616,70 @@
     "Verme Maldito"
    ]
   }
+ },
+ "1196": {
+  "species_id": 1196,
+  "maps": {
+   "alde_dun02": 0
+  },
+  "name": "Shinobi Prisioneiro",
+  "max_hp": 380000,
+  "walk_speed_ms": 350,
+  "names_by_map": {
+   "alde_dun02": [
+    "Shinobi Prisioneiro"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1201": {
+  "species_id": 1201,
+  "maps": {
+   "um_dun02": 0,
+   "prt_sewb4": 0
+  },
+  "name": "Shinobi Ladrão",
+  "max_hp": 120000,
+  "walk_speed_ms": 200,
+  "names_by_map": {
+   "um_dun02": [
+    "Abelha Macho"
+   ],
+   "prt_sewb4": [
+    "Shinobi Ladrão"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1202": {
+  "species_id": 1202,
+  "maps": {
+   "alde_dun02": 0
+  },
+  "name": "Prisioneiro Assassino",
+  "max_hp": 363000,
+  "walk_speed_ms": 700,
+  "names_by_map": {
+   "alde_dun02": [
+    "Prisioneiro Assassino"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1209": {
+  "species_id": 1209,
+  "maps": {
+   "prt_sewb4": 0
+  },
+  "name": "Ratasana",
+  "max_hp": 12000,
+  "walk_speed_ms": 100,
+  "names_by_map": {
+   "prt_sewb4": [
+    "Ratasana"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
  },
  "1210": {
   "species_id": 1210,
@@ -478,8 +741,26 @@
    ],
    "pvp_n_1-1": [
     "Onbba"
+   ],
+   "moc_fild01": [
+    "Onbba"
    ]
   }
+ },
+ "1257": {
+  "species_id": 1257,
+  "maps": {
+   "alde_dun02": 0
+  },
+  "name": "Prisioneiro Fugitivo",
+  "max_hp": 366000,
+  "walk_speed_ms": 400,
+  "names_by_map": {
+   "alde_dun02": [
+    "Prisioneiro Fugitivo"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
  },
  "1262": {
   "species_id": 1262,
@@ -519,6 +800,26 @@
   "walk_speed_ms": 100,
   "name": "Inseto Rei",
   "max_hp": 755000,
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "gld_dun03": [
+    "Inseto Rei"
+   ]
+  }
+ },
+ "1293": {
+  "species_id": 1293,
+  "maps": {
+   "yggdrasil01": 0
+  },
+  "name": "Borboleta Macho",
+  "max_hp": 69000,
+  "walk_speed_ms": 155,
+  "names_by_map": {
+   "yggdrasil01": [
+    "Borboleta Macho"
+   ]
+  },
   "sprite_source": "GRF prioritário"
  },
  "1294": {
@@ -567,7 +868,12 @@
   "walk_speed_ms": 290,
   "name": "Kyodaigumo",
   "max_hp": 9000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "cmd_fild09": [
+    "Kyodaigumo"
+   ]
+  }
  },
  "1305": {
   "species_id": 1305,
@@ -626,6 +932,21 @@
    ]
   }
  },
+ "1321": {
+  "species_id": 1321,
+  "maps": {
+   "yggdrasil01": 0
+  },
+  "name": "Lavadeira",
+  "max_hp": 300000,
+  "walk_speed_ms": 200,
+  "names_by_map": {
+   "yggdrasil01": [
+    "Lavadeira"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1322": {
   "species_id": 1322,
   "maps": {
@@ -673,6 +994,25 @@
   "name": "Katsuyo",
   "max_hp": 2468000
  },
+ "1401": {
+  "species_id": 1401,
+  "maps": {
+   "alde_dun02": 0,
+   "gl_prison": 0
+  },
+  "name": "Nukenin Assassino ",
+  "max_hp": 1611230,
+  "walk_speed_ms": 300,
+  "names_by_map": {
+   "alde_dun02": [
+    "Nukenin Assassino "
+   ],
+   "gl_prison": [
+    "Nukenin Assassino "
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1402": {
   "species_id": 1402,
   "maps": {
@@ -695,7 +1035,27 @@
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 200,
   "name": "Chamu",
-  "max_hp": 152000
+  "max_hp": 152000,
+  "names_by_map": {
+   "ve_fild04": [
+    "Chamu"
+   ]
+  }
+ },
+ "1408": {
+  "species_id": 1408,
+  "maps": {
+   "um_dun01": 0
+  },
+  "name": "Borboleta Sanguinária",
+  "max_hp": 398000,
+  "walk_speed_ms": 145,
+  "names_by_map": {
+   "um_dun01": [
+    "Borboleta Sanguinária"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
  },
  "1418": {
   "species_id": 1418,
@@ -725,6 +1085,21 @@
   "sprite_source": "dados do jogo",
   "maps": {}
  },
+ "1494": {
+  "species_id": 1494,
+  "maps": {
+   "um_dun01": 0
+  },
+  "name": "Besouro-Rei",
+  "max_hp": 396000,
+  "walk_speed_ms": 165,
+  "names_by_map": {
+   "um_dun01": [
+    "Besouro-Rei"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1499": {
   "species_id": 1499,
   "maps": {
@@ -749,7 +1124,12 @@
   "walk_speed_ms": 165,
   "name": "Sanjuu Kyodaireo",
   "max_hp": 154000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "ve_fild04": [
+    "Sanjuu Kyodaireo"
+   ]
+  }
  },
  "1552": {
   "species_id": 1552,
@@ -760,6 +1140,21 @@
   "captured_sprite": true,
   "name": "Sacerdotisa Sombria",
   "max_hp": 500000
+ },
+ "1589": {
+  "species_id": 1589,
+  "maps": {
+   "gl_sew02": 0
+  },
+  "captured_sprite": true,
+  "name": "Shinobi Assassino",
+  "max_hp": 45000,
+  "walk_speed_ms": 175,
+  "names_by_map": {
+   "gl_sew02": [
+    "Shinobi Assassino"
+   ]
+  }
  },
  "1597": {
   "species_id": 1597,
@@ -782,6 +1177,40 @@
    ]
   }
  },
+ "1618": {
+  "species_id": 1618,
+  "maps": {
+   "gl_sew02": 0
+  },
+  "name": "Barata",
+  "max_hp": 36000,
+  "walk_speed_ms": 350,
+  "names_by_map": {
+   "gl_sew02": [
+    "Barata"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1619": {
+  "species_id": 1619,
+  "maps": {
+   "prt_sewb4": 0,
+   "gl_sew02": 0
+  },
+  "name": "Bacteria",
+  "max_hp": 10800,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "prt_sewb4": [
+    "Bacteria"
+   ],
+   "gl_sew02": [
+    "Bacteria"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1628": {
   "species_id": 1628,
   "maps": {
@@ -803,7 +1232,12 @@
   "walk_speed_ms": 140,
   "name": "Gremlin",
   "max_hp": 399000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "anthell02": [
+    "Gremlin"
+   ]
+  }
  },
  "1634": {
   "species_id": 1634,
@@ -852,7 +1286,46 @@
   "name": "Genin",
   "max_hp": 36000,
   "sprite_source": "Genin.spr (Naruto Ultimate)",
-  "captured_sprite": true
+  "captured_sprite": true,
+  "names_by_map": {
+   "cmd_fild09": [
+    "Genin"
+   ]
+  }
+ },
+ "1769": {
+  "species_id": 1769,
+  "maps": {
+   "gl_sew02": 0,
+   "alde_dun02": 0
+  },
+  "name": "Shinobi Sanguinário",
+  "max_hp": 45500,
+  "walk_speed_ms": 300,
+  "names_by_map": {
+   "gl_sew02": [
+    "Shinobi Sanguinário"
+   ],
+   "alde_dun02": [
+    "Shinobi Sanguinário"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1771": {
+  "species_id": 1771,
+  "maps": {
+   "gl_prison": 0
+  },
+  "name": "Nukenin",
+  "max_hp": 1300000,
+  "walk_speed_ms": 300,
+  "names_by_map": {
+   "gl_prison": [
+    "Nukenin"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
  },
  "1780": {
   "species_id": 1780,
@@ -886,6 +1359,9 @@
     "Filhote de Katsuyu"
    ],
    "pvp_n_1-1": [
+    "Filhote de Katsuyu"
+   ],
+   "moc_fild01": [
     "Filhote de Katsuyu"
    ]
   }
@@ -927,11 +1403,35 @@
  "1836": {
   "species_id": 1836,
   "maps": {
-   "yuno_in01": 43
+   "yuno_in01": 43,
+   "areia": 0
   },
   "walk_speed_ms": 300,
   "name": "Boneco de Treino",
   "max_hp": 4294967295,
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "yuno_in01": [
+    "Boneco de Treino"
+   ],
+   "areia": [
+    "Boneco de Treino"
+   ]
+  }
+ },
+ "1839": {
+  "species_id": 1839,
+  "maps": {
+   "gl_prison": 0
+  },
+  "name": "Nukenin Procurado ",
+  "max_hp": 75112,
+  "walk_speed_ms": 300,
+  "names_by_map": {
+   "gl_prison": [
+    "Nukenin Procurado "
+   ]
+  },
   "sprite_source": "GRF prioritário"
  },
  "1917": {
@@ -943,6 +1443,11 @@
   "name": "Polvo Gigante",
   "max_hp": 4690000,
   "sprite_source": "GRF prioritário"
+ },
+ "1983": {
+  "species_id": 1983,
+  "captured_sprite": true,
+  "maps": {}
  },
  "2407": {
   "species_id": 2407,

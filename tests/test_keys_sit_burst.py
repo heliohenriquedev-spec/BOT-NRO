@@ -55,7 +55,7 @@ def test_bot_sits_while_a_player_is_near_and_stands_before_resuming(tmp_path, mo
 
 def test_hotkeys_are_validated():
     assert validate({**DEFAULTS, 'hotkey_hunt': 'F9', 'hotkey_minimap': 'Num 5'})['hotkey_hunt'] == 'F9'
-    for wrong in ({'hotkey_hunt': 'F12'}, {'hotkey_hunt': 'End', 'hotkey_minimap': 'End'}, {'hotkey_minimap': 'A'}):
+    for wrong in ({'hotkey_hunt': 'End', 'hotkey_minimap': 'End'}, {'hotkey_minimap': 'A'}):  # F12 is a normal key now
         with pytest.raises(ValueError):
             validate({**DEFAULTS, **wrong})
     with pytest.raises(ValueError):

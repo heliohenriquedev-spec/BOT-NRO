@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 from collections import deque
 import asyncio
+import re
 from datetime import datetime
 import json
 import math
@@ -21,6 +22,9 @@ from .packet_encoder import attack, skill, move, body_action, SIT, STAND
 from .packet_reader import position
 from .entity_inventory import EntityInventory
 from .quest_relay import QuestRelay
+
+
+from .gm_signs import staff_name  # noqa: E402  (GM/staff tags in names)
 
 
 class HuntTargetChanged(ValueError):
@@ -261,14 +265,20 @@ class SessionRelay(QuestRelay):
         if self.rotation is not None:
             self.rotation.summons.mode = settings['summon_queue_mode']
             self.hunt.use_skills = False
-        self.hunt.auto_movement = settings['auto_movement'] and not self.navigation_stationary
+        self.manual_movement = settings.get('manual_movement', False)
+        self.hunt.auto_movement = settings['auto_movement'] and not self.manual_movement and not self.navigation_stationary
         if not self.hunt.auto_movement and self.hunt.pending and self.hunt.pending['kind'] == 'move':
             self.hunt.pending = None
-        if settings['patrol'] and settings['auto_movement']:
+        if settings['patrol'] and settings['auto_movement'] and not self.manual_movement:
+            layout = dict(spacing=settings['patrol_spacing'], coverage=settings['patrol_coverage']/100,
+                          wall_margin=settings['patrol_wall_margin'] if settings['patrol_avoid_walls'] else 1,
+                          avoid_walls=settings['patrol_avoid_walls'])
             if self.hunt.patrol is None:
-                self.hunt.patrol = PacketPatrol(settings['patrol_step'])
+                self.hunt.patrol = PacketPatrol(settings['patrol_step'], **layout)
             else:
+                self.hunt.patrol.configure(**layout)
                 self.hunt.patrol.max_step = settings['patrol_step']
+            self.hunt.patrol.GOAL_TIMEOUT = settings['patrol_give_up']
         else:
             self.hunt.patrol = None
         observer = self.tracker.observer
@@ -305,6 +315,26 @@ class SessionRelay(QuestRelay):
         if motion is not None:
             self.hunt.ready_at = max(self.hunt.ready_at, motion['at']+motion['duration'])
 
+    OVERLAY_CLICKS = (0xa7, 0x89, 0x90)  # walk, attack/target click, NPC click
+
+    def drop_clicks_under_overlay(self, data):
+        """Clicks the game sends while the cursor is over the bot's minimap/counter are dropped."""
+        frames = self.native_frames.frames
+        if not frames or not any(op in self.OVERLAY_CLICKS for op, _ in frames) or self.native_frames.buffer:
+            return data
+        flag = self.folder/'cursor_sobre_janela'
+        try:
+            if time.time()-flag.stat().st_mtime > 120:  # stale flag (panel closed mid-hover)
+                return data
+        except OSError:
+            return data
+        if b''.join(frame for _, frame in frames) != bytes(data):
+            return data  # not exactly whole frames: forward untouched
+        kept = b''.join(frame for op, frame in frames if op not in self.OVERLAY_CLICKS)
+        if 0xa7 in (op for op, _ in frames):
+            self.manual_active = False  # it was the drag, not the player walking
+        return kept
+
     def inspect_native_frames(self, data):
         """REDE-55: called under send_lock before forwarding native client bytes."""
         completed = self.native_frames.feed(data)
@@ -326,7 +356,7 @@ class SessionRelay(QuestRelay):
                     origin = 'mouse no jogo' if opcode == 0x8c else 'clique no jogo'
                     if self.capture_player(identity, origin):
                         break
-        if self.hunt is not None and 0xa7 in completed:
+        if self.hunt is not None and 0xa7 in completed and not getattr(self, 'manual_movement', False):
             # REDE-76: a click on the ground hands control to the player for a moment only.
             if not self.manual_active:
                 self.record_hunt({'kind': 'manual_movement_override'})
@@ -466,7 +496,43 @@ class SessionRelay(QuestRelay):
                      and math.dist(state['player_position'], row['position']) <= self.hunt.SEARCH_RADIUS]
         return {**state, 'recent_entities': preferred} if preferred else state
 
+    def attacker_species(self, now):
+        """Species of the monsters attacking the character, when more than the configured number do."""
+        from .network_targets import is_player_id
+        from .presence_guard import monster_sprite
+        if self.hunt is None:
+            return set()
+        attackers = {}
+        for identity, at in list(self.hunt.aggressors.items()):
+            entity = self.inventory.entities.get(identity)
+            if (now-at <= 10 and entity and entity['present_last_observation'] and not is_player_id(identity)
+                    and monster_sprite(entity['species_id'])):
+                attackers[identity] = entity['species_id']
+        limit = (self.settings or {}).get('ignore_attackers', 0)
+        return set(attackers.values()) if len(attackers) > limit else set()
+
+    def include_attackers(self, now):
+        """Monsters attacking (above the ignore limit) become targets, whatever their species, until
+        they stop; the configured targets stay as they are."""
+        from .network_targets import Entity
+        observer = self.tracker.observer
+        if not self.settings:
+            return
+        wanted = set(self.settings['species']) | self.attacker_species(now)
+        if wanted == observer.species:
+            return
+        added = wanted-observer.species
+        observer.species = wanted
+        for e in self.inventory.entities.values():
+            if (e['species_id'] in added and e['present_last_observation']
+                    and (observer.registry.ttl is None or now-e['last_seen'] <= observer.registry.ttl)):
+                observer.registry.update(Entity(e['entity_id'], e['species_id'], *e['position'], e['last_seen'], 'monster',
+                    destination=tuple(e['destination']) if e.get('destination') else None, walk_speed_ms=e.get('walk_speed_ms')))
+        if added:
+            self.record_hunt({'kind': 'attackers_targeted', 'species': sorted(added)})
+
     def plan_group_or_hunt(self, state, now, speed, collision):
+        self.include_attackers(now)
         if not self.group_follower():
             return self.hunt.plan(state,now,speed,collision=collision)
         leader_id=self.group_leader_id()
@@ -784,7 +850,7 @@ class SessionRelay(QuestRelay):
                 if self.quests.recording:raise ValueError('Salve ou descarte a gravacao antes de iniciar a caca')
                 if self.quests.active:self.quest_stop('Controle transferido para caca manual')
                 if not game_gate() or self.upstream is None:
-                    raise ValueError('Entre no personagem pelo perfil local antes de iniciar; libere F12')
+                    raise ValueError('Entre no personagem pelo perfil local antes de iniciar; libere os envios')
                 self.validate_navigation_start()
                 self.commands_blocked = False
                 self.hunt.start()
@@ -824,6 +890,24 @@ class SessionRelay(QuestRelay):
             path.unlink(missing_ok=True)
         self.status()
 
+    def schedule_character_choice(self, char_list, upstream):
+        """Login automatico: the character named in the panel is picked from the server's list."""
+        from . import auto_login
+        config = auto_login.load()
+        if not config['enabled'] or not config['character']:
+            return
+        slot = auto_login.character_slot(char_list, config['character'])
+        if slot is None:
+            print(f"Login automatico: personagem {config['character']} nao esta na lista; escolha-o no jogo.")
+            return
+
+        async def choose():
+            await asyncio.sleep(1.5)  # the character screen is drawn first
+            upstream.write(auto_login.select_packet(slot))
+            await upstream.drain()
+            print(f"Login automatico: personagem {config['character']} (slot {slot}) escolhido.")
+        asyncio.get_running_loop().create_task(choose())
+
     def collision_map(self):
         if self.map_repository is None:
             return None
@@ -831,6 +915,7 @@ class SessionRelay(QuestRelay):
         collision = self.map_repository.get(name)
         if collision is not None:
             collision.set_forbidden(self.portals.cells(name))
+            collision.links = tuple(self.portals.links(name))
         if name not in self.reported_maps:
             self.reported_maps.add(name)
             result = {'kind': 'map_collision', 'map': name, 'available': collision is not None,
@@ -939,7 +1024,7 @@ class SessionRelay(QuestRelay):
             metadata = observer.skills.get(identity)
             if (not self.allow_commands or self.commands_blocked or self.hunt.enabled or not game_gate()
                 or self.upstream is None or not self.native_frames.ready or not observer.player_position_valid(time.monotonic())):
-                raise ValueError('Teste exige personagem conectado, caça pausada e F12 liberado')
+                raise ValueError('Teste exige personagem conectado, caça pausada e envios liberados')
             if (type(identity) is not int or type(level) is not int or metadata is None
                 or not 1 <= level <= metadata['level'] or metadata.get('target_flags') not in (4, 16)):
                 raise ValueError('Nível ou habilidade de uso em si/suporte não confirmado')
@@ -1205,6 +1290,7 @@ class SessionRelay(QuestRelay):
                 self.mirror.clear()
             events = self.tracker.feed(self.mirror_sequence, data, time.monotonic())
             self.quests.observe(events,self.tracker.observer.player_id,self.tracker.observer.map_name,time.monotonic())
+            self.quest_events(events,time.monotonic())
             for transition in events:
                 if transition['kind'] in ('map_change','map_transfer') and transition.get('map'):
                     self.next_map=transition['map']
@@ -1215,6 +1301,11 @@ class SessionRelay(QuestRelay):
             self.presence.observe(events, self.tracker.observer.player_id, time.monotonic(),
                                   own_position=self.tracker.observer.player)
             self.track_players(events)
+            if not hasattr(self, 'gm_signs'):
+                from .gm_signs import GmSigns
+                self.gm_signs = GmSigns()
+            self.gm_signs.observe(events, self.tracker.observer.player, time.monotonic())
+            self.halt_on_presence()
             if self.portals.observe(events, self.tracker.observer.map_name, self.tracker.observer.player):
                 self.collision_map()  # apply the new portal area right away
             self.registry.observe(events, self.tracker.observer.player_id,
@@ -1409,7 +1500,9 @@ class SessionRelay(QuestRelay):
                                     self.record_hunt({'kind': 'native_frame_unrecognized', 'reason': self.native_frames.error})
                                     print(self.native_frames.error)
                             self.inspect_manual_skill(data)
-                        upstream.write(data)
+                            data = self.drop_clicks_under_overlay(data)
+                        if data:
+                            upstream.write(data)
                         await upstream.drain()
                 if stage == 'map':
                     self.record_hunt({'kind': 'connection_eof', 'source': 'game_client', 'recent_map_sends': list(self.recent_map_sends)})
@@ -1430,6 +1523,7 @@ class SessionRelay(QuestRelay):
                                 self.own_look = {'sex': packet[46]} if len(packet) > 46 else {}
                             elif op == 0x6b:
                                 self.char_list = packet
+                                self.schedule_character_choice(packet, upstream)
                             elif op == 0x71:
                                 self.select_character(struct.unpack_from('<I', packet, 2)[0])
                                 from .packet_reader import character_look
@@ -1481,7 +1575,7 @@ class SessionRelay(QuestRelay):
             if not self.native_frames.ready:
                 raise ValueError('Aguardando término do comando nativo')
             if self.commands_blocked or self.single_attack_used:
-                raise RuntimeError('Envio bloqueado: F12 acionado ou teste único já realizado')
+                raise RuntimeError('Envio bloqueado: envios parados ou teste único já realizado')
             state = self.status()
             if not game_gate() or self.upstream is None or state['candidate'] is None or state['candidate']['entity_id'] != target_id:
                 raise ValueError('Sessão, foco ou alvo recente não confirmado')
@@ -1536,6 +1630,22 @@ class SessionRelay(QuestRelay):
             self.watch_stamp, self.watch_entries = stamp, watchlist.load()
         return self.watch_entries
 
+    def gm_signs_found(self, now):
+        """[(row, reasons)] of visible characters that look like GM/staff."""
+        from .gm_signs import GmSigns
+        if not hasattr(self, 'gm_signs'):
+            self.gm_signs = GmSigns()
+        result = []
+        for row in self.players_nearby():
+            if self.presence.ignored(row['entity_id']):
+                continue
+            entry = self.registry.players.get(str(row['entity_id']))
+            speed = self.gm_signs.speeds.get(row['entity_id'])
+            why = self.gm_signs.reasons(row, entry, speed, now)
+            if why:
+                result.append((row, why))
+        return result
+
     def emergency_detections(self):
         """Watched characters found (any way, @hide included) and anyone in @hide / invisible."""
         from . import watchlist
@@ -1543,17 +1653,25 @@ class SessionRelay(QuestRelay):
         now = time.monotonic()
         entries = self.load_watchlist()
         hidden_gm = any(h['option'] & OPTION_INVISIBLE for h in self.presence.hidden.values())
-        if not entries and not self.presence.ghosts and not hidden_gm:
-            return []
         self.sync_presence_names()
+        signs = self.gm_signs_found(now)
+        if not entries and not self.presence.ghosts and not hidden_gm and not signs:
+            return []
         state = {'presence': self.presence.snapshot(self.tracker.observer.player, now),
                  'players_nearby': self.players_nearby()}
         found = {d['entity_id']: {**d, 'watched': True} for d in watchlist.detections(entries, state, self.registry.players)}
         # Not on the list: a character in @hide is enough, seen switching it on or acting invisible.
         everyone = watchlist.detections(['*'], state, self.registry.players, match_all=True)
         for d in everyone:
-            if d['kind'] in ('invisible', 'gm_hide') and d['entity_id'] not in found and not self.presence.ignored(d['entity_id']):
+            # Only a confirmed @hide (option 0x40) stops everything; common hide/cloak and
+            # characters acting unseen only pause the hunt.
+            if d['kind'] == 'gm_hide' and d['entity_id'] not in found and not self.presence.ignored(d['entity_id']):
                 found[d['entity_id']] = {**d, 'watched': False}
+        for row, why in signs:  # a GM/staff character on screen
+            if row['entity_id'] not in found:
+                found[row['entity_id']] = dict(entity_id=row['entity_id'], name=row.get('name'), kind='gm',
+                                               text='GM/staff na tela: '+', '.join(why), detail=f"{row.get('distance')} celulas",
+                                               position=row.get('position'), entry='GM', watched=False)
         return list(found.values())
 
     def check_emergency(self):
@@ -1565,7 +1683,7 @@ class SessionRelay(QuestRelay):
             return
         first = new[0]
         who = first['name'] or f"ID {first['entity_id']}"
-        reason = ('jogador da lista de observacao' if first['watched'] else 'personagem em @hide')+f": {who} {first['text']}"
+        reason = ('jogador da lista de observacao' if first['watched'] else 'GM/staff' if first['kind'] == 'gm' else 'personagem em @hide')+f": {who} {first['text']}"
         self.emergency = {'id': (self.emergency or {}).get('id', 0)+1, 'reason': reason,
                           'detections': found, 'at': datetime.now().isoformat(timespec='seconds')}
         self.record_hunt({'kind': 'emergency_stop', 'reason': reason, 'detections': found})
@@ -1578,9 +1696,26 @@ class SessionRelay(QuestRelay):
         except RuntimeError:
             pass
 
+    def halt_on_presence(self):
+        """A player just showed up while hunting: stop at once, not at the next hunt tick, so no
+        walking is seen when they arrive."""
+        hunting = self.hunt is not None and self.hunt.enabled or getattr(self.quests, 'phase', None) == 'hunt'
+        if (not hunting or self.presence_hold is not None or self.commands_blocked or not self.allow_commands
+                or not self.walking_now()):
+            return
+        if self.presence.reason(self.tracker.observer.player, time.monotonic()) is None:
+            return
+        if self.hunt is not None:
+            self.hunt.pending = None
+        try:
+            asyncio.get_running_loop().create_task(self.stop_walking())
+        except RuntimeError:
+            pass
+
     async def stop_walking(self):
         """A walk already sent would carry on for a few cells: stop on the current cell."""
-        player = self.tracker.observer.player
+        positions = self.tracker.observer.combat_positions(time.monotonic())
+        player = positions[0] if positions else self.tracker.observer.player
         if player is None or self.upstream is None or not self.native_frames.ready or not self.walking_now():
             return
         async with self.send_lock:
@@ -1868,10 +2003,10 @@ async def run(args):
         print(f'Relay local pronto em 127.0.0.1:{port}. Registros: {folder}')
         print('Modo de conexão/observação. Login e senha não são gravados. Ctrl+C encerra o relay e desconecta a sessão local.')
         if active_test:
-            print('TESTE ÚNICO: no jogo, Ctrl+Alt+F10 solicita um ataque por pacote. F12 bloqueia envios. Nenhum ataque é automático.')
+            print('TESTE ÚNICO: no jogo, Ctrl+Alt+F10 solicita um ataque por pacote. Nenhum ataque é automático.')
         if hunt_mode:
             targets = 'automaticos do mapa' if relay.settings['auto_map_targets'] else ', '.join(SPECIES.get(i, str(i)) for i in relay.settings['species'])
-            print(f"CAÇA: {relay.hunt_key_name} inicia/pausa. F12 para. Alvos: {targets}; raio: {relay.settings['radius']} células. Começa DESLIGADA.")
+            print(f"CAÇA: {relay.hunt_key_name} inicia/pausa. Alvos: {targets}; raio: {relay.settings['radius']} células. Começa DESLIGADA.")
             print('Habilidade: Arremessar Kunai nível 10, somente com nível/custo/SP confirmados. Falha retorna a ataque normal; '+relay.hunt_key_name+' permite reativar.')
         last_display = 0
         last_skill_message = None
@@ -1893,12 +2028,6 @@ async def run(args):
                 relay.status()
                 last_heartbeat = time.monotonic()
             if controls is not None:
-                if controls.panic() and not relay.commands_blocked:
-                    relay.commands_blocked = True
-                    if relay.hunt is not None:
-                        relay.hunt.pause('F12')
-                    relay.status()
-                    print('F12: todos os envios do bot estão bloqueados; a conexão do jogo continua.')
                 key = controls.test_pressed() if active_test else False
                 if key and not previous_key:
                     try:
@@ -1926,7 +2055,7 @@ async def run(args):
                                 relay.commands_blocked = False
                                 relay.hunt.start()
                                 relay.defer_until_manual_walk_finishes()
-                                print('Caça ativada por pacote. F12 para.')
+                                print('Caça ativada por pacote.')
                             except ValueError as exc:
                                 relay.hunt.pause(str(exc))
                                 print(f'Não foi possível iniciar: {exc}')
@@ -1990,7 +2119,7 @@ async def run(args):
                                         gap = relay.rotation.burst_interval if relay.rotation.burst else .12
                                         relay.rotation.next_send = max(relay.rotation.next_send, time.monotonic()+gap)
                                 except HuntTargetChanged as exc:
-                                    relay.hunt.replan_action(time.monotonic(), str(exc))
+                                    relay.hunt.replan_action(time.monotonic(), str(exc), action)
                                     relay.flush_hunt_diagnostics()
                                 except (OSError, ValueError) as exc:
                                     relay.hunt.pause(str(exc))

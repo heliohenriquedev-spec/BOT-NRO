@@ -167,3 +167,19 @@ def test_relay_hunt_never_sends_without_focus_and_does_not_duplicate_pending(tmp
         with pytest.raises(ValueError, match='inativa'):
             await relay.send_hunt_action(action, game_gate=lambda: True)
     asyncio.run(scenario())
+
+
+def test_patrol_hunt_prefers_monsters_ahead_over_slightly_closer_ones_behind():
+    from nrobot.packet_patrol import PacketPatrol
+    hunt = PacketHunt(); hunt.start()
+    hunt.patrol = PacketPatrol(); hunt.patrol.heading = (8, 0)  # sweeping to the east
+    ahead_and_behind = state([50, 50], [(30, [41, 50]), (31, [60, 50])])
+    assert hunt.plan(ahead_and_behind, 0)['target_id'] == 31  # 10 ahead beats 9 behind
+    hunt = PacketHunt(); hunt.start()
+    hunt.patrol = PacketPatrol(); hunt.patrol.heading = (8, 0)
+    far_behind = state([50, 50], [(32, [30, 50])])
+    action = hunt.plan(far_behind, 0)
+    assert action is None or action.get('target_id') != 32  # far behind: left for the sweep
+    hunt = PacketHunt(); hunt.start()
+    no_patrol = state([50, 50], [(30, [41, 50]), (31, [60, 50])])
+    assert hunt.plan(no_patrol, 0)['target_id'] == 30  # without patrol: simply the closest

@@ -94,7 +94,8 @@ def test_buffs_renew_only_after_effect_ends_and_unconfirmed_buff_is_blocked():
     rotation.sent(rotation.plan(snapshot, 3), 3)
     assert rotation.plan(snapshot, 5) is None
     assert 29 in rotation.blocked_buffs
-    assert rotation.plan(snapshot, 100) is None  # do not recast an unconfirmed effect forever
+    assert rotation.plan(snapshot, 5.5) is None  # unconfirmed: a short wait...
+    assert rotation.plan(snapshot, 7)['skill_id'] == 29  # ...and it is cast again right away
 
 
 def test_unmapped_buff_ground_passive_and_insufficient_sp_cannot_send():
@@ -323,3 +324,14 @@ def test_skill_during_acknowledged_walk_uses_current_position_not_future_destina
         observer.apply({'kind':'position','entity_id':1,'position':[4,10]},now+.01)
         assert observer.player_motion is None and observer.combat_positions(now+.02)==[[4,10]]
     asyncio.run(scenario())
+
+
+def test_buff_is_renewed_just_before_its_learned_end():
+    rotation = CombatRotation([profile(29, 'buff', 12)])
+    rotation.observe([{'kind': 'status_effect', 'entity_id': 1, 'effect_id': 12, 'active': True}], 1, 0)
+    rotation.observe([{'kind': 'status_effect', 'entity_id': 1, 'effect_id': 12, 'active': False}], 1, 120)
+    assert rotation.effect_length[12] == 120  # learned: lasts two minutes
+    rotation.observe([{'kind': 'status_effect', 'entity_id': 1, 'effect_id': 12, 'active': True}], 1, 200)
+    snapshot = state(); snapshot['own_effects'] = {12: True}
+    assert rotation.plan(snapshot, 260) is None  # still well on
+    assert rotation.plan(snapshot, 318)['skill_id'] == 29  # 2.5 s before the end: renewed, never drops

@@ -26,7 +26,11 @@ VERSION_FILE = ROOT/'versao.json'
 # Never replaced or removed by an update: belongs to the person using the bot.
 PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/monstros',
              'data/rede/invocacoes_aprendidas.json', 'data/rede/painel_config.json', 'data/rede/buffs_aprendidos.json',
-             'data/rede/rotas_quests.json', 'data/rede/quadros_missoes.json')
+             'data/rede/rotas_quests.json', 'data/rede/quadros_missoes.json',
+             'data/rede/rotas_mapas.json', 'data/rede/missoes_concluidas.json',
+             'data/rede/slots_missoes.json', 'data/rede/quest_extras.json',
+             'data/rede/progresso_quests.json', 'data/x1',
+             'data/rede/login_automatico.json')
 # Kept in the repository for development, not needed to run the bot.
 NOT_DISTRIBUTED = ('tests', 'tools', 'Arquivos_grf', '.gitignore', '.gitattributes')
 TIMEOUT = 30
@@ -114,6 +118,30 @@ def distributed(relative):
     return path.parts[0].casefold() not in excluded and not is_protected(relative)
 
 
+def local_changes(root):
+    """Tracked files changed and not committed, in a git copy (the developer's); [] elsewhere."""
+    if not (Path(root)/'.git').exists() or shutil.which('git') is None:
+        return []
+    result = subprocess.run(['git', 'status', '--porcelain', '--untracked-files=no'], cwd=root,
+                            capture_output=True, text=True, encoding='utf-8', errors='replace')
+    if result.returncode:
+        return []
+    changed = [line[3:].strip().strip('"') for line in result.stdout.splitlines() if line.strip()]
+    return [name for name in changed if distributed(name)]
+
+
+def backup(root, relatives):
+    """Zip of the files an update is about to replace or remove, in backups/ (never touched by updates)."""
+    if not relatives:
+        return None
+    target = Path(root)/'backups'/f"antes-da-atualizacao-{datetime.now().strftime('%Y%m%d-%H%M%S')}.zip"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(target, 'w', zipfile.ZIP_DEFLATED) as bundle:
+        for relative in relatives:
+            bundle.write(Path(root)/relative, relative)
+    return target
+
+
 def apply(log=print, root=ROOT, archive=None):
     """Download the latest version and replace the bot files; returns the new version."""
     c = config() if archive is None else {}
@@ -134,10 +162,19 @@ def apply(log=print, root=ROOT, archive=None):
         old = json.loads((root/'versao.json').read_text(encoding='utf-8'))
     except (OSError, ValueError):
         old = {'files': []}
+    unpublished = local_changes(root)
+    if unpublished:
+        raise UpdateError(f'esta cópia tem {len(unpublished)} arquivo(s) alterado(s) ainda não publicado(s) '
+                          f'(ex.: {unpublished[0]}); publique primeiro, senão a atualização apagaria essas mudanças')
     requirements_before = (root/'requirements.txt').read_bytes() if (root/'requirements.txt').is_file() else b''
+    removed = [relative for relative in old.get('files', [])
+               if relative not in files and distributed(relative) and (root/relative).is_file()]
+    wanted = [relative for relative in files if distributed(relative)]
+    saved = backup(root, [r for r in wanted if (root/r).is_file() and (root/r).read_bytes() != bundle.read(files[r])]+removed)
+    if saved:
+        log(f'Cópia dos arquivos antigos: {saved.relative_to(root).as_posix()}')
     with tempfile.TemporaryDirectory(dir=root) as staging:
         staging = Path(staging)
-        wanted = [relative for relative in files if distributed(relative)]
         for relative in wanted:  # extract everything first: a failed download changes nothing
             target = staging/relative
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -146,12 +183,11 @@ def apply(log=print, root=ROOT, archive=None):
             destination = root/relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(staging/relative, destination)
-    removed = [relative for relative in old.get('files', [])
-               if relative not in files and distributed(relative) and (root/relative).is_file()]
     for relative in removed:  # files that the new version no longer has
         (root/relative).unlink()
     log(f"Arquivos atualizados: {len(wanted)}; removidos: {len(removed)}.")
-    if (root/'requirements.txt').read_bytes() != requirements_before and root == ROOT:
+    requirements_after = (root/'requirements.txt').read_bytes() if (root/'requirements.txt').is_file() else b''
+    if requirements_after != requirements_before and root == ROOT:
         log('Dependências mudaram; instalando...')
         result = subprocess.run([sys.executable, '-m', 'pip', 'install', '-r', str(root/'requirements.txt')],
                                 capture_output=True, text=True)

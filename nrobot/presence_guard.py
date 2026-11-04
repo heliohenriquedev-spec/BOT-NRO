@@ -41,7 +41,12 @@ class PresenceGuard:
     REMOVE_LOGOUT, REMOVE_TELEPORT = 2, 3
 
     GHOST_GRACE = 2  # seconds after a character left the view: late packets are not a sign
+    # Only signals the server sends to those right next to the actor prove an invisible character
+    # beside us. Attacks, skills and ground effects also arrive from players who simply walked out
+    # of the screen (they hit a monster still on it): those never count.
+    CLOSE_SIGNALS = {'chat', 'emote', 'direction', 'status_effect', 'body_action'}
     SIGNALS = {'chat': 'falou no chat', 'emote': 'usou emoticon', 'direction': 'virou de direcao',
+               'body_action': 'sentou/levantou/pegou item',
                'normal_attack': 'atacou/pegou item/sentou', 'skill_damage': 'usou habilidade',
                'skill_no_damage': 'usou habilidade', 'skill_cast': 'conjurou habilidade',
                'status_effect': 'recebeu efeito de status', 'ground_effect': 'criou efeito no chao'}
@@ -83,6 +88,10 @@ class PresenceGuard:
 
     def ghost_signal(self, event, player_id, now):
         identity, signal = self.signal_source(event)
+        if signal == 'normal_attack' and event.get('action_type') in (1, 2, 3):
+            signal = 'body_action'  # pick up / sit / stand: done where the character stands
+        if signal not in self.CLOSE_SIGNALS:
+            return
         if (identity is None or identity == player_id or not is_player_id(identity) or identity in self.players
                 or now-self.last_removed.get(identity, -1e9) <= self.GHOST_GRACE):
             return

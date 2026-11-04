@@ -3,7 +3,7 @@ character in @hide was found and the bot stopped.
 
 It never takes the keyboard focus from the game and stays until it is clicked.
 """
-from PySide6.QtCore import Qt, QRectF, QTimer
+from PySide6.QtCore import Qt, QPointF, QRectF, QTimer
 from PySide6.QtGui import QColor, QFont, QGuiApplication, QPainter, QPen
 from PySide6.QtWidgets import QApplication, QWidget
 
@@ -28,7 +28,7 @@ class WatchAlert(QWidget):
         self.lines = []
         for found in detections[:4]:
             name = found['name'] or 'nome não recebido'
-            tag = 'LISTA DE OBSERVAÇÃO' if found.get('watched', True) else '@HIDE'
+            tag = ('LISTA DE OBSERVAÇÃO' if found.get('watched', True) else 'GM' if found.get('kind') == 'gm' else '@HIDE')
             line = f"[{tag}] {name} (ID {found['entity_id']}) — {found['text']}"
             details = [d for d in (found.get('detail'), f"célula {found['position']}" if found.get('position') else None) if d]
             self.lines.append((line, ' • '.join(details)))
@@ -54,7 +54,13 @@ class WatchAlert(QWidget):
         self.beep_timer.stop()
         super().hideEvent(event)
 
+    def close_rect(self):
+        return QRectF(self.width()-46, 12, 30, 30)
+
     def mousePressEvent(self, event):
+        self.hide()  # anywhere closes it, the X included
+
+    def keyPressEvent(self, event):
         self.hide()
 
     def paintEvent(self, event):
@@ -68,6 +74,10 @@ class WatchAlert(QWidget):
         painter.setFont(QFont('Segoe UI', 17, QFont.Bold))
         painter.drawText(QRectF(box.x()+20, box.y()+10, box.width()-40, 40), Qt.AlignLeft | Qt.AlignVCenter,
                          self.title)
+        painter.setPen(QPen(QColor(255, 255, 255), 3))
+        x = self.close_rect()
+        painter.drawLine(x.topLeft()+QPointF(6, 6), x.bottomRight()-QPointF(6, 6))
+        painter.drawLine(x.topRight()+QPointF(-6, 6), x.bottomLeft()+QPointF(6, -6))
         y = box.y()+56
         for line, detail in self.lines:
             painter.setFont(QFont('Segoe UI', 14, QFont.DemiBold))

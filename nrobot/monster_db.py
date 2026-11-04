@@ -121,6 +121,21 @@ def monster_choice_key(map_name, species_id, name):
     return f'{map_key(map_name)}:{species_id}:{name}'
 
 
+def maps_for_name(name, captured=None):
+    """Maps where a monster with this exact name was seen. NRO reuses one sprite (species id) for
+    different monsters, so the name, not the id, tells where a quest monster lives."""
+    from .npc_labels import plain
+    wanted, maps = plain(name or ''), set()
+    if not wanted:
+        return maps
+    for records in (load_base(), load_captured() if captured is None else captured):
+        for entry in records.values():
+            for map_name, names in entry.get('names_by_map', {}).items():
+                if any(plain(n) == wanted for n in names):
+                    maps.add(map_name)
+    return maps
+
+
 def names_for_map(map_name, captured=None):
     key = map_key(map_name)
     names = {}

@@ -242,3 +242,70 @@ def test_coverage_goal_remains_reachable_when_revisit_penalties_exhaust_search_b
             patrol.reached(action['destination'], position)
             position = action['destination']
     assert patrol.walked and action is not None
+
+
+def test_spacing_coverage_and_wall_margin_are_configurable():
+    from nrobot.map_navigation import CollisionMap
+    from nrobot.patrol_tour import PatrolTour
+    from nrobot.packet_patrol import PacketPatrol
+    open_map = CollisionMap(80, 80, [1]*6400)
+    dense, sparse = PatrolTour(open_map, (40, 40), spacing=8), PatrolTour(open_map, (40, 40), spacing=20)
+    assert len(dense.points) > 2*len(sparse.points) and sparse.seen_radius == 15
+    near_walls = PatrolTour(open_map, (40, 40), spacing=10, wall_margin=1)
+    away = PatrolTour(open_map, (40, 40), spacing=10, wall_margin=6, avoid_walls=True)
+    assert min(away.wall[p] for p in away.points.values()) >= 6  # no point next to a wall
+    assert min(near_walls.wall[p] for p in near_walls.points.values()) < 6
+    patrol = PacketPatrol(8, spacing=10, coverage=.5)
+    patrol.switch_map(open_map, [40, 40])
+    for block in list(patrol.remaining)[:len(patrol.tour.points)//2+1]:
+        patrol.remaining.discard(block); patrol.done.add(block)
+    cycle = patrol.cycle_number
+    patrol.plan([40, 40], 100, 150, open_map)
+    assert patrol.cycle_number == cycle+1  # half the map done: a new cycle, as configured
+    patrol.configure(spacing=20, coverage=1.0, wall_margin=2, avoid_walls=False)
+    assert patrol.tour is None and patrol.coverage_target == 1.0  # waypoints redone with the new spacing
+
+
+def test_ring_shaped_map_is_swept_without_jumping_away_from_waypoints_right_beside():
+    # A cave ring like ve_fild04: the sweep goes on along it instead of leaving points behind.
+    from nrobot.map_navigation import CollisionMap
+    from nrobot.packet_patrol import PacketPatrol
+    import math as m
+    size = 120
+    cells = bytearray(size*size)
+    for y in range(size):
+        for x in range(size):
+            if 25 <= m.dist((x, y), (60, 60)) <= 50:
+                cells[y*size+x] = 1
+    collision = CollisionMap(size, size, cells)
+    patrol = PacketPatrol(rng=random.Random(4), spacing=12)
+    position, jumps, goals = [60, 15], 0, 0
+    for tick in range(600):
+        before = patrol.goal_block
+        action = patrol.plan(position, tick, 100, collision)
+        if patrol.goal_block is not None and patrol.goal_block != before:
+            goals += 1
+            distances = patrol.tour.distances(position)
+            near = [b for b in patrol.remaining if b != patrol.goal_block and distances.get(b, 1e9) <= 12]
+            if distances[patrol.goal_block] > 36 and near:
+                jumps += 1  # went far while a waypoint was right beside
+        if action is None or patrol.cycle_number > 1:
+            break
+        patrol.reached(action['destination'], position)
+        position = action['destination']
+    assert goals > 10 and jumps == 0
+
+
+def test_waypoints_behind_refused_steps_are_given_up_until_the_next_cycle():
+    from nrobot.map_navigation import CollisionMap
+    from nrobot.packet_patrol import PacketPatrol
+    patrol = PacketPatrol(rng=random.Random(5), spacing=10)
+    open_map = CollisionMap(60, 60, [1]*3600)
+    patrol.switch_map(open_map, [30, 30])
+    patrol.plan([30, 30], 0, 100, open_map)
+    goal = patrol.goal_block
+    for t in range(3):  # the server refuses the way three times from the same cell
+        patrol.failed([30, 30], [36, 30], t)
+    assert goal in patrol.unreachable and goal not in patrol.remaining and patrol.goal is None
+    patrol.new_cycle([30, 30])
+    assert not patrol.unreachable  # tried again on the next round

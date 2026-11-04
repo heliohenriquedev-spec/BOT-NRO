@@ -80,13 +80,15 @@ def test_route_can_use_monsters_assigned_to_selected_mission(tmp_path,monkeypatc
     os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
     from PySide6.QtWidgets import QApplication
     from nrobot.quest_panel import RouteEditor
-    monkeypatch.setattr(lib,'FILE',tmp_path/'library.json')
+    from nrobot import map_routes
+    monkeypatch.setattr(lib,'FILE',tmp_path/'library.json');monkeypatch.setattr(map_routes,'FILE',tmp_path/'maps.json')
     lib.save(dict(missions=[dict(id='A',name='Rank A-1',board_id='vip',monster_ids=[1262,1294],target_map='anthell02')]))
+    map_routes.save([dict(id='M',name='Kamizuru',target_map='anthell02',steps=[dict(kind='portal',map='hospital2',position=[1,1]),dict(kind='wait_map',map='anthell02')])])
     app=QApplication.instance() or QApplication([])
     editor=RouteEditor(dict(name='Rota',mission_ids=['A'],steps=[],species=[],kills=50),{})
     assert 'Dragão Mutante' in editor.mission_list.item(0).text()
-    editor.use_mission_targets()
-    assert editor.species.text()=='1262, 1294' and editor.map.text()=='anthell02'
+    editor.map_route.setCurrentIndex(editor.map_route.findData('M'));editor.accept()
+    assert editor.route['species']==[1262,1294] and editor.route['target_map']=='anthell02' and editor.route['map_route_id']=='M'
     editor.close()
 
 

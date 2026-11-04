@@ -60,9 +60,8 @@ def effective_steps(data,m,stage):
     if not wanted:return copy.deepcopy(raw)
     steps=source['steps'];si=source['slot_index'];prefix=copy.deepcopy(steps[:si]);map_name=steps[si]['map']
     steps[si]=dict(kind='select_free_slot' if stage=='pickup' else 'select_mission_slot',map=map_name,option=wanted)
-    if stage=='pickup':
-        steps[source['rank_index']]['option']=wanted
-        prefix[0]['verify_start']=True  # may be skipped: the next mission's slot menu proves it too
+    if stage=='pickup':steps[source['rank_index']]['option']=wanted
+    prefix[0]['verify_start']=True  # may be skipped: the next mission's slot menu proves it too
     steps.extend(prefix)
     steps.extend([dict(kind='verify_slot' if stage=='pickup' else 'verify_slot_absent',map=map_name,option=wanted),dict(kind='cancel',map=map_name)])
     return steps

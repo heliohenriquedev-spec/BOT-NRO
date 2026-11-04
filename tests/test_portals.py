@@ -40,3 +40,32 @@ def test_warp_portal_skill_is_avoided_until_it_closes(tmp_path):
     assert (8, 8) in guard.cells('map')
     assert guard.observe([{'kind': 'ground_effect_removed', 'effect_id': 9}], 'map')
     assert not guard.cells('map') and not guard.known
+
+
+def test_inner_portal_is_learned_freed_and_used_by_the_patrol(tmp_path):
+    import random
+    from nrobot.map_navigation import CollisionMap
+    from nrobot.packet_patrol import PacketPatrol
+    from nrobot.portals import PortalGuard
+    guard = PortalGuard(tmp_path/'portais.json')
+    guard.observe([{'kind': 'appearance', 'entity_id': 1, 'species_id': 45, 'position': [20, 10]}], 'ygg', own_position=[10, 10])
+    assert (20, 10) in guard.cells('ygg')
+    guard.observe([], 'ygg', own_position=[20, 11])  # standing on the portal
+    guard.observe([{'kind': 'map_change', 'map': 'ygg.gat', 'position': [50, 50]}], 'ygg', own_position=[50, 50])
+    assert guard.links('ygg') == [((20, 10), (50, 50))] and (20, 10) not in guard.cells('ygg')
+    guard.observe([{'kind': 'map_change', 'map': 'ygg.gat', 'position': [5, 5]}], 'ygg', own_position=[5, 5])
+    assert len(guard.links('ygg')) == 1  # a random teleport far from portals is not a link
+    guard.save(); assert PortalGuard(tmp_path/'portais.json').links('ygg') == [((20, 10), (50, 50))]
+    # Two halves of a map split by a wall; the inner portal leads to the other half.
+    cells = bytearray([1]*(70*70))
+    for y in range(70):
+        cells[y*70+35] = 0
+    collision = CollisionMap(70, 70, cells); collision.links = ((20, 10), (50, 50)),
+    patrol = PacketPatrol(rng=random.Random(2), spacing=10)
+    patrol.switch_map(collision, [10, 10])
+    assert any(p[0] > 35 for p in patrol.tour.points.values())  # the other side is part of the patrol
+    beyond = next(b for b, p in patrol.tour.points.items() if p[0] > 40)
+    patrol.remaining = {beyond}; patrol.done = set(patrol.tour.points)-{beyond}
+    action = patrol.plan([18, 10], 0, 100, collision)
+    assert patrol.tour.portal_on_way([18, 10], beyond) == (20, 10)
+    assert action['destination'] == [20, 10]  # walks onto the portal to get there

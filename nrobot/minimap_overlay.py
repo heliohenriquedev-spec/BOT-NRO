@@ -45,6 +45,7 @@ class MinimapOverlay(QWidget):
         self.offset = None  # position relative to the game's client area once dragged
         self.drag = None
         self.on_change = lambda: None  # size, zoom or position changed: the panel saves them
+        self.on_hover = lambda inside: None  # cursor over the window: the game's clicks are not sent
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool | Qt.WindowDoesNotAcceptFocus)
@@ -84,6 +85,8 @@ class MinimapOverlay(QWidget):
         self.update()
 
     def follow_game(self):
+        if self.drag is not None:
+            return True  # being dragged: the mouse decides where it goes
         rect = game_client_rect()
         screen = QGuiApplication.primaryScreen()
         ratio = screen.devicePixelRatio() if screen else 1
@@ -137,6 +140,13 @@ class MinimapOverlay(QWidget):
                 return
         self.drag = event.globalPosition()-QPointF(self.x(), self.y())
 
+    def enterEvent(self, event):
+        self.on_hover(True)
+
+    def leaveEvent(self, event):
+        if self.drag is None:
+            self.on_hover(False)
+
     def mouseMoveEvent(self, event):
         if self.drag is not None:
             target = event.globalPosition()-self.drag
@@ -146,6 +156,8 @@ class MinimapOverlay(QWidget):
         if self.drag is None:
             return
         self.drag = None
+        if not self.underMouse():
+            self.on_hover(False)
         rect = game_client_rect()
         screen = QGuiApplication.primaryScreen()
         ratio = screen.devicePixelRatio() if screen else 1

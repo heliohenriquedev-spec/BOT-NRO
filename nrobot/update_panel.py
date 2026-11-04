@@ -48,6 +48,17 @@ class UpdatePanel(QWidget):
         self.publish_button.clicked.connect(self.publish)
         row.addWidget(self.publish_button)
         publish_layout.addLayout(row)
+        row = QHBoxLayout()
+        from PySide6.QtWidgets import QCheckBox
+        self.restart_after_publish = QCheckBox('Reiniciar sozinho depois de publicar (com a conexão fechada)')
+        self.restart_after_publish.setChecked(True)
+        row.addWidget(self.restart_after_publish)
+        self.restart_button = QPushButton('Reiniciar o bot')
+        self.restart_button.setToolTip('Fecha e abre o painel de novo, já com o código atual.')
+        self.restart_button.clicked.connect(self.restart)
+        row.addWidget(self.restart_button)
+        row.addStretch()
+        publish_layout.addLayout(row)
         layout.addWidget(self.publish_box)
         self.publish_box.setVisible(updater.can_publish())
 
@@ -66,7 +77,7 @@ class UpdatePanel(QWidget):
         self.process.finished.connect(self.finished)
 
     def busy(self, value):
-        for button in (self.check_button, self.apply_button, self.publish_button):
+        for button in (self.check_button, self.apply_button, self.publish_button, self.restart_button):
             button.setEnabled(not value)
 
     def run(self, action, *args):
@@ -83,6 +94,15 @@ class UpdatePanel(QWidget):
             self.status.setText('Feche a conexão (botão Fechar conexão) antes de atualizar.')
             return
         self.run('apply')
+
+    def restart(self):
+        if self.relay_running():
+            from PySide6.QtWidgets import QMessageBox
+            if QMessageBox.question(self, 'Reiniciar o bot', 'A conexão está aberta: reiniciar desconecta o personagem. '
+                                    'Reiniciar mesmo assim?') != QMessageBox.Yes:
+                return
+        self.status.setText('Reiniciando o painel...')
+        self.restart_requested.emit()
 
     def publish(self):
         if not self.message.text().strip():
@@ -117,5 +137,11 @@ class UpdatePanel(QWidget):
         elif action == 'publish' and code == 0:
             self.message.clear()
             self.status.setText(f"Publicado. Versão instalada: {updater.local_version().get('version')}")
+            if self.restart_after_publish.isChecked():
+                if self.relay_running():
+                    self.status.setText(self.status.text()+' • Feche a conexão e clique em Reiniciar o bot para usar a versão nova.')
+                else:
+                    self.status.setText(self.status.text()+' • Reiniciando o painel...')
+                    self.restart_requested.emit()
         elif code:
             self.status.setText('A operação falhou; veja o registro abaixo.')

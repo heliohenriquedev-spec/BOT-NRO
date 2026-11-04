@@ -43,6 +43,8 @@ class PlayerRegistry:
             if kind == 'remove':
                 self.in_view.discard(identity)
                 continue
+            if kind == 'actor_signal' and event.get('signal') == 'chat' and event.get('name'):
+                kind, event = 'name', {**event, 'kind': 'name'}  # "Name : text" in public chat names the speaker
             if kind not in ('appearance', 'name', 'move', 'position', 'option_change'):
                 continue
             entry = self.players.setdefault(str(identity), {'entity_id': identity, 'first_seen': stamp,
@@ -56,10 +58,21 @@ class PlayerRegistry:
                     entry['disguised'] = species
                 elif species is not None:
                     entry['job'] = species
+                look = event.get('look')
+                if look and not entry.get('disguised') == species:
+                    for field in ('level', 'sex', 'guild_id'):
+                        if look.get(field) is not None:
+                            entry[field] = look[field]
+                    entry['look'] = {k: v for k, v in look.items() if k not in ('level', 'sex', 'guild_id')}
             if kind == 'name' and event.get('name'):
+                if entry.get('name') and entry['name'] != event['name']:
+                    history = entry.setdefault('former_names', [])
+                    if entry['name'] not in history:
+                        history.append(entry['name'])  # same id, another name: renamed or another character
                 entry['name'] = event['name']
-                if event.get('guild'):
-                    entry['guild'] = event['guild']
+                for field in ('guild', 'guild_title', 'party'):
+                    if event.get(field):
+                        entry[field] = event[field]
             if event.get('option', 0) & HIDDEN_OPTIONS:
                 entry['hidden_seen'] = 'gm' if event['option'] & 0x40 else 'hide'
             if 'position' in event:

@@ -39,8 +39,8 @@ def job_names():
 
 
 class PlayerPanel(QWidget):
-    HEADERS = ['Na tela', 'Observado', 'Nome', 'ID', 'Classe', 'Guilda', 'Último mapa', 'Última célula', 'Visto', 'Primeira vez',
-               'Última vez', 'Observações']
+    HEADERS = ['Na tela', 'Observado', 'Nome', 'ID', 'Nível', 'Sexo', 'Classe', 'Guilda', 'Cargo', 'Grupo', 'Último mapa',
+               'Última célula', 'Visto', 'Primeira vez', 'Última vez', 'Observações']
 
     def __init__(self):
         super().__init__()
@@ -95,8 +95,12 @@ class PlayerPanel(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        # Sized once per fill: ResizeToContents re-measured every row on each cell written,
+        # and the table is refilled whenever someone enters or leaves the screen.
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         self.table.horizontalHeader().setStretchLastSection(True)
+        self.sized = False
+        self.shown_rows = None
         layout.addWidget(self.table, 1)
         threading.Thread(target=self.load_job_names, daemon=True).start()
 
@@ -202,16 +206,32 @@ class PlayerPanel(QWidget):
                 notes.append('@hide visto' if entry['hidden_seen'] == 'gm' else 'hide visto')
             if entry.get('disguised'):
                 notes.append(f"disfarce (sprite {entry['disguised']})")
+            if entry.get('former_names'):
+                notes.append('antes: '+', '.join(entry['former_names']))
             values = ['● sim' if present else '', '★' if self.is_watched(entry) else '',
                       entry.get('name') or '(nome não recebido)', str(entry['entity_id']),
-                      self.job(entry), entry.get('guild') or '—', entry.get('last_map') or '—',
+                      str(entry['level']) if entry.get('level') else '—',
+                      {'M': 'Masc.', 'F': 'Fem.'}.get(entry.get('sex'), '—'),
+                      self.job(entry), entry.get('guild') or '—', entry.get('guild_title') or '—', entry.get('party') or '—',
+                      entry.get('last_map') or '—',
                       str(entry.get('last_position') or '—'), f"{entry.get('sightings', 0)}x",
                       self.when(entry.get('first_seen')), self.when(entry.get('last_seen')), ', '.join(notes)]
             search = plain(' '.join(values+entry.get('maps', [])))
             if text and text not in search:
                 continue
-            rows.append((not present, -(datetime.fromisoformat(entry['last_seen']).timestamp() if entry.get('last_seen') else 0), values, present))
+            look = entry.get('look') or {}
+            visual = ('Visual: arma '+str(look.get('weapon'))+', escudo '+str(look.get('shield'))+', cabeca topo/meio/baixo '
+                      +f"{look.get('head_top')}/{look.get('head_mid')}/{look.get('head_bottom')}"
+                      +f", cabelo {look.get('hair')} cor {look.get('hair_color')}, roupa cor {look.get('clothes_color')}"
+                      +(f", guilda ID {entry['guild_id']}" if entry.get('guild_id') else '')) if look else ''
+            rows.append((not present, -(datetime.fromisoformat(entry['last_seen']).timestamp() if entry.get('last_seen') else 0), values, present, visual))
         rows.sort(key=lambda row: row[:2])
+        looks = [row[4] for row in rows]
+        rows = [row[:4] for row in rows]
+        shown = [(values, present) for _, _, values, present in rows]
+        if shown == self.shown_rows:
+            return  # nothing visible changed
+        self.shown_rows = shown
         self.table.setUpdatesEnabled(False)
         self.table.setRowCount(len(rows))
         highlight = QBrush(QColor(40, 110, 60, 120))
@@ -220,7 +240,12 @@ class PlayerPanel(QWidget):
                 item = QTableWidgetItem(value)
                 if present:
                     item.setBackground(highlight)
+                if c == 2 and looks[r]:
+                    item.setToolTip(looks[r])
                 self.table.setItem(r, c, item)
+        if not self.sized and rows:
+            self.table.resizeColumnsToContents()
+            self.sized = True
         self.table.setUpdatesEnabled(True)
         self.summary.setText(f'{len(self.players)} jogadores registrados • {len(self.present)} na tela agora • '
                              f'{len(rows)} na lista')

@@ -36,7 +36,7 @@ class Board:
         for _ in range(limit):
             self.t+=1
             action=self.q.plan(self.map,self.position,None,self.p,self.t)
-            if not self.q.active or self.q.phase=='return':return
+            if not self.q.active or self.q.phase in ('return','travel'):return
             if action is None:continue
             self.q.sent(action,self.t);self.sent.append(action)
             kind=action['kind']

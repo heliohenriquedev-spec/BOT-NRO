@@ -34,6 +34,12 @@ class PortalGuard:
             self.known = json.loads(self.path.read_text(encoding='utf-8'))
         except (OSError, ValueError):
             self.known = {}  # {map: {"x,y": margin}}
+        self.links_path = self.path.with_name('portais_internos.json')
+        try:
+            self.internal = json.loads(self.links_path.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            self.internal = {}  # {map: {"x,y": [x, y]}}: portals leading elsewhere on the same map
+        self.last_own = None
         self.temporary = {}  # Warp Portal skill cells on the current map
         self.map_name = None
         self.dirty = False
@@ -49,6 +55,8 @@ class PortalGuard:
             kind = event['kind']
             if kind in ('map_change', 'map_transfer'):
                 self.temporary.clear()
+                if kind == 'map_change' and event.get('position') and self.key(event.get('map')) == self.key(map_name):
+                    self.learn_link(map_name, self.last_own, event['position'])
                 if kind == 'map_change':
                     map_name = event.get('map') or map_name
                     if event.get('position'):
@@ -68,6 +76,8 @@ class PortalGuard:
             elif kind == 'ground_effect_removed':
                 self.temporary.pop(event['effect_id'], None)
         self.map_name = map_name
+        if own_position:
+            self.last_own = tuple(own_position)
         if (self.version, self.cells(map_name)) != before:
             self.version += 1
             return True
@@ -80,13 +90,38 @@ class PortalGuard:
                 self.known[self.key(map_name)][cell] = max(0, distance-1)
                 self.dirty = True
 
+    def learn_link(self, map_name, origin, destination):
+        """Stepping on a known portal and landing far away on the same map: an inner portal, to
+        another part of the map. Random teleports far from portals are not taken for one."""
+        if origin is None or chebyshev(origin, destination) <= 5:
+            return
+        near = [(chebyshev(origin, cell), cell) for cell, margin in self.portals(map_name)
+                if chebyshev(origin, cell) <= margin+2]
+        if not near:
+            return
+        cell = min(near)[1]
+        links = self.internal.setdefault(self.key(map_name), {})
+        key = '%d,%d' % tuple(cell)
+        if links.get(key) != list(destination):
+            links[key] = list(destination)
+            self.dirty = True
+            self.version += 1
+
+    def links(self, map_name):
+        """[(portal cell, arrival cell)] of the inner portals of this map."""
+        return [(tuple(map(int, cell.split(','))), tuple(target)) for cell, target in self.internal.get(self.key(map_name), {}).items()]
+
     def portals(self, map_name):
         known = [(tuple(map(int, cell.split(','))), margin) for cell, margin in self.known.get(self.key(map_name), {}).items()]
         return known+[(cell, MARGIN) for cell in self.temporary.values()]
 
     def cells(self, map_name):
+        """Cells never to walk on: portals to other maps. Inner portals stay free to use."""
+        inner = {cell for cell, _ in self.links(map_name)}
         result = set()
         for (x, y), margin in self.portals(map_name):
+            if (x, y) in inner:
+                continue
             result.update((x+dx, y+dy) for dx in range(-margin, margin+1) for dy in range(-margin, margin+1))
         return frozenset(result)
 
@@ -97,4 +132,8 @@ class PortalGuard:
         temporary = self.path.with_suffix('.tmp')
         temporary.write_text(json.dumps(self.known, ensure_ascii=False, indent=1), encoding='utf-8')
         os.replace(temporary, self.path)
+        if self.internal:
+            temporary = self.links_path.with_suffix('.tmp')
+            temporary.write_text(json.dumps(self.internal, ensure_ascii=False, indent=1), encoding='utf-8')
+            os.replace(temporary, self.links_path)
         self.dirty = False

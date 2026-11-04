@@ -30,7 +30,16 @@ as ações de combate e movimento.
 1. Execute **`INICIAR_BOT.bat`** e clique **Abrir conexão**.
 2. No jogo, escolha o servidor **NRO - BOT LOCAL** e entre no personagem.
 3. Configure alvos e habilidades nas abas **Configuração**, **Habilidades** e **Prioridade**.
-4. **Home** inicia ou pausa a caça e **F12** bloqueia todos os envios do bot.
+4. A tecla configurada (padrão **Home**) inicia ou pausa a caça; o botão **Parar envios** bloqueia todos os envios do bot.
+
+### Login automático
+
+Na área de conexão, preencha **Login**, **Senha**, **Personagem** e a posição do servidor
+"NRO - BOT LOCAL" na lista, marque **Ativar** e clique **Salvar login**. A senha fica
+criptografada pelo Windows (DPAPI): só o seu usuário deste PC consegue lê-la. Ao **Abrir
+conexão**, se o jogo estiver fechado o bot o abre, digita login e senha e escolhe o
+servidor; o personagem é escolhido pelo relay, pelo nome, quando a lista chega. Com o jogo
+já aberto, o bot não digita nada (você entra) e só escolhe o personagem.
 
 Clicar no chão para andar só pausa o bot enquanto você está no controle: ele volta sozinho
 3 segundos depois do último clique.

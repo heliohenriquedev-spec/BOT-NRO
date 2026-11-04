@@ -1,5 +1,47 @@
 # Rota de quests
 
+## Montar uma rota (fluxo atual)
+
+1. **Mapas de caca**: grave uma vez o caminho ate cada mapa de caca. Posicione o
+   personagem onde o bot vai partir (onde o Retorno te deixa), clique em **Gravar nova
+   rota**, caminhe, entre nos portais e fale com os NPCs de transporte. No mapa de caca,
+   espere parar e clique em **Salvar gravacao**. Grave tambem a volta (mapa de caca ate a
+   cidade/hospital): rotas gravadas servem de ligacao para ir entregar.
+2. **Fila de rotas → Nova quest**: informe o nome, escolha o **Mapa de caca** e marque as
+   missoes. A lista mostra todas as missoes que os quadros oferecem (as cadastradas e
+   todos os ranks vistos nos menus), com "✓ concluida hoje" nas diarias ja feitas.
+   Nao ha monstros, quantidades nem mensagens para preencher.
+3. **Executar fila marcada**: pega as missoes (pulando as concluidas hoje), vai ao mapa,
+   caca ate todos os contadores fecharem e volta para entregar.
+
+Monstros e quantidades vem de cada missao ("Monstros necessarios"). Se a missao ainda
+nao tem descricao, o bot le os monstros no quadro na hora de pegar e guarda no cadastro.
+Missoes puladas nao entram no contador nem na entrega.
+
+A coleta e a entrega usam um modelo gravado uma vez ("Gravar como pegar" / "Gravar como
+entregar") e valem para todas as missoes dos dois quadros. Nenhuma mensagem de sucesso
+e usada: a coleta vale quando a missao aparece no slot e a entrega quando sai do slot.
+Se o quadro responder "Voce precisa matar todos os monstros da lista", a fila para com
+"ainda nao concluida (faltam monstros)".
+
+Entre rotas: ao entregar as missoes de uma rota num quadro, o bot ja pega ali as missoes da
+proxima rota desse quadro, antes de sair. Depois da ultima entrega, se todas as missoes da
+proxima rota ja estao pegas e a viagem dela passa pela Sala Vip (Viajante Ninja), segue
+direto, sem Retorno.
+
+Ordem: primeiro as missoes de Kakashi, depois as da Sala Vip. Se a viagem ao mapa de caca
+passa pela Sala Vip (Viajante Ninja em ra_in01), o bot segue dali sem usar o Retorno.
+
+Os 8 slots sao os mesmos nos dois quadros e mostram so o rank ("Rank A-1"). O bot guarda
+qual missao cadastrada esta em cada slot que ele preencheu (`data/rede/slots_missoes.json`),
+para nao confundir a Rank A-1 de Kakashi com a Rank A-1 da Sala Vip, ao pegar e ao entregar.
+
+Na viagem, o bot vai direto ao proximo portal ou NPC do mapa pelo caminho mais curto,
+sem repetir cada clique gravado. Se for teleportado para outro ponto do mapa, segue do
+ponto da gravacao mais proximo. Ao chegar no mapa de caca, a caca comeca ali. O caminho e
+calculado uma vez e seguido enquanto o personagem estiver nele (antes era recalculado a
+cada passo, o que travava o relay e o jogo depois de um teleporte para longe).
+
 ## Coleta por slots livres e missoes escolhidas na rota
 
 Uma gravacao completa de **Gravar como pegar** que passa por "Aceitar uma missao",
@@ -119,7 +161,7 @@ exigencias do servidor. A gravacao da outra etapa nao e necessaria para testar
 uma que ja esta pronta.
 
 Em **Fila de rotas**, **Executar somente viagem** valida o caminho ate o mapa dos
-monstros e termina antes de iniciar combate. **Parar teste**, Home, F12 e Pausar
+monstros e termina antes de iniciar combate. **Parar teste**, a tecla de iniciar/parar e Pausar
 interrompem os novos envios. O resultado aparece no painel; falta de confirmacao
 e tratada como falha, nao como sucesso. Pare a fila e encerre qualquer gravacao
 antes de executar um teste.
@@ -258,7 +300,7 @@ sucesso, o painel impede iniciar a fila.
    a entrega; apenas sua confirmacao libera a proxima rota.
 
 **Iniciar**, no cabecalho, inicia a caca normal; a fila tem seu proprio botao.
-Home, Pausar e F12 interrompem a fila. Ao parar/concluir, os alvos anteriores sao
+A tecla de iniciar/parar e Pausar interrompem a fila. Ao parar/concluir, os alvos anteriores sao
 restaurados. A fila nao reinicia sozinha apos fechar o painel ou uma desconexao.
 
 ## Gravar o caminho uma vez
@@ -310,6 +352,125 @@ Percurso informado: hospital → areia → Sala Vip [144,195] → ra_in01 → Vi
 Ninja [217,86] → Esconderijo do Cla Kamizuru Nivel 2 → anthell01 → portal [250,35]
 → anthell02. Falta gravar o portal do hospital e as etapas reais dos dialogos;
 o rascunho exige essa gravacao antes de executar.
+
+## @voltar e montaria
+
+Em **Fila de rotas → Ao terminar a caca e na locomocao**:
+
+- **@voltar**: clique em **Aprender @voltar** e digite `@voltar` no chat do jogo uma vez.
+  O bot guarda o pacote que o jogo enviou e o repete (trocando so o nome se outro
+  personagem estiver jogando). Com a opcao marcada, ao fechar os contadores o bot para,
+  mata os monstros num raio (padrao 8 celulas), espera o tempo sem combate (padrao 6 s)
+  e usa o @voltar. Dano fisico durante a conjuracao a cancela: o bot mata quem atacou,
+  espera de novo e repete (ate 6 vezes). So segue para a entrega depois de o servidor
+  confirmar a troca de mapa.
+- **Montaria**: clique em **Aprender montaria** e equipe a montaria no jogo, fora de
+  combate. O bot guarda o item e quais equipamentos o servidor tirou para ela. Com a
+  opcao marcada, antes de cada deslocamento (ir aos quadros, ao mapa de caca, entregar)
+  ele equipa a montaria do mesmo jeito do @voltar (mata os monstros ao redor, espera
+  sair de combate, tenta de novo se o servidor recusar). Ao chegar no mapa de caca, antes
+  de atacar, recoloca os equipamentos que a montaria tirou; no proximo deslocamento,
+  a montaria volta.
+
+**Switch** abre uma janela com duas abas. **Montaria**: todas as montarias do inventario
+(descricao com "montaria" ou item que ocupa baixo, mao direita e mao esquerda); escolha uma.
+**Equipamentos**: os equipamentos de baixo, mao direita e mao esquerda (o que a montaria
+tira) e a municao (kunai/shuriken; marque so uma). Salvar so guarda a escolha, por
+personagem; a fila a usa: montaria nos deslocamentos, equipamentos ao comecar a caca.
+
+O @voltar conjura a habilidade 960 do servidor. Se o servidor recusar (em combate), o bot
+espera de novo o tempo sem combate inteiro (padrao 10 s, contado do ultimo golpe dado ou
+recebido) antes de repetir. Quando a conjuracao comeca, espera o tempo que o servidor
+informar. As respostas do servidor nos 15 s apos cada @voltar ficam em
+`respostas_voltar.jsonl`, na pasta da sessao em `logs/relay`.
+
+Se o jogo mostrar mensagens de combate ("entrou/saiu de combate", "aguarde N segundos"),
+o bot as usa: com "saiu de combate" age na hora; uma recusa conta como tentativa cancelada.
+As mensagens aparecem no console como `[ROTA] Jogo: ...`. Sem elas, vale o tempo sem combate.
+
+Na caca da quest, um monstro que ataca o personagem passa a ser atacado tambem ate o fim
+da rota, mesmo que nao seja alvo de nenhuma missao (ex.: Inseto Assassino em anthell02).
+
+Os ajustes ficam em `data/rede/quest_extras.json`. No console, cada passo aparece como
+`[ROTA] @voltar: ...`, `[ROTA] Montaria: ...` ou `[ROTA] Equipamentos: ...`.
+
+## Parada por GM
+
+Param tudo (envios bloqueados, alerta na tela, so volta ao iniciar): @hide confirmado,
+personagem da lista de observacao e GM/staff na tela. GM/staff e reconhecido por: marca no
+nome, guilda, grupo ou cargo ("GM", "[GM]", "ADM", "Admin", "Staff", "Mod", "Suporte"),
+velocidade anormal (ate 40 ms por celula; o normal e 150), dois teleportes seguidos perto
+de voce em 30 s, ou um visual/marca listado em `data/jogadores/gm_sinais.json`:
+
+    {"visuais": [5038, 1224], "marcas": ["Hokage"]}
+
+`visuais` sao IDs de arma, escudo ou visual de cabeca (veja-os passando o mouse sobre o nome
+na aba Jogadores); `marcas` sao textos extras de nome.
+
+## Encadear rotas (varios mapas, uma coleta e uma entrega)
+
+Em **Editar rota**, marque **Encadear com a proxima rota da fila**. Rotas seguidas assim
+formam uma cadeia: o bot pega as missoes de todas de uma vez, caca no mapa da primeira ate
+fechar os monstros dela, segue para o mapa da proxima (usando o @voltar se nao houver
+caminho gravado de um mapa de caca para o outro), e depois do ultimo mapa volta e entrega
+todas. Na lista da fila, a rota encadeada aparece com "⛓". Ao escolher o mapa de caca, as
+missoes com monstros daquele mapa ficam com fundo verde na lista.
+
+## Retomar a fila
+
+O progresso da fila (rota, etapa, missoes pegas/entregues/puladas, contador de monstros)
+fica salvo em `data/rede/progresso_quests.json` a cada poucos segundos e a cada parada.
+**Retomar fila** continua dali: na caca, volta ao mapa de caca com o contador mantido;
+na coleta/entrega, segue da proxima missao que falta.
+
+## Gravacao enxuta das rotas
+
+Ao salvar uma rota de mapa, um acesso ao quadro ou a rota da quest, o bot guarda so:
+os NPCs com quem falar e as opcoes escolhidas, em cada mapa o ponto de saida para o
+proximo (portal, ou o ultimo ponto quando a saida e caminhando) e o destino final. Os
+cliques de caminhada nao sao guardados: a cada execucao o bot calcula o caminho mais curto
+ate cada ponto, pela colisao do mapa. As rotas antigas foram compactadas (copia em
+`backups/rotas-20261103`).
+
+## Patrulha da caca
+
+Em **Configuracao**: **Distancia entre pontos** (6 a 40 celulas; pontos por onde ja
+passou perto, a 3/4 dessa distancia, nao sao revisitados), **Cobrir do mapa antes de
+recomecar** (30 a 100%) e **Ignorar pontos proximos a paredes** com a **Distancia minima
+da parede**. Mudar esses valores refaz os pontos de cada mapa, mantendo o que ja foi andado.
+
+## Opcoes de caca da rota
+
+- **Ignorar os monstros que ja completaram e os que nao sao da quest**: a caca ataca so o
+  que ainda falta. **Nao ignorar (atacar sempre)** lista os monstros do mapa de caca:
+  marque o que da problema (ex.: o agressivo) para ataca-lo sempre. Sem a opcao, todos os
+  monstros contados e quem atacar o personagem continuam sendo atacados.
+- O contador aparece dentro do jogo, no canto superior direito: feitos/necessarios e
+  quantos faltam de cada monstro.
+- Presenca de jogadores so pausa durante o combate; deslocamentos, montaria, troca de
+  equipamentos e @voltar continuam.
+- Antes do @voltar e da montaria, o bot mata so os monstros que estao atacando o
+  personagem; os pacificos ao redor sao deixados em paz.
+- Se nao houver caminho gravado a partir do mapa atual (ex.: do mapa de caca ate os
+  quadros), o bot usa o @voltar aprendido (mesmo com a opcao desmarcada). Se ainda assim
+  parar, leve o personagem a um mapa com caminho gravado (ex.: @voltar manual): a fila
+  continua sozinha.
+- **Configuracao → Movimentacao manual**: voce anda pelo mapa; o bot so combate e seus
+  cliques no chao nao o pausam.
+
+## Contador por monstro
+
+Em **Editar rota**, marque as missoes e use **Preencher pelas missoes marcadas** (ou
+**Usar monstros das missoes marcadas nesta rota**). A tabela recebe um contador por
+monstro a partir de "Monstros necessarios" de cada missao, por exemplo 50 Louva-a-Deus
+e 50 Gremlin. Um monstro pedido por duas missoes conta uma vez, com a maior quantidade,
+como o servidor conta. A tabela pode ser editada (monstro, quantidade, IDs).
+
+Na caca, todos os monstros da rota continuam sendo atacados, inclusive os que ja
+chegaram a quantidade; a entrega so comeca quando todos os contadores estiverem
+completos. O andamento aparece em **Fila de rotas** ("Louva-a-Deus 32/50 | Gremlin 50/50 ✓").
+Sem contador, vale o total em "Mortes (sem contador)". Se o nome de um monstro da
+missao nao tiver ID conhecido, a fila pede para vincula-lo em **Configurar rank e monstros**.
 
 ## Contagem e armazenamento
 

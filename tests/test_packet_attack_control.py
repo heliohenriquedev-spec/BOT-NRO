@@ -54,7 +54,7 @@ def test_focus_panic_and_expired_target_prevent_sending(tmp_path):
         with pytest.raises(ValueError, match='foco'):
             await relay.send_attack(777, game_gate=lambda: False)
         relay.commands_blocked = True
-        with pytest.raises(RuntimeError, match='F12'):
+        with pytest.raises(RuntimeError, match='envios parados'):
             await relay.send_attack(777, game_gate=lambda: True)
         relay.commands_blocked = False
         relay.tracker.observer.registry.entities[777] = Entity(777, 1051, 11, 10, time.monotonic()-6, 'monster')

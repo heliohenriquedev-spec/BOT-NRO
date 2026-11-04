@@ -155,3 +155,108 @@ class GameOverlay(QWidget):
         painter.setPen(QColor(255, 80, 80))
         painter.drawText(QPointF(feet.x()-40, feet.y()-y*scale-6), label)
         return True
+
+
+def counter_lines(state):
+    """Kills of the quest route: done / needed and how many are missing, per monster."""
+    quests = (state or {}).get('quests') or {}
+    if quests.get('phase') not in ('hunt', 'travel', 'delivery', 'pickup', 'return'):
+        return []
+    lines = []
+    for p in quests.get('kill_progress') or []:
+        left = max(0, p['count']-p['done'])
+        lines.append((f"{p['name']}: {p['done']}/{p['count']}"+(' ✓ concluido' if p['complete'] else f' (faltam {left})'), p['complete']))
+    return lines
+
+
+class QuestCounter(QWidget):
+    """Quest kill counter over the game, in its own window: drag it anywhere (kept per game window)."""
+    WIDTH = 300
+
+    def __init__(self):
+        super().__init__(None)
+        self.state = {}
+        self.offset = None  # relative to the game's client area once dragged
+        self.drag = None
+        self.on_change = lambda: None
+        self.on_hover = lambda inside: None
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WA_ShowWithoutActivating)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool | Qt.WindowDoesNotAcceptFocus)
+        self.setCursor(Qt.SizeAllCursor)
+
+    def enterEvent(self, event):
+        self.on_hover(True)
+
+    def leaveEvent(self, event):
+        if self.drag is None:
+            self.on_hover(False)
+
+    def lines(self):
+        return counter_lines(self.state)
+
+    def has_content(self):
+        return bool(self.lines())
+
+    def update_state(self, state):
+        self.state = state or {}
+        self.resize(self.WIDTH, 32+22*len(self.lines()))
+        self.update()
+
+    def follow_game(self):
+        if self.drag is not None:
+            return True
+        rect = game_client_rect()
+        if rect is None:
+            return False
+        screen = QGuiApplication.primaryScreen()
+        ratio = screen.devicePixelRatio() if screen else 1.0
+        x, y = rect[0]/ratio, rect[1]/ratio
+        dx, dy = self.offset if self.offset is not None else (10, 240)  # below the hidden-players list
+        if (int(x+dx), int(y+dy)) != (self.x(), self.y()):
+            self.move(int(x+dx), int(y+dy))
+        return True
+
+    def layout_state(self):
+        return {'offset': list(self.offset) if self.offset is not None else None}
+
+    def restore_layout(self, state):
+        offset = (state or {}).get('offset')
+        self.offset = tuple(offset) if offset else None
+
+    def mousePressEvent(self, event):
+        self.drag = event.globalPosition()-QPointF(self.x(), self.y())
+
+    def mouseMoveEvent(self, event):
+        if self.drag is not None:
+            target = event.globalPosition()-self.drag
+            self.move(int(target.x()), int(target.y()))
+
+    def mouseReleaseEvent(self, event):
+        if self.drag is None:
+            return
+        self.drag = None
+        if not self.underMouse():
+            self.on_hover(False)
+        rect = game_client_rect()
+        screen = QGuiApplication.primaryScreen()
+        ratio = screen.devicePixelRatio() if screen else 1.0
+        if rect is not None:
+            self.offset = (self.x()-rect[0]/ratio, self.y()-rect[1]/ratio)
+            self.on_change()
+
+    def paintEvent(self, event):
+        lines = self.lines()
+        if not lines:
+            return
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setFont(QFont('Segoe UI', 9, QFont.DemiBold))
+        painter.setPen(QPen(QColor(255, 220, 120, 160), 1))
+        painter.setBrush(QColor(15, 15, 20, 200))
+        painter.drawRoundedRect(QRectF(0.5, 0.5, self.width()-1, self.height()-1), 6, 6)
+        painter.setPen(QColor(255, 220, 120))
+        painter.drawText(QPointF(10, 20), 'Quest: '+(((self.state.get('quests') or {}).get('quest')) or '')+'   (arraste para mover)')
+        for i, (text, done) in enumerate(lines):
+            painter.setPen(QColor(120, 230, 140) if done else QColor(235, 235, 235))
+            painter.drawText(QPointF(10, 42+22*i), text)

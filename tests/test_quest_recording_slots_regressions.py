@@ -78,7 +78,8 @@ def test_all_selected_missions_are_confirmed_in_new_slots_before_return(engine):
         assert q.stage_confirmed
         q.sent(q.plan('ra_in01',[219,95],None,p,3),3)
         q.plan('ra_in01',[219,95],None,p,4)
-    assert q.completed_missions['pickup']==['D4','D5'] and q.phase=='return'
+    # The trip to the hunting map starts in ra_in01 (Viajante Ninja): no Retorno after the Sala Vip.
+    assert q.completed_missions['pickup']==['D4','D5'] and q.phase=='travel'
 
 
 def test_already_active_mission_is_not_accepted_twice(engine):
@@ -102,13 +103,23 @@ def test_wrong_or_missing_allocation_does_not_confirm_pickup(engine):
     assert q.phase=='paused' and not q.stage_confirmed
 
 
-def test_delivery_uses_current_mission_slot_and_requires_ack(engine):
+def test_delivery_is_proved_by_the_slot_not_by_a_message(engine):
     q,p=engine;q.enter_stage('delivery',0)
     put_menu(q,'select_mission_slot',['#3 Rank D-4','#5 Rank S-11'])
     assert q.plan('ra_in01',[219,95],None,p,1)['choice']==1
-    put_menu(q,'verify_slot_absent',['#3 Vázio','#5 Rank S-11'])
+    put_menu(q,'verify_slot_absent',['#3 Vázio','#5 Rank S-11'])  # gone from its slot: delivered
     q.plan('ra_in01',[219,95],None,p,2)
-    assert q.phase=='paused' and not q.stage_confirmed
+    assert q.stage_confirmed and q.phase=='delivery'
+
+
+def test_delivery_still_in_slot_stops_and_says_monsters_are_missing(engine):
+    q,p=engine;q.enter_stage('delivery',0)
+    put_menu(q,'select_mission_slot',['#3 Rank D-4','#5 Rank S-11'])
+    q.plan('ra_in01',[219,95],None,p,1)
+    q.npc_texts=['Você precisa matar todos os monstros da lista']
+    put_menu(q,'verify_slot_absent',['#3 Rank D-4','#5 Rank S-11'])
+    q.plan('ra_in01',[219,95],None,p,2)
+    assert q.phase=='paused' and not q.stage_confirmed and 'faltam monstros' in q.reason
 
 
 def test_return_recording_survives_npc_disappearance_and_late_close(tmp_path,monkeypatch):

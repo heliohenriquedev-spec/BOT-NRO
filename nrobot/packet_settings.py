@@ -12,7 +12,9 @@ DEFAULTS = {'species': [1037], 'radius': 28, 'patrol': True, 'patrol_step': 8, '
             'switch_distance': 6, 'switch_saving': 3, 'switch_ratio_percent': 65}
 DEFAULTS.update(monster_name_choices={})
 DEFAULTS.update(pvp_enabled=False, pvp_all=False, pvp_first=False, pvp_targets=[])
-DEFAULTS.update(auto_map_targets=True, skill_global_delay=.12, require_collision=True, auto_movement=True, skill_profiles=[], auto_attacks=True, advanced_combat=True)
+DEFAULTS.update(auto_map_targets=True, skill_global_delay=.12, require_collision=True, auto_movement=True, skill_profiles=[], auto_attacks=True, advanced_combat=True,
+                manual_movement=False, patrol_spacing=14, patrol_coverage=90, patrol_wall_margin=3, patrol_avoid_walls=True,
+                patrol_give_up=10, ignore_attackers=0)
 # REDE-68: user-defined skill order; 'throws' is the alternating Shuriken/Kunai pair.
 DEFAULTS.update(skill_priority=[])
 # REDE-70: which presences hold the bot.
@@ -78,7 +80,8 @@ def validate(data, *, links_path=None):
     if (not isinstance(ids, list) or (not ids and not result['auto_map_targets'] and not any(choices.values()))
         or any(type(i) is not int or (i not in SPECIES and i not in monster_assets() and not monster_sprite(i)) for i in ids)):
         raise ValueError('Selecione ao menos um monstro conhecido')
-    for key, minimum, maximum in (('radius', 8, 60), ('patrol_step', 1, 8), ('skill_attempts', 1, 5),
+    for key, minimum, maximum in (('radius', 8, 60), ('patrol_step', 1, 8), ('patrol_spacing', 6, 40),
+                                  ('patrol_coverage', 30, 100), ('patrol_wall_margin', 1, 8), ('patrol_give_up', 3, 60), ('ignore_attackers', 0, 20), ('skill_attempts', 1, 5),
                                   ('target_defer', 2, 30), ('switch_distance', 4, 28),
                                   ('switch_saving', 1, 10), ('switch_ratio_percent', 25, 90)):
         if type(result[key]) is not int or not minimum <= result[key] <= maximum:
@@ -88,7 +91,7 @@ def validate(data, *, links_path=None):
             raise ValueError(f'{key}: valor deve estar entre {minimum} e {maximum}')
     if result['skill_timeout'] < result['skill_interval']:
         raise ValueError('Espera por resposta deve ser maior ou igual ao intervalo da habilidade')
-    for key in ('pvp_enabled', 'pvp_all', 'pvp_first', 'patrol', 'skills', 'require_collision', 'auto_movement', 'auto_attacks', 'advanced_combat', 'auto_map_targets',
+    for key in ('pvp_enabled', 'pvp_all', 'pvp_first', 'patrol', 'skills', 'require_collision', 'auto_movement', 'manual_movement', 'patrol_avoid_walls', 'auto_attacks', 'advanced_combat', 'auto_map_targets',
                 'pause_on_players', 'pause_on_disguised', 'pause_on_hidden', 'fast_offensives', 'sit_on_players',
                 'limit_target_failures', 'defer_failed_targets', 'skill_burst'):
         if type(result[key]) is not bool:
@@ -137,8 +140,8 @@ def validate(data, *, links_path=None):
     for key in ('hotkey_hunt', 'hotkey_minimap'):
         if result[key] not in HOTKEYS:
             raise ValueError(f'{key}: tecla não suportada')
-    if result['hotkey_hunt'] == result['hotkey_minimap'] or 'F12' in (result['hotkey_hunt'], result['hotkey_minimap']):
-        raise ValueError('As teclas de iniciar/parar e do minimapa devem ser diferentes entre si e de F12 (bloqueio)')
+    if result['hotkey_hunt'] == result['hotkey_minimap']:
+        raise ValueError('As teclas de iniciar/parar e do minimapa devem ser diferentes')
     if type(result['resume_delay']) is not int or not 10 <= result['resume_delay'] <= 600:
         raise ValueError('Tempo para voltar a rodar deve estar entre 10 e 600 segundos')
     burst = result['skill_burst_interval']

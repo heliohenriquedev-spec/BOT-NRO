@@ -4,6 +4,7 @@ import html
 import json
 from pathlib import Path
 import sys
+import time
 import uuid
 
 from PySide6.QtCore import QProcess, QProcessEnvironment, QTimer, Qt
@@ -65,6 +66,7 @@ class PacketPanel(QMainWindow):
         game_row.addWidget(self.game_label)
         layout.addLayout(game_row)
         self.show_game_folder()
+        self.build_auto_login(layout)
         self.status_label = QLabel('Conexão fechada • abra a conexão e entre pelo perfil local')
         self.status_label.setWordWrap(True)
         layout.addWidget(self.status_label)
@@ -110,9 +112,33 @@ class PacketPanel(QMainWindow):
         self.step.setRange(1, 8)
         self.step.setSuffix(' células')
         form.addRow('Trecho da patrulha', self.step)
+        self.patrol_spacing = QSpinBox(); self.patrol_spacing.setRange(6, 40); self.patrol_spacing.setSuffix(' células')
+        self.patrol_spacing.setToolTip('Distância entre os pontos da patrulha. Pontos por onde já passou perto não são revisitados.')
+        form.addRow('Distância entre pontos', self.patrol_spacing)
+        self.patrol_coverage = QSpinBox(); self.patrol_coverage.setRange(30, 100); self.patrol_coverage.setSuffix(' %')
+        self.patrol_coverage.setToolTip('Quanto do mapa precisa ser percorrido antes de recomeçar a patrulha.')
+        form.addRow('Cobrir do mapa antes de recomeçar', self.patrol_coverage)
+        self.patrol_avoid_walls = QCheckBox('Ignorar pontos próximos a paredes (não encostar nas paredes)')
+        form.addRow(self.patrol_avoid_walls)
+        self.patrol_wall_margin = QSpinBox(); self.patrol_wall_margin.setRange(1, 8); self.patrol_wall_margin.setSuffix(' células')
+        self.patrol_avoid_walls.toggled.connect(self.patrol_wall_margin.setEnabled)
+        form.addRow('Distância mínima da parede', self.patrol_wall_margin)
+        self.patrol_give_up = QSpinBox(); self.patrol_give_up.setRange(3, 60); self.patrol_give_up.setSuffix(' s')
+        self.patrol_give_up.setToolTip('Proteção contra ponto inacessível: sem chegar mais perto nesse tempo (ou 3 passos '
+                                       'recusados seguidos), o ponto é deixado de lado até o próximo ciclo.')
+        form.addRow('Desistir de um ponto após', self.patrol_give_up)
+        self.ignore_attackers = QSpinBox(); self.ignore_attackers.setRange(0, 20); self.ignore_attackers.setSuffix(' monstros')
+        self.ignore_attackers.setToolTip('Monstros atacando o personagem: até este número são ignorados; acima dele, '
+                                         'todos são atacados, de qualquer espécie. 0 = sempre ataca quem ataca.')
+        form.addRow('Ignorar até (atacando você)', self.ignore_attackers)
         self.auto_movement = QCheckBox('Movimentação automática pelo mapa')
         self.auto_movement.setToolTip('Desmarque para atacar e usar habilidades ao alcance sem caminhada automática.')
         form.addRow(self.auto_movement)
+        self.manual_movement = QCheckBox('Movimentação manual: eu ando pelo mapa; o bot só combate e não pausa quando clico no chão')
+        self.manual_movement.setToolTip('Desliga a caminhada automática e a patrulha. Ataques, habilidades e buffs continuam; '
+                                        'seus cliques no chão não pausam o bot.')
+        self.manual_movement.toggled.connect(lambda on: self.auto_movement.setEnabled(not on))
+        form.addRow(self.manual_movement)
         self.patrol = QCheckBox('Explorar áreas menos visitadas, variando trajetos e diagonais')
         form.addRow(self.patrol)
         self.skills = QCheckBox('Ativar habilidades configuradas')
@@ -183,6 +209,8 @@ class PacketPanel(QMainWindow):
         from .game_overlay import GameOverlay
         self.overlay = MinimapOverlay()
         self.game_overlay = GameOverlay()
+        from .game_overlay import QuestCounter
+        self.quest_counter = QuestCounter()
         self.priority_panel.capture_requested.connect(self.start_player_selection)
         self.priority_panel.minimap.toggled.connect(lambda checked: self.update_overlay())
         self.priority_panel.release_requested.connect(lambda: self.command('release_player'))
@@ -204,6 +232,9 @@ class PacketPanel(QMainWindow):
         pvp_layout.addWidget(QLabel('Jogadores visíveis no mapa atual'))
         pvp_layout.addWidget(self.pvp_list)
         self.pvp_list.itemChanged.connect(self.pvp_target_changed)
+        from .x1_panel import X1Box
+        self.x1_box = X1Box()
+        pvp_layout.addWidget(self.x1_box)
         tabs.addTab(pvp, 'PvP')
         from .player_panel import PlayerPanel
         self.player_panel = PlayerPanel()
@@ -238,10 +269,9 @@ class PacketPanel(QMainWindow):
         from .packet_settings import HOTKEYS
         self.hotkey_hunt, self.hotkey_minimap = QComboBox(), QComboBox()
         for combo in (self.hotkey_hunt, self.hotkey_minimap):
-            combo.addItems([name for name in HOTKEYS if name != 'F12'])
+            combo.addItems(list(HOTKEYS))
         keys_form.addRow('Iniciar / parar o bot', self.hotkey_hunt)
         keys_form.addRow('Esconder / mostrar o minimapa', self.hotkey_minimap)
-        keys_form.addRow(QLabel('F12 continua bloqueando todos os envios do bot.'))
         form.insertRow(form.rowCount()-1, keys_box)
         presence_box = QGroupBox('Pausar o bot quando aparecer')
         presence_layout = QVBoxLayout(presence_box)
@@ -316,7 +346,7 @@ class PacketPanel(QMainWindow):
         self.quest_panel=QuestPanel()
         self.quest_panel.command_requested.connect(lambda command,values:self.command(command,**values))
         tabs.addTab(self.quest_panel,'Rota de quests')
-        self.notice = QLabel('Home inicia/pausa • F12 bloqueia envios • Alt+Tab mantém a caça')
+        self.notice = QLabel('Home inicia/pausa • Alt+Tab mantém a caça')
         self.notice.setWordWrap(True)
         layout.addWidget(self.notice)
         layout.addWidget(QLabel('Fechar este painel ou encerrar a conexão desconecta o jogo ligado a este relay.'))
@@ -331,8 +361,15 @@ class PacketPanel(QMainWindow):
         self.auto_map_targets.setChecked(settings['auto_map_targets'])
         self.radius.setValue(settings['radius'])
         self.step.setValue(settings['patrol_step'])
+        self.patrol_spacing.setValue(settings.get('patrol_spacing', 14))
+        self.patrol_coverage.setValue(settings.get('patrol_coverage', 90))
+        self.patrol_wall_margin.setValue(settings.get('patrol_wall_margin', 3))
+        self.patrol_avoid_walls.setChecked(settings.get('patrol_avoid_walls', True))
+        self.patrol_give_up.setValue(settings.get('patrol_give_up', 10))
+        self.ignore_attackers.setValue(settings.get('ignore_attackers', 0))
         self.patrol.setChecked(settings['patrol'])
         self.auto_movement.setChecked(settings['auto_movement'])
+        self.manual_movement.setChecked(settings.get('manual_movement', False))
         self.pvp_enabled.setChecked(settings['pvp_enabled'])
         self.pvp_all.setChecked(settings['pvp_all'])
         self.pvp_first.setChecked(settings['pvp_first'])
@@ -386,8 +423,12 @@ class PacketPanel(QMainWindow):
                 'group_distance':self.group_distance.value(),'group_members':[n.strip() for n in self.group_members.toPlainText().splitlines() if n.strip()],
                 'species': sorted(self.targets.selected), 'monster_name_choices': dict(self.targets.name_choices),
                 'radius': self.radius.value(), 'patrol_step': self.step.value(),
+                'patrol_spacing': self.patrol_spacing.value(), 'patrol_coverage': self.patrol_coverage.value(),
+                'patrol_wall_margin': self.patrol_wall_margin.value(), 'patrol_avoid_walls': self.patrol_avoid_walls.isChecked(),
+                'patrol_give_up': self.patrol_give_up.value(), 'ignore_attackers': self.ignore_attackers.value(),
                 'patrol': self.patrol.isChecked(), 'skills': self.skills.isChecked(), 'auto_map_targets': self.auto_map_targets.isChecked(),
                 'require_collision': self.strict_map.isChecked(), 'auto_movement': self.auto_movement.isChecked(),
+                'manual_movement': self.manual_movement.isChecked(),
                 'pvp_enabled': self.pvp_enabled.isChecked(), 'pvp_all': self.pvp_all.isChecked(),
                 'pvp_first': self.pvp_first.isChecked(), 'pvp_targets': sorted(self.pvp_targets), 'advanced_combat': self.advanced.isChecked(),
                 'auto_attacks': self.auto_attacks.isChecked(), 'skill_profiles': self.skill_panel.profiles(),
@@ -483,15 +524,102 @@ class PacketPanel(QMainWindow):
                                                 '--game-dir', str(game)])
             self.open_button.setEnabled(False)
             self.notice.setText('Entre no jogo por NRO - BOT LOCAL (TESTE), depois clique em Iniciar.')
+            self.start_auto_login(game)
         except (OSError, ValueError) as exc:
             self.notice.setText(str(exc))
+
+    # -- login automatico ------------------------------------------------------------------
+    def build_auto_login(self, layout):
+        from . import auto_login
+        from PySide6.QtWidgets import QLineEdit as Line, QSpinBox as Spin, QGroupBox as Group, QGridLayout
+        config = auto_login.load()
+        box = Group('Login automático'); grid = QGridLayout(box)
+        self.login_enabled = QCheckBox('Ativar: ao abrir a conexão, abre o jogo (se fechado), entra na conta e escolhe o personagem')
+        self.login_enabled.setChecked(config['enabled'])
+        self.login_user = Line(config['user']); self.login_user.setPlaceholderText('Login da conta')
+        self.login_password = Line(); self.login_password.setEchoMode(Line.Password)
+        self.login_password.setPlaceholderText('senha salva (protegida pelo Windows)' if config['password'] else 'Senha')
+        self.login_character = Line(config['character']); self.login_character.setPlaceholderText('Nome do personagem')
+        self.login_server = Spin(); self.login_server.setRange(1, 10); self.login_server.setValue(config['server_index'])
+        self.login_when_open = QCheckBox('Digitar com o jogo já aberto (só se ele estiver na tela de login)')
+        self.login_when_open.setChecked(config.get('type_when_open', False))
+        self.login_wait = Spin(); self.login_wait.setRange(3, 60); self.login_wait.setSuffix(' s'); self.login_wait.setValue(config['login_wait'])
+        self.login_wait.setToolTip('Espera depois de abrir o jogo até a tela de login aparecer')
+        self.login_server.setToolTip('Posição do servidor "NRO - BOT LOCAL" na lista de servidores do jogo')
+        save_login = QPushButton('Salvar login'); save_login.clicked.connect(self.save_auto_login)
+        grid.addWidget(self.login_enabled, 0, 0, 1, 6)
+        for column, (title, widget) in enumerate((('Login', self.login_user), ('Senha', self.login_password),
+                                                  ('Personagem', self.login_character), ('Servidor nº', self.login_server))):
+            grid.addWidget(QLabel(title), 1, column*2 if column < 2 else column*2); grid.addWidget(widget, 1, column*2+1)
+        grid.addWidget(self.login_when_open, 2, 0, 1, 4)
+        grid.addWidget(QLabel('Espera da tela de login'), 2, 4); grid.addWidget(self.login_wait, 2, 5)
+        grid.addWidget(save_login, 2, 7)
+        layout.addWidget(box)
+
+    def save_auto_login(self):
+        from . import auto_login
+        config = auto_login.load()
+        try:
+            if self.login_password.text():
+                config['password'] = auto_login.protect(self.login_password.text())
+        except OSError as exc:
+            self.notice.setText(str(exc)); return
+        config.update(enabled=self.login_enabled.isChecked(), user=self.login_user.text().strip(),
+                      character=self.login_character.text().strip(), server_index=self.login_server.value(),
+                      type_when_open=self.login_when_open.isChecked(), login_wait=self.login_wait.value())
+        auto_login.save(config)
+        self.login_password.clear(); self.login_password.setPlaceholderText('senha salva (protegida pelo Windows)' if config['password'] else 'Senha')
+        self.notice.setText('Login automático salvo.' if config['enabled'] else 'Login automático desligado.')
+
+    def start_auto_login(self, game):
+        """Opens the game when closed and types the login there; an open game is left alone (the
+        bot never types into a game it did not open: it could be in chat)."""
+        from . import auto_login
+        import threading
+        config = auto_login.load()
+        if not config['enabled']:
+            return
+        try:
+            opened = auto_login.launch_game(game)
+        except OSError as exc:
+            self.notice.setText('Login automático: '+str(exc)); return
+        if not opened and not config.get('type_when_open'):
+            self.notice.setText('Jogo já aberto: entre na conta pelo NRO - BOT LOCAL; o personagem '
+                                +(config['character'] or '')+' é escolhido sozinho. Para digitar também com o jogo '
+                                'aberto, marque "Digitar com o jogo já aberto".')
+            return
+        if not config['user'] or not config['password']:
+            self.notice.setText('Login automático: salve login e senha primeiro.'); return
+        self.notice.setText('Abrindo o jogo para o login automático...' if opened else 'Login automático: digitando no jogo aberto...')
+        messages = self.login_messages = []
+
+        def run():
+            report = messages.append
+            if auto_login.wait_game_window() is None:
+                report('Login automático: a janela do jogo não apareceu em 90 s.'); return
+            if opened:
+                report(f"Login automático: jogo aberto; aguardando {config['login_wait']} s a tela de login.")
+                time.sleep(config['login_wait'])
+            try:
+                auto_login.log_in(config, report)
+            except OSError as exc:
+                report('Login automático: '+str(exc))
+        threading.Thread(target=run, daemon=True).start()
+
+    def show_login_messages(self):
+        """The login runs in the background: its steps show in Diagnóstico and on the notice line."""
+        messages = getattr(self, 'login_messages', None)
+        while messages:
+            text = messages.pop(0)
+            self.log.appendPlainText(text)
+            self.notice.setText(text)
 
     def command(self, command, **values):
         if self.process.state() == QProcess.NotRunning or self.session is None:
             self.notice.setText('Abra a conexão primeiro.')
             return
         if self.pending_command and command not in ('pause', 'stop'):
-            self.notice.setText('Aguardando confirmação do comando anterior. F12 continua disponível.')
+            self.notice.setText('Aguardando confirmação do comando anterior.')
             return
         try:
             request = {'id': uuid.uuid4().hex, 'command': command, **values}
@@ -520,6 +648,7 @@ class PacketPanel(QMainWindow):
     def finished(self, *args):
         self.overlay.hide()
         self.game_overlay.hide()
+        self.quest_counter.hide()
         self.open_button.setEnabled(True)
         self.pending_command = None
         self.status_label.setText('Conexão encerrada')
@@ -580,6 +709,7 @@ class PacketPanel(QMainWindow):
                                   variants=state.get('map_monster_names', []))
             self.refresh_pvp(state.get('players_nearby', []))
             self.player_panel.check_watch(state)  # status line of the lista de observação
+            self.x1_box.set_character((state.get('own_look') or {}).get('name'))
             # The relay stops itself on a watched character or anyone in @hide; this shows it.
             emergency = state.get('emergency_stop')
             if emergency and emergency['id'] != getattr(self, 'emergency_seen', None):
@@ -697,9 +827,10 @@ class PacketPanel(QMainWindow):
     def refresh_overlays(self):
         """10 Hz state for the in-game drawings; the dashboard keeps its own slower refresh."""
         self.check_minimap_key()
+        self.show_login_messages()
         if self.session is None or self.process.state() == QProcess.NotRunning:
             return
-        if not (self.game_overlay.isVisible() or self.overlay.isVisible() or self.priority_panel.minimap.isChecked()):
+        if not (self.game_overlay.isVisible() or self.overlay.isVisible() or self.quest_counter.isVisible() or self.priority_panel.minimap.isChecked()):
             return
         try:
             self.last_state = json.loads((self.session/'estado.json').read_text(encoding='utf-8'))
@@ -719,7 +850,9 @@ class PacketPanel(QMainWindow):
 
     def update_overlay(self):
         state = getattr(self, 'last_state', {}) if self.process.state() != QProcess.NotRunning else {}
-        if bool(state) and self.priority_panel.minimap.isChecked():
+        from .radar_overlay import game_in_front
+        front = game_in_front()  # minimized or Alt+Tab: every overlay hides with the game
+        if bool(state) and self.priority_panel.minimap.isChecked() and front:
             self.overlay.update_state(state)
             if self.session is not None:
                 self.overlay.load(self.session)
@@ -730,12 +863,19 @@ class PacketPanel(QMainWindow):
             self.overlay.hide()
         # Shadow on the own character while hidden; other hidden characters are on the minimap.
         self.game_overlay.update_state(state)
-        if self.game_overlay.has_content():
+        if self.game_overlay.has_content() and front:
             self.game_overlay.follow_game()
             if not self.game_overlay.isVisible():
                 self.game_overlay.show()
         elif self.game_overlay.isVisible():
             self.game_overlay.hide()
+        # Quest kill counter: its own window, dragged apart from the minimap.
+        self.quest_counter.update_state(state)
+        if self.quest_counter.has_content() and front and self.quest_counter.follow_game():
+            if not self.quest_counter.isVisible():
+                self.quest_counter.show()
+        elif self.quest_counter.isVisible():
+            self.quest_counter.hide()
 
     def restart_after_update(self):
         from .updater import restart_panel
@@ -770,20 +910,23 @@ class PacketPanel(QMainWindow):
             combo.currentTextChanged.connect(lambda text: self.update_key_notice())
         for field in (self.resume_delay, self.burst_interval):
             field.valueChanged.connect(self.schedule_save)
-        for box in (self.pvp_enabled, self.pvp_all, self.pvp_first, self.auto_map_targets, self.auto_movement, self.patrol, self.skills, self.strict_map, self.fast_offensives,
+        for box in (self.pvp_enabled, self.pvp_all, self.pvp_first, self.auto_map_targets, self.auto_movement, self.manual_movement, self.patrol, self.patrol_avoid_walls, self.skills, self.strict_map, self.fast_offensives,
                     self.sit_on_players, self.limit_failures, self.defer_failed, self.skill_burst,
                     self.advanced, self.auto_attacks, self.pause_players, self.pause_disguised, self.pause_hidden):
             box.toggled.connect(self.schedule_save)
-        for field in (self.radius, self.step, *self.combat_fields.values()):
+        for field in (self.radius, self.step, self.patrol_spacing, self.patrol_coverage, self.patrol_wall_margin, self.patrol_give_up,
+                      self.ignore_attackers, *self.combat_fields.values()):
             field.valueChanged.connect(self.schedule_save)
         self.skill_panel.changed.connect(self.schedule_save)
         self.priority_panel.changed.connect(self.schedule_save)
         self.priority_panel.minimap.toggled.connect(lambda checked: self.save_ui())
         self.overlay.on_change = self.save_ui
+        self.quest_counter.on_change = self.save_ui
+        self.overlay.on_hover = self.quest_counter.on_hover = self.cursor_over_overlay
 
     def update_key_notice(self):
         self.notice.setText(f'{self.hotkey_hunt.currentText()} inicia/pausa • {self.hotkey_minimap.currentText()} '
-                            'esconde/mostra o minimapa • F12 bloqueia envios • Alt+Tab mantém a caça')
+                            'esconde/mostra o minimapa • Alt+Tab mantém a caça')
 
     def check_minimap_key(self):
         """REDE-82: the minimap key toggles it while the game (or this panel) is in front."""
@@ -837,12 +980,29 @@ class PacketPanel(QMainWindow):
             self.priority_panel.minimap.setChecked(bool(ui['minimap']))
         try:
             self.overlay.restore_layout(ui.get('minimap_layout'))
+            self.quest_counter.restore_layout(ui.get('counter_layout'))
         except (TypeError, ValueError):
+            pass
+
+    def cursor_over_overlay(self, inside):
+        """The game reads the mouse even over the bot's windows: while the cursor is on the minimap
+        or the counter, the relay drops the game's walk/attack/NPC clicks, so dragging them never
+        moves the character."""
+        if self.session is None:
+            return
+        flag = self.session/'cursor_sobre_janela'
+        try:
+            if inside:
+                flag.write_text('1', encoding='ascii')
+            elif flag.exists():
+                flag.unlink()
+        except OSError:
             pass
 
     def save_ui(self):
         ui = {'geometry': bytes(self.saveGeometry().toBase64()).decode('ascii'), 'tab': self.tabs.currentIndex(),
               'minimap': self.priority_panel.minimap.isChecked(), 'minimap_layout': self.overlay.layout_state(),
+              'counter_layout': self.quest_counter.layout_state(),
               'last_map': self.targets.map_name}
         try:
             self.UI_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -857,6 +1017,7 @@ class PacketPanel(QMainWindow):
         self.save_ui()
         self.overlay.close()
         self.game_overlay.close()
+        self.quest_counter.close()
         self.close_relay()
         event.accept()
 

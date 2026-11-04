@@ -67,3 +67,24 @@ def test_user_paths_are_protected():
     assert updater.is_protected('data/mapas/map_cache.dat')
     assert not updater.is_protected('data/rede/especies_nro.json')
     assert not updater.distributed('tools/validar_patrulha.py') and updater.distributed('nrobot/updater.py')
+
+
+def test_update_keeps_a_copy_of_what_it_replaces_or_removes(tmp_path):
+    (tmp_path/'nrobot').mkdir()
+    (tmp_path/'nrobot/session_relay.py').write_text('old')
+    (tmp_path/'nrobot/antigo.py').write_text('dropped')
+    (tmp_path/'versao.json').write_text(json.dumps({'version': '1', 'files': ['nrobot/antigo.py']}))
+    updater.apply(log=lambda text: None, root=tmp_path, archive=bundle({'nrobot/session_relay.py': 'new'}))
+    copies = list((tmp_path/'backups').glob('antes-da-atualizacao-*.zip'))
+    assert len(copies) == 1
+    with zipfile.ZipFile(copies[0]) as saved:
+        assert saved.read('nrobot/session_relay.py') == b'old' and saved.read('nrobot/antigo.py') == b'dropped'
+
+
+def test_update_refuses_a_git_copy_with_unpublished_changes(tmp_path, monkeypatch):
+    (tmp_path/'nrobot').mkdir()
+    (tmp_path/'nrobot/session_relay.py').write_text('mine, not published')
+    monkeypatch.setattr(updater, 'local_changes', lambda root: ['nrobot/session_relay.py'])
+    with pytest.raises(updater.UpdateError, match='publique primeiro'):
+        updater.apply(log=lambda text: None, root=tmp_path, archive=bundle({'nrobot/session_relay.py': 'new'}))
+    assert (tmp_path/'nrobot/session_relay.py').read_text() == 'mine, not published'

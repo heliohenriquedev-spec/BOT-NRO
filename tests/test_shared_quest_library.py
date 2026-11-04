@@ -96,24 +96,26 @@ def complete_return(q,board_id,portals,now):
 
 
 def test_two_boards_require_each_acceptance_and_each_delivery(tmp_path):
+    # Kakashi first, then the Sala Vip, whatever the order chosen in the route.
     q=QuestRoutes();q.start([route(['A','B'])],0,library=dict(missions=[mission(),mission('B','kakashi')]))
     p=PortalGuard(tmp_path/'p')
-    complete_dialog(q,90,'Aceita A','ra_in01',[219,95],p,0)
+    assert q.current_mission['id']=='B'
+    complete_dialog(q,91,'Aceita B','kakashi',[87,140],p,0)
     assert q.phase=='return'
-    complete_return(q,'vip',p,2)
-    assert q.phase=='pickup' and q.current_mission['id']=='B'
-    assert q.completed_missions['pickup']==['A'] and not q.stage_confirmed
-    complete_dialog(q,91,'Aceita B','kakashi',[87,140],p,3)
-    complete_return(q,'kakashi',p,5)
-    assert q.phase=='travel' and q.completed_missions['pickup']==['A','B']
+    complete_return(q,'kakashi',p,2)
+    assert q.phase=='pickup' and q.current_mission['id']=='A'
+    assert q.completed_missions['pickup']==['B'] and not q.stage_confirmed
+    complete_dialog(q,90,'Aceita A','ra_in01',[219,95],p,3)
+    # the trip starts in ra_in01: straight on, no Retorno
+    assert q.phase=='travel' and q.completed_missions['pickup']==['B','A']
     q.plan('anthell02',[2,2],None,p,6);assert q.phase=='hunt'
     q.kills=50;q.finish_hunt(7)
-    complete_dialog(q,92,'Entregue A','ra_in01',[219,95],p,8)
-    complete_return(q,'vip',p,10)
-    assert q.phase=='delivery' and q.index==0 and q.current_mission['id']=='B'
-    complete_dialog(q,93,'Entregue B','kakashi',[87,140],p,11)
-    complete_return(q,'kakashi',p,13)
-    assert q.phase=='done' and q.completed_missions['delivery']==['A','B']
+    complete_dialog(q,93,'Entregue B','kakashi',[87,140],p,8)
+    complete_return(q,'kakashi',p,10)
+    assert q.phase=='delivery' and q.index==0 and q.current_mission['id']=='A'
+    complete_dialog(q,92,'Entregue A','ra_in01',[219,95],p,11)
+    complete_return(q,'vip',p,13)
+    assert q.phase=='done' and q.completed_missions['delivery']==['B','A']
 
 
 def test_success_from_first_mission_cannot_confirm_second(tmp_path):
@@ -141,12 +143,12 @@ def test_editor_selects_both_boards_without_duplicating_dialogs(tmp_path,monkeyp
     os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
     from PySide6.QtWidgets import QApplication
     from nrobot.quest_panel import RouteEditor
-    monkeypatch.setattr(lib,'FILE',tmp_path/'library.json')
+    from nrobot import map_routes
+    monkeypatch.setattr(lib,'FILE',tmp_path/'library.json');monkeypatch.setattr(map_routes,'FILE',tmp_path/'maps.json')
     lib.save(dict(missions=[mission(),mission('B','kakashi')]))
     app=QApplication.instance() or QApplication([])
     editor=RouteEditor(route(['B','A']),{})
     assert editor.selected_missions()==['B','A']
-    assert not editor.stage_tabs.isTabEnabled(0) and editor.stage_tabs.currentIndex()==1
     editor.accept()
     assert editor.route['mission_ids']==['B','A'] and not editor.route['pickup_steps']
     editor.close()
@@ -226,3 +228,47 @@ def test_fast_npc_response_is_not_erased_after_drain(tmp_path,monkeypatch):
     r.upstream=Writer()
     assert asyncio.run(r.quest_tick(lambda:True))
     assert q.stage_confirmed and q.dialog['action']=='close'
+
+
+def test_delivery_takes_the_next_route_missions_on_each_board_and_skips_retorno_for_the_vip_trip(tmp_path):
+    # Route 1 and route 2 both use Kakashi and the Sala Vip; route 2's trip starts in ra_in01 (Viajante Ninja).
+    library = dict(missions=[mission('K1', 'kakashi'), mission('V1'), mission('K2', 'kakashi'), mission('V2')])
+    first, second = route(['K1', 'V1']), {**route(['K2', 'V2']), 'id': 'R2', 'name': 'Segunda'}
+    q = QuestRoutes(); q.start([first, second], 0, library=library)
+    p = PortalGuard(tmp_path/'p')
+    q.phase = 'hunt'; q.kills = 50; q.finish_hunt(1)
+    assert q.phase == 'delivery' and q.current_mission['id'] == 'K1'
+    complete_dialog(q, 93, 'Entregue K1', 'kakashi', [87, 140], p, 2)
+    assert q.phase == 'pickup' and q.current_mission['id'] == 'K2'  # same visit to Kakashi
+    complete_dialog(q, 93, 'Aceita K2', 'kakashi', [87, 140], p, 4)
+    assert q.phase == 'return'
+    complete_return(q, 'kakashi', p, 6)
+    assert q.phase == 'delivery' and q.current_mission['id'] == 'V1'
+    complete_dialog(q, 92, 'Entregue V1', 'ra_in01', [219, 95], p, 8)
+    assert q.phase == 'pickup' and q.current_mission['id'] == 'V2'
+    complete_dialog(q, 92, 'Aceita V2', 'ra_in01', [219, 95], p, 10)
+    # Everything for route 2 is taken and its trip starts here: no Retorno, straight on.
+    assert q.index == 1 and q.phase == 'travel' and q.completed_missions['pickup'] == ['K2', 'V2']
+
+
+def test_linked_routes_take_everything_hunt_map_by_map_and_deliver_everything(tmp_path):
+    library = dict(missions=[mission('A'), mission('B')])
+    first = {**route(['A']), 'id': 'R1', 'name': 'Mapa 1', 'target_map': 'field1', 'species': [1262], 'chain_next': True,
+             'steps': [dict(kind='portal', map='ra_in01', position=[1, 1]), dict(kind='wait_map', map='field1')]}
+    second = {**route(['B']), 'id': 'R2', 'name': 'Mapa 2', 'target_map': 'field2', 'species': [1294],
+              'steps': [dict(kind='portal', map='ra_in01', position=[1, 1]), dict(kind='wait_map', map='field2')]}
+    q = QuestRoutes(); q.start([first, second], 0, library=library)
+    p = PortalGuard(tmp_path/'p')
+    assert q.route['mission_ids'] == ['A', 'B']  # one pickup for the whole chain
+    complete_dialog(q, 90, 'Aceita A', 'ra_in01', [219, 95], p, 0)
+    assert q.phase == 'pickup' and q.current_mission['id'] == 'B'
+    complete_dialog(q, 90, 'Aceita B', 'ra_in01', [219, 95], p, 2)
+    assert q.phase == 'travel' and q.index == 0 and q.route['mission_ids'] == ['A'] and q.route['species'] == [1262]
+    q.plan('field1', [2, 2], None, p, 4); assert q.phase == 'hunt'
+    q.kills = 50; q.finish_hunt(5)
+    assert q.phase == 'travel' and q.index == 1 and q.route['species'] == [1294] and q.kills == 0  # next map, no delivery
+    q.plan('field2', [2, 2], None, p, 6); assert q.phase == 'hunt'
+    q.kills = 50; q.finish_hunt(7)
+    assert q.phase == 'delivery' and q.route['mission_ids'] == ['A', 'B']  # everything delivered at the end
+    state = q.progress_state()
+    assert state['chain']['indices'] == [0, 1] and state['chain_routes']['0']['mission_ids'] == ['A']

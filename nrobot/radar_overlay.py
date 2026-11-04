@@ -7,9 +7,33 @@ GAME_TITLE = 'Naruto Redemption Online'
 GAME_EXECUTABLE = 'nro.exe'
 
 
+_window = None
+
+
+def game_window():
+    """The game window, found once and kept while it exists (searching every window is slow)."""
+    global _window
+    if os.name != 'nt':
+        return None
+    if _window is not None and ctypes.windll.user32.IsWindow(_window):
+        return _window
+    _window = find_game_window()
+    return _window
+
+
+def game_in_front():
+    """The game is the active window and not minimized: the overlays show only then (they hide
+    with it on Alt+Tab or minimize)."""
+    hwnd = game_window()
+    if hwnd is None:
+        return False
+    user32 = ctypes.windll.user32
+    return not user32.IsIconic(hwnd) and user32.GetForegroundWindow() == hwnd
+
+
 def game_client_rect():
     """(x, y, width, height) of the game's client area in physical pixels, or None."""
-    hwnd = find_game_window()
+    hwnd = game_window()
     if hwnd is None or ctypes.windll.user32.IsIconic(hwnd):
         return None
     rect = wintypes.RECT()

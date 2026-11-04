@@ -59,7 +59,11 @@ class PacketHunt:
         self.aggressors = {}
         self.priority_target = None  # REDE-67: captured character
 
-    def replan_action(self, now, reason):
+    def replan_action(self, now, reason, action=None):
+        if action and action.get('purpose') == 'patrol' and self.patrol is not None and action.get('origin'):
+            # Refused before sending (blocked cells, route changed): the same step is not proposed again.
+            self.patrol.failed(action['origin'], action['destination'], now)
+            self.patrol.route_cache_key = self.patrol.route_cache = None
         self.pending = None
         self.ready_at = now+.05
         self.reason = 'recalculando aproximacao: '+reason
@@ -360,7 +364,7 @@ class PacketHunt:
         action = self.pending
         if self.patrol is not None:
             self.patrol.failed(action.get('origin'), action['destination'], now)
-        self.blocked_until[tuple(action['destination'])] = now+8
+        self.blocked_until[tuple(action["destination"])] = now+2
         self.movement_failures += 1
         self.record('movement_failed', target_id=action['target_id'], reason=reason,
                     origin=action.get('origin'), destination=action['destination'], position=position)
@@ -390,6 +394,7 @@ class PacketHunt:
         self.ready_at = now
 
     def sent(self, action, now):
+        self.last_action_at = now
         self.pending = {**action, 'sent_at': now}
         if action['kind'] == 'move':
             self.pending['movement_acknowledged'] = False
@@ -402,10 +407,26 @@ class PacketHunt:
             if action['kind'] == 'skill':
                 self.skill_ready_at = now+self.SKILL_INTERVAL
 
+    IDLE_LIMIT = 2  # seconds hunting without sending anything before the stall breaker acts
+
     def plan(self, state, now, walk_speed_ms=400, collision=None):
         self.navigation = 'rotas por colisão' if collision is not None else 'colisão indisponível; aproximação anterior'
         if not self.enabled:
+            self.last_action_at = None
             return None
+        if getattr(self, 'last_action_at', None) is None or self.target is not None or self.engaged is not None:
+            self.last_action_at = now  # fighting is not standing still (skills go through the rotation)
+        if self.pending is None and now-self.last_action_at > self.IDLE_LIMIT:
+            # Never stand still while hunting (players around are handled before this is called):
+            # forget recent failures and blocks and pick a fresh route.
+            self.record('stall_breaker', seconds=round(now-self.last_action_at, 1))
+            self.blocked_until.clear()
+            if self.patrol is not None:
+                self.patrol.failed_edges.clear()  # waypoints put aside (unreachable) stay aside
+                self.patrol.goal = self.patrol.goal_block = None
+                self.patrol.route_cache_key = self.patrol.route_cache = None
+                self.patrol.retry_at = 0
+            self.last_action_at = now
         if (state['state'] != 'tracking' or not state['player_position_recent']
             or state.get('player_position') is None):
             self.pause('posição própria ou leitura indisponível')
@@ -460,8 +481,25 @@ class PacketHunt:
         entity = entities.get(self.target)
         def distance_to(e):
             return math.dist(player, (e.get('attack_positions') or [e.get('destination') or e.get('effective_position', e['position'])])[0])
-        nearby = [e for e in entities.values() if distance_to(e) <= self.SEARCH_RADIUS]
-        closest = min(nearby, key=lambda e: (distance_to(e), e['entity_id'])) if nearby else None
+        heading = getattr(self.patrol, 'heading', None) if self.auto_movement and self.patrol is not None else None
+
+        def alignment(e):
+            """1 straight ahead on the patrol heading, -1 right behind, 0 sideways or no heading."""
+            if not heading or not any(heading):
+                return 0
+            point = (e.get('attack_positions') or [e.get('destination') or e.get('effective_position', e['position'])])[0]
+            offset = (point[0]-player[0], point[1]-player[1])
+            size = math.hypot(*offset)*math.hypot(*heading)
+            return (offset[0]*heading[0]+offset[1]*heading[1])/size if size else 0
+
+        def weighed(e):
+            # Monsters behind the sweep count up to twice as far: the hunt goes on forward instead
+            # of running back over covered ground, which made the patrol loop around.
+            distance = distance_to(e)
+            return distance*(1+max(0, -alignment(e))) if distance > 4 else distance
+        nearby = [e for e in entities.values() if distance_to(e) <= self.SEARCH_RADIUS
+                  and not (alignment(e) < -.3 and distance_to(e) > self.SEARCH_RADIUS/2)]
+        closest = min(nearby, key=lambda e: (weighed(e), e['entity_id'])) if nearby else None
         # REDE-57: keep a visible valid target until removal; proximity does not override it.
         if entity is None:
             if not nearby:

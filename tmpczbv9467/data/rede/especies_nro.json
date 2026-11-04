@@ -1,0 +1,61 @@
+{
+  "source_capture": "C:\\BOT NRO\\logs\\rede\\20261101-164137\\captura.pcapng",
+  "classification": "Appearance-name correlation; diagnostic candidates only, not a proof of monster category.",
+  "species": {
+    "1034": {
+      "name": "Girino",
+      "evidence_entity_ids": [
+        110660020
+      ]
+    },
+    "1051": {
+      "name": "Bikouchuu",
+      "evidence_entity_ids": [
+        110660192,
+        110660238,
+        110660250,
+        110660289
+      ]
+    },
+    "1212": {
+      "name": "Akino",
+      "evidence_entity_ids": [
+        110660392,
+        110660450,
+        110660464,
+        110660486
+      ]
+    },
+    "1783": {
+      "name": "Filhote de Katsuyu",
+      "evidence_entity_ids": [
+        110660312,
+        110660345,
+        110660355,
+        110660357,
+        110660361
+      ]
+    },
+    "1214": {
+      "name": "Onbba",
+      "evidence_entity_ids": [
+        110660559
+      ]
+    },
+    "1037": {
+      "name": "Filhote de cobra",
+      "evidence_entity_ids": [
+        110660091
+      ]
+    },
+    "1836": {
+      "name": "Boneco de Treino",
+      "evidence_entity_ids": [
+        110830885,
+        110830886,
+        110830887,
+        110830888
+      ]
+    }
+  }
+}

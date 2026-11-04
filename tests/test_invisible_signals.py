@@ -24,7 +24,8 @@ def test_an_invisible_character_is_revealed_by_its_actions():
     assert guard.drain_alerts()[0] == {'kind': 'ghost', 'entity_id': GM, 'signal': 'falou no chat'}
     assert 'invisivel' in guard.reason([10, 10], 1)
     guard.observe([{'kind': 'skill_no_damage', 'skill_id': 28, 'amount': 0, 'target_id': 110000001,
-                    'source_id': GM, 'success': True}], OWN, 5)
+                    'source_id': GM, 'success': True}], OWN, 4)  # skills arrive from far away too: not counted
+    guard.observe([decode(struct.pack('<HIB', 0xc0, GM, 5))], OWN, 5)
     shadow, = guard.snapshot([10, 10], 5)['shadow_details']
     assert shadow['name'] == 'GM Sombra' and shadow['signals'] == 2 and shadow['position'] is None
     assert guard.snapshot([10, 10], 5)['invisible'] == [GM]
@@ -41,7 +42,9 @@ def test_visible_or_just_departed_characters_are_not_invisible():
     guard.observe([{'kind': 'remove', 'entity_id': GM, 'reason': 0}, attack], OWN, 1)
     assert not guard.ghosts  # late packet right after leaving the view
     guard.observe([attack], OWN, 1+guard.GHOST_GRACE+1)
-    assert GM in guard.ghosts
+    assert GM not in guard.ghosts  # walked out and still hitting a monster on our screen: not invisible
+    guard.observe([{**attack, 'action_type': 2}], OWN, 1+guard.GHOST_GRACE+2)
+    assert GM in guard.ghosts  # sitting is only seen right beside it
     guard.observe([visible], OWN, 10)
     assert not guard.ghosts  # it showed up: a normal visible player again
     guard.observe([{**attack, 'source_id': OWN}, {**attack, 'source_id': 110000009}], OWN, 30)

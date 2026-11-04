@@ -221,6 +221,30 @@ def movement(raw: bytes):
                            ((raw[3] & 3) << 8) | raw[4]]
 
 
+def character_look_fields(message, *, hair, weapon, bottom, top, mid, hair_color, clothes, guild, sex, level):
+    """What a character's appearance packet says about them (players only are kept by the registry)."""
+    u16 = lambda offset: struct.unpack_from('<H', message, offset)[0]
+    look = dict(hair=u16(hair), weapon=u16(weapon), shield=u16(weapon+2), head_bottom=u16(bottom), head_top=u16(top),
+                head_mid=u16(mid), hair_color=u16(hair_color), clothes_color=u16(clothes),
+                guild_id=struct.unpack_from('<I', message, guild)[0], sex='F' if message[sex] == 0 else 'M')
+    if 1 <= u16(level) <= 9999:
+        look['level'] = u16(level)
+    return look
+
+
+def combat_notice(text):
+    """The game's own combat messages ("entrou em combate", "saiu de combate", refusals)."""
+    if not re.search(r'combate', text, re.I):
+        # Other @voltar/teleport answers are kept for the trace, never ordinary chat.
+        if re.search(r'@?voltar|teleport|conjura|aguarde', text, re.I) and not text.startswith('[Cooldown]'):
+            return dict(kind='server_notice', text=text[:200])
+        return None
+    out = re.search(r'sa(iu|indo)|fora de combate|n[aã]o est[aá] mais|terminou|livre', text, re.I)
+    seconds = re.search(r'(\d{1,3})\s*seg', text, re.I)
+    return dict(kind='combat_notice', text=text[:200], state='out' if out else 'in',
+                seconds=int(seconds.group(1)) if seconds else None)
+
+
 def decode(message: bytes) -> dict:
     if message_length(message) != len(message):
         raise ValueError('Mensagem incompleta ou comprimento inesperado')
@@ -234,19 +258,27 @@ def decode(message: bytes) -> dict:
         event.update(kind='appearance', entity_id=u32(3), object_type=message[2],
                      species_id=u16(21 if op == 0x7c else 17 if op == 0x22c else 15))
         event['option'] = u32(13) if op == 0x22c else u16(13)
+        event['speed_raw'] = u16(7)  # unfiltered: a GM's @speed goes below the normal range
         if 50 <= u16(7) <= 2000:
             event['walk_speed_ms'] = u16(7)
         if op == 0x22c:
             event['position'], event['destination'] = movement(message[55:61])
+            if len(message) >= 65:
+                event['look'] = character_look_fields(message, hair=19, weapon=21, bottom=25, top=31, mid=33,
+                                                      hair_color=35, clothes=37, guild=41, sex=54, level=63)
         else:
             event['position'] = position(message[37:40] if op == 0x7c else message[47:50])
     elif op in (0x22a, 0x22b):
         # Characters standing still (022A) or spawning/warping in (022B): unlike 022C these
         # carry no object-type byte, so a player is known on sight, before it walks.
         event.update(kind='appearance', entity_id=u32(2), species_id=u16(16), option=u32(12),
-                     position=position(message[50:53]))
+                     position=position(message[50:53]), speed_raw=u16(6))
+        if op == 0x22b:
+            event['spawned'] = True  # warped/teleported in (or logged in) right there
         if 50 <= u16(6) <= 2000:
             event['walk_speed_ms'] = u16(6)
+        event['look'] = character_look_fields(message, hair=18, weapon=20, bottom=24, top=26, mid=28, hair_color=30,
+                                              clothes=32, guild=36, sex=49, level=56 if op == 0x22a else 55)
     elif op in (0x86, 0x87):
         event['kind'] = 'player_move' if op == 0x87 else 'move'
         if op == 0x86:
@@ -299,7 +331,11 @@ def decode(message: bytes) -> dict:
         if notice:
             event.update(kind='skill_retry_notice', seconds=int(notice.group(1)))
         else:
-            event['kind'] = 'other'
+            event.update(combat_notice(text) or {'kind': 'other'})
+    elif op in (0x1c3, 0x2c1, 0x17f) and len(message) > 4:
+        # Colored server/NPC messages and NRO's 017F notices: only combat/@voltar notices are kept.
+        text = message[{0x1c3: 16, 0x2c1: 12, 0x17f: 4}[op]:].split(b'\0')[0].decode('cp1252', 'replace')
+        event.update(combat_notice(text) or {'kind': 'other'})
     elif op in (0xa3, 0x1ee, 0x2e8, 0xa4, 0x2d0):
         # NRO's client sends stackables (ammo included) as 02E8; 02D0 grew per packet version.
         stackable = op in (0xa3, 0x1ee, 0x2e8)
@@ -310,7 +346,8 @@ def decode(message: bytes) -> dict:
                 continue
             items = [{'index':u16(offset), 'item_id':u16(offset+2), 'type':message[offset+4],
                       'amount':u16(offset+6) if stackable else 1,
-                      'equipped':u16(offset+8), 'location':0x8000 if message[offset+4] == 10 else 0}
+                      'equipped':u16(offset+8), 'location':0x8000 if message[offset+4] == 10 else 0,
+                      'equip_location':0 if stackable else u16(offset+6)}
                      for offset in range(4, len(message), stride)]
             if (len({item['index'] for item in items}) == len(items)
                 and not any(item['index'] == 0 or item['item_id'] == 0 or not 0 <= item['type'] <= 12 or item['amount'] <= 0 for item in items)):
@@ -361,6 +398,12 @@ def decode(message: bytes) -> dict:
             guild = message[54:78].split(b'\0')[0].decode('cp1252', 'replace').strip()
             if guild:
                 event['guild'] = guild
+            title = message[78:102].split(b'\0')[0].decode('cp1252', 'replace').strip()
+            if title:
+                event['guild_title'] = title
+            party = message[30:54].split(b'\0')[0].decode('cp1252', 'replace').strip()
+            if party and not re.match(r'HP:', party):
+                event['party'] = party
             # NRO customizes the party/guild display with textual HP.
             match = re.search(rb'HP:\s*(\d+)/(\d+)', message[30:54])
             if match:

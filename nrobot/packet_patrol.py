@@ -20,12 +20,28 @@ class PacketPatrol:
     ROUTE_GREED = 1.5
     MAP_FIELDS = ('tour', 'remaining', 'done', 'walked', 'cycle_number')
 
-    def __init__(self, max_step=8, rng=None):
+    def __init__(self, max_step=8, rng=None, *, spacing=SPACING, coverage=1.0, wall_margin=2, avoid_walls=False):
         if not 1 <= max_step <= 8:
             raise ValueError('Trecho de patrulha deve ter entre uma e oito células')
         self.max_step = max_step
+        self.layout = dict(spacing=spacing, wall_margin=wall_margin, avoid_walls=avoid_walls)
+        self.coverage_target = coverage  # share of the map's waypoints passed before a new cycle starts
         self.rng = rng if rng is not None else random.Random()
         self.reset()
+
+    def wall_cost(self):
+        """Walking next to a wall costs more, much more when walls are to be avoided."""
+        return 6 if self.layout.get('avoid_walls') else 3
+
+    def configure(self, *, spacing, coverage, wall_margin, avoid_walls):
+        """New spacing/margins redo each map's waypoints; what was walked (visits) is kept."""
+        layout = dict(spacing=spacing, wall_margin=wall_margin, avoid_walls=avoid_walls)
+        self.coverage_target = coverage
+        if layout != self.layout:
+            self.layout = layout
+            self.map_memory = {}
+            self.tour = None
+            self.goal = self.goal_block = None
 
     def reset(self):
         self.map_memory = {}
@@ -50,6 +66,8 @@ class PacketPatrol:
         self.route_cache = None
         self.failed_edges = {}
         self.retry_at = 0
+        self.fail_streak = (None, 0)
+        self.unreachable = set()  # waypoints the server would not let us reach this cycle
         self.steps = 0
         self.recent_sectors = deque(maxlen=24)
         self.recent_positions = deque(maxlen=10)
@@ -72,6 +90,8 @@ class PacketPatrol:
         return sectors
 
     def reached(self, position, origin=None):
+        if origin is not None and max(abs(position[i]-origin[i]) for i in (0, 1)) > 2*self.max_step+2:
+            origin = None  # a jump (inner portal, teleport): nothing was walked in between
         for sector in self.sectors_on_segment(origin or position, position):
             self.walked.add(sector)
             if sector != self.last_sector:
@@ -114,7 +134,7 @@ class PacketPatrol:
             for field, value in saved.items():
                 setattr(self, field, value)
             return
-        self.tour = PatrolTour(collision, position)
+        self.tour = PatrolTour(collision, position, **self.layout)
         self.cycle_number = 1
         self.done, self.walked = set(), set()
         self.remaining = set(self.tour.points)
@@ -122,6 +142,7 @@ class PacketPatrol:
 
     def new_cycle(self, position):
         self.cycle_number += 1
+        self.unreachable.clear()
         self.remaining = set(self.tour.points)
         self.done.clear()
         self.walked.clear()
@@ -141,18 +162,55 @@ class PacketPatrol:
         if not reachable:
             return None
         heading = math.hypot(*self.heading) or 1
+        beside = self.tour.graph[self.tour.block_near(position)]
 
         def cost(block):
             point = self.tour.points[block]
             offset = [point[i]-position[i] for i in (0, 1)]
             alignment = sum(offset[i]*self.heading[i] for i in (0, 1))/((math.hypot(*offset) or 1)*heading)
-            closed = self.tour.closed(block, self.remaining)
-            return (distances[block]-.5*SPACING*alignment-.3*SPACING*closed, block)
+            spacing = self.tour.spacing
+            done = self.tour.done_around(block, self.remaining)
+            value = distances[block]-.5*spacing*alignment-.3*spacing*done
+            if not any(other in self.remaining for other in self.tour.graph[block]):
+                # A straggler: everything around is done or wall. Left now, it would cost a walk back later.
+                value -= .6*spacing
+            if block in beside and done:
+                # The next block of the sweep, touching ground already covered: keep going on.
+                # A neighbour on fresh ground (e.g. through a gap) waits, so no side is left behind.
+                value -= .4*spacing
+            if distances[block] > 2.5*spacing:
+                # Choosing among far waypoints: open ground first, the ones by walls at the end.
+                # Waypoints right beside are taken on the way, so nothing is left behind for a loop.
+                value += .15*spacing*self.tour.edge_penalty(block)
+            return (value, block)
         return min(reachable, key=cost)
 
+    FAILED_EDGE_SECONDS = 2
+
+    STUCK_FAILURES = 3  # refused steps in a row from one cell: what lies that way is unreachable
+
     def failed(self, origin, destination, now):
-        if origin is not None:
-            self.failed_edges[(tuple(origin), tuple(destination))] = now+60
+        if origin is None:
+            return
+        self.failed_edges[(tuple(origin), tuple(destination))] = now+self.FAILED_EDGE_SECONDS
+        streak = self.fail_streak
+        self.fail_streak = (tuple(origin), streak[1]+1 if streak[0] == tuple(origin) else 1)
+        if self.fail_streak[1] >= self.STUCK_FAILURES and self.tour is not None:
+            self.give_up_around(destination)
+            self.fail_streak = (None, 0)
+
+    def give_up_around(self, cell):
+        """The server keeps refusing the way (its map differs from ours there): the waypoint aimed
+        at and the ones next to the refused cell are left out until the next cycle."""
+        dropped = {block for block, point in self.tour.points.items()
+                   if block in self.remaining and math.dist(point, cell) <= self.tour.spacing}
+        if self.goal_block is not None:
+            dropped.add(self.goal_block)
+        for block in dropped:
+            self.remaining.discard(block)
+            self.unreachable.add(block)
+        self.goal = self.goal_block = None
+        self.route_cache_key = self.route_cache = None
 
     def plan(self, position, now, speed, collision=None):
         if now < self.retry_at:
@@ -175,7 +233,8 @@ class PacketPatrol:
             if self.tour.points and self.remaining and not (self.remaining-set(self.deferred)) and not self.retried:
                 self.deferred.clear()  # points put aside get one more try before the cycle closes
                 self.retried = True
-            if self.tour.points and not (self.remaining-set(self.deferred)):
+            if self.tour.points and (not (self.remaining-set(self.deferred))
+                                     or self.coverage_target < 1 and self.tour.coverage(self.done) >= self.coverage_target):
                 self.new_cycle(position)
                 self.retried = False
             if self.search_destination is not None:
@@ -197,11 +256,18 @@ class PacketPatrol:
                 cache_key = (self.cycle_number, self.goal, self.search_destination is None)
                 cached = (cache_key == self.route_cache_key and self.route_cache and tuple(position) in self.route_cache
                           and (tuple(position) != tuple(self.route_cache[-1]) or tuple(self.route_cache[-1]) == tuple(self.goal)))
+                portal = None
+                if not cached and self.goal_block is not None and self.search_destination is None:
+                    portal = self.tour.portal_on_way(position, self.goal_block)
                 if cached:
                     route = self.route_cache[self.route_cache.index(tuple(position)):]
+                elif portal is not None and tuple(portal) != tuple(position):
+                    # The waypoint is on the other side of an inner portal: walk onto the portal.
+                    route = collision.route(position, portal, exact=True, max_nodes=self.ROUTE_NODES*4,
+                                            greed=self.ROUTE_GREED, wall_cost=self.wall_cost())
                 else:
                     route = collision.route(position, self.goal, exact=self.search_destination is None,
-                                            max_nodes=self.ROUTE_NODES, greed=self.ROUTE_GREED,
+                                            max_nodes=self.ROUTE_NODES, greed=self.ROUTE_GREED, wall_cost=self.wall_cost(),
                                             visited_sectors=self.walked if self.search_destination is None else frozenset())
                     if route is None and self.search_destination is None:
                         # Every search stays bounded so the relay never stalls on a big map: a far
@@ -210,10 +276,10 @@ class PacketPatrol:
                         stone = self.tour.stepping_stone(position, self.goal_block) if self.goal_block else None
                         if stone is not None and tuple(stone) != tuple(position):
                             route = collision.route(position, stone, exact=True, max_nodes=self.ROUTE_NODES,
-                                                    greed=self.ROUTE_GREED, partial=True)
+                                                    greed=self.ROUTE_GREED, partial=True, wall_cost=self.wall_cost())
                         if not route or len(route) < 2:
                             route = collision.route(position, self.goal, exact=True, max_nodes=self.ROUTE_NODES,
-                                                    greed=self.ROUTE_GREED, partial=True)
+                                                    greed=self.ROUTE_GREED, partial=True, wall_cost=self.wall_cost())
                 self.route_cache_key, self.route_cache = cache_key, route
                 if route and len(route) > 1:
                     self.heading = tuple(route[1][i]-position[i] for i in (0, 1))
@@ -234,7 +300,18 @@ class PacketPatrol:
             for candidate in range(2, min(24, len(route))):
                 if collision.segment(position, route[candidate], max_steps=self.max_step, wall_margin=min(3, collision.clearance(route[1]))):
                     index = candidate
+            # A step that just failed is never sent again: a shorter one on the same route is tried,
+            # and if every one failed the waypoint waits a moment so another one is taken (the old
+            # way re-chose the same waypoint and stood still until the failure expired).
+            while index > 1 and (tuple(position), tuple(route[index])) in self.failed_edges:
+                index -= 1
             destination = tuple(route[index])
+            if (tuple(position), destination) in self.failed_edges and self.goal_block is not None:
+                self.deferred[self.goal_block] = now+15
+                self.goal = self.goal_block = None
+                self.route_cache_key = self.route_cache = None
+                self.retry_at = now+.05
+                return None
             if (tuple(position), destination) not in self.failed_edges:
                 seconds = max(50, min(speed, 2000))/1000
                 dx, dy = (abs(destination[i]-position[i]) for i in (0, 1))

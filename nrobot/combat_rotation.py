@@ -66,7 +66,9 @@ class CombatRotation:
         self.session_key = None
         from .summon_queue import SummonQueue
         self.summons = SummonQueue()
-        self.blocked_buffs = set()
+        self.blocked_buffs = {}  # buff -> time of the next try after an unconfirmed cast
+        self.effect_since = {}  # own effect -> when it was switched on
+        self.effect_length = {}  # own effect -> how long it lasted last time (learned)
         self.last_sent = {}
         self.learned_min_interval = {}
         self.last_throw = None
@@ -90,12 +92,16 @@ class CombatRotation:
         self.last_throw = None
         self.session_key = key
 
+    RENEW_BEFORE = 2.5  # seconds before a buff's learned end it is cast again
+
     def _fail(self, skill_id, now, reason):
         pending = self.pending.pop(skill_id, None)
         if pending and pending['role'] == 'summon':
             self.summons.failed(skill_id, now, reason == 'servidor recusou')
         if pending and pending['role'] == 'buff':
-            self.blocked_buffs.add(skill_id)
+            # Not confirmed (cut by a step, a cooldown...): try again later, waiting longer each
+            # time in a row, instead of never renewing the buff again.
+            self.blocked_buffs[skill_id] = now+1.5  # keeping the buff up comes first: try again soon
         sent = self.last_sent.get(skill_id)
         if (reason == 'sem confirmação' and sent is not None and self.last_confirmed_at is not None
                 and 0 <= sent-self.last_confirmed_at < self.after_skill_delay+.25):
@@ -144,9 +150,19 @@ class CombatRotation:
                         self.buff_confirmed += 1
                         self.log.append({'kind': 'rotation_buff_confirmed', 'skill_id': identity, 'effect_id': event['effect_id']})
             if kind == 'status_effect' and event['entity_id'] == player_id:
+                # How long each own effect lasts, so buffs are renewed just before they end.
+                effect = event['effect_id']
+                if event['active']:
+                    self.effect_since[effect] = now
+                elif effect in self.effect_since:
+                    # Removed early (dispelled by an enemy skill) must not teach a short duration:
+                    # the longest run seen is the buff's length. Off now: it is cast again at once.
+                    lasted = now-self.effect_since.pop(effect)
+                    if lasted > 5:
+                        self.effect_length[effect] = max(lasted, self.effect_length.get(effect, 0))
                 for profile in self.profiles:
                     if profile['role'] == 'buff' and profile['effect_id'] == event['effect_id']:
-                        self.blocked_buffs.discard(profile['skill_id'])
+                        self.blocked_buffs.pop(profile['skill_id'], None)
             if skill_id not in self.pending:
                 continue
             pending = self.pending[skill_id]
@@ -312,8 +328,8 @@ class CombatRotation:
             if (not profile['enabled'] or meta is None or meta['level'] < profile['level']
                 or waiting or now < max(self.ready.get(identity, 0), cooldown)):
                 continue
-            if identity in self.blocked_buffs:
-                self.reason = f'Buff {identity}: sem efeito confirmado; revisar vínculo antes de repetir'
+            if now < self.blocked_buffs.get(identity, 0):
+                self.reason = f'Buff {identity}: sem efeito confirmado; nova tentativa em {self.blocked_buffs[identity]-now:.0f} s'
                 continue
             if identity in self.THROWS and turn is not None and identity != turn:
                 continue
@@ -326,8 +342,10 @@ class CombatRotation:
                 if flags not in (4, 16) or not effect:
                     self.reason = f'Buff {identity}: tipo ou efeito ainda não vinculado'
                     continue
-                if state.get('own_effects', {}).get(effect, state.get('own_effects', {}).get(str(effect), False)):
-                    continue
+                active = state.get('own_effects', {}).get(effect, state.get('own_effects', {}).get(str(effect), False))
+                length, since = self.effect_length.get(effect), self.effect_since.get(effect)
+                if active and not (length and since is not None and now >= since+length-self.RENEW_BEFORE):
+                    continue  # still on and not about to end
                 target = state.get('player_id')
                 if target is None:
                     continue

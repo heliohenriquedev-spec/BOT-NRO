@@ -175,8 +175,40 @@ def ready_mission(data,identity):
         steps=effective_steps(data,m,stage)
         try:validate_conversation(steps,b)
         except ValueError as exc:raise ValueError('Missao '+m['name']+': grave '+('como pegar' if stage=='pickup' else 'como entregar')+'. '+str(exc)) from exc
-        if not any(s['kind']=='verify_slot' for s in steps) and not text(confirmation(data,m,stage)):raise ValueError('Grave '+stage+' e a confirmacao da missao '+m['name'])
+        if not any(s['kind'] in ('verify_slot','verify_slot_absent') for s in steps) and not text(confirmation(data,m,stage)):raise ValueError('Grave '+stage+' e a confirmacao da missao '+m['name'])
     return m
+
+
+BOARD_ORDER=('kakashi','vip')  # Kakashi first: the Sala Vip has the transport to the hunting maps
+
+
+def board_rank(data,identity):
+    b=mission(data,identity)['board_id']
+    return BOARD_ORDER.index(b) if b in BOARD_ORDER else len(BOARD_ORDER)
+
+
+def kill_targets(data,mission_ids,require=False):
+    """Counters from the missions' "Monstros necessarios": one per monster, the largest amount.
+
+    The server counts one kill for every active mission that wants that monster, so two
+    missions of 50 Gorila need 50, not 100."""
+    from .npc_labels import plain
+    from .monster_db import all_monsters
+    lookup={}
+    for monster in all_monsters():lookup.setdefault(plain(monster['name']),set()).add(monster['species_id'])
+    result={}
+    for identity in mission_ids:
+        m=mission(data,identity)
+        if require and not m.get('monster_targets'):
+            raise ValueError('Missao '+m['name']+': o quadro nao mostrou "Monstros necessarios"; configure em Configurar rank e monstros')
+        for target in m.get('monster_targets',[]):
+            key=plain(target['name'])
+            species=lookup.get(key,set())
+            if not species and len(m.get('monster_targets',[]))==1:species=set(m.get('monster_ids',[]))
+            if not species:raise ValueError('Vincule o ID do monstro '+target['name']+' em Configurar rank e monstros ('+m['name']+')')
+            entry=result.setdefault(key,dict(name=target['name'],count=0,species=set()))
+            entry['count']=max(entry['count'],int(target['count']));entry['species']|=species
+    return [dict(name=e['name'],count=e['count'],species=sorted(e['species'])) for e in result.values()]
 
 
 def return_steps(data,identity):

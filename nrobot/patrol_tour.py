@@ -38,21 +38,37 @@ def wall_distance(collision, cells, cap=6):
     return defaultdict(lambda: cap, distance)
 
 
-def block_of(point):
-    return (point[0]//SPACING, point[1]//SPACING)
+def block_of(point, spacing=SPACING):
+    return (point[0]//spacing, point[1]//spacing)
 
 
 class PatrolTour:
     """Nodes are (bx, by, piece): the ground of one block split in the pieces connected
-    inside it, so a block lying across a wall never makes crossing that wall look short."""
+    inside it, so a block lying across a wall never makes crossing that wall look short.
 
-    def __init__(self, collision, start):
+    spacing: cells between waypoints (configurable); a waypoint counts as passed within
+    3/4 of it, so nearby points are not walked to again. wall_margin: waypoints keep at
+    least this many cells from walls; avoid_walls also drops the corridor fallback, so the
+    character never has to walk up to a wall."""
+
+    def __init__(self, collision, start, *, spacing=SPACING, wall_margin=MIN_OPEN, avoid_walls=False):
         self.collision = collision
-        self.cells = collision.reachable(start)
-        self.wall = wall_distance(collision, self.cells)
+        self.spacing = spacing
+        self.link_edges = {}  # (node, node beyond an inner portal) -> portal cell to step on
+        self.seen_radius = max(4, round(spacing*.75)) if spacing != SPACING else SEEN_RADIUS
+        # Ground reached by walking plus what inner portals lead to (the other side of the map).
+        cells, pending = set(collision.reachable(start)), list(getattr(collision, 'links', ()))
+        grown = True
+        while grown:
+            grown = False
+            for source, target in pending:
+                if tuple(source) in cells and tuple(target) not in cells and collision.walkable(target):
+                    cells |= collision.reachable(target); grown = True
+        self.cells = frozenset(cells)
+        self.wall = wall_distance(collision, self.cells, cap=max(6, wall_margin+1))
         members = defaultdict(list)
         for point in self.cells:
-            members[block_of(point)].append(point)
+            members[block_of(point, spacing)].append(point)
         self.node_of, self.pieces = {}, defaultdict(list)
         for block, cells in members.items():
             inside, piece = set(cells), 0
@@ -76,9 +92,9 @@ class PatrolTour:
         self.transit, self.points, self.sizes = {}, {}, {}
         for node, cells in groups.items():
             centre = (sum(p[0] for p in cells)/len(cells), sum(p[1] for p in cells)/len(cells))
-            best = max(cells, key=lambda p: (min(self.wall[p], 4), -math.dist(p, centre), p))
+            best = max(cells, key=lambda p: (min(self.wall[p], max(4, wall_margin)), -math.dist(p, centre), p))
             self.transit[node], self.sizes[node] = best, len(cells)
-            if len(cells) >= MIN_CELLS and self.wall[best] >= MIN_OPEN:
+            if len(cells) >= min(MIN_CELLS, spacing*2) and self.wall[best] >= wall_margin:
                 self.points[node] = best
         self.graph = defaultdict(set)
         for point in self.cells:
@@ -89,19 +105,33 @@ class PatrolTour:
                 if neighbour is not None and neighbour != node and collision.edge(point, other):
                     self.graph[node].add(neighbour)
                     self.graph[neighbour].add(node)
+        for source, target in getattr(collision, 'links', ()):
+            a, b = self.node_of.get(tuple(source)), self.node_of.get(tuple(target))
+            if a is not None and b is not None and a != b:
+                self.graph[a].add(b)  # one way: stepping on the portal lands there
+                self.link_edges[(a, b)] = tuple(source)
         for node in list(self.points):
             if len(self.graph[node]) <= 1 and self.sizes[node] < NOOK_CELLS and len(self.points) > 1:
                 del self.points[node]  # dead-end corner: seen from the neighbouring waypoint
         # Mazes of narrow corridors have no open ground at all: a corridor piece with no
         # waypoint around it still needs one, even if it touches the walls.
         for node in sorted(self.transit):
-            if node in self.points or self.sizes[node] < 8:
+            if avoid_walls or node in self.points or self.sizes[node] < 8:
                 continue
             around = (other for dx in (-1, 0, 1) for dy in (-1, 0, 1)
                       for other in self.pieces.get((node[0]+dx, node[1]+dy), ()))
             best = self.transit[node]
-            if not any(other in self.points and math.dist(best, self.points[other]) <= SEEN_RADIUS+3 for other in around):
+            if not any(other in self.points and math.dist(best, self.points[other]) <= self.seen_radius+3 for other in around):
                 self.points[node] = self.transit[node]
+
+    def edge_penalty(self, node):
+        """How much a waypoint lies at the border of the ground: missing neighbours (walls, map
+        edge) and closeness of its cell to a wall. Open ground first, borders last."""
+        point = self.points.get(node, self.transit[node])
+        return max(0, 8-len(self.graph[node]))+max(0, 4-min(self.wall[point], 4))
+
+    def done_around(self, node, remaining):
+        return sum(other not in remaining for other in self.graph[node])
 
     def closed(self, node, remaining):
         """Neighbouring ground already done, plus missing neighbours (walls, map edge)."""
@@ -132,6 +162,22 @@ class PatrolTour:
                     heapq.heappush(heap, (value, neighbour))
         return best
 
+    def portal_on_way(self, position, node):
+        """The inner portal to step on first when node lies beyond one, else None."""
+        if not self.link_edges:
+            return None
+        parents = {}
+        if node not in self.distances(position, parents):
+            return None
+        path = [node]
+        while path[-1] in parents:
+            path.append(parents[path[-1]])
+        path.reverse()
+        for a, b in zip(path, path[1:]):
+            if (a, b) in self.link_edges:
+                return self.link_edges[(a, b)]
+        return None
+
     def stepping_stone(self, position, node, hops=3):
         """A cell a few nodes along the node path to node, so cell searches stay short."""
         parents = {}
@@ -145,11 +191,14 @@ class PatrolTour:
 
     def seen_from(self, position):
         """Waypoints close enough to position to count as visited."""
-        reach = SEEN_RADIUS//SPACING+1
-        base = block_of(position)
+        reach = self.seen_radius//self.spacing+1
+        base = block_of(position, self.spacing)
         for bx in range(base[0]-reach, base[0]+reach+1):
             for by in range(base[1]-reach, base[1]+reach+1):
                 for node in self.pieces.get((bx, by), ()):
                     point = self.points.get(node)
-                    if point is not None and math.dist(position, point) <= SEEN_RADIUS:
+                    if point is not None and math.dist(position, point) <= self.seen_radius:
                         yield node
+
+    def coverage(self, done):
+        return len(done)/len(self.points) if self.points else 1.0
