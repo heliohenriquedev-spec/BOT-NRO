@@ -64,19 +64,50 @@ def digest(root=ROOT):
 def export(log=print, root=ROOT):
     """Developer publishing: the current quests, routes and portals go with the version."""
     root = Path(root)
-    count = 0
+    payload = {}
     for name, own in FILES.items():
-        data = _read(root/own, None)
+        path = root/own
+        data = json.loads(path.read_text(encoding='utf-8')) if path.is_file() else None
         if data is None:
             continue
         if name == 'quadros_missoes.json':
             data = {k: v for k, v in data.items() if k not in PERSONAL_LIBRARY}
         if name == 'quest_extras.json':
             data = {k: v for k, v in data.items() if k in SHARED_EXTRAS}
-        _write(root/SHARED/name, data)
-        count += 1
+        payload[name] = data
+    validate_references(payload)
+    for name in FILES:
+        if name in payload:
+            _write(root/SHARED/name, payload[name])
+        else:
+            (root/SHARED/name).unlink(missing_ok=True)
+    manifest = {name: hashlib.sha256((root/SHARED/name).read_bytes()).hexdigest() for name in payload}
+    _write(root/SHARED/'manifesto.json', {'schema': 1, 'files': manifest})
     _write(root/MARKER, {'digest': digest(root)})  # the developer already has all of it
-    log(f'Quests, quadros, rotas de mapa, portais, @voltar, buffs e sinais de GM preparados para os usuarios ({count} arquivos).')
+    log(f'Quests, quadros, rotas de mapa, portais, @voltar, buffs e sinais de GM preparados para os usuarios ({len(payload)} arquivos).')
+
+
+def validate_references(payload):
+    """A quest cannot depend on a mission or map route present only on the author's PC."""
+    library = payload.get('quadros_missoes.json') or {}
+    missions = {m['id'] for m in library.get('missions', [])}
+    routes = {r['id'] for r in payload.get('rotas_mapas.json') or []}
+    validated_library = None
+    for quest in payload.get('rotas_quests.json') or []:
+        missing = set(quest.get('mission_ids', []))-missions
+        if missing:
+            raise ValueError(f"Quest {quest.get('name')}: missoes nao incluidas: {', '.join(sorted(missing))}")
+        route = quest.get('map_route_id')
+        if route and route not in routes:
+            raise ValueError(f"Quest {quest.get('name')}: rota de mapa nao incluida: {route}")
+        if quest.get('enabled', True) and quest.get('mission_ids'):
+            from . import quest_library
+            if validated_library is None:
+                validated_library = quest_library.validate(library)
+            for identity in quest['mission_ids']:
+                mission = quest_library.ready_mission(validated_library, identity)
+                if not any(p['board_id'] == mission['board_id'] for p in validated_library['access_paths']):
+                    raise ValueError(f"Quest {quest.get('name')}: percurso ate o quadro {mission['board_id']} nao incluido")
 
 
 # -- merging on the user's PC ----------------------------------------------------------------
@@ -224,6 +255,16 @@ def merge(root=ROOT, log=print, force=False):
     if not force and _read(root/MARKER, {}).get('digest') == current:
         return False
     shared = {name: _read(folder/name, None) for name in FILES}
+    try:
+        manifest = _read(folder/'manifesto.json', None)
+        if manifest is not None:
+            for name, expected in manifest['files'].items():
+                if name not in FILES or not (folder/name).is_file() or hashlib.sha256((folder/name).read_bytes()).hexdigest() != expected:
+                    raise ValueError(f'Arquivo compartilhado ausente ou alterado: {name}')
+            validate_references(shared)
+    except (ValueError, KeyError, TypeError, OSError) as exc:
+        log(f'Dados compartilhados nao aplicados: {exc}')
+        return False
     own = {name: _read(root/path, None) for name, path in FILES.items()}
     result, missions_renamed, maps_renamed = {}, {}, {}
     if shared['quadros_missoes.json'] is not None:

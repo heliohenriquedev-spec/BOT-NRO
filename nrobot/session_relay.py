@@ -2019,19 +2019,16 @@ async def run(args):
                       'Escolha a pasta do jogo aberto no painel (Conexão > Pasta do jogo); mapas e GRFs vêm de lá.')
             from .packet_reader import configure_client_game
             configure_client_game(game_dir)
-            relay.map_repository = MapRepository(game_dir)
-            from .grf import data_ini_grfs
-            import os as _os
-            grfs = relay.map_repository.grfs
-            listed = data_ini_grfs(_os.path.join(str(game_dir), 'DATA.INI'))
-            missing = [n for n in listed if not _os.path.isfile(_os.path.join(str(game_dir), n))]
-            print(f'Pasta do jogo: {game_dir} | GRFs do DATA.INI: {len(listed)} ({", ".join(listed)})'
-                  + (f' | não encontrados: {", ".join(missing)}' if missing else '')
-                  + (f' | ignorados: {"; ".join(grfs.skipped)}' if grfs.skipped else ''))
-            from .ammo import names_from_grfs
-            relay.ammo.names = names_from_grfs(relay.map_repository.grfs)
+            relay.map_repository = MapRepository(game_dir, independent=True)
+            print('Navegacao independente: usando colisao do servidor/base do bot; GRFs e DATA.INI visuais ignorados.')
         except (OSError, ValueError, GrfError) as exc:
             print(f'Colisão indisponível: {exc}. Aproximação anterior mantida. Pasta do jogo usada: {locals().get("game_dir")}')
+    from .ammo import names_from_catalog
+    try:
+        relay.ammo.names = names_from_catalog()
+        print(f'Catalogo independente de municao: {len(relay.ammo.names)} itens.')
+    except (OSError, ValueError) as exc:
+        print(f'Municao automatica indisponivel: {exc}. Atualize os recursos do bot.')
     from .packet_reader import client_lengths
     try:
         sizes = client_lengths()

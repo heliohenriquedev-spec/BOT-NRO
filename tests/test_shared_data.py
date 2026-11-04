@@ -20,7 +20,7 @@ STEPS = [dict(kind='portal', map='town.gat', position=[1, 1]), dict(kind='wait_m
 def test_published_data_reaches_a_new_pc_once(tmp_path):
     dev, user = tmp_path/'dev', tmp_path/'user'
     write(dev, 'data/rede/rotas_mapas.json', [dict(id='m1', name='Campo', target_map='field.gat', steps=STEPS)])
-    write(dev, 'data/rede/rotas_quests.json', [dict(id='q1', name='Quest A', map_route_id='m1', mission_ids=['x'])])
+    write(dev, 'data/rede/rotas_quests.json', [dict(id='q1', name='Quest A', map_route_id='m1', mission_ids=[])])
     write(dev, 'data/mapas/portais_internos.json', {'prt_sewb2': {'20,175': [60, 28]}})
     shared_data.export(log=lambda t: None, root=dev)
     (user/'data').mkdir(parents=True)

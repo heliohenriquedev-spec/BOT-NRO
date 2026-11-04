@@ -28,12 +28,16 @@ def is_confirmed_monster(entity, player_id=None):
     if entity.get('object_type_raw') not in (None, 0, 5) or entity.get('owner_id') or entity.get('summoned'):
         return False
     name = entity.get('name')
-    if not name or is_known_player(name):
+    if is_known_player(name):
         return False
     # The server writes "HP: x/y" in the name reply of monsters; when that reply comes without it
     # (seen on other PCs), a named unit with a monster sprite is still a monster, otherwise
     # nothing was ever confirmed there and the bot only patrolled.
     from .monster_db import is_monster_species
+    if not name:
+        # Explicit server monster type does not depend on hover/name requests made by the client.
+        # Ambiguous type 0 still requires the name; players, owners and summons were excluded above.
+        return entity.get('object_type_raw') == 5 and is_monster_species(entity.get('species_id') or 0)
     return entity.get('max_hp', 0) > 0 or is_monster_species(entity.get('species_id') or 0)
 
 
@@ -46,10 +50,14 @@ def confirmed_types(inventory, player_id=None, *, by_name=False):
         # custom monsters (e.g. training dummies) missing from the client catalog still count.
         if not is_confirmed_monster(entity, player_id):
             continue
-        evidence = ('aparencia do catalogo de monstros e HP recebido do servidor' if identity in assets
-                    else 'HP de monstro recebido do servidor (fora do catalogo do cliente)')
-        key = (identity, entity['name']) if by_name else identity
-        entry = result.setdefault(key, {'species_id': identity, 'name': entity['name'], 'present': 0,
+        evidence = ('HP de monstro recebido do servidor' if entity.get('max_hp', 0) > 0 else
+                    'tipo de monstro explicito recebido do servidor' if entity.get('object_type_raw') == 5 else
+                    'nome recebido do servidor e aparencia de monstro')
+        if identity not in assets:
+            evidence += ' (fora do catalogo do cliente)'
+        name = entity.get('name') or assets.get(identity) or f'Monstro {identity}'
+        key = (identity, name) if by_name else identity
+        entry = result.setdefault(key, {'species_id': identity, 'name': name, 'present': 0,
                                               'evidence': evidence})
         entry['present'] += int(entity['present_last_observation'] and entity.get('hp', 1) > 0)
     return result

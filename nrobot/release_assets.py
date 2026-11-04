@@ -15,12 +15,30 @@ ROOT = Path(__file__).resolve().parents[1]
 GAME = Path(r'C:\NRO - Jogo COMPLETO')
 
 
-def prepare(log=print):
-    source = ROOT/'Arquivos_grf'
-    index = source/'prioridade.tsv'
-    if not index.is_file():
+def prepare(log=print, *, refresh_combat=False):
+    from . import game_folder
+    from .ammo import names_from_grfs, names_from_catalog
+    destination = ROOT/'data'/'recursos'
+    if not refresh_combat and (destination/'municao.json').is_file() and (destination/'colisoes.json').is_file():
+        names_from_catalog()
+        from .map_navigation import read_bundled_maps, CollisionMap
+        maps = read_bundled_maps(destination/'colisoes.json')
+        if not maps:
+            raise ValueError('Base de colisao vazia; restaure os recursos do bot')
+        for width, height, cells in maps.values():
+            CollisionMap.from_cell_types(width, height, zlib.decompress(cells))
+        log(f'Base de combate preservada: {len(maps)} mapas; GRFs visuais nao alteram os recursos publicados.')
+        prepare_icons(log)
         return
-    repo = MapRepository(str(GAME))
+    game = game_folder.saved() or GAME
+    repo = MapRepository(str(game))
+    destination = ROOT/'data'/'recursos'
+    destination.mkdir(parents=True, exist_ok=True)
+    ammo = names_from_grfs(repo.grfs, bundled=False)
+    if not ammo:
+        raise ValueError('Catalogo de municao indisponivel; confira DATA.INI e as GRFs antes de publicar')
+    (destination/'municao.json').write_text(json.dumps(ammo, ensure_ascii=False, indent=1)+'\n', encoding='utf-8')
+    log(f'Catalogo portatil: {len(ammo)} municoes. Pasta do jogo: {game}')
     # Export the collision from the priority GRF set, independent of user caches.
     repo.server_maps.clear()
     repo.bundled_maps.clear()
@@ -46,6 +64,17 @@ def prepare(log=print):
             collision.width, collision.height, base64.b64encode(packed).decode('ascii')]
     if missing:
         raise ValueError('GATs ausentes no pacote: '+', '.join(missing))
+    (destination/'colisoes.json').write_text(
+        json.dumps(maps, ensure_ascii=False, separators=(',', ':'))+'\n', encoding='utf-8')
+    log(f'Colisoes portateis: {len(maps)} mapas, incluindo aliases.')
+    prepare_icons(log)
+
+
+def prepare_icons(log=print):
+    """Visual updates can change icons, never operational map cells or item IDs."""
+    index = ROOT/'Arquivos_grf'/'prioridade.tsv'
+    if not index.is_file():
+        return
     sprites = monster_db.priority_sprites()
     if not sprites:
         raise ValueError('Índice de sprites prioritários vazio')
@@ -65,6 +94,34 @@ def prepare(log=print):
         for row in csv.DictReader(source_table, delimiter='\t'):
             if row['tipo'] == '.spr' and row['nome'] in sprites:
                 writer.writerow(row)
-    (destination/'colisoes.json').write_text(
-        json.dumps(maps, ensure_ascii=False, separators=(',', ':'))+'\n', encoding='utf-8')
-    log(f'Recursos de atualização: {len(sprites)} ícones e {len(maps)} mapas, incluindo aliases.')
+    log(f'Recursos visuais de atualizacao: {len(sprites)} icones.')
+
+
+def validate_quest_maps(root=ROOT):
+    """Check paths against distributed grids, never the developer's private map cache."""
+    from .shared_data import SHARED
+    required = set()
+    def visit(value):
+        if isinstance(value, dict):
+            for key, child in value.items():
+                if key in ('map', 'target_map') and isinstance(child, str) and child.strip():
+                    required.add(child.strip().lower().removesuffix('.gat').removesuffix('.rsw'))
+                else:
+                    visit(child)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child)
+    root = Path(root)
+    for name in ('rotas_quests.json', 'rotas_mapas.json', 'quadros_missoes.json'):
+        path = root/SHARED/name
+        if path.is_file():
+            visit(json.loads(path.read_text(encoding='utf-8')))
+    from .map_navigation import read_bundled_maps, CollisionMap
+    available = read_bundled_maps(root/'data/recursos/colisoes.json')
+    missing = sorted(required-set(available))
+    if missing:
+        raise ValueError('Mapas das quests sem colisao no pacote: '+', '.join(missing))
+    for name in required:
+        width, height, packed = available[name]
+        CollisionMap(width, height, zlib.decompress(packed))
+    return len(required)

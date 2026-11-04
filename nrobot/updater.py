@@ -248,7 +248,13 @@ def publish(message, log=print, run_tests=True):
         raise UpdateError(f'Falha ao preparar os recursos: {exc}') from exc
     export_base(log)  # custom monsters learned here reach every user with this version
     from .shared_data import export as export_shared
-    export_shared(log)  # quests, boards, missions, map routes and portals too
+    try:
+        export_shared(log)  # quests, boards, missions, map routes and portals too
+        from .release_assets import validate_quest_maps
+        count = validate_quest_maps(ROOT)
+        log(f'Percursos de quests: {count} mapas conferidos no pacote portatil.')
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        raise UpdateError(f'Pacote de quests incompleto; nada publicado: {exc}') from exc
     if run_tests and (ROOT/'tests').is_dir():
         log('Rodando os testes antes de publicar...')
         result = subprocess.run([sys.executable, '-m', 'pytest', '-q', '-p', 'no:cacheprovider', 'tests'],

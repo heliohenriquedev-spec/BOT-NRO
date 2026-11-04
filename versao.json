@@ -1,7 +1,7 @@
 {
- "version": "2026.11.04.8",
- "published_at": "2026-11-04T02:11:27",
- "notes": "Fix",
+ "version": "2026.11.04.9",
+ "published_at": "2026-11-04T08:11:15",
+ "notes": "fix",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -12,6 +12,7 @@
   "data/catalogo/catalogo.json",
   "data/compartilhado/buffs_aprendidos.json",
   "data/compartilhado/gm_sinais.json",
+  "data/compartilhado/manifesto.json",
   "data/compartilhado/portais.json",
   "data/compartilhado/portais_internos.json",
   "data/compartilhado/quadros_missoes.json",
@@ -243,6 +244,7 @@
   "data/monstros_base/sprites/3824.png",
   "data/monstros_base/sprites/3825.png",
   "data/recursos/colisoes.json",
+  "data/recursos/municao.json",
   "data/recursos/prioridade.tsv",
   "data/recursos/sprites_por_nome/14_3_mercenary_a.png",
   "data/recursos/sprites_por_nome/14_3_mercenary_b.png",
@@ -1413,6 +1415,7 @@
   "data/rede/habilidades_chao_validacao.json",
   "data/rede/identidades_cliente.json",
   "data/rede/tamanhos_cliente.json",
+  "docs/AUDITORIA_GRF_QUESTS.md",
   "docs/ROTAS_QUESTS.md",
   "docs/X1.md",
   "docs/exemplo_x1.json",
@@ -2084,5 +2087,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "59d6dbb34414"
+ "files_digest": "443487b01bd0"
 }

@@ -243,9 +243,10 @@ class CollisionMap:
 class MapRepository:
     CACHE_FOLDER = Path(__file__).resolve().parents[1]/'data'/'mapas'
 
-    def __init__(self, game_dir, cache_folder=None):
+    def __init__(self, game_dir, cache_folder=None, *, independent=False):
         self.root = Path(game_dir)
-        self.grfs = GrfSet(str(self.root))
+        self.independent = independent
+        self.grfs = None if independent else GrfSet(str(self.root))
         self.cache_folder = Path(cache_folder or self.CACHE_FOLDER)
         self.server_maps = read_map_caches(self.cache_folder)
         self.bundled_maps = read_bundled_maps(BUNDLED_MAPS)
@@ -340,6 +341,13 @@ class MapRepository:
                 result = CollisionMap.from_cell_types(width, height, zlib.decompress(packed))
                 self.sources[name] = 'map cache do servidor'
             else:
+                if getattr(self, 'independent', False):
+                    result = self.bundled_collision(p.stem)
+                    if result is None:
+                        raise ValueError('Mapa sem colisao na base do bot; atualize os recursos do bot: '+name)
+                    self.sources[name] = 'base independente do bot (GRFs visuais ignoradas)'
+                    self.cache[name] = result
+                    return result
                 resource = 'data\\'+key
                 try:
                     try:

@@ -1,18 +1,50 @@
 """REDE-57: ammo-only equipment state, confirmed by server responses."""
 import re
+import json
+from pathlib import Path
 from .grf import GrfError
 
 AMMO_SLOT = 0x8000
+CATALOG = Path(__file__).resolve().parents[1]/'data/recursos/municao.json'
 
 
-def names_from_grfs(grfs):
-    try:
-        text = grfs.read('data\\idnum2itemdisplaynametable.txt').decode('cp1252', 'replace')
-        return {int(identity): name.replace('_', ' ') for identity, name in re.findall(r'(\d+)#([^#]*)#', text)
-                if re.search(r'kunai|shuriken', name, re.I)}
-    except (OSError, KeyError, ValueError, GrfError):
-        # Optional naming data must never terminate the authenticated transport.
-        return {}
+def names_from_catalog():
+    """Runtime combat uses published item IDs, independent of visual item names."""
+    data = json.loads(CATALOG.read_text(encoding='utf-8'))
+    if not isinstance(data, dict):
+        raise ValueError('Catalogo de municao invalido; atualize o bot')
+    names = {int(k): v for k, v in data.items()
+             if str(k).isdigit() and isinstance(v, str) and re.search(r'kunai|shuriken', v, re.I)}
+    if not names:
+        raise ValueError('Catalogo de municao vazio; atualize o bot')
+    return names
+
+
+def names_from_grfs(grfs, *, bundled=True):
+    """Published names fill missing resources; the client's priority table wins per ID."""
+    names = {}
+    if bundled:
+        try:
+            names = {int(k): v for k, v in json.loads(CATALOG.read_text(encoding='utf-8')).items()
+                     if str(k).isdigit() and isinstance(v, str) and re.search(r'kunai|shuriken', v, re.I)}
+        except (OSError, ValueError, AttributeError):
+            pass
+    key = 'data\\idnum2itemdisplaynametable.txt'
+    entries = ([grfs.entries[key]] if key in getattr(grfs, 'entries', {}) else [])
+    entries += getattr(grfs, 'alternates', {}).get(key, [])
+    # Lowest priority first; readable higher-priority entries override them.
+    for entry in reversed(entries):
+        try:
+            text = grfs.read_entry(entry).decode('cp1252', 'replace')
+        except (OSError, KeyError, ValueError, GrfError):
+            continue
+        for identity, name in re.findall(r'(\d+)#([^#]*)#', text):
+            identity = int(identity)
+            if re.search(r'kunai|shuriken', name, re.I):
+                names[identity] = name.replace('_', ' ')
+            else:
+                names.pop(identity, None)
+    return names
 
 
 class AmmoInventory:

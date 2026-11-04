@@ -88,7 +88,15 @@ def data_ini_grfs(path: str) -> list[str]:
     "[data]" in lower case, repeated numbers (the last one wins) or stray text are ignored,
     where a strict INI reader gave up and no map loaded."""
     with open(path, "rb") as f:
-        text = f.read().decode("latin-1").lstrip("ï»¿")  # UTF-8 BOM read as latin-1
+        raw = f.read()
+        if raw.startswith((b'\xff\xfe', b'\xfe\xff')):
+            text = raw.decode('utf-16')
+        else:
+            try:
+                text = raw.decode('utf-8-sig')
+            except UnicodeDecodeError:
+                text = raw.decode('cp1252')
+        text = text.lstrip('\ufeffï»¿')
     section, found, has_sections = None, {}, False
     for raw in text.splitlines():
         line = raw.strip()
@@ -123,6 +131,7 @@ class GrfSet:
         for name in names:
             grf = os.path.join(game_dir, name)
             if not os.path.isfile(grf):
+                self.skipped.append(f'{name}: arquivo nao encontrado na pasta do jogo')
                 continue
             try:
                 index = read_index(grf)

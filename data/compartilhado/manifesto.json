@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "files": {
+  "rotas_quests.json": "bd15a75f60a902313f29fa94c2e47dba086db1db8b51e55156ff0c7c428c3325",
+  "quadros_missoes.json": "e9e45f790fd77e3b3f37a676fd0358bb282ec22afb8267085d3a998f8a590a0d",
+  "rotas_mapas.json": "73cd6ed6463ded08904a2c9982ce5040f7c8dd287b3ef729d0cb2af277efe23a",
+  "portais.json": "0ad9ef5ae8d3600b5055ddd8b8dccb3e6cb0bd6e88c6bc9d630462c80a865f03",
+  "portais_internos.json": "2666947c838f4a97f8b0efa04f88fb5d06bc920678f17cba3af29560d0685b00",
+  "quest_extras.json": "ed0e58b8b6173a2d4244b25f9e207032122a6b01466e037576bb20f19e02cb3a",
+  "buffs_aprendidos.json": "31f77f462227f53442ae6f9378629b137eb008ce009800e1ca5ba6c56d16e571",
+  "gm_sinais.json": "0948b17e6db0d9a451e3d2fcf7691f806a117ac70f928f870b492c4784e0a5a6"
+ }
+}
