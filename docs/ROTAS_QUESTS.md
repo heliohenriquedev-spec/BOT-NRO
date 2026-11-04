@@ -485,3 +485,17 @@ configuracoes permanecem em `data/rede/rotas_quests.json`, protegido de atualiza
 Formatos de dialogo conferidos com a tabela do cliente local e com a
 [implementacao de NPCs do rAthena](https://github.com/rathena/rathena/blob/master/src/map/clif.cpp).
 Essa referencia nao substitui a validacao do percurso completo no NRO.
+
+## Quests para todos os usuários
+
+Ao publicar, as quests, os quadros e missões, as rotas de mapa e os portais (inclusive os
+internos) do desenvolvedor vão juntos em `data/compartilhado`. No PC de cada usuário, ao
+atualizar ou abrir o painel, esses dados são mesclados uma vez por publicação:
+
+- o que veio publicado substitui a cópia anterior do mesmo item (mesmo id, mesma missão do
+  quadro ou mesmo percurso origem → destino);
+- o que o usuário criou continua, e a escolha de ativar ou não cada quest na fila é mantida;
+- antes de mesclar, os arquivos do usuário são copiados para `backups/antes-dos-dados-compartilhados-*.zip`.
+
+Não são compartilhados: missões concluídas no dia, vagas, progresso da fila, @voltar
+aprendido, Switch (montaria e equipamentos de cada personagem) e login.

@@ -1,7 +1,7 @@
 {
- "version": "2026.11.04.1",
- "published_at": "2026-11-04T00:26:41",
- "notes": "Montaria",
+ "version": "2026.11.04.2",
+ "published_at": "2026-11-04T00:37:15",
+ "notes": "Quests",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -10,6 +10,11 @@
   "RESTAURAR_CONEXAO_ORIGINAL.bat",
   "atualizacao.json",
   "data/catalogo/catalogo.json",
+  "data/compartilhado/portais.json",
+  "data/compartilhado/portais_internos.json",
+  "data/compartilhado/quadros_missoes.json",
+  "data/compartilhado/rotas_mapas.json",
+  "data/compartilhado/rotas_quests.json",
   "data/monstros_base/monstros.json",
   "data/monstros_base/sprites/1010.png",
   "data/monstros_base/sprites/1031.png",
@@ -1475,6 +1480,7 @@
   "nrobot/server_clock.py",
   "nrobot/server_path.py",
   "nrobot/session_relay.py",
+  "nrobot/shared_data.py",
   "nrobot/skill_panel.py",
   "nrobot/sprite_reader.py",
   "nrobot/summon_queue.py",
@@ -2074,5 +2080,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "44fa3abee0fe"
+ "files_digest": "279d95eb22f1"
 }

@@ -21,6 +21,7 @@ data/rede/slots_missoes.json
 data/rede/quest_extras.json
 data/rede/progresso_quests.json
 data/rede/login_automatico.json
+data/rede/compartilhado_importado.json
 data/x1/
 *.etl
 data/monstros/

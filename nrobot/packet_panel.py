@@ -1025,6 +1025,11 @@ class PacketPanel(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
+    try:  # quests, routes and portals of the version just installed (once per publication)
+        from .shared_data import merge
+        merge()
+    except (OSError, ValueError) as exc:
+        print('Dados compartilhados nao aplicados:', exc)
     window = PacketPanel()
     window.show()
     sys.exit(app.exec())

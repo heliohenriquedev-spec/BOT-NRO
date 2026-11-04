@@ -30,7 +30,7 @@ PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/m
              'data/rede/rotas_mapas.json', 'data/rede/missoes_concluidas.json',
              'data/rede/slots_missoes.json', 'data/rede/quest_extras.json',
              'data/rede/progresso_quests.json', 'data/x1',
-             'data/rede/login_automatico.json')
+             'data/rede/login_automatico.json', 'data/rede/compartilhado_importado.json')
 # Kept in the repository for development, not needed to run the bot.
 NOT_DISTRIBUTED = ('tests', 'tools', 'Arquivos_grf', '.gitignore', '.gitattributes')
 TIMEOUT = 30
@@ -186,6 +186,11 @@ def apply(log=print, root=ROOT, archive=None):
     for relative in removed:  # files that the new version no longer has
         (root/relative).unlink()
     log(f"Arquivos atualizados: {len(wanted)}; removidos: {len(removed)}.")
+    try:  # the new version's quests and routes, merged into the user's own
+        from .shared_data import merge
+        merge(root, log)
+    except (OSError, ValueError) as exc:
+        log(f'Dados compartilhados nao aplicados: {exc}')
     requirements_after = (root/'requirements.txt').read_bytes() if (root/'requirements.txt').is_file() else b''
     if requirements_after != requirements_before and root == ROOT:
         log('Dependências mudaram; instalando...')
@@ -242,6 +247,8 @@ def publish(message, log=print, run_tests=True):
     except (OSError, ValueError) as exc:
         raise UpdateError(f'Falha ao preparar os recursos: {exc}') from exc
     export_base(log)  # custom monsters learned here reach every user with this version
+    from .shared_data import export as export_shared
+    export_shared(log)  # quests, boards, missions, map routes and portals too
     if run_tests and (ROOT/'tests').is_dir():
         log('Rodando os testes antes de publicar...')
         result = subprocess.run([sys.executable, '-m', 'pytest', '-q', '-p', 'no:cacheprovider', 'tests'],

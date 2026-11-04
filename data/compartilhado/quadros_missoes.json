@@ -1,0 +1,2048 @@
+{
+ "boards": [
+  {
+   "id": "vip",
+   "name": "Quadro da Sala Vip",
+   "map": "ra_in01",
+   "position": [
+    219,
+    95
+   ],
+   "npc_name": "Quadro de Missões",
+   "via": {
+    "map": "areia",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip"
+   },
+   "return_npc": {
+    "map": "ra_in01",
+    "position": [
+     213,
+     80
+    ],
+    "name": "Retorno"
+   }
+  },
+  {
+   "id": "kakashi",
+   "name": "Quadro de Kakashi",
+   "map": "kakashi",
+   "position": [
+    87,
+    140
+   ],
+   "npc_name": "Quadro de Missões",
+   "via": {
+    "map": "hospital2",
+    "position": [
+     16,
+     74
+    ],
+    "name": ""
+   },
+   "return_npc": {
+    "map": "kakashi",
+    "position": [
+     83,
+     150
+    ],
+    "name": "Retorno"
+   }
+  }
+ ],
+ "access_paths": [
+  {
+   "id": "7e214b0e984f4a74a10b6263d99d5c7a",
+   "board_id": "vip",
+   "name": "hospital2.gat → Quadro da Sala Vip",
+   "steps": [
+    {
+     "kind": "portal",
+     "map": "hospital2.gat",
+     "position": [
+      103,
+      3
+     ]
+    },
+    {
+     "kind": "wait_map",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "npc",
+     "map": "areia.gat",
+     "position": [
+      144,
+      195
+     ],
+     "name": "Sala Vip#2"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "select",
+     "map": "areia.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "walk",
+     "map": "ra_in01.gat",
+     "position": [
+      219,
+      92
+     ]
+    }
+   ]
+  },
+  {
+   "id": "2ee81179678143a9be115c5b3b3140d6",
+   "board_id": "kakashi",
+   "name": "hospital2.gat → Quadro de Kakashi",
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "hospital2.gat",
+     "position": [
+      16,
+      74
+     ],
+     "name": "Campo de Treinamento#c"
+    },
+    {
+     "kind": "select",
+     "map": "hospital2.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "next",
+     "map": "hospital2.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "walk",
+     "map": "kakashi.gat",
+     "position": [
+      88,
+      140
+     ]
+    }
+   ]
+  }
+ ],
+ "missions": [
+  {
+   "id": "4245d05e081143f19922fae0d43b7c47",
+   "name": "Rank A-1",
+   "menu_option": "Rank A-1",
+   "board_id": "kakashi",
+   "rank": "Rank A-1",
+   "description": "Rank A-1 Description: Derrote Louva-a-Deus no Kamizuro 2 (2) [Progresso da missão] Tempo restante: 56 min 12 segundos Monstros : Louva-a-Deus [0/50] [Recompensas] Zeny : 25,000 Item : 1 Ranking A Completar missão ? [Quadro de missões] Você deve entregar essa missão para Quadro de missões Tempo restante: 55 min 57 segundos Desistir desta missão ? Tempo restante: 55 min 53 segundos Você desistiu desta missão Descrição: Derrote Gremlins no Kamizuro 2 (2) Status : Incompleta Monstros necessários : 50 Gremlin [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas",
+   "monster_targets": [
+    {
+     "name": "Gremlin",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Gremlin"
+   ],
+   "monster_ids": [
+    1632
+   ],
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "id": "ee25138e302d4802a948aceb980c0755",
+   "name": "Rank A-2",
+   "menu_option": "Rank A-2",
+   "board_id": "kakashi",
+   "rank": "Rank A-2",
+   "description": "Rank A-2 Description: Derrote Gremlins no Kamizuro 2 (2) [Progresso da missão] Tempo restante: 56 min 5 segundos Monstros : Gremlin [0/50] [Recompensas] Zeny : 25,000 Item : 1 Ranking A Completar missão ? [Quadro de missões] Você deve entregar essa missão para Quadro de missões Tempo restante: 56 min 1 segundos Descrição: Status : Incompleta Monstros necessários : 50 Dragão Mutante [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas",
+   "monster_targets": [
+    {
+     "name": "Dragão Mutante",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Dragão Mutante"
+   ],
+   "monster_ids": [
+    1262
+   ],
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "id": "1a8a2ca038db4ebaad1815c172e79c5e",
+   "name": "Rank A-3",
+   "menu_option": "Rank A-3",
+   "board_id": "kakashi",
+   "rank": "Rank A-3",
+   "description": "[Quadro de missões] Rank A-3 Descrição: Derrote Louva-a-Deus no Kamizuro 2 (2) Status : Incompleta Monstros necessários : 50 Louva-a-Deus [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A",
+   "monster_targets": [
+    {
+     "name": "Louva-a-Deus",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Louva-a-Deus"
+   ],
+   "monster_ids": [
+    1139
+   ],
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank A-1",
+   "rank": "Rank A-1",
+   "description": "[Quadro de missões] Rank A-1 Descrição: Derrote Louva-a-Deus no Kamizuro 2 (2) Status : Incompleta Monstros necessários : 50 Louva-a-Deus [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A Você aceitou uma missão : Tempo restante : 1 horas Description: Derrote Louva-a-Deus no Kamizuro 2 (2) [Progresso da missão] Tempo restante: 58 min 46 segundos Monstros : Louva-a-Deus [0/50] Completar missão ? Você precisa matar todos os monstros da lista Rank A-1 Description: Derrote Louva-a-Deus no Kamizuro 2 (2) [Progresso da missão] Tempo restante: 59 min 2 segundos Monstros : Louva-a-Deus [0/50] [Recompensas] Zeny : 25,000 Item : 1 Ranking A Desistir desta missão ? [Quadro de missões] Você desistiu desta missão",
+   "monster_targets": [
+    {
+     "name": "Louva-a-Deus",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Louva-a-Deus"
+   ],
+   "monster_ids": [
+    1139
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank A-1",
+   "id": "49dede4af47048d389e36d418cdf33c0",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank A-2",
+   "rank": "Rank A-2",
+   "description": "[Quadro de missões] Rank A-2 Descrição: Derrote Gremlins no Kamizuro 2 (2) Status : Incompleta Monstros necessários : 50 Gremlin [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A Você aceitou uma missão : Tempo restante : 1 horas",
+   "monster_targets": [
+    {
+     "name": "Gremlin",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Gremlin"
+   ],
+   "monster_ids": [
+    1632
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank A-2",
+   "id": "ad93c32b32c24d58951fcbbf766967d4",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-1",
+   "rank": "Rank B-1",
+   "description": "[Quadro de missões] Rank B-1 Descrição: Derrote Manmosukas Status : Incompleta Monstros necessários : 50 Manmosukas [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B Você aceitou uma missão : Tempo restante : 1 horas Description: Derrote Manmosukas [Progresso da missão] Tempo restante: 59 min 56 segundos Monstros : Manmosukas [0/50] Desistir desta missão ? Você desistiu desta missão",
+   "monster_targets": [
+    {
+     "name": "Manmosukas",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Manmosukas"
+   ],
+   "monster_ids": [
+    1040
+   ],
+   "board_id": "kakashi",
+   "menu_option": "Rank B-1",
+   "id": "8f39d5bb7c6d428281dded1a3a15c6e1",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-2",
+   "rank": "Rank B-2",
+   "description": "[Quadro de missões] Rank B-2 Descrição: Derrote Chamus Status : Incompleta Monstros necessários : 50 Chamu [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B",
+   "monster_targets": [
+    {
+     "name": "Chamu",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Chamu"
+   ],
+   "monster_ids": [
+    1405
+   ],
+   "board_id": "kakashi",
+   "menu_option": "Rank B-2",
+   "id": "cc8e76e34ef44d16b999bb8c1e3ab7b1",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-9",
+   "rank": "Rank B-9",
+   "description": "[Quadro de missões] Rank B-9 Descrição: Derrote Besouros-Rei no Kamizuro 1 (1) Status : Incompleta Monstros necessários : 50 Besouro-Rei [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B",
+   "monster_targets": [
+    {
+     "name": "Besouro-Rei",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Besouro-Rei"
+   ],
+   "monster_ids": [
+    1494
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank B-9",
+   "id": "368aac0c3dc145b89c6d4f255ebb0c94",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-10",
+   "rank": "Rank B-10",
+   "description": "[Quadro de missões] Rank B-10 Descrição: Derrote Borboletas no Kamizuro 1 (1) Status : Incompleta Monstros necessários : 50 Borboleta [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B",
+   "monster_targets": [
+    {
+     "name": "Borboleta",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Borboleta"
+   ],
+   "monster_ids": [
+    1018
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank B-10",
+   "id": "9bda4c50f6f14ef08fea6986867c1ce7",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank C-3",
+   "rank": "Rank C-3",
+   "description": "[Quadro de missões] Rank C-3 Descrição: Status : Incompleta Monstros necessários : 40 Shinobi Ladrão [Limitações] Pode realizar : Todo dia Base Level : 200~999 Limite de tempo : 1 horas [Recompensas] Zeny : 10,000 Item : 1 Ranking C",
+   "monster_targets": [
+    {
+     "name": "Shinobi Ladrão",
+     "count": 40
+    }
+   ],
+   "monster_names": [
+    "Shinobi Ladrão"
+   ],
+   "monster_ids": [
+    1201
+   ],
+   "board_id": "kakashi",
+   "menu_option": "Rank C-3",
+   "id": "70c7d5cbc4e54424904c2e578196832b",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank A-3",
+   "rank": "Rank A-3",
+   "description": "[Quadro de missões] Rank A-3 Descrição: Derrote Abelhas no Kamizuro 1 (2) Status : Incompleta Monstros necessários : 50 Abelha [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A",
+   "monster_targets": [
+    {
+     "name": "Abelha",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Abelha"
+   ],
+   "monster_ids": [
+    1114
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank A-3",
+   "id": "3bd1257e4ddb4b26ae8ecf59fc9a45e8",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank S-4",
+   "rank": "Rank S-4",
+   "description": "[Quadro de missões] Rank S-4 Descrição: Derrote Lavadeiras no Kamizuro 1 (3) Status : Incompleta Monstros necessários : 50 Lavadeira [Limitações] Pode realizar : Todo dia Base Level : 700~999 Limite de tempo : 1 horas [Recompensas] Zeny : 35,000 Item : 1 Ranking S",
+   "monster_targets": [
+    {
+     "name": "Lavadeira",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Lavadeira"
+   ],
+   "monster_ids": [
+    1321
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank S-4",
+   "id": "7fcf23d1865541dd8d4ea4d252571d04",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank S-5",
+   "rank": "Rank S-5",
+   "description": "[Quadro de missões] Rank S-5 Descrição: Derrote Besouros no Kamizuro 1 (3) Status : Incompleta Monstros necessários : 50 Besouro [Limitações] Pode realizar : Todo dia Base Level : 700~999 Limite de tempo : 1 horas [Recompensas] Zeny : 35,000 Item : 1 Ranking S",
+   "monster_targets": [
+    {
+     "name": "Besouro",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Besouro"
+   ],
+   "monster_ids": [
+    1128
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank S-5",
+   "id": "8009bf2ca08443879b2834f617a40a29",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank S-6",
+   "rank": "Rank S-6",
+   "description": "[Quadro de missões] Rank S-6 Descrição: Derrote Borboletas Machos no Kamizuro 1 (3) Status : Incompleta Monstros necessários : 50 Borboleta Macho [Limitações] Pode realizar : Todo dia Base Level : 700~999 Limite de tempo : 1 horas [Recompensas] Zeny : 35,000 Item : 1 Ranking S",
+   "monster_targets": [
+    {
+     "name": "Borboleta Macho",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Borboleta Macho"
+   ],
+   "monster_ids": [
+    1293
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank S-6",
+   "id": "adcf477fdf7243e2bd58779e3eb0a4b2",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank A-4",
+   "rank": "Rank A-4",
+   "description": "[Quadro de missões] Rank A-4 Descrição: Derrote Abelhas Machos no Kamizuro 1 (2) Status : Incompleta Monstros necessários : 50 Abelha Macho [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A",
+   "monster_targets": [
+    {
+     "name": "Abelha Macho",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Abelha Macho"
+   ],
+   "monster_ids": [
+    1201
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank A-4",
+   "id": "c02e9e1a6132472eb9bda61c6815723e",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-3",
+   "rank": "Rank B-3",
+   "description": "[Quadro de missões] Rank B-3 Descrição: Derrote Baratas no Esgoto (3) Status : Incompleta Monstros necessários : 50 Barata [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B",
+   "monster_targets": [
+    {
+     "name": "Barata",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Barata"
+   ],
+   "monster_ids": [
+    1618
+   ],
+   "board_id": "kakashi",
+   "menu_option": "Rank B-3",
+   "id": "9fa33c9c20ec41b1901cd97fd3fb3cc1",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-1",
+   "rank": "Rank B-1",
+   "description": "[Quadro de missões] Rank B-1 Descrição: Derrote Shinobis Assasinos no Esgoto (3) Status : Incompleta Monstros necessários : 50 Shinobi Assassino [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B",
+   "monster_targets": [
+    {
+     "name": "Shinobi Assassino",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Shinobi Assassino"
+   ],
+   "monster_ids": [
+    1589
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank B-1",
+   "id": "c0f47f662971471880a2d44fb87e13e8",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-2",
+   "rank": "Rank B-2",
+   "description": "[Quadro de missões] Rank B-2 Descrição: Status : Incompleta Monstros necessários : 50 Shinobi Sanguinário [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B",
+   "monster_targets": [
+    {
+     "name": "Shinobi Sanguinário",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Shinobi Sanguinário"
+   ],
+   "monster_ids": [
+    1769
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank B-2",
+   "id": "6f1891ce7ff44100b318d1f594dc5d04",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank D-1",
+   "rank": "Rank D-1",
+   "description": "[Quadro de missões] Rank D-1 Descrição: Derrote Ratasanas no Esgoto (2) Status : Incompleta Monstros necessários : 35 Ratasana [Limitações] Pode realizar : Todo dia Base Level : 100~999 Limite de tempo : 1 horas [Recompensas] Zeny : 5,000 Item : 1 Ranking D",
+   "monster_targets": [
+    {
+     "name": "Ratasana",
+     "count": 35
+    }
+   ],
+   "monster_names": [
+    "Ratasana"
+   ],
+   "monster_ids": [
+    1209
+   ],
+   "board_id": "kakashi",
+   "menu_option": "^0000FFRank D-1",
+   "id": "d6fc67897ce24b7e8dd65b5a25302814",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank C-4",
+   "rank": "Rank C-4",
+   "description": "[Quadro de missões] Rank C-4 Descrição: Derrote Ratasanas no Esgoto (2) Status : Incompleta Monstros necessários : 35 Ratasana [Limitações] Pode realizar : Todo dia Base Level : 200~999 Limite de tempo : 1 horas [Recompensas] Zeny : 10,000 Item : 1 Ranking C",
+   "monster_targets": [
+    {
+     "name": "Ratasana",
+     "count": 35
+    }
+   ],
+   "monster_names": [
+    "Ratasana"
+   ],
+   "monster_ids": [
+    1209
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank C-4",
+   "id": "e3c0c99565ac49dbb96aae08fcf563a0",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank C-5",
+   "rank": "Rank C-5",
+   "description": "[Quadro de missões] Rank C-5 Descrição: Derrote Baratas Macho no Esgoto (2) Status : Incompleta Monstros necessários : 35 Barata Macho [Limitações] Pode realizar : Todo dia Base Level : 200~999 Limite de tempo : 1 horas [Recompensas] Zeny : 10,000 Item : 1 Ranking C",
+   "monster_targets": [
+    {
+     "name": "Barata Macho",
+     "count": 35
+    }
+   ],
+   "monster_names": [
+    "Barata Macho"
+   ],
+   "monster_ids": [
+    1053
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank C-5",
+   "id": "52ffae21e4424a7faaf31c2ae1c86673",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank A-4",
+   "rank": "Rank A-4",
+   "description": "[Quadro de missões] Rank A-4 Descrição: Derrote Shinobis Prisioneiros no Esgoto (4) Status : Incompleta Monstros necessários : 50 Shinobi Prisioneiro [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A",
+   "monster_targets": [
+    {
+     "name": "Shinobi Prisioneiro",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Shinobi Prisioneiro"
+   ],
+   "monster_ids": [
+    1196
+   ],
+   "board_id": "kakashi",
+   "menu_option": "Rank A-4",
+   "id": "1840f5bf0a864b6ba7cbd078cfa0dca6",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank A-5",
+   "rank": "Rank A-5",
+   "description": "[Quadro de missões] Rank A-5 Descrição: Derrote Prisioneiros Fugitivos no Esgoto (4) Status : Incompleta Monstros necessários : 50 Prisioneiro Fugitivo [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A",
+   "monster_targets": [
+    {
+     "name": "Prisioneiro Fugitivo",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Prisioneiro Fugitivo"
+   ],
+   "monster_ids": [
+    1257
+   ],
+   "board_id": "kakashi",
+   "menu_option": "Rank A-5",
+   "id": "1a12033c8965468381fdfc7b5f8a58e4",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank A-9",
+   "rank": "Rank A-9",
+   "description": "[Quadro de missões] Rank A-9 Descrição: Derrote Prisioneiros Fugitivos no Esgoto (4) Status : Incompleta Monstros necessários : 50 Prisioneiro Fugitivo [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A",
+   "monster_targets": [
+    {
+     "name": "Prisioneiro Fugitivo",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Prisioneiro Fugitivo"
+   ],
+   "monster_ids": [
+    1257
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank A-9",
+   "id": "087f7d07c66f45deb52f4740e8ab0cfa",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank A-10",
+   "rank": "Rank A-10",
+   "description": "[Quadro de missões] Rank A-10 Descrição: Derrote Shinobis Prisioneiros no Esgoto (4) Status : Incompleta Monstros necessários : 50 Shinobi Prisioneiro [Limitações] Pode realizar : Todo dia Base Level : 400~999 Limite de tempo : 1 horas [Recompensas] Zeny : 25,000 Item : 1 Ranking A",
+   "monster_targets": [
+    {
+     "name": "Shinobi Prisioneiro",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Shinobi Prisioneiro"
+   ],
+   "monster_ids": [
+    1196
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank A-10",
+   "id": "f091fda921bc4acfa473552cdb087dd9",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  }
+ ],
+ "menus": {
+  "vip": [
+   [
+    "Completar missão",
+    "Desistir de uma missão",
+    "Aceitar uma missão",
+    ""
+   ],
+   [
+    "#1 ^FF0000Vázio^000000",
+    "#2 ^FF0000Vázio^000000",
+    "#3 ^FF0000Vázio^000000",
+    "#4 ^FF0000Vázio^000000",
+    "#5 ^FF0000Vázio^000000",
+    "#6 ^FF0000Vázio^000000",
+    "#7 ^FF0000Vázio^000000",
+    "#8 ^FF0000Vázio^000000"
+   ],
+   [
+    "^0000FFRank D-1",
+    "Rank D-2",
+    "Rank D-3",
+    "Rank D-4",
+    "Rank D-5",
+    "Rank C-1",
+    "Rank C-2",
+    "Rank C-3",
+    "Rank C-4",
+    "Rank C-5",
+    "Rank B-1",
+    "Rank B-2",
+    "Rank B-3",
+    "Rank B-4",
+    "Rank B-5",
+    "Rank B-6",
+    "Rank B-7",
+    "Rank B-8",
+    "Rank B-9",
+    "Rank B-10",
+    "Rank A-1",
+    "Rank A-2",
+    "Rank A-3",
+    "Rank A-4",
+    "Rank A-5",
+    "Rank A-6",
+    "Rank A-7",
+    "Rank A-8",
+    "Rank A-9",
+    "Rank A-10",
+    "Rank S-1",
+    "Rank S-2",
+    "Rank S-3",
+    "Rank S-4",
+    "Rank S-5",
+    "Rank S-6",
+    "Rank S-7",
+    "Rank S-8",
+    "Rank S-9",
+    "Rank S-10",
+    "Rank S-11",
+    "Rank S-12",
+    "Rank SS^000000"
+   ],
+   [
+    "Aceitar missão",
+    "Escolher outra"
+   ],
+   [
+    "#1 ^0000FFRank A-1^000000",
+    "#2 ^FF0000Vázio^000000",
+    "#3 ^FF0000Vázio^000000",
+    "#4 ^FF0000Vázio^000000",
+    "#5 ^FF0000Vázio^000000",
+    "#6 ^FF0000Vázio^000000",
+    "#7 ^FF0000Vázio^000000",
+    "#8 ^FF0000Vázio^000000"
+   ],
+   [
+    "#1 ^0000FFRank A-1^000000",
+    "#2 ^0000FFRank A-2^000000",
+    "#3 ^FF0000Vázio^000000",
+    "#4 ^FF0000Vázio^000000",
+    "#5 ^FF0000Vázio^000000",
+    "#6 ^FF0000Vázio^000000",
+    "#7 ^FF0000Vázio^000000",
+    "#8 ^FF0000Vázio^000000"
+   ],
+   [
+    "Sim",
+    "Não"
+   ]
+  ],
+  "kakashi": [
+   [
+    "Completar missão",
+    "Desistir de uma missão",
+    "Aceitar uma missão",
+    ""
+   ],
+   [
+    "#1 ^0000FFRank A-1^000000",
+    "#2 ^0000FFRank A-2^000000",
+    "#3 ^FF0000Vázio^000000",
+    "#4 ^FF0000Vázio^000000",
+    "#5 ^FF0000Vázio^000000",
+    "#6 ^FF0000Vázio^000000",
+    "#7 ^FF0000Vázio^000000",
+    "#8 ^FF0000Vázio^000000"
+   ],
+   [
+    "Sim",
+    "Não"
+   ],
+   [
+    "#1 ^FF0000Vázio^000000",
+    "#2 ^0000FFRank A-2^000000",
+    "#3 ^FF0000Vázio^000000",
+    "#4 ^FF0000Vázio^000000",
+    "#5 ^FF0000Vázio^000000",
+    "#6 ^FF0000Vázio^000000",
+    "#7 ^FF0000Vázio^000000",
+    "#8 ^FF0000Vázio^000000"
+   ],
+   [
+    "^0000FFRank D-1",
+    "Rank D-2",
+    "Rank D-3",
+    "Rank C-1",
+    "Rank C-2",
+    "Rank C-3",
+    "Rank B-1",
+    "Rank B-2",
+    "Rank B-3",
+    "Rank A-1",
+    "Rank A-2",
+    "Rank A-3",
+    "Rank A-4",
+    "Rank A-5",
+    "Rank A-6",
+    "Rank A-7",
+    "Rank S - Zeny^000000"
+   ],
+   [
+    "Aceitar missão",
+    "Escolher outra"
+   ],
+   [
+    "#1 ^0000FFRank B-1^000000",
+    "#2 ^0000FFRank A-2^000000",
+    "#3 ^FF0000Vázio^000000",
+    "#4 ^FF0000Vázio^000000",
+    "#5 ^FF0000Vázio^000000",
+    "#6 ^FF0000Vázio^000000",
+    "#7 ^FF0000Vázio^000000",
+    "#8 ^FF0000Vázio^000000"
+   ]
+  ]
+ },
+ "return_enabled": true,
+ "return_paths": {
+  "kakashi": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      83,
+      150
+     ],
+     "name": "Retorno#f"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "hospital2.gat"
+    },
+    {
+     "kind": "walk",
+     "map": "hospital2.gat",
+     "position": [
+      25,
+      92
+     ]
+    }
+   ]
+  }
+ },
+ "option_details": {
+  "vip": {
+   "Rank A-1": [
+    "[Quadro de missões]",
+    "^0000FFRank A-1^000000",
+    "Descrição: ^0000FFDerrote Louva-a-Deus no Kamizuro 2 (2)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Louva-a-Deus^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000",
+    "Você aceitou uma missão :",
+    "Tempo restante : ^FF00001 horas^000000",
+    "Description: ^0000FFDerrote Louva-a-Deus no Kamizuro 2 (2)^000000",
+    "[Progresso da missão]",
+    "Tempo restante:  ^FF000058 min 46 segundos^000000",
+    "Monstros : ^0000FFLouva-a-Deus^000000 [0/50]",
+    "Completar missão ?",
+    "Você precisa matar todos os monstros da lista"
+   ],
+   "Rank A-2": [
+    "[Quadro de missões]",
+    "^0000FFRank A-2^000000",
+    "Descrição: ^0000FFDerrote Gremlins no Kamizuro 2 (2)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Gremlin^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000",
+    "Você aceitou uma missão :",
+    "Tempo restante : ^FF00001 horas^000000"
+   ],
+   "#1 ^0000FFRank A-1^000000": [
+    "^0000FFRank A-1^000000",
+    "Description: ^0000FFDerrote Louva-a-Deus no Kamizuro 2 (2)^000000",
+    " ",
+    "[Progresso da missão]",
+    "Tempo restante:  ^FF000059 min 2 segundos^000000",
+    "Monstros : ^0000FFLouva-a-Deus^000000 [0/50]",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000",
+    "Desistir desta missão ?",
+    "[Quadro de missões]",
+    "Você desistiu desta missão"
+   ],
+   "^0000FFRank D-1": [
+    "[Quadro de missões]",
+    "^0000FFRank D-1^000000",
+    "Descrição: ^0000FFDerrote Girinos na Academia^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF25 Girino^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF100~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF5,000^000000",
+    "Item : ^0000FF1 Ranking D^000000"
+   ],
+   "Rank D-2": [
+    "[Quadro de missões]",
+    "^0000FFRank D-2^000000",
+    "Descrição: ^0000FFDerrote Filhotes de Cobra na Academia^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF25 Filhote de Cobra^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF100~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF5,000^000000",
+    "Item : ^0000FF1 Ranking D^000000"
+   ],
+   "Rank D-3": [
+    "[Quadro de missões]",
+    "^0000FFRank D-3^000000",
+    "Descrição: ^0000FFDerrote Akinos na Academia^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF25 Akino^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF100~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF5,000^000000",
+    "Item : ^0000FF1 Ranking D^000000"
+   ],
+   "Rank D-4": [
+    "[Quadro de missões]",
+    "^0000FFRank D-4^000000",
+    "Descrição: ^0000FFDerrote Vermes no Kamizuro 2 (1)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF25 Verme^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF100~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF5,000^000000",
+    "Item : ^0000FF1 Ranking D^000000"
+   ],
+   "Rank D-5": [
+    "[Quadro de missões]",
+    "^0000FFRank D-5^000000",
+    "Descrição: ^0000FFDerrote Morcegos no Esgoto (1)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF25 Morcego^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF100~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF5,000^000000",
+    "Item : ^0000FF1 Ranking D^000000"
+   ],
+   "Rank C-1": [
+    "[Quadro de missões]",
+    "^0000FFRank C-1^000000",
+    "Descrição: ^0000FFDerrote Genins^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF35 Genin^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF200~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF10,000^000000",
+    "Item : ^0000FF1 Ranking C^000000"
+   ],
+   "Rank C-2": [
+    "[Quadro de missões]",
+    "^0000FFRank C-2^000000",
+    "Descrição: ^0000FFDerrote Kyodaigumos^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF35 Kyodaigumo^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF200~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF10,000^000000",
+    "Item : ^0000FF1 Ranking C^000000"
+   ],
+   "Rank C-3": [
+    "[Quadro de missões]",
+    "^0000FFRank C-3^000000",
+    "Descrição: ^0000FFDerrote Abelhas Rainha Gigante^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF35 Abelha Rainha Gigante^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF200~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF10,000^000000",
+    "Item : ^0000FF1 Ranking C^000000"
+   ],
+   "Rank C-4": [
+    "[Quadro de missões]",
+    "^0000FFRank C-4^000000",
+    "Descrição: ^0000FFDerrote Ratasanas no Esgoto (2)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF35 Ratasana^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF200~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF10,000^000000",
+    "Item : ^0000FF1 Ranking C^000000"
+   ],
+   "Rank C-5": [
+    "[Quadro de missões]",
+    "^0000FFRank C-5^000000",
+    "Descrição: ^0000FFDerrote Baratas Macho no Esgoto (2)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF35 Barata Macho^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF200~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF10,000^000000",
+    "Item : ^0000FF1 Ranking C^000000"
+   ],
+   "Rank B-1": [
+    "[Quadro de missões]",
+    "^0000FFRank B-1^000000",
+    "Descrição: ^0000FFDerrote Shinobis Assasinos no Esgoto (3)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Shinobi Assassino^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank B-2": [
+    "[Quadro de missões]",
+    "^0000FFRank B-2^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Shinobi Sanguinário^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank B-3": [
+    "[Quadro de missões]",
+    "^0000FFRank B-3^000000",
+    "Descrição: ^0000FFDerrote Mineiradores nas Minas Shinobis (1)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Mineirador^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank B-4": [
+    "[Quadro de missões]",
+    "^0000FFRank B-4^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Operário^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank B-5": [
+    "[Quadro de missões]",
+    "^0000FFRank B-5^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Pequena Tartaruga^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank B-6": [
+    "[Quadro de missões]",
+    "^0000FFRank B-6^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Cornutus^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank B-7": [
+    "[Quadro de missões]",
+    "^0000FFRank B-7^000000",
+    "Descrição: ^0000FFDerrote Vermes Chefes no Kamizuro 2 (1)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Verme Chefe^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank B-8": [
+    "[Quadro de missões]",
+    "^0000FFRank B-8^000000",
+    "Descrição: ^0000FFDerrote Vermes Malditos no Kamizuro 2 (1)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Verme Maldito^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank B-9": [
+    "[Quadro de missões]",
+    "^0000FFRank B-9^000000",
+    "Descrição: ^0000FFDerrote Besouros-Rei no Kamizuro 1 (1)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Besouro-Rei^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank B-10": [
+    "[Quadro de missões]",
+    "^0000FFRank B-10^000000",
+    "Descrição: ^0000FFDerrote Borboletas no Kamizuro 1 (1)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Borboleta^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank A-3": [
+    "[Quadro de missões]",
+    "^0000FFRank A-3^000000",
+    "Descrição: ^0000FFDerrote Abelhas no Kamizuro 1 (2)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Abelha^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-4": [
+    "[Quadro de missões]",
+    "^0000FFRank A-4^000000",
+    "Descrição: ^0000FFDerrote Abelhas Machos no Kamizuro 1 (2)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Abelha Macho^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-5": [
+    "[Quadro de missões]",
+    "^0000FFRank A-5^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Guardião Arqueiro^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-6": [
+    "[Quadro de missões]",
+    "^0000FFRank A-6^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Guardião Mestre^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-7": [
+    "[Quadro de missões]",
+    "^0000FFRank A-7^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Tartaruga^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-8": [
+    "[Quadro de missões]",
+    "^0000FFRank A-8^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Grande Esquilo^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-9": [
+    "[Quadro de missões]",
+    "^0000FFRank A-9^000000",
+    "Descrição: ^0000FFDerrote Prisioneiros Fugitivos no Esgoto (4)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Prisioneiro Fugitivo^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-10": [
+    "[Quadro de missões]",
+    "^0000FFRank A-10^000000",
+    "Descrição: ^0000FFDerrote Shinobis Prisioneiros no Esgoto (4)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Shinobi Prisioneiro^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank S-1": [
+    "[Quadro de missões]",
+    "^0000FFRank S-1^000000",
+    "Descrição: ^0000FFDerrote Gafanhotos no Kamizuro 2 (3)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Gafanhoto^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-2": [
+    "[Quadro de missões]",
+    "^0000FFRank S-2^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Inseto Guardião^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-3": [
+    "[Quadro de missões]",
+    "^0000FFRank S-3^000000",
+    "Descrição: ^0000FFDerrote Insetos Reis no Kamizuro 2 (3)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Inseto Rei^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-4": [
+    "[Quadro de missões]",
+    "^0000FFRank S-4^000000",
+    "Descrição: ^0000FFDerrote Lavadeiras no Kamizuro 1 (3)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Lavadeira^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-5": [
+    "[Quadro de missões]",
+    "^0000FFRank S-5^000000",
+    "Descrição: ^0000FFDerrote Besouros no Kamizuro 1 (3)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Besouro^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-6": [
+    "[Quadro de missões]",
+    "^0000FFRank S-6^000000",
+    "Descrição: ^0000FFDerrote Borboletas Machos no Kamizuro 1 (3)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Borboleta Macho^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-7": [
+    "[Quadro de missões]",
+    "^0000FFRank S-7^000000",
+    "Descrição: ^0000FFDerrote Insetos Rainhas em Kamizuro 2 (3)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Inseto Rainha^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-8": [
+    "[Quadro de missões]",
+    "^0000FFRank S-8^000000",
+    "Descrição: ^0000FFDerrote Ninkames^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Ninkame^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-9": [
+    "[Quadro de missões]",
+    "^0000FFRank S-9^000000",
+    "Descrição: ^0000FFDerrote Salamandras^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Salamandra^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-10": [
+    "[Quadro de missões]",
+    "^0000FFRank S-10^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^00CC00Completa^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 General Tartaruga^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-11": [
+    "[Quadro de missões]",
+    "^0000FFRank S-11^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^00CC00Completa^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Gorila^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank S-12": [
+    "[Quadro de missões]",
+    "^0000FFRank S-12^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^00CC00Completa^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Monstro Marinho^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF700~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF35,000^000000",
+    "Item : ^0000FF1 Ranking S^000000"
+   ],
+   "Rank SS^000000": [
+    "[Quadro de missões]",
+    "^0000FFRank SS^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF1 Líder Genin^000000",
+    "Monstros necessários : ^0000FF1 Líder Chunin^000000",
+    "Monstros necessários : ^0000FF1 Líder Jounin^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF900~999^000000",
+    "Limite de tempo : ^FF00003 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF250,000^000000",
+    "Item : ^0000FF4 Ranking S^000000"
+   ]
+  },
+  "kakashi": {
+   "Rank A-1": [
+    "^0000FFRank A-1^000000",
+    "Description: ^0000FFDerrote Louva-a-Deus no Kamizuro 2 (2)^000000",
+    " ",
+    "[Progresso da missão]",
+    "Tempo restante:  ^FF000056 min 12 segundos^000000",
+    "Monstros : ^0000FFLouva-a-Deus^000000 [0/50]",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000",
+    "Completar missão ?",
+    "[Quadro de missões]",
+    "Você deve entregar essa missão para",
+    "^0000FFQuadro de missões^000000",
+    "Tempo restante:  ^FF000055 min 57 segundos^000000",
+    "Desistir desta missão ?",
+    "Tempo restante:  ^FF000055 min 53 segundos^000000",
+    "Você desistiu desta missão",
+    "Descrição: ^0000FFDerrote Gremlins no Kamizuro 2 (2)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    "Monstros necessários : ^0000FF50 Gremlin^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000"
+   ],
+   "Rank A-2": [
+    "^0000FFRank A-2^000000",
+    "Description: ^0000FFDerrote Gremlins no Kamizuro 2 (2)^000000",
+    " ",
+    "[Progresso da missão]",
+    "Tempo restante:  ^FF000056 min 5 segundos^000000",
+    "Monstros : ^0000FFGremlin^000000 [0/50]",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000",
+    "Completar missão ?",
+    "[Quadro de missões]",
+    "Você deve entregar essa missão para",
+    "^0000FFQuadro de missões^000000",
+    "Tempo restante:  ^FF000056 min 1 segundos^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    "Monstros necessários : ^0000FF50 Dragão Mutante^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000"
+   ],
+   "^0000FFRank D-1": [
+    "[Quadro de missões]",
+    "^0000FFRank D-1^000000",
+    "Descrição: ^0000FFDerrote Ratasanas no Esgoto (2)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF35 Ratasana^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF100~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF5,000^000000",
+    "Item : ^0000FF1 Ranking D^000000"
+   ],
+   "Rank D-2": [
+    "[Quadro de missões]",
+    "^0000FFRank D-2^000000",
+    "Descrição: ^0000FFDerrote Morcegos no Esgoto (1)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF35 Morcego^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF100~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF5,000^000000",
+    "Item : ^0000FF1 Ranking D^000000"
+   ],
+   "Rank D-3": [
+    "[Quadro de missões]",
+    "^0000FFRank D-3^000000",
+    "Descrição: ^0000FFDerrote Akinos na Academia^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF35 Akino^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF100~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF5,000^000000",
+    "Item : ^0000FF1 Ranking D^000000"
+   ],
+   "Rank C-1": [
+    "[Quadro de missões]",
+    "^0000FFRank C-1^000000",
+    "Descrição: ^0000FFDerrote Genins^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF40 Genin^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF200~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF10,000^000000",
+    "Item : ^0000FF1 Ranking C^000000"
+   ],
+   "Rank C-2": [
+    "[Quadro de missões]",
+    "^0000FFRank C-2^000000",
+    "Descrição: ^0000FFDerrote Akamarus^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF40 Akamaru^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF200~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF10,000^000000",
+    "Item : ^0000FF1 Ranking C^000000"
+   ],
+   "Rank C-3": [
+    "[Quadro de missões]",
+    "^0000FFRank C-3^000000",
+    "Descrição: ^0000FF^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF40 Shinobi Ladrão^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF200~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF10,000^000000",
+    "Item : ^0000FF1 Ranking C^000000"
+   ],
+   "Rank B-1": [
+    "[Quadro de missões]",
+    "^0000FFRank B-1^000000",
+    "Descrição: ^0000FFDerrote Manmosukas^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Manmosukas^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000",
+    "Você aceitou uma missão :",
+    "Tempo restante : ^FF00001 horas^000000",
+    "Description: ^0000FFDerrote Manmosukas^000000",
+    "[Progresso da missão]",
+    "Tempo restante:  ^FF000059 min 56 segundos^000000",
+    "Monstros : ^0000FFManmosukas^000000 [0/50]",
+    "Desistir desta missão ?",
+    "Você desistiu desta missão"
+   ],
+   "Rank B-2": [
+    "[Quadro de missões]",
+    "^0000FFRank B-2^000000",
+    "Descrição: ^0000FFDerrote Chamus^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Chamu^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank B-3": [
+    "[Quadro de missões]",
+    "^0000FFRank B-3^000000",
+    "Descrição: ^0000FFDerrote Baratas no Esgoto (3)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Barata^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF300~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF15,000^000000",
+    "Item : ^0000FF1 Ranking B^000000"
+   ],
+   "Rank A-3": [
+    "[Quadro de missões]",
+    "^0000FFRank A-3^000000",
+    "Descrição: ^0000FFDerrote Louva-a-Deus no Kamizuro 2 (2)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Louva-a-Deus^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-4": [
+    "[Quadro de missões]",
+    "^0000FFRank A-4^000000",
+    "Descrição: ^0000FFDerrote Shinobis Prisioneiros no Esgoto (4)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Shinobi Prisioneiro^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-5": [
+    "[Quadro de missões]",
+    "^0000FFRank A-5^000000",
+    "Descrição: ^0000FFDerrote Prisioneiros Fugitivos no Esgoto (4)^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Prisioneiro Fugitivo^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-6": [
+    "[Quadro de missões]",
+    "^0000FFRank A-6^000000",
+    "Descrição: ^0000FFDerrote Salamandras^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Salamandra^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank A-7": [
+    "[Quadro de missões]",
+    "^0000FFRank A-7^000000",
+    "Descrição: ^0000FFDerrote Dokis^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Doki^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF400~999^000000",
+    "Limite de tempo : ^FF00001 horas^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF25,000^000000",
+    "Item : ^0000FF1 Ranking A^000000"
+   ],
+   "Rank S - Zeny^000000": [
+    "[Quadro de missões]",
+    "^0000FFRank S - Zeny^000000",
+    "Descrição: ^0000FFDerrote Anbus^000000",
+    "Status : ^FF0000Incompleta^000000",
+    " ",
+    "Monstros necessários : ^0000FF50 Anbu^000000",
+    "[Limitações]",
+    "Pode realizar : ^00CC00Todo dia^000000",
+    "Base Level :  ^0000FF999^000000",
+    "Limite de tempo : ^FF00001 horas 30 min^000000",
+    "[Recompensas]",
+    "Zeny : ^0000FF1,000,000^000000"
+   ]
+  }
+ },
+ "board_templates": {
+  "vip": {
+   "pickup": {
+    "steps": [
+     {
+      "kind": "npc",
+      "map": "ra_in01.gat",
+      "position": [
+       219,
+       95
+      ],
+      "name": "Quadro de missões#3"
+     },
+     {
+      "kind": "next",
+      "map": "ra_in01.gat"
+     },
+     {
+      "kind": "select",
+      "map": "ra_in01.gat",
+      "option": "Aceitar uma missão"
+     },
+     {
+      "kind": "select",
+      "map": "ra_in01.gat",
+      "option": "#1 ^FF0000Vázio^000000"
+     },
+     {
+      "kind": "next",
+      "map": "ra_in01.gat"
+     },
+     {
+      "kind": "select",
+      "map": "ra_in01.gat",
+      "option": "Rank A-2"
+     },
+     {
+      "kind": "next",
+      "map": "ra_in01.gat"
+     },
+     {
+      "kind": "select",
+      "map": "ra_in01.gat",
+      "option": "Aceitar missão"
+     },
+     {
+      "kind": "close",
+      "map": "ra_in01.gat"
+     }
+    ],
+    "confirmation": "Tempo restante : ^FF00001 horas^000000"
+   },
+   "delivery": {
+    "steps": [
+     {
+      "kind": "npc",
+      "map": "ra_in01.gat",
+      "position": [
+       219,
+       95
+      ],
+      "name": "Quadro de missões#3"
+     },
+     {
+      "kind": "next",
+      "map": "ra_in01.gat"
+     },
+     {
+      "kind": "select",
+      "map": "ra_in01.gat",
+      "option": "Completar missão"
+     },
+     {
+      "kind": "select",
+      "map": "ra_in01.gat",
+      "option": "#1 ^0000FFRank A-1^000000"
+     },
+     {
+      "kind": "next",
+      "map": "ra_in01.gat"
+     },
+     {
+      "kind": "select",
+      "map": "ra_in01.gat",
+      "option": "Sim"
+     },
+     {
+      "kind": "close",
+      "map": "ra_in01.gat"
+     }
+    ],
+    "confirmation": "Você precisa matar todos os monstros da lista"
+   }
+  }
+ }
+}

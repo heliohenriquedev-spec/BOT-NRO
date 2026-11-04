@@ -1,0 +1,926 @@
+[
+ {
+  "name": "Kami 2",
+  "target_map": "anthell02.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Esconderijo do Clã Kamizuru Nível 2"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "anthell01.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "anthell01.gat",
+    "position": [
+     253,
+     32
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "anthell02.gat"
+   }
+  ],
+  "id": "19e0287b6eda4c87b04299e939088168",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "Mamute Suna",
+  "target_map": "ve_fild04.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Mamutes da Suna"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ve_fild04.gat"
+   },
+   {
+    "kind": "walk",
+    "map": "ve_fild04.gat",
+    "position": [
+     179,
+     117
+    ]
+   }
+  ],
+  "id": "f93dde4fbc6c4f619384a07824ab36ef",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "kami 1",
+  "target_map": "um_dun01.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Esconderijo do Clã Kamizuru"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "um_dun01.gat"
+   },
+   {
+    "kind": "walk",
+    "map": "um_dun01.gat",
+    "position": [
+     228,
+     277
+    ]
+   }
+  ],
+  "id": "a4312ae1594a402cb1c67463a924f956",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "Kami 1 - Andar 2",
+  "target_map": "um_dun02.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Esconderijo do Clã Kamizuru"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "um_dun01.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "um_dun01.gat",
+    "position": [
+     48,
+     27
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "um_dun02.gat"
+   },
+   {
+    "kind": "walk",
+    "map": "um_dun02.gat",
+    "position": [
+     126,
+     148
+    ]
+   }
+  ],
+  "id": "a270b2766e8b4b1bb281a984b470b7ff",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "Kami 1 - Andar 3",
+  "target_map": "yggdrasil01.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "areia.gat",
+    "position": [
+     144,
+     195
+    ],
+    "name": "Sala Vip#2"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "next",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "select",
+    "map": "areia.gat",
+    "option": "Sim"
+   },
+   {
+    "kind": "wait_map",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "npc",
+    "map": "ra_in01.gat",
+    "position": [
+     217,
+     86
+    ],
+    "name": "Viajante Ninja#h2-8"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "select",
+    "map": "ra_in01.gat",
+    "option": "Esconderijo do Clã Kamizuru"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "next",
+    "map": "ra_in01.gat"
+   },
+   {
+    "kind": "wait_map",
+    "map": "um_dun01.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "um_dun01.gat",
+    "position": [
+     48,
+     27
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "um_dun02.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "um_dun02.gat",
+    "position": [
+     55,
+     18
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "yggdrasil01.gat"
+   },
+   {
+    "kind": "walk",
+    "map": "yggdrasil01.gat",
+    "position": [
+     39,
+     63
+    ]
+   }
+  ],
+  "id": "4de2f50684c14cc2a9c29091e9bc1b69",
+  "start_map": "hospital2.gat",
+  "inner_portals": {
+   "yggdrasil01": {
+    "134,55": [
+     29,
+     195
+    ],
+    "26,195": [
+     132,
+     53
+    ]
+   }
+  }
+ },
+ {
+  "name": "hospital2.gat → areia.gat",
+  "target_map": "areia.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   }
+  ],
+  "id": "d481e5454a044a2c83ac643d489234c3",
+  "start_map": "hospital2.gat"
+ },
+ {
+  "name": "hospital2.gat → prt_sewb2.gat",
+  "target_map": "prt_sewb2.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "areia.gat",
+    "position": [
+     108,
+     250
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb2.gat"
+   }
+  ],
+  "id": "e4f71f06c7fc4436bd24ba018846b4c6",
+  "start_map": "hospital2.gat",
+  "inner_portals": {
+   "prt_sewb2": {
+    "20,175": [
+     60,
+     28
+    ],
+    "101,176": [
+     141,
+     31
+    ]
+   }
+  }
+ },
+ {
+  "name": "Esgoto Suna - Andar 2",
+  "target_map": "prt_sewb4.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "areia.gat",
+    "position": [
+     108,
+     250
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb2.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "prt_sewb2.gat",
+    "position": [
+     180,
+     24
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb4.gat"
+   }
+  ],
+  "id": "77b71b566e1447208032da830d4dd734",
+  "start_map": "hospital2.gat",
+  "inner_portals": {
+   "prt_sewb2": {
+    "20,175": [
+     60,
+     28
+    ],
+    "101,176": [
+     141,
+     31
+    ]
+   }
+  }
+ },
+ {
+  "name": "Esgoto Suna - Andar 3",
+  "target_map": "gl_sew02.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "areia.gat",
+    "position": [
+     108,
+     250
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb2.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "prt_sewb2.gat",
+    "position": [
+     180,
+     24
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb4.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "prt_sewb4.gat",
+    "position": [
+     99,
+     16
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "gl_sew02.gat"
+   }
+  ],
+  "id": "2ba464836fa04502a78a5cd9bb842832",
+  "start_map": "hospital2.gat",
+  "inner_portals": {
+   "prt_sewb2": {
+    "20,175": [
+     60,
+     28
+    ],
+    "101,176": [
+     141,
+     31
+    ]
+   }
+  }
+ },
+ {
+  "name": "Esgoto Suna - Andar 5",
+  "target_map": "gl_prison.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "areia.gat",
+    "position": [
+     108,
+     250
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb2.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "prt_sewb2.gat",
+    "position": [
+     180,
+     24
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb4.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "prt_sewb4.gat",
+    "position": [
+     99,
+     16
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "gl_sew02.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "gl_sew02.gat",
+    "position": [
+     299,
+     293
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "alde_dun02.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "alde_dun02.gat",
+    "position": [
+     123,
+     170
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "gl_prison.gat"
+   }
+  ],
+  "id": "7a94e5edb6ea42249fb3e91ceac24cf8",
+  "start_map": "hospital2.gat",
+  "inner_portals": {
+   "prt_sewb2": {
+    "20,175": [
+     60,
+     28
+    ],
+    "101,176": [
+     141,
+     31
+    ]
+   }
+  }
+ },
+ {
+  "name": "Esgoto Suna - Andar 4",
+  "target_map": "alde_dun02.gat",
+  "steps": [
+   {
+    "kind": "portal",
+    "map": "hospital2.gat",
+    "position": [
+     103,
+     3
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "areia.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "areia.gat",
+    "position": [
+     108,
+     250
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb2.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "prt_sewb2.gat",
+    "position": [
+     180,
+     24
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "prt_sewb4.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "prt_sewb4.gat",
+    "position": [
+     99,
+     16
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "gl_sew02.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "gl_sew02.gat",
+    "position": [
+     299,
+     293
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "alde_dun02.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "alde_dun02.gat",
+    "position": [
+     123,
+     170
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "gl_prison.gat"
+   },
+   {
+    "kind": "portal",
+    "map": "gl_prison.gat",
+    "position": [
+     189,
+     47
+    ]
+   },
+   {
+    "kind": "wait_map",
+    "map": "alde_dun02.gat"
+   },
+   {
+    "kind": "walk",
+    "map": "alde_dun02.gat",
+    "position": [
+     126,
+     170
+    ]
+   }
+  ],
+  "id": "9a03cb0c62bf473fbd2cf8aadb6c3b01",
+  "start_map": "hospital2.gat",
+  "inner_portals": {
+   "prt_sewb2": {
+    "20,175": [
+     60,
+     28
+    ],
+    "101,176": [
+     141,
+     31
+    ]
+   }
+  }
+ }
+]
