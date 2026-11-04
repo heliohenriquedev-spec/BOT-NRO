@@ -2006,13 +2006,26 @@ async def run(args):
             game_dir = args.game_dir or find()
             if game_dir is None:
                 raise GrfError('pasta do jogo não encontrada; escolha a pasta do jogo no painel')
+            from .game_folder import running_game
+            opened = running_game()
+            if opened is not None and Path(opened).resolve() != Path(game_dir).resolve():
+                print(f'ATENÇÃO: o jogo aberto está em {opened}, mas o bot usa a pasta {game_dir}. '
+                      'Escolha a pasta do jogo aberto no painel (Conexão > Pasta do jogo); mapas e GRFs vêm de lá.')
             from .packet_reader import configure_client_game
             configure_client_game(game_dir)
             relay.map_repository = MapRepository(game_dir)
+            from .grf import data_ini_grfs
+            import os as _os
+            grfs = relay.map_repository.grfs
+            listed = data_ini_grfs(_os.path.join(str(game_dir), 'DATA.INI'))
+            missing = [n for n in listed if not _os.path.isfile(_os.path.join(str(game_dir), n))]
+            print(f'Pasta do jogo: {game_dir} | GRFs do DATA.INI: {len(listed)} ({", ".join(listed)})'
+                  + (f' | não encontrados: {", ".join(missing)}' if missing else '')
+                  + (f' | ignorados: {"; ".join(grfs.skipped)}' if grfs.skipped else ''))
             from .ammo import names_from_grfs
             relay.ammo.names = names_from_grfs(relay.map_repository.grfs)
         except (OSError, ValueError, GrfError) as exc:
-            print(f'Colisão indisponível: {exc}. Aproximação anterior mantida.')
+            print(f'Colisão indisponível: {exc}. Aproximação anterior mantida. Pasta do jogo usada: {locals().get("game_dir")}')
     from .packet_reader import client_lengths
     try:
         sizes = client_lengths()

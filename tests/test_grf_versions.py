@@ -40,3 +40,17 @@ def test_an_unreadable_grf_is_skipped_and_the_others_still_load(tmp_path):
     grfs = GrfSet(str(tmp_path))
     assert grfs.read('data\mapa.gat') == b'GAT'
     assert grfs.skipped and grfs.skipped[0].startswith('quebrado.grf')
+
+
+def test_data_ini_written_by_hand_is_read_like_the_game_does(tmp_path):
+    from nrobot.grf import data_ini_grfs
+    ini = tmp_path/'DATA.INI'
+    ini.write_bytes('﻿[data]\r\n//0=antigo.grf\r\n; comentario\r\n0=NRO - Mapas limpos sem dano.grf\r\n'
+                    '1=NRO.grf // principal\r\n1=NRO5.grf\r\nlixo sem igual\r\n2=data.grf\r\n[Outra]\r\n3=nao.grf\r\n'.encode('utf-8'))
+    assert data_ini_grfs(str(ini)) == ['NRO - Mapas limpos sem dano.grf', 'NRO5.grf', 'data.grf']
+
+
+def test_a_commented_grf_line_no_longer_hides_every_map(tmp_path):
+    make_grf(tmp_path/'bom.grf', {'data\mapa.gat': b'GAT'})
+    (tmp_path/'DATA.INI').write_text('[Data]\n//0=velho.grf\n0=bom.grf\n', encoding='latin-1')
+    assert GrfSet(str(tmp_path)).read('data\mapa.gat') == b'GAT'

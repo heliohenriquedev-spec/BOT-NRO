@@ -1,7 +1,6 @@
 """Leitor somente-leitura de arquivos GRF 0x200 e 0x300 (RF-03)."""
 from __future__ import annotations
 
-import configparser
 import os
 import struct
 import zlib
@@ -82,6 +81,32 @@ def _entries(path, table, offset_size, size_on_disk):
 WARNED: set[str] = set()
 
 
+def data_ini_grfs(path: str) -> list[str]:
+    """GRFs of DATA.INI in priority order, read the tolerant way the game does.
+
+    Only "number=file" lines of [Data] count: commented lines ("//0=x.grf", ";", "#"), a BOM,
+    "[data]" in lower case, repeated numbers (the last one wins) or stray text are ignored,
+    where a strict INI reader gave up and no map loaded."""
+    with open(path, "rb") as f:
+        text = f.read().decode("latin-1").lstrip("ï»¿")  # UTF-8 BOM read as latin-1
+    section, found, has_sections = None, {}, False
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith(("//", ";", "#")):
+            continue
+        if line.startswith("[") and "]" in line:
+            section = line[1:line.index("]")].strip().lower()
+            has_sections = True
+            continue
+        if has_sections and section != "data":
+            continue
+        key, sep, value = line.partition("=")
+        key, value = key.strip(), value.split("//")[0].strip().strip('"')
+        if sep and key.isdigit() and value:
+            found[int(key)] = value
+    return [found[k] for k in sorted(found)]
+
+
 class GrfSet:
     """GRFs do jogo, respeitando a prioridade definida em DATA.INI."""
 
@@ -89,10 +114,9 @@ class GrfSet:
         ini = os.path.join(game_dir, "DATA.INI")
         if not os.path.isfile(ini):
             raise GrfError(f"DATA.INI não encontrado em {game_dir}")
-        parser = configparser.ConfigParser()
-        parser.read(ini, encoding="latin-1")
-        data = parser["Data"]
-        names = [data[k] for k in sorted(data, key=int)]
+        names = data_ini_grfs(ini)
+        if not names:
+            raise GrfError(f"DATA.INI sem nenhum GRF na seção [Data] ({ini})")
         self.entries: dict[str, Entry] = {}
         self.alternates: dict[str, list[Entry]] = {}
         self.skipped: list[str] = []
