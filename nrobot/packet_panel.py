@@ -534,18 +534,18 @@ class PacketPanel(QMainWindow):
         from PySide6.QtWidgets import QLineEdit as Line, QSpinBox as Spin, QGroupBox as Group, QGridLayout
         config = auto_login.load()
         box = Group('Login automático'); grid = QGridLayout(box)
-        self.login_enabled = QCheckBox('Ativar: ao abrir a conexão, abre o jogo (se fechado), entra na conta e escolhe o personagem')
+        self.login_enabled = QCheckBox('Ativar login automatico: credenciais e personagem por pacotes')
         self.login_enabled.setChecked(config['enabled'])
         self.login_user = Line(config['user']); self.login_user.setPlaceholderText('Login da conta')
         self.login_password = Line(); self.login_password.setEchoMode(Line.Password)
         self.login_password.setPlaceholderText('senha salva (protegida pelo Windows)' if config['password'] else 'Senha')
         self.login_character = Line(config['character']); self.login_character.setPlaceholderText('Nome do personagem')
         self.login_server = Spin(); self.login_server.setRange(1, 10); self.login_server.setValue(config['server_index'])
-        self.login_when_open = QCheckBox('Digitar com o jogo já aberto (só se ele estiver na tela de login)')
-        self.login_when_open.setChecked(config.get('type_when_open', False))
+        self.login_when_open = QCheckBox('Avancar pelas telas reconhecidas (usa dados ficticios para iniciar o cliente)')
+        self.login_when_open.setChecked(config.get('screen_login', True))
         self.login_wait = Spin(); self.login_wait.setRange(3, 60); self.login_wait.setSuffix(' s'); self.login_wait.setValue(config['login_wait'])
-        self.login_wait.setToolTip('Espera depois de abrir o jogo até a tela de login aparecer')
-        self.login_server.setToolTip('Posição do servidor "NRO - BOT LOCAL" na lista de servidores do jogo')
+        self.login_wait.setToolTip('Tempo maximo para uma tela responder; nao repete tentativas sem confirmacao')
+        self.login_server.setToolTip('Mundo escolhido na lista recebida apos autenticar (ex.: NRO(50)). A conexao BOT LOCAL e identificada pelo perfil instalado.')
         save_login = QPushButton('Salvar login'); save_login.clicked.connect(self.save_auto_login)
         grid.addWidget(self.login_enabled, 0, 0, 1, 6)
         for column, (title, widget) in enumerate((('Login', self.login_user), ('Senha', self.login_password),
@@ -554,7 +554,29 @@ class PacketPanel(QMainWindow):
         grid.addWidget(self.login_when_open, 2, 0, 1, 4)
         grid.addWidget(QLabel('Espera da tela de login'), 2, 4); grid.addWidget(self.login_wait, 2, 5)
         grid.addWidget(save_login, 2, 7)
+        self.pause_login_button = QPushButton('Retomar login automatico' if config.get('paused') else 'Pausar login automatico')
+        self.pause_login_button.setToolTip('Pausa somente o login e a escolha automatica do personagem. Mantem a conexao e permite capturar as telas.')
+        self.pause_login_button.clicked.connect(self.toggle_auto_login_pause)
+        grid.addWidget(self.pause_login_button, 3, 0, 1, 8)
+        self.login_runner = None
         layout.addWidget(box)
+
+    def toggle_auto_login_pause(self):
+        from . import auto_login
+        config = auto_login.load()
+        config['paused'] = not config.get('paused', False)
+        try:
+            auto_login.save(config)
+        except OSError as exc:
+            self.notice.setText('Nao foi possivel alterar a pausa do login: '+str(exc)); return
+        self.pause_login_button.setText('Retomar login automatico' if config['paused'] else 'Pausar login automatico')
+        self.notice.setText('Login automatico pausado. Pode navegar manualmente e tirar os prints.' if config['paused'] else
+                            'Login automatico retomado.' if config['enabled'] else 'Pausa removida; ative e salve o login para usar a automacao.')
+        if not config['paused'] and config['enabled'] and getattr(self, 'session', None) is not None:
+            from .game_folder import saved
+            game = saved()
+            if game is not None and self.process.state() != QProcess.NotRunning:
+                self.start_auto_login(game)
 
     def save_auto_login(self):
         from . import auto_login
@@ -566,49 +588,46 @@ class PacketPanel(QMainWindow):
             self.notice.setText(str(exc)); return
         config.update(enabled=self.login_enabled.isChecked(), user=self.login_user.text().strip(),
                       character=self.login_character.text().strip(), server_index=self.login_server.value(),
-                      type_when_open=self.login_when_open.isChecked(), login_wait=self.login_wait.value())
+                      screen_login=self.login_when_open.isChecked(), login_wait=self.login_wait.value())
         auto_login.save(config)
         self.login_password.clear(); self.login_password.setPlaceholderText('senha salva (protegida pelo Windows)' if config['password'] else 'Senha')
         self.notice.setText('Login automático salvo.' if config['enabled'] else 'Login automático desligado.')
+        if config['enabled'] and not config.get('paused') and self.session is not None and self.process.state() != QProcess.NotRunning:
+            from .game_folder import saved
+            game = saved()
+            if game is not None:
+                self.start_auto_login(game)
 
     def start_auto_login(self, game):
-        """Opens the game when closed and types the login there; an open game is left alone (the
-        bot never types into a game it did not open: it could be in chat)."""
+        """Open the client if needed; never type into an unverified game screen."""
         from . import auto_login
-        import threading
         config = auto_login.load()
+        if config.get('paused'):
+            self.notice.setText('Login automatico pausado. Use Retomar login automatico quando quiser continuar.')
+            return
         if not config['enabled']:
             return
         try:
             opened = auto_login.launch_game(game)
         except OSError as exc:
-            self.notice.setText('Login automático: '+str(exc)); return
-        if not opened and not config.get('type_when_open'):
-            self.notice.setText('Jogo já aberto: entre na conta pelo NRO - BOT LOCAL; o personagem '
-                                +(config['character'] or '')+' é escolhido sozinho. Para digitar também com o jogo '
-                                'aberto, marque "Digitar com o jogo já aberto".')
-            return
+            self.notice.setText('Login automatico: '+str(exc)); return
+        self.login_messages = []
+        if self.login_runner is not None:
+            self.login_runner.stop()
+        from .login_runner import LoginRunner
+        self.login_runner = LoginRunner(game, self.session, self.login_messages.append)
+        self.login_runner.start()
         if not config['user'] or not config['password']:
-            self.notice.setText('Login automático: salve login e senha primeiro.'); return
-        self.notice.setText('Abrindo o jogo para o login automático...' if opened else 'Login automático: digitando no jogo aberto...')
-        messages = self.login_messages = []
-
-        def run():
-            report = messages.append
-            if auto_login.wait_game_window() is None:
-                report('Login automático: a janela do jogo não apareceu em 90 s.'); return
-            if opened:
-                report(f"Login automático: jogo aberto; aguardando {config['login_wait']} s a tela de login.")
-                time.sleep(config['login_wait'])
-            try:
-                auto_login.log_in(config, report)
-            except OSError as exc:
-                report('Login automático: '+str(exc))
-        threading.Thread(target=run, daemon=True).start()
+            self.login_messages.append('Salve login e senha no painel para habilitar a substituicao por pacote.')
+        if opened:
+            self.login_messages.append('Cliente aberto; aguardando inicio nativo da autenticacao pelo NRO - BOT LOCAL.')
 
     def show_login_messages(self):
         """The login runs in the background: its steps show in Diagnóstico and on the notice line."""
         messages = getattr(self, 'login_messages', None)
+        if hasattr(self, 'pause_login_button'):
+            from .auto_login import load
+            self.pause_login_button.setText('Retomar login automatico' if load().get('paused') else 'Pausar login automatico')
         while messages:
             text = messages.pop(0)
             self.log.appendPlainText(text)
@@ -660,6 +679,8 @@ class PacketPanel(QMainWindow):
             self.open_button.setEnabled(True)
 
     def close_relay(self):
+        if getattr(self, 'login_runner', None) is not None:
+            self.login_runner.stop()
         if self.process.state() != QProcess.NotRunning:
             # The venv python.exe is a launcher: the relay runs in its child process, which
             # would survive and keep port 16900 busy. End the whole process tree.
@@ -697,6 +718,7 @@ class PacketPanel(QMainWindow):
         self.pvp_list.blockSignals(False)
 
     def refresh(self):
+        self.show_login_messages()
         if self.session is None or self.process.state() == QProcess.NotRunning:
             self.refresh_pvp([])
             if self.player_panel.isVisible():
@@ -1026,8 +1048,9 @@ def main():
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
     try:  # quests, routes and portals of the version just installed (once per publication)
-        from .shared_data import merge
+        from .shared_data import merge, merge_targets
         merge()
+        merge_targets()  # before the window reads painel_config.json
     except (OSError, ValueError) as exc:
         print('Dados compartilhados nao aplicados:', exc)
     window = PacketPanel()

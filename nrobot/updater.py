@@ -24,13 +24,14 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT/'atualizacao.json'
 VERSION_FILE = ROOT/'versao.json'
 # Never replaced or removed by an update: belongs to the person using the bot.
-PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/monstros',
+PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/monstros', 'data/database',
              'data/rede/invocacoes_aprendidas.json', 'data/rede/painel_config.json', 'data/rede/buffs_aprendidos.json',
              'data/rede/rotas_quests.json', 'data/rede/quadros_missoes.json',
              'data/rede/rotas_mapas.json', 'data/rede/missoes_concluidas.json',
              'data/rede/slots_missoes.json', 'data/rede/quest_extras.json',
              'data/rede/progresso_quests.json', 'data/x1',
-             'data/rede/login_automatico.json', 'data/rede/compartilhado_importado.json')
+             'data/rede/login_automatico.json', 'data/rede/compartilhado_importado.json',
+             'data/rede/alvos_importados.json')
 # Kept in the repository for development, not needed to run the bot.
 NOT_DISTRIBUTED = ('tests', 'tools', 'Arquivos_grf', '.gitignore', '.gitattributes')
 TIMEOUT = 30

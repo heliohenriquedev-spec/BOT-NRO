@@ -1,12 +1,13 @@
 """REDE-75: patrol waypoints on open ground, analysed once per map.
 
 The reachable ground is split in SPACING x SPACING blocks. Each block gets one waypoint on
-its most open cell (farthest from walls), so the patrol never aims at corners, wall edges or
-dead-end nooks: those are still seen from the nearby open waypoints (monsters are announced
-well beyond SEEN_RADIUS). Blocks are linked when their ground touches, which gives walkable
+its most open cell (farthest from walls). Open maps omit tiny nooks; narrow corridor maps
+retain safe ends and tight bends and finish each branch before returning. Blocks are linked
+when their ground touches, which gives walkable
 distances between waypoints without running a cell search for every pair.
 """
 from collections import defaultdict, deque
+from array import array
 import heapq
 import math
 
@@ -66,6 +67,8 @@ class PatrolTour:
                     cells |= collision.reachable(target); grown = True
         self.cells = frozenset(cells)
         self.wall = wall_distance(collision, self.cells, cap=max(6, wall_margin+1))
+        self.corridor_mode = bool(self.cells) and sum(self.wall[p] >= 5 for p in self.cells)/len(self.cells) < .15
+        self.endpoints = set()
         members = defaultdict(list)
         for point in self.cells:
             members[block_of(point, spacing)].append(point)
@@ -123,6 +126,20 @@ class PatrolTour:
             best = self.transit[node]
             if not any(other in self.points and math.dist(best, self.points[other]) <= self.seen_radius+3 for other in around):
                 self.points[node] = self.transit[node]
+        if self.corridor_mode:
+            for node, neighbours in self.graph.items():
+                point = self.transit[node]
+                # A cap can span two grid blocks: both then have degree 2/3, not 1.
+                # Neighbours all on the same side also anchor tight corridor bends.
+                directions = [(self.transit[n][0]-point[0], self.transit[n][1]-point[1]) for n in neighbours]
+                heading = tuple(sum(v[i]/max(1, math.hypot(*v)) for v in directions) for i in (0, 1))
+                one_sided = bool(directions) and all(
+                    sum(v[i]*heading[i] for i in (0, 1))/max(1, math.hypot(*v)*math.hypot(*heading)) > .1
+                    for v in directions)
+                if (len(neighbours) <= 3 and one_sided and self.sizes[node] >= 8
+                    and self.wall[point] >= wall_margin):
+                    self.points[node] = point
+                    self.endpoints.add(node)
 
     def edge_penalty(self, node):
         """How much a waypoint lies at the border of the ground: missing neighbours (walls, map
@@ -197,8 +214,97 @@ class PatrolTour:
             for by in range(base[1]-reach, base[1]+reach+1):
                 for node in self.pieces.get((bx, by), ()):
                     point = self.points.get(node)
-                    if point is not None and math.dist(position, point) <= self.seen_radius:
+                    radius = min(2, self.seen_radius) if node in self.endpoints else self.seen_radius
+                    if (point is not None and math.dist(position, point) <= radius
+                        and (not self.corridor_mode or self.collision.line_clear(position, point))):
                         yield node
 
     def coverage(self, done):
         return len(done)/len(self.points) if self.points else 1.0
+
+    def sweep_order(self, position):
+        """A stable walking-distance circuit, with crossing/backtracking edges shortened once.
+
+        Distances follow the connected ground, not straight lines through walls. Reversing
+        part of an itinerary is valid only for bidirectional ground (not one-way portals).
+        """
+        if not self.points:
+            return []
+        if self.corridor_mode:
+            return self.branch_order(position)
+        nodes = sorted(self.points)
+        indices = {node: i for i, node in enumerate(nodes)}
+        distances = getattr(self, '_sweep_distances', None)
+        if distances is None:
+            distances = []
+            for node in nodes:
+                walked = self.distances(self.points[node])
+                distances.append(array('f', (walked.get(other, math.inf) for other in nodes)))
+            self._sweep_distances = distances
+        initial = self.distances(position)
+        remaining = set(self.points) & initial.keys()
+        order = []
+        previous = None
+        while remaining:
+            def distance(n):
+                return initial.get(n, math.inf) if previous is None else distances[indices[previous]][indices[n]]
+            node = min(remaining, key=lambda n: (distance(n), n))
+            if not math.isfinite(distance(node)):
+                break
+            order.append(node)
+            remaining.remove(node)
+            previous = node
+        if self.link_edges:
+            return order
+        def cost(a, b):
+            return distances[indices[a]][indices[b]]
+        # Keep the first (nearest) waypoint fixed. Bounded passes avoid work on every tick.
+        for _ in range(4):
+            changed = False
+            for i in range(1, len(order)-1):
+                a, b = order[i-1], order[i]
+                window = max(32, 250000//max(1, len(order)))
+                for j in range(i+1, min(len(order), i+window)):
+                    c = order[j]
+                    old, new = cost(a, b), cost(a, c)
+                    if j+1 < len(order):
+                        d = order[j+1]
+                        old += cost(c, d)
+                        new += cost(b, d)
+                    if new+0.01 < old:
+                        order[i:j+1] = reversed(order[i:j+1])
+                        changed = True
+                        break
+            if not changed:
+                break
+        return order
+
+    def branch_order(self, position):
+        """Depth-first circuit: finish a corridor before returning to the next fork.
+
+        Transit nodes matter even when too small for a hunting waypoint. The iteration
+        follows real graph edges, retains one-way portal direction and avoids recursion.
+        """
+        start = self.block_near(position)
+        visited, order = {start}, [start] if start in self.points else []
+        stack = [(start, None)]
+        while stack:
+            node, parent = stack[-1]
+            fresh = self.graph[node]-visited
+            if not fresh:
+                stack.pop()
+                continue
+            origin = self.transit[node]
+            previous = self.transit[parent] if parent is not None else tuple(position)
+            heading = (origin[0]-previous[0], origin[1]-previous[1])
+            def priority(other):
+                point = self.transit[other]
+                delta = (point[0]-origin[0], point[1]-origin[1])
+                alignment = sum(heading[i]*delta[i] for i in (0, 1))/max(1, math.hypot(*heading)*math.hypot(*delta))
+                return (-alignment, len(self.graph[other]-visited), math.dist(origin, point), other)
+            chosen = min(fresh, key=priority)
+            visited.add(chosen)
+            if chosen in self.points:
+                order.append(chosen)
+            stack.append((chosen, node))
+        return order

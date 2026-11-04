@@ -4,7 +4,7 @@ Monsters and amounts come from the missions themselves ("Monstros necessarios" o
 paths to hunting maps are recorded once in "Mapas de caca" and picked by name.
 """
 import copy
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QItemSelectionModel
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QFormLayout,QLabel,QPushButton,QListWidget,QListWidgetItem,
     QLineEdit,QDialog,QDialogButtonBox,QTableWidget,QTableWidgetItem,QComboBox,QMessageBox,QTabWidget,QGroupBox,QSpinBox,
     QInputDialog,QCheckBox)
@@ -14,6 +14,28 @@ from .npc_labels import clean, plain, rank, mission_label, mission_option
 from . import map_routes
 from .portals import PortalGuard
 map_routes_key=PortalGuard.key
+
+
+class QuestQueueList(QListWidget):
+    order_changed = Signal()
+
+    def __init__(self):
+        super().__init__()
+        self.setSelectionMode(QListWidget.ExtendedSelection)
+        self.setDragDropMode(QListWidget.InternalMove)
+        self.setDefaultDropAction(Qt.MoveAction)
+        self.setDropIndicatorShown(True)
+
+    def dropEvent(self, event):
+        before = [self.item(i).data(Qt.UserRole) for i in range(self.count())]
+        blocked = self.blockSignals(True)
+        try:
+            super().dropEvent(event)
+        finally:
+            self.blockSignals(blocked)
+        after = [self.item(i).data(Qt.UserRole) for i in range(self.count())]
+        if before != after:
+            self.order_changed.emit()
 
 TYPES={'walk':'Caminhar','portal':'Entrar no portal','npc':'Falar com NPC','select':'Escolher opcao',
        'next':'Proximo dialogo','close':'Fechar dialogo','cancel':'Cancelar/fechar menu','wait_map':'Confirmar mapa de chegada','wait_transfer':'Aguardar teletransporte Retorno',
@@ -593,7 +615,9 @@ class QuestPanel(QWidget):
                      'fecharem → 4. Entregar as missoes. A proxima rota so comeca depois das entregas confirmadas pelo quadro.')
         intro.setWordWrap(True);layout.addWidget(intro)
         self.status=QLabel('Fila parada');self.status.setWordWrap(True);layout.addWidget(self.status)
-        self.list=QListWidget();self.list.setMinimumHeight(170);layout.addWidget(self.list,1);self.list.itemChanged.connect(self.checked)
+        self.list=QuestQueueList();self.list.setMinimumHeight(170);layout.addWidget(self.list,1);self.list.itemChanged.connect(self.checked)
+        self.list.order_changed.connect(self.dropped)
+        self.list.setToolTip('Arraste para ordenar. Ctrl seleciona varias rotas; Shift seleciona um intervalo. A ordem e salva automaticamente.')
         self.edit_buttons=[]
         actions=FlowLayout();layout.addLayout(actions)
         for name,callback in [('Nova quest',self.new),('Editar rota',self.edit),('Excluir',self.delete),('Subir',lambda:self.reorder(-1)),('Descer',lambda:self.reorder(1)),('Recarregar',self.reload),('Executar somente viagem',self.test_travel),
@@ -605,7 +629,8 @@ class QuestPanel(QWidget):
         self.resume.clicked.connect(lambda:self.request('quest_resume'));execution.addWidget(self.resume)
         stop=QPushButton('Pausar fila');stop.clicked.connect(lambda:self.request('quest_stop'));execution.addWidget(stop)
         self.progress=QLabel();self.progress.setWordWrap(True);layout.addWidget(self.progress)
-        self.notice=QLabel('A tecla de iniciar/parar e Pausar interrompem a fila.');self.notice.setWordWrap(True);layout.addWidget(self.notice)
+        self.notice=QLabel('Arraste as rotas para ordenar. Ctrl seleciona varias; Shift seleciona um intervalo. '
+                          'A ordem e salva automaticamente. Pause a fila para editar.');self.notice.setWordWrap(True);layout.addWidget(self.notice)
         self.extras=ExtrasBox();self.extras.command_requested.connect(self.command_requested.emit);layout.addWidget(self.extras)
         self.map_panel=MapRoutesPanel();self.map_panel.command_requested.connect(self.command_requested.emit)
         self.sections.addTab(scroll_page(self.map_panel),'Mapas de caca')
@@ -615,10 +640,12 @@ class QuestPanel(QWidget):
         self.reload();self.update_state({})
 
     def selected(self):
-        row=self.list.currentRow();return self.routes[row] if 0<=row<len(self.routes) else None
+        item=self.list.currentItem()
+        return next((r for r in self.routes if item and r['id']==item.data(Qt.UserRole)),None)
 
     def reload(self):
         selected=self.selected();identity=selected['id'] if selected else None
+        selected_ids={item.data(Qt.UserRole) for item in self.list.selectedItems()}
         try:self.routes=load()
         except (ValueError,OSError) as exc:self.notice.setText(str(exc));return
         try:
@@ -630,8 +657,10 @@ class QuestPanel(QWidget):
             missions=', '.join(names.get(m,'?') for m in r['mission_ids']) or 'nenhuma missao'
             item=QListWidgetItem(f"{i+1}. {r['name']}  |  {r['target_map'] or 'escolha o mapa de caca'}  |  {missions}"
                                  +('  |  ⛓ encadeada com a proxima' if r.get('chain_next') else ''))
+            item.setData(Qt.UserRole,r['id'])
             item.setFlags(item.flags()|Qt.ItemIsUserCheckable);item.setCheckState(Qt.Checked if r['enabled'] else Qt.Unchecked);self.list.addItem(item)
-            if r['id']==identity:self.list.setCurrentRow(i)
+            item.setSelected(r['id'] in selected_ids)
+            if r['id']==identity:self.list.setCurrentRow(i,QItemSelectionModel.NoUpdate)
         self.list.blockSignals(False)
 
     def persist(self):
@@ -639,7 +668,16 @@ class QuestPanel(QWidget):
         except (ValueError,OSError) as exc:self.notice.setText(str(exc));return False
 
     def checked(self,item):
-        self.routes[self.list.row(item)]['enabled']=item.checkState()==Qt.Checked;self.persist()
+        route=next((r for r in self.routes if r['id']==item.data(Qt.UserRole)),None)
+        if route:route['enabled']=item.checkState()==Qt.Checked;self.persist()
+
+    def dropped(self):
+        by_id={r['id']:r for r in self.routes}
+        ids=[self.list.item(i).data(Qt.UserRole) for i in range(self.list.count())]
+        if len(ids)!=len(by_id) or set(ids)!=set(by_id):
+            self.reload();return
+        self.routes=[by_id[identity] for identity in ids]
+        if self.persist():self.notice.setText('Ordem da fila salva. Ctrl/Shift permitem arrastar varias rotas juntas.')
 
     def new(self):
         dialog=RouteEditor(dict(name='',enabled=True,kills=1,species=[],steps=[],target_map='',lifecycle_enabled=True),self.state,self)
@@ -656,9 +694,13 @@ class QuestPanel(QWidget):
             del self.routes[self.list.currentRow()];self.persist()
 
     def reorder(self,direction):
-        row=self.list.currentRow();other=row+direction
-        if row>=0 and 0<=other<len(self.routes):
-            self.routes[row],self.routes[other]=self.routes[other],self.routes[row];self.persist();self.list.setCurrentRow(other)
+        selected={item.data(Qt.UserRole) for item in self.list.selectedItems()}
+        indices=range(len(self.routes)) if direction<0 else range(len(self.routes)-1,-1,-1)
+        for row in indices:
+            other=row+direction
+            if self.routes[row]['id'] in selected and 0<=other<len(self.routes) and self.routes[other]['id'] not in selected:
+                self.routes[row],self.routes[other]=self.routes[other],self.routes[row]
+        self.persist()
 
     def test_travel(self):
         route=self.selected()

@@ -245,6 +245,20 @@ def combat_notice(text):
                 seconds=int(seconds.group(1)) if seconds else None)
 
 
+SERVER_TEXT_UNTIL = 0.0  # time.monotonic() deadline set right after the bot sends its own @ command
+
+
+def server_text(op, text):
+    """Lines the server writes to this character only, kept just after the bot's own @mi.
+
+    Outside that short window, anything said by someone ("Name : text") and global broadcasts,
+    nothing is kept."""
+    import time
+    if time.monotonic() >= SERVER_TEXT_UNTIL or op == 0x9a or ' : ' in text or not text.strip():
+        return {'kind': 'other'}
+    return {'kind': 'server_text', 'text': text[:300]}
+
+
 def decode(message: bytes) -> dict:
     if message_length(message) != len(message):
         raise ValueError('Mensagem incompleta ou comprimento inesperado')
@@ -331,11 +345,11 @@ def decode(message: bytes) -> dict:
         if notice:
             event.update(kind='skill_retry_notice', seconds=int(notice.group(1)))
         else:
-            event.update(combat_notice(text) or {'kind': 'other'})
+            event.update(combat_notice(text) or server_text(op, text))
     elif op in (0x1c3, 0x2c1, 0x17f) and len(message) > 4:
         # Colored server/NPC messages and NRO's 017F notices: only combat/@voltar notices are kept.
         text = message[{0x1c3: 16, 0x2c1: 12, 0x17f: 4}[op]:].split(b'\0')[0].decode('cp1252', 'replace')
-        event.update(combat_notice(text) or {'kind': 'other'})
+        event.update(combat_notice(text) or server_text(op, text))
     elif op in (0xa3, 0x1ee, 0x2e8, 0xa4, 0x2d0):
         # NRO's client sends stackables (ammo included) as 02E8; 02D0 grew per packet version.
         stackable = op in (0xa3, 0x1ee, 0x2e8)
@@ -424,6 +438,12 @@ def decode(message: bytes) -> dict:
         else:event['text']=contents
     elif op in (0xb5, 0xb6) and len(message)==6:
         event.update(kind='npc_dialog',entity_id=u32(2),action='next' if op==0xb5 else 'close')
+    elif op in (0x9d, 0x9e) and len(message) == 17:
+        event.update(kind='floor_item', object_id=u32(2), item_id=u16(6), identified=bool(message[8]),
+                     position=[u16(9), u16(11)], amount=u16(15 if op == 0x9e else 13),
+                     newly_dropped=op == 0x9e)
+    elif op == 0xa1 and len(message) == 6:
+        event.update(kind='floor_item_removed', object_id=u32(2))
     elif op == 0x80:
         event.update(kind='remove', entity_id=u32(2), reason=message[6])
     elif op == 0x91:

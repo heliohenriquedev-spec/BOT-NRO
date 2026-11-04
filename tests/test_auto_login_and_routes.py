@@ -45,12 +45,14 @@ def test_relay_picks_the_character_from_the_list(tmp_path):
 
     class Upstream:
         def __init__(self): self.sent = []
+        def is_closing(self): return False
         def write(self, data): self.sent.append(bytes(data))
         async def drain(self): pass
 
     async def scenario():
         auto_login.save(dict(auto_login.DEFAULTS, enabled=True, character='Uadaweu2'))
         r = SessionRelay('127.0.0.1', folder=tmp_path)
+        r.stage = 'char'
         upstream = Upstream()
         r.schedule_character_choice(char_list((150002, 'Uadaweu2', 2)), upstream)
         await asyncio.sleep(1.7)

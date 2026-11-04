@@ -112,11 +112,15 @@ class MonsterPanel(QWidget):
         self.extract_button.clicked.connect(self.extract)
         row.addWidget(self.extract_button)
         layout.addLayout(row)
+        database = QPushButton('Database de itens e drops')
+        database.clicked.connect(lambda: self.show_drops())
+        layout.addWidget(database)
         self.summary = QLabel()
         layout.addWidget(self.summary)
         self.model = MonsterModel()
         self.table = QTableView()
         self.table.setModel(self.model)
+        self.table.doubleClicked.connect(self.show_drops)
         self.table.setIconSize(QSize(ICON, ICON))
         self.table.verticalHeader().setDefaultSectionSize(ICON+6)
         self.table.verticalHeader().setVisible(False)
@@ -136,6 +140,14 @@ class MonsterPanel(QWidget):
         self.process.setProcessChannelMode(QProcess.MergedChannels)
         self.process.readyReadStandardOutput.connect(self.read_progress)
         self.process.finished.connect(self.extraction_done)
+
+    def show_drops(self, index=None):
+        from .drop_panel import DropDatabaseDialog
+        species = None
+        if index is not None and index.isValid():
+            species = self.model.rows[self.model.visible[index.row()]]['species_id']
+        dialog = DropDatabaseDialog(self, species=species)
+        dialog.exec()
 
     def showEvent(self, event):
         super().showEvent(event)

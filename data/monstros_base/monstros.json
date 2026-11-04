@@ -99,7 +99,11 @@
   "name": "Togashiro",
   "max_hp": 75500,
   "sprite_source": "GRF prioritário",
-  "names_by_map": {}
+  "names_by_map": {
+   "moc_fild08": [
+    "Togashiro"
+   ]
+  }
  },
  "1031": {
   "species_id": 1031,
@@ -109,8 +113,8 @@
    "0015@tower": 0,
    "0045@tower": 0
   },
-  "walk_speed_ms": 150,
-  "name": "Mula sem Cabesa",
+  "walk_speed_ms": 300,
+  "name": "Namekuji",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -124,6 +128,9 @@
    "0045@tower": [
     "Deca",
     "Mula sem Cabesa"
+   ],
+   "moc_fild13": [
+    "Namekuji"
    ]
   }
  },
@@ -187,7 +194,7 @@
    "gef_fild04": 0
   },
   "walk_speed_ms": 200,
-  "name": "Filhote de cobra",
+  "name": "Filhote de Cobra",
   "max_hp": 45,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -468,6 +475,12 @@
   "names_by_map": {
    "ve_fild04": [
     "Planta Medicinal "
+   ],
+   "moc_fild13": [
+    "Planta Medicinal "
+   ],
+   "cmd_fild09": [
+    "Planta Medicinal "
    ]
   }
  },
@@ -689,9 +702,9 @@
    "um_dun02": 0,
    "prt_sewb4": 0
   },
-  "name": "Shinobi Ladrão",
+  "name": "Abelha Macho",
   "max_hp": 120000,
-  "walk_speed_ms": 200,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "um_dun02": [
     "Abelha Macho"
@@ -902,7 +915,11 @@
   "walk_speed_ms": 200,
   "name": "Pakkun",
   "max_hp": 33500,
-  "names_by_map": {}
+  "names_by_map": {
+   "moc_fild13": [
+    "Pakkun"
+   ]
+  }
  },
  "1303": {
   "species_id": 1303,
@@ -1019,7 +1036,11 @@
   "name": "Usagiburaun",
   "max_hp": 35000,
   "sprite_source": "GRF prioritário",
-  "names_by_map": {}
+  "names_by_map": {
+   "moc_fild08": [
+    "Usagiburaun"
+   ]
+  }
  },
  "1368": {
   "species_id": 1368,
@@ -1100,7 +1121,11 @@
   "max_hp": 36000,
   "sprite_source": "Gama_Kichi.spr (Naruto Ultimate)",
   "captured_sprite": true,
-  "names_by_map": {}
+  "names_by_map": {
+   "moc_fild13": [
+    "Gama-Kichi"
+   ]
+  }
  },
  "1405": {
   "species_id": 1405,
@@ -1421,7 +1446,7 @@
    "ein_fild08": 15
   },
   "walk_speed_ms": 100,
-  "name": "Líder Genin",
+  "name": "Genin",
   "max_hp": 36000,
   "sprite_source": "Genin.spr (Naruto Ultimate)",
   "captured_sprite": true,

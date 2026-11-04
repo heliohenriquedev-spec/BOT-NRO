@@ -12,6 +12,10 @@ import pytest  # noqa: E402
 def isolated_monster_data(tmp_path, monkeypatch):
     """Tests never write the monsters learned on this PC (data/monstros)."""
     from nrobot import monster_db
+    from nrobot import auto_login
+    from nrobot import drop_db
+    monkeypatch.setattr(drop_db, 'FILE', tmp_path/'database'/'observacoes.sqlite3')
+    monkeypatch.setattr(auto_login, 'FILE', tmp_path/'login_automatico.json')
     monkeypatch.setattr(monster_db, 'CAPTURED', tmp_path/'monstros'/'capturados.json')
     monkeypatch.setattr(monster_db, 'SPRITES', tmp_path/'monstros'/'sprites')
     monkeypatch.setattr(monster_db, 'BASE_INFO', tmp_path/'monstros_base'/'monstros.json')

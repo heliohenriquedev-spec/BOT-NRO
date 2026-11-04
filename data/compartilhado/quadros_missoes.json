@@ -1077,6 +1077,58 @@
    "pickup_confirmation": "",
    "delivery_steps": [],
    "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-7",
+   "rank": "Rank B-7",
+   "description": "[Quadro de missões] Rank B-7 Descrição: Derrote Vermes Chefes no Kamizuro 2 (1) Status : Incompleta Monstros necessários : 50 Verme Chefe [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B",
+   "monster_targets": [
+    {
+     "name": "Verme Chefe",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Verme Chefe"
+   ],
+   "monster_ids": [
+    1099
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank B-7",
+   "id": "30717e943032429c8cc539a2b5bb0794",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
+  },
+  {
+   "name": "Rank B-8",
+   "rank": "Rank B-8",
+   "description": "[Quadro de missões] Rank B-8 Descrição: Derrote Vermes Malditos no Kamizuro 2 (1) Status : Incompleta Monstros necessários : 50 Verme Maldito [Limitações] Pode realizar : Todo dia Base Level : 300~999 Limite de tempo : 1 horas [Recompensas] Zeny : 15,000 Item : 1 Ranking B",
+   "monster_targets": [
+    {
+     "name": "Verme Maldito",
+     "count": 50
+    }
+   ],
+   "monster_names": [
+    "Verme Maldito"
+   ],
+   "monster_ids": [
+    1194
+   ],
+   "board_id": "vip",
+   "menu_option": "Rank B-8",
+   "id": "61b39953b855481f908e9e834a845495",
+   "target_map": "",
+   "monster_ids_manual": false,
+   "pickup_steps": [],
+   "pickup_confirmation": "",
+   "delivery_steps": [],
+   "delivery_confirmation": ""
   }
  ],
  "menus": {

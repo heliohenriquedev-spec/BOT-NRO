@@ -1,7 +1,7 @@
 {
- "version": "2026.11.04.10",
- "published_at": "2026-11-04T08:39:46",
- "notes": "Fix + Quest",
+ "version": "2026.11.04.11",
+ "published_at": "2026-11-04T12:21:41",
+ "notes": "fix",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -244,6 +244,13 @@
   "data/monstros_base/sprites/3824.png",
   "data/monstros_base/sprites/3825.png",
   "data/recursos/colisoes.json",
+  "data/recursos/itens.json",
+  "data/recursos/login/btn_connect.png",
+  "data/recursos/login/btn_ok.png",
+  "data/recursos/login/win_login.png",
+  "data/recursos/login/win_msgbox.png",
+  "data/recursos/login/win_select.png",
+  "data/recursos/login/win_service.png",
   "data/recursos/municao.json",
   "data/recursos/prioridade.tsv",
   "data/recursos/sprites_por_nome/14_3_mercenary_a.png",
@@ -1416,6 +1423,9 @@
   "data/rede/identidades_cliente.json",
   "data/rede/tamanhos_cliente.json",
   "docs/AUDITORIA_GRF_QUESTS.md",
+  "docs/DATABASE_ITENS_DROPS.md",
+  "docs/LOGIN_POR_PACOTES.md",
+  "docs/PATRULHA_E_FILA.md",
   "docs/ROTAS_QUESTS.md",
   "docs/X1.md",
   "docs/exemplo_x1.json",
@@ -1429,6 +1439,8 @@
   "nrobot/client_frame_guard.py",
   "nrobot/combat_rotation.py",
   "nrobot/continuous_observer.py",
+  "nrobot/drop_db.py",
+  "nrobot/drop_panel.py",
   "nrobot/entity_inventory.py",
   "nrobot/etw_capture.py",
   "nrobot/game_folder.py",
@@ -1440,6 +1452,9 @@
   "nrobot/immediate_monster_removal.py",
   "nrobot/item_names.py",
   "nrobot/kuchiyose_dialog.py",
+  "nrobot/login_runner.py",
+  "nrobot/login_screens.py",
+  "nrobot/login_window.py",
   "nrobot/lua_tables.py",
   "nrobot/manual_skill_diagnostic.py",
   "nrobot/map_monsters.py",
@@ -1448,6 +1463,7 @@
   "nrobot/map_search.py",
   "nrobot/minimap_overlay.py",
   "nrobot/mission_details.py",
+  "nrobot/mob_info.py",
   "nrobot/monster_db.py",
   "nrobot/monster_origin.py",
   "nrobot/monster_panel.py",
@@ -2088,5 +2104,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "c75c9d989743"
+ "files_digest": "268ef3bd2490"
 }

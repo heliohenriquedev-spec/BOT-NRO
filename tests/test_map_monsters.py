@@ -128,3 +128,22 @@ def test_names_with_same_species_are_saved_and_selectable_individually(tmp_path,
     assert relay.monster_name_allowed(110000001, 1051)
     assert not relay.monster_name_allowed(110000002, 1051)
     assert not relay.monster_name_allowed(110000003, 1051)
+
+
+def test_attacker_check_keeps_automatic_and_named_targets(tmp_path,monkeypatch):
+    """Since 2026.11.03.9 every hunt tick reset the targets to the species list plus attackers:
+    with automatic map targets or checked names (species list empty) nothing was ever a candidate."""
+    from nrobot.monster_db import monster_choice_key
+    monkeypatch.setattr('nrobot.map_monsters.monster_assets',lambda:{2000:'local'})
+    relay=SessionRelay('127.0.0.1',folder=tmp_path,allow_commands=True)
+    relay.hunt=PacketHunt()
+    relay.tracker.observer.map_name='cmd_fild09.gat'
+    relay.apply_settings({**DEFAULTS,'species':[],'auto_map_targets':True,
+                          'monster_name_choices':{monster_choice_key('cmd_fild09.gat',1051,'Bikouchuu'):True}})
+    relay.hunt.start()
+    relay.inventory.observe([appearance(20,2000)],time.monotonic())
+    relay.inventory.observe([{'kind':'name','entity_id':20,'name':'Novo Monstro','hp':30,'max_hp':30}],time.monotonic())
+    relay.sync_map_monsters()
+    relay.include_attackers(time.monotonic())
+    assert {2000,1051} <= relay.tracker.observer.species
+    assert 20 in relay.tracker.observer.registry.entities

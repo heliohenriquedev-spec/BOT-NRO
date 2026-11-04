@@ -80,3 +80,39 @@ def test_voltar_buffs_and_gm_signs_go_too_but_not_the_switch(tmp_path):
 def test_a_voltar_learned_on_this_pc_is_kept():
     mine = dict(voltar_frame='mine', voltar_enabled=False, clear_radius=9)
     assert shared_data.merge_extras(mine, dict(voltar_frame='dev', clear_radius=6)) == mine
+
+
+def test_monster_targets_reach_other_users_once(tmp_path):
+    import json
+    from nrobot import shared_data
+    dev, user = tmp_path/'dev', tmp_path/'user'
+    (dev/'data/rede').mkdir(parents=True); (user/'data/rede').mkdir(parents=True)
+    (dev/'data/rede/painel_config.json').write_text(json.dumps({
+        'species': [1051, 1303], 'radius': 5, 'hotkey_hunt': 'F5',
+        'monster_name_choices': {'cmd_fild09:1656:Genin': True, 'poring_w01:1051:Bikoucuu': False}}), encoding='utf-8')
+    shared_data.export(log=lambda *_: None, root=dev)
+    assert not shared_data.merge_targets(dev, log=lambda *_: None)  # the developer already has them
+    (user/'data/compartilhado').mkdir(parents=True)
+    (user/'data/compartilhado/alvos_monstros.json').write_bytes((dev/'data/compartilhado/alvos_monstros.json').read_bytes())
+    (user/'data/rede/painel_config.json').write_text(json.dumps({
+        'species': [1037], 'radius': 20, 'auto_map_targets': True,
+        'monster_name_choices': {'cmd_fild09:1656:Genin': False}}), encoding='utf-8')
+    assert shared_data.merge_targets(user, log=lambda *_: None)
+    config = json.loads((user/'data/rede/painel_config.json').read_text(encoding='utf-8'))
+    assert config['species'] == [1037, 1051, 1303]
+    assert config['monster_name_choices'] == {'cmd_fild09:1656:Genin': False, 'poring_w01:1051:Bikoucuu': False}
+    assert config['radius'] == 20 and config['auto_map_targets'] and config['hotkey_hunt'] == 'Home'  # only targets travel
+    config['species'] = [1037]
+    (user/'data/rede/painel_config.json').write_text(json.dumps(config), encoding='utf-8')
+    assert not shared_data.merge_targets(user, log=lambda *_: None)  # once per publication: removals stay
+    assert list((user/'backups').glob('antes-dos-alvos-compartilhados-*.zip'))
+
+
+def test_new_user_without_settings_gets_the_targets(tmp_path):
+    import json
+    from nrobot import shared_data
+    (tmp_path/'data/compartilhado').mkdir(parents=True)
+    (tmp_path/'data/compartilhado/alvos_monstros.json').write_text(json.dumps({'species': [1051]}), encoding='utf-8')
+    assert shared_data.merge_targets(tmp_path, log=lambda *_: None)
+    config = json.loads((tmp_path/'data/rede/painel_config.json').read_text(encoding='utf-8'))
+    assert config['species'] == [1037, 1051]

@@ -178,7 +178,7 @@ def test_moving_target_adjacent_destination_with_distant_observed_position():
 
 def test_empty_route_is_unavailable_without_crashing():
     class EmptyRoute:
-        def route(self, *args): return []
+        def route(self, *args, **kwargs): return []
     hunt = PacketHunt()
     hunt.start()
     state = {'state': 'tracking', 'player_position_recent': True, 'player_position': [2, 2],

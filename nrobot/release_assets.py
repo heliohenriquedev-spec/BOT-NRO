@@ -35,6 +35,8 @@ def prepare(log=print, *, refresh_combat=False):
     destination = ROOT/'data'/'recursos'
     destination.mkdir(parents=True, exist_ok=True)
     ammo = names_from_grfs(repo.grfs, bundled=False)
+    from .drop_db import prepare_item_names
+    prepare_item_names(repo.grfs)
     if not ammo:
         raise ValueError('Catalogo de municao indisponivel; confira DATA.INI e as GRFs antes de publicar')
     (destination/'municao.json').write_text(json.dumps(ammo, ensure_ascii=False, indent=1)+'\n', encoding='utf-8')

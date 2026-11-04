@@ -22,9 +22,11 @@ data/rede/quest_extras.json
 data/rede/progresso_quests.json
 data/rede/login_automatico.json
 data/rede/compartilhado_importado.json
+data/rede/alvos_importados.json
 data/x1/
 *.etl
 data/monstros/
+data/database/
 data/jogadores/
 perfis/painel_ui.json
 

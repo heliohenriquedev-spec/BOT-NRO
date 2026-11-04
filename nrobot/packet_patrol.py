@@ -1,11 +1,9 @@
 """REDE-40: novelty-biased exploration with a persistent travel heading.
 
-REDE-75: with collision data the map is covered through open-ground waypoints (see
-patrol_tour.py): the next goal is the unvisited waypoint that is closest by walking,
-preferring the current heading and waypoints whose neighbours are already done (so no
-stragglers are left behind for a long walk back). Corners, wall edges and dead-end nooks
-are never goals. Coverage is remembered per map; a new cycle starts once every waypoint
-was passed."""
+With collision data the map is covered through an ordered circuit of open-ground
+waypoints (patrol_tour.py), shortened using walkable distances. Coverage is remembered
+per map and the connecting paths do not add novelty detours. Branches and bottlenecks
+may require returning through previously visited ground."""
 from collections import Counter, deque
 import math
 import random
@@ -18,7 +16,7 @@ class PacketPatrol:
     GOAL_TIMEOUT = 25  # seconds without getting closer before a waypoint is put aside
     ROUTE_NODES = 4000  # cell search budget per plan (~0.1 s); longer trips go by stepping stones
     ROUTE_GREED = 1.5
-    MAP_FIELDS = ('tour', 'remaining', 'done', 'walked', 'cycle_number')
+    MAP_FIELDS = ('tour', 'remaining', 'done', 'walked', 'cycle_number', 'sweep_order')
 
     def __init__(self, max_step=8, rng=None, *, spacing=SPACING, coverage=1.0, wall_margin=2, avoid_walls=False):
         if not 1 <= max_step <= 8:
@@ -57,6 +55,7 @@ class PacketPatrol:
         self.last_plan_at = 0
         self.tour = None
         self.remaining = set()
+        self.sweep_order = []
         self.done = set()
         self.walked = set()  # 4x4 sectors walked this cycle: routes prefer fresh ground
         self.cycle_number = 1
@@ -135,6 +134,7 @@ class PacketPatrol:
                 setattr(self, field, value)
             return
         self.tour = PatrolTour(collision, position, **self.layout)
+        self.sweep_order = self.tour.sweep_order(position)
         self.cycle_number = 1
         self.done, self.walked = set(), set()
         self.remaining = set(self.tour.points)
@@ -142,6 +142,7 @@ class PacketPatrol:
 
     def new_cycle(self, position):
         self.cycle_number += 1
+        self.sweep_order = self.tour.sweep_order(position)
         self.unreachable.clear()
         self.remaining = set(self.tour.points)
         self.done.clear()
@@ -153,14 +154,19 @@ class PacketPatrol:
             self.remaining = set(self.tour.points)-set(self.tour.seen_from(position)) or set(self.tour.points)
 
     def next_block(self, position):
-        """Closest unvisited waypoint by walking; ties favour the heading and leftovers."""
+        """Next pending point of the stable circuit; blocked points wait without resetting it."""
         candidates = self.remaining-set(self.deferred)
         if not candidates:
             return None
+        ordered = next((block for block in self.sweep_order if block in candidates), None)
+        if ordered is not None:
+            return ordered
         distances = self.tour.distances(position)
         reachable = [block for block in candidates if block in distances]
         if not reachable:
             return None
+        nearest = min(distances[block] for block in reachable)
+        reachable = [block for block in reachable if distances[block] <= nearest+.35*self.tour.spacing]
         heading = math.hypot(*self.heading) or 1
         beside = self.tour.graph[self.tour.block_near(position)]
 
@@ -170,14 +176,11 @@ class PacketPatrol:
             alignment = sum(offset[i]*self.heading[i] for i in (0, 1))/((math.hypot(*offset) or 1)*heading)
             spacing = self.tour.spacing
             done = self.tour.done_around(block, self.remaining)
-            value = distances[block]-.5*spacing*alignment-.3*spacing*done
-            if not any(other in self.remaining for other in self.tour.graph[block]):
-                # A straggler: everything around is done or wall. Left now, it would cost a walk back later.
-                value -= .6*spacing
+            # Sweep forwards through adjacent fresh ground. Large "leftover" rewards used to
+            # pull the character backwards after almost every waypoint, fragmenting the circuit.
+            value = distances[block]-.65*spacing*alignment
             if block in beside and done:
-                # The next block of the sweep, touching ground already covered: keep going on.
-                # A neighbour on fresh ground (e.g. through a gap) waits, so no side is left behind.
-                value -= .4*spacing
+                value -= .15*spacing
             if distances[block] > 2.5*spacing:
                 # Choosing among far waypoints: open ground first, the ones by walls at the end.
                 # Waypoints right beside are taken on the way, so nothing is left behind for a loop.
@@ -267,8 +270,7 @@ class PacketPatrol:
                                             greed=self.ROUTE_GREED, wall_cost=self.wall_cost())
                 else:
                     route = collision.route(position, self.goal, exact=self.search_destination is None,
-                                            max_nodes=self.ROUTE_NODES, greed=self.ROUTE_GREED, wall_cost=self.wall_cost(),
-                                            visited_sectors=self.walked if self.search_destination is None else frozenset())
+                                            max_nodes=self.ROUTE_NODES, greed=self.ROUTE_GREED, wall_cost=self.wall_cost())
                     if route is None and self.search_destination is None:
                         # Every search stays bounded so the relay never stalls on a big map: a far
                         # goal behind a detour is approached through a cell a few blocks along the
@@ -386,7 +388,8 @@ class PacketPatrol:
                 'temporarily_failed_segments': len(self.failed_edges), 'max_step_cells': self.max_step,
                 'general_heading': list(self.heading), 'loop_escapes': self.loop_escapes,
                 'cycle': self.cycle_number, 'cycle_sectors_total': len(points),
-                'cycle_mode': 'pontos de passagem em chão aberto',
+                'cycle_mode': ('corredores: completar ramificacao e retornar' if self.tour is not None and self.tour.corridor_mode
+                               else 'circuito ordenado por distancia caminhavel'),
                 'cycle_sectors_explored': len(self.done), 'cycle_sectors_visited': len(self.done),
                 'cycle_sectors_remaining': len(self.remaining),
                 'goal': list(self.goal) if self.goal is not None else None}

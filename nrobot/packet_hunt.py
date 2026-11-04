@@ -58,6 +58,38 @@ class PacketHunt:
         self.engaged_until = 0
         self.aggressors = {}
         self.priority_target = None  # REDE-67: captured character
+        self.approach_cache = None
+        self.awaiting_map = False
+
+    def map_transition(self):
+        """Keep the run/pause choice, discard commands and IDs from the previous area."""
+        self.awaiting_map = self.enabled
+        self.target = self.pending = self.engaged = None
+        self.aggressors.clear()
+        self.excluded_until.clear()
+        self.blocked_until.clear()
+        self.approach_cache = None
+        self.attempts = 0
+        self.ready_at = 0
+        self.target_since = None
+        if self.patrol is not None:
+            self.patrol.goal = self.patrol.goal_block = None
+            self.patrol.route_cache = self.patrol.route_cache_key = None
+        if self.enabled:
+            self.reason = 'portal atravessado; aguardando posicao do mapa de chegada'
+
+    def approach_path(self, collision, player, target, blocked, now):
+        key = (id(collision), self.target, frozenset(blocked), getattr(collision, 'forbidden', frozenset()))
+        cached = self.approach_cache
+        if cached is not None and cached['key'] == key and math.dist(cached['goal'], target) <= 2:
+            path = cached['path']
+            if path and collision.line_clear(cached['goal'], target) and tuple(player) in path[:-1]:
+                return path[path.index(tuple(player)):]
+            if path is None and now < cached['retry_at'] and tuple(player) == cached['origin']:
+                return None
+        path = collision.route(player, target, blocked, max_nodes=16000)
+        self.approach_cache = dict(key=key, goal=tuple(target), origin=tuple(player), path=path, retry_at=now+.75)
+        return path
 
     def replan_action(self, now, reason, action=None):
         if action and action.get('purpose') == 'patrol' and self.patrol is not None and action.get('origin'):
@@ -87,6 +119,8 @@ class PacketHunt:
         return result
 
     def start(self):
+        self.awaiting_map = False
+        self.approach_cache = None
         self.enabled = True
         self.skill_disabled = False
         self.skill_failures = 0
@@ -102,6 +136,8 @@ class PacketHunt:
         self.aggressors.clear()
 
     def pause(self, reason):
+        self.awaiting_map = False
+        self.approach_cache = None
         self.enabled = False
         self.reason = reason
         self.pending = None
@@ -429,8 +465,12 @@ class PacketHunt:
             self.last_action_at = now
         if (state['state'] != 'tracking' or not state['player_position_recent']
             or state.get('player_position') is None):
+            if self.awaiting_map:
+                self.reason = 'aguardando dados atuais depois do portal'
+                return None
             self.pause('posição própria ou leitura indisponível')
             return None
+        self.awaiting_map = False
         if self.pending:
             if self.pending['kind'] in ('attack', 'skill'):
                 if now >= self.pending['deadline']:
@@ -547,7 +587,8 @@ class PacketHunt:
         # The configured rotation supplies engagement_range and handles shooting while
         # retreating. The legacy Kunai planner must reach its cast/response checks first;
         # otherwise a nearby target always produces a walk instead of a ready skill.
-        elif self.auto_movement and not self.auto_attacks and combat_range >= 3:
+        elif (self.auto_movement and not self.auto_attacks and combat_range >= 3
+              and (collision is None or all(collision.line_clear(player, point) for point in range_positions))):
             spacing = max(1, combat_range-1)
             if closest < spacing-.25:
                 retreat = self.step_back(player, actual_position, combat_range, collision, walk_speed_ms, blocked)
@@ -576,7 +617,7 @@ class PacketHunt:
         if not self.auto_movement:
             self.reason = 'Movimentação automática desativada; aguardando alvo ao alcance'
             return None
-        path = collision.route(player, chase_position, blocked) if collision else None
+        path = self.approach_path(collision, player, chase_position, blocked, now) if collision else None
         if collision and not path and blocked:
             self.reason = 'rota temporariamente bloqueada; mantendo alvo'
             self.ready_at = now+.5

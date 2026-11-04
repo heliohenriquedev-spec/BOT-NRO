@@ -14,6 +14,7 @@ import json
 import math
 from pathlib import Path
 import socket
+import sqlite3
 import struct
 import time
 
@@ -78,7 +79,9 @@ async def rewrite_endpoints(op, packet, register):
         if len(packet) < 79 or (len(packet)-47) % 32:
             raise ValueError('Lista de servidores incompatível com a variante clássica')
         offsets, stage = range(47, len(packet), 32), 'char'
-    elif op == 0x71:
+    elif op in (0x71, 0x92):
+        if len(packet) != 28:
+            raise ValueError('Destino de mapa com comprimento invalido')
         offsets, stage = [22], 'map'
     else:
         return packet
@@ -91,6 +94,48 @@ async def rewrite_endpoints(op, packet, register):
         result[offset:offset+4] = socket.inet_aton('127.0.0.1')
         struct.pack_into('<H', result, offset+4, local_port)
     return bytes(result)
+
+
+class MapEndpointStream:
+    """Rewrite complete map-transfer messages, never opcode-like bytes inside other data."""
+    def __init__(self, account, register, on_transfer):
+        self.account, self.register, self.on_transfer = account, register, on_transfer
+        self.buffer = bytearray()
+        self.started = self.passthrough = False
+
+    def flush(self):
+        result = bytes(self.buffer); self.buffer.clear()
+        return result
+
+    async def feed(self, data):
+        if self.passthrough:
+            return data
+        from .packet_reader import message_length
+        self.buffer.extend(data)
+        result = bytearray()
+        if not self.started:
+            if len(self.buffer) < 4:
+                return b''
+            self.started = True
+            if self.account and self.buffer[:4] == self.account:
+                result.extend(self.buffer[:4]); del self.buffer[:4]
+        while self.buffer:
+            try:
+                size = message_length(self.buffer, 0)
+            except (OSError, ValueError):
+                self.passthrough = True
+                print('Enquadramento de portal desconhecido; trafego encaminhado sem alterar destinos.')
+                result.extend(self.flush())
+                break
+            if size is None or len(self.buffer) < size:
+                break
+            packet = bytes(self.buffer[:size]); del self.buffer[:size]
+            opcode = struct.unpack_from('<H', packet)[0]
+            if opcode == 0x92:
+                self.on_transfer()
+                packet = await rewrite_endpoints(opcode, packet, self.register)
+            result.extend(packet)
+        return bytes(result)
 
 
 class SessionRelay(QuestRelay):
@@ -113,6 +158,10 @@ class SessionRelay(QuestRelay):
         self.mirror_ready = False
         self.mirror_sequence = 0
         self.stage = 'starting'
+        self.login_phase = 'waiting'
+        self.login_transport = 'waiting'
+        self.login_world_count = 0
+        self.login_world_selected = False
         self.error = None
         self.last_saved = 0
         self.last_inventory_map = None
@@ -162,6 +211,10 @@ class SessionRelay(QuestRelay):
         self.monsters_seen = load_captured()  # REDE-79: what the game showed about each monster
         self.monsters_dirty = False
         self.monsters_written = 0
+        from .drop_db import DropObserver, mob_info_species
+        from .mob_info import MobInfoQueue
+        self.drops = DropObserver()
+        self.mob_info = MobInfoQueue(mob_info_species())  # @mi: the server's drop list of each monster
         self.sprite_state = {}  # species -> 'exists' / 'grf' / 'captured' / None (needs a capture)
         self.minimap_ground_written = None
         self.last_route_written = 0
@@ -519,7 +572,9 @@ class SessionRelay(QuestRelay):
         observer = self.tracker.observer
         if not self.settings:
             return
-        wanted = set(self.settings['species']) | self.attacker_species(now)
+        # On top of every configured target (automatic map targets and checked names included), not
+        # instead of them: replacing them left only the species list and nothing else was hunted.
+        wanted = self.configured_species() | self.attacker_species(now)
         if wanted == observer.species:
             return
         added = wanted-observer.species
@@ -750,16 +805,9 @@ class SessionRelay(QuestRelay):
         from .network_targets import Entity
         observer = self.tracker.observer
         self.discovered_monsters = confirmed_types(self.inventory, observer.player_id)
-        selected = set((self.settings or {}).get('species', observer.species))
-        if self.settings and self.settings['auto_map_targets']:
-            selected.update(self.discovered_monsters)
-        from .monster_db import map_key
-        current_map = map_key(observer.map_name)
-        for key, enabled in (self.settings or {}).get('monster_name_choices', {}).items():
-            map_id, _, rest = key.partition(':')
-            species, _, name = rest.partition(':')
-            if enabled and map_id == current_map and species.isascii() and species.isdecimal() and name:
-                selected.add(int(species))
+        selected = self.configured_species()
+        if self.hunt is not None and self.settings:
+            selected |= self.attacker_species(time.monotonic())
         if selected != observer.species:
             observer.species = selected
             for identity, actor in list(observer.registry.entities.items()):
@@ -772,6 +820,22 @@ class SessionRelay(QuestRelay):
                     observer.registry.update(Entity(entity['entity_id'], entity['species_id'], *entity['position'],
                         entity['last_seen'], 'monster', destination=tuple(entity['destination']) if entity.get('destination') else None,
                         walk_speed_ms=entity.get('walk_speed_ms')))
+
+    def configured_species(self):
+        """Target sprites: the species list, the map's confirmed monsters (automatic targets) and
+        every sprite with a checked name on the current map."""
+        from .monster_db import map_key
+        observer = self.tracker.observer
+        selected = set((self.settings or {}).get('species', observer.species))
+        if self.settings and self.settings['auto_map_targets']:
+            selected.update(getattr(self, 'discovered_monsters', None) or {})
+        current_map = map_key(observer.map_name)
+        for key, enabled in (self.settings or {}).get('monster_name_choices', {}).items():
+            map_id, _, rest = key.partition(':')
+            species, _, name = rest.partition(':')
+            if enabled and map_id == current_map and species.isascii() and species.isdecimal() and name:
+                selected.add(int(species))
+        return selected
 
     def monster_name_allowed(self, identity, species):
         from .monster_db import monster_choice_key
@@ -888,6 +952,11 @@ class SessionRelay(QuestRelay):
                     raise ValueError('O servidor ainda informa o efeito ativo; aguarde o termino real')
                 self.rotation.summons.finish(time.monotonic(), 'user_observed_end')
                 self.flush_rotation_diagnostics()
+            elif command == 'mob_info':
+                species = int(request['species_id'])
+                if species <= 0:
+                    raise ValueError('ID de monstro invalido')
+                self.mob_info.want(species, force=True)
             elif command == 'probe_buff':
                 if self.hunt.enabled:
                     raise ValueError('Pause a caça antes de testar um buff')
@@ -903,11 +972,31 @@ class SessionRelay(QuestRelay):
             path.unlink(missing_ok=True)
         self.status()
 
+    def sync_auto_login_pause(self):
+        from . import auto_login
+        config = auto_login.load()
+        paused = bool(config.get('paused'))
+        previous = getattr(self, 'login_paused', None)
+        self.login_paused = paused
+        if paused or not config['enabled']:
+            task = getattr(self, 'character_choice_task', None)
+            if task is not None and not task.done():
+                task.cancel()
+        elif previous is True and self.stage == 'char' and not getattr(self, 'character_choice_done', False):
+            context = getattr(self, 'character_choice_context', None)
+            if context is not None and not context[1].is_closing():
+                self.schedule_character_choice(*context)
+
     def schedule_character_choice(self, char_list, upstream):
         """Login automatico: the character named in the panel is picked from the server's list."""
         from . import auto_login
         config = auto_login.load()
-        if not config['enabled'] or not config['character']:
+        self.character_choice_context = (char_list, upstream)
+        self.login_paused = bool(config.get('paused'))
+        previous = getattr(self, 'character_choice_task', None)
+        if previous is not None and not previous.done():
+            previous.cancel()
+        if not config['enabled'] or config.get('paused') or not config['character']:
             return
         slot = auto_login.character_slot(char_list, config['character'])
         if slot is None:
@@ -915,11 +1004,22 @@ class SessionRelay(QuestRelay):
             return
 
         async def choose():
-            await asyncio.sleep(1.5)  # the character screen is drawn first
-            upstream.write(auto_login.select_packet(slot))
-            await upstream.drain()
-            print(f"Login automatico: personagem {config['character']} (slot {slot}) escolhido.")
-        asyncio.get_running_loop().create_task(choose())
+            await asyncio.sleep(.1)  # let the server list reach the client first
+            current = auto_login.load()
+            if current.get('paused') or not current['enabled'] or self.stage != 'char' or getattr(self, 'character_choice_done', False) or upstream.is_closing():
+                return
+            try:
+                async with self.send_lock:
+                    latest = auto_login.load()
+                    if latest.get('paused') or not latest['enabled'] or self.stage != 'char' or getattr(self, 'character_choice_done', False) or upstream.is_closing():
+                        return
+                    upstream.write(auto_login.select_packet(slot))
+                    await upstream.drain()
+                    self.character_choice_done = True
+                print(f"Login automatico: personagem {config['character']} (slot {slot}) escolhido por pacote.")
+            except (OSError, ConnectionError):
+                print('Login automatico: conexao de personagens encerrada antes da escolha.')
+        self.character_choice_task = asyncio.get_running_loop().create_task(choose())
 
     def collision_map(self):
         if self.map_repository is None:
@@ -1027,6 +1127,61 @@ class SessionRelay(QuestRelay):
         self.manual_skill_pending = None
         self.record_hunt({'kind': 'buff_learned_saved', 'skill_id': manual['skill_id'], 'effect_id': effect})
         print(f"Buff {manual['skill_id']} aprendido, habilitado e salvo; renovacao acompanha o efeito {effect}.")
+
+    def mob_info_observe(self, events, now):
+        """Monsters seen get their server sheet (@mi) once; answers go to the drop database."""
+        from .map_monsters import is_confirmed_monster
+        from .monster_origin import excluded_spawn
+        queue = self.mob_info
+        queue.observe(events, now)
+        for event in events:
+            if event['kind'] == 'name':
+                entity = self.inventory.entities.get(event.get('entity_id'))
+                if (entity and is_confirmed_monster(entity, self.tracker.observer.player_id)
+                        and not excluded_spawn(entity['species_id'], self.inventory.map_name, entity.get('name'))):
+                    queue.want(entity['species_id'])
+        while queue.results:
+            species, info, lines = queue.results.pop(0)
+            try:
+                with (self.folder/'respostas_mi.jsonl').open('a', encoding='utf-8') as log:
+                    log.write(json.dumps({'at': datetime.now().isoformat(), 'species_id': species,
+                                          'recognized': info is not None, 'lines': lines}, ensure_ascii=False)+'\n')
+            except OSError:
+                pass
+            if info is None:
+                print(f'[DROPS] @mi {species}: resposta nao reconhecida ({len(lines)} linha(s)): '
+                      + (' | '.join(lines[:3]) or 'nenhuma resposta do servidor'))
+                if queue.suspended:
+                    print('[DROPS] Consultas @mi automaticas suspensas nesta sessao; use "Consultar @mi" na Database.')
+                continue
+            try:
+                from .drop_db import save_mob_info
+                save_mob_info(species, info, lines)
+                print(f"[DROPS] @mi {species} ({info['name']}): {len(info['drops'])} drop(s)"
+                      + (f", {len(info['mvp'])} MVP" if info['mvp'] else '') + ' salvos na Database.')
+            except (sqlite3.Error, OSError) as exc:
+                print(f'[DROPS] @mi {species}: nao foi possivel salvar ({exc})')
+
+    async def send_mob_info(self, *, game_gate):
+        now = time.monotonic()
+        species = self.mob_info.due(now)
+        name = (self.own_look or {}).get('name')
+        if (species is None or not name or not self.allow_commands or self.login_phase != 'map'
+                or not self.tracker.observer.player_position_valid(now)):
+            return
+        from .mob_info import chat_command
+        payload = chat_command(f'@mi {species}', name)
+        if self.native_frames.fallback().get(0xf3) not in (-1, len(payload)):
+            self.mob_info.suspended = True; self.mob_info.queue.clear()
+            print('[DROPS] Pacote de chat 00F3 nao validado para este cliente; @mi desativado.')
+            return
+        async with self.send_lock:
+            if not self.native_frames.ready or not game_gate() or self.upstream is None:
+                return
+            self.mob_info.sent(species, now)
+            self.trace_map_send('bot', 0xf3, len(payload))
+            self.upstream.write(payload)
+            await self.upstream.drain()
 
     async def send_buff_probe(self, request, *, game_gate):
         async with self.send_lock:
@@ -1150,6 +1305,9 @@ class SessionRelay(QuestRelay):
             self.record_test()
             print('O ataque de teste foi enviado, mas não houve confirmação de dano no prazo. Não repetirei automaticamente.')
         state = self.tracker.snapshot(time.monotonic())
+        state.update(login_phase=self.login_phase, login_transport=self.login_transport,
+                     login_world_count=self.login_world_count, login_world_selected=self.login_world_selected)
+        state['drop_database'] = {'collecting': self.drops.error is None, 'error': self.drops.error}
         state['recent_entities'] = [entity for entity in state['recent_entities']
                                    if entity.get('kind') == 'player' or self.monster_name_allowed(
                                        entity['entity_id'], entity.get('species_id'))]
@@ -1301,6 +1459,8 @@ class SessionRelay(QuestRelay):
                 data = bytes(self.mirror)
                 self.mirror.clear()
             events = self.tracker.feed(self.mirror_sequence, data, time.monotonic())
+            if any(e['kind'] == 'player_position_init' for e in events):
+                self.login_phase = 'map'
             self.quests.observe(events,self.tracker.observer.player_id,self.tracker.observer.map_name,time.monotonic())
             self.quest_events(events,time.monotonic())
             for transition in events:
@@ -1308,6 +1468,15 @@ class SessionRelay(QuestRelay):
                     self.next_map=transition['map']
             self.mirror_sequence += len(data)
             self.inventory.observe(events, time.monotonic())
+            try:
+                self.drops.observe(events, self.tracker.observer.player_id, time.monotonic(),
+                                   self.inventory.map_name or self.tracker.observer.map_name)
+            except (sqlite3.Error, OSError, ValueError, KeyError, TypeError) as exc:
+                if self.drops.error is None:
+                    self.drops.error = str(exc)
+                    self.drops.close()
+                    print('Database de drops indisponivel; jogo e combate continuam: '+str(exc))
+            self.mob_info_observe(events, time.monotonic())
             from .monster_origin import temporary_reason
             if getattr(self, 'origin_epoch', None) != self.inventory.epoch:
                 self.origin_epoch = self.inventory.epoch
@@ -1355,6 +1524,7 @@ class SessionRelay(QuestRelay):
                 self.sync_map_monsters()
             for event in events:
                 if event['kind'] == 'server_disconnect':
+                    self.login_phase = 'failed' if event['reason_raw'] else 'disconnected'
                     self.error = f"Servidor enviou desconexao, codigo {event['reason_raw']}"
                     self.record_hunt(event)
                     print(self.error)
@@ -1433,12 +1603,7 @@ class SessionRelay(QuestRelay):
                             self.manual_kunai_trace = None
                             break
                 if any(e['kind'] in ('map_change', 'map_transfer') for e in events):
-                    self.map_validation = None
-                    if self.hunt.enabled:
-                        self.hunt.pause(f'mapa alterado; {self.hunt_key_name} retoma no novo mapa')
-                    self.hunt.blocked_until.clear()
-                    if self.hunt.patrol is not None:
-                        self.hunt.patrol.reset()
+                    self.begin_hunt_transfer()
                 before = self.hunt.confirmed_attacks
                 self.hunt.observe(events, self.tracker.observer.player_id, time.monotonic(),
                                   movement_motion=self.tracker.observer.player_motion)
@@ -1471,6 +1636,7 @@ class SessionRelay(QuestRelay):
         self.character_id = identity
 
     def begin_map_observation(self):
+        self.drops.reset()
         self.release_player()
         self.player_tracks.clear()
         self.player_first_seen.clear()
@@ -1489,6 +1655,26 @@ class SessionRelay(QuestRelay):
         observer.pinned = pinned
         observer.map_name = self.next_map
 
+    def begin_hunt_transfer(self, now=None):
+        if self.hunt is not None:
+            self.hunt.map_transition()
+        self.map_validation = None
+        self.hunt_transfer_until = (time.monotonic() if now is None else now)+20
+
+    def waiting_hunt_transfer(self, connected, now=None):
+        until = getattr(self, 'hunt_transfer_until', 0)
+        if not until:
+            return False
+        now = time.monotonic() if now is None else now
+        if connected and self.tracker.observer.player_position_valid(now):
+            self.hunt_transfer_until = 0
+            return False
+        if now >= until:
+            self.hunt_transfer_until = 0
+            if self.hunt is not None and self.hunt.enabled:
+                self.hunt.pause('portal sem confirmacao do mapa de chegada; confira a conexao')
+        return True
+
     async def bridge(self, stage, host, port, client_reader, client_writer):
         upstream = None
         jobs = []
@@ -1496,12 +1682,19 @@ class SessionRelay(QuestRelay):
             remote_reader, upstream = await asyncio.open_connection(host, port)
             self.error = None
             self.stage = stage
+            self.character_choice_done = False
+            old_choice = getattr(self, 'character_choice_task', None)
+            if old_choice is not None:
+                old_choice.cancel()
             if stage == 'login':
+                self.login_phase = 'waiting'
+                self.login_transport = 'waiting'
                 self.account = None
                 self.character_id = None
                 self.tracker.observer.clear()
                 self.own_option = 0
             if stage == 'map':
+                self.login_phase = 'loading'
                 if self.upstream is not None:
                     raise ValueError('Já existe conexão de mapa neste relay')
                 self.upstream = upstream
@@ -1512,8 +1705,8 @@ class SessionRelay(QuestRelay):
                 self.map_validation = None
                 if self.rotation is not None:
                     self.rotation.reset_session(self.next_map)
-                if self.hunt is not None and self.hunt.patrol is not None:
-                    self.hunt.patrol.reset()
+                if self.hunt is not None:
+                    self.hunt.map_transition()
                 self.game_peer = client_writer.get_extra_info('peername')
                 self.game_local = client_writer.get_extra_info('sockname')
                 self.mirror_sequence, self.mirror_ready = 0, False
@@ -1528,8 +1721,33 @@ class SessionRelay(QuestRelay):
             print(f'Conexão {stage} encaminhada.')
 
             async def client_to_server():
+                login_adapter = None
+                character_requests = None
+                if stage in ('login', 'char'):
+                    from .auto_login import LoginPacketAdapter, relay_login_config
+                    from .packet_reader import client_lengths
+                    try:
+                        sizes = client_lengths()
+                    except (OSError, ValueError):
+                        sizes = {}
+                    if stage == 'login':
+                        login_adapter = LoginPacketAdapter(relay_login_config(self.folder), sizes)
+                    else:
+                        from .client_frame_guard import ClientFrameGuard
+                        character_requests = ClientFrameGuard(fallback=sizes)
                 while data := await client_reader.read(65536):
                     async with self.send_lock:
+                        if login_adapter is not None:
+                            login_adapter.config = relay_login_config(self.folder)
+                            data = login_adapter.feed(data)
+                            if login_adapter.finished:
+                                self.login_transport = 'unsupported' if login_adapter.unsupported else 'ready'
+                                if login_adapter.rewritten:
+                                    self.login_phase = 'authenticating'
+                                print('Login por pacote: '+login_adapter.reason)
+                                login_adapter = None
+                        if character_requests is not None and 0x66 in character_requests.feed(data):
+                            self.character_choice_done = True  # fragmented/coalesced manual choice wins
                         if stage == 'map':
                             if self.tracker.observer.player_position_valid(time.monotonic()):
                                 previous_error = self.native_frames.error
@@ -1549,6 +1767,7 @@ class SessionRelay(QuestRelay):
 
             async def server_to_client():
                 frames = HandshakeFrames(stage, self.account)
+                endpoints = MapEndpointStream(self.account, self.register, self.begin_hunt_transfer) if stage == 'map' else None
                 removal = None
                 if stage == 'map' and (Path(__file__).resolve().parents[1]/'perfis'/'remocao_visual_imediata').is_file():
                     from .immediate_monster_removal import ImmediateMonsterRemoval
@@ -1565,7 +1784,8 @@ class SessionRelay(QuestRelay):
                     removal = ImmediateMonsterRemoval(self.account, confirmed_monster)
                 while data := await remote_reader.read(65536):
                     if stage == 'map':
-                        visible = removal.feed(data) if removal is not None else data
+                        routed = await endpoints.feed(data)
+                        visible = removal.feed(routed) if removal is not None else routed
                         if visible:
                             client_writer.write(visible)
                             await client_writer.drain()
@@ -1575,22 +1795,34 @@ class SessionRelay(QuestRelay):
                         while (frame := frames.pop()) is not None:
                             op, packet = frame
                             if op == 0x69:
+                                from .auto_login import select_world, load as load_login
+                                packet, self.login_world_selected = select_world(packet, load_login())
+                                self.login_phase = 'world'
+                                self.login_world_count = (len(packet)-47)//32
                                 self.account = packet[8:12]  # in memory only
                                 self.own_look = {'sex': packet[46]} if len(packet) > 46 else {}
                             elif op == 0x6b:
+                                self.login_phase = 'characters'
                                 self.char_list = packet
                                 self.schedule_character_choice(packet, upstream)
                             elif op == 0x71:
+                                self.login_phase = 'loading'
+                                self.character_choice_done = True
                                 self.select_character(struct.unpack_from('<I', packet, 2)[0])
                                 from .packet_reader import character_look
                                 self.own_look.update(character_look(self.char_list, self.character_id) or {})
                                 self.next_map = packet[6:22].split(b'\0')[0].decode('cp1252', 'replace')
+                            elif op in (0x6a, 0x6c, 0x6e, 0x70, 0x81):
+                                self.login_phase = 'failed'
                             packet = await rewrite_endpoints(op, packet, self.register)
                             client_writer.write(packet)
                             await client_writer.drain()
                     if time.monotonic()-self.last_saved > .5:
                         self.last_saved = time.monotonic()
                         self.status()
+                if endpoints is not None and (remaining := endpoints.flush()):
+                    client_writer.write(removal.feed(remaining) if removal is not None else remaining)
+                    await client_writer.drain()
                 if removal is not None and (remaining := removal.flush()):
                     client_writer.write(remaining)
                     await client_writer.drain()
@@ -1601,6 +1833,8 @@ class SessionRelay(QuestRelay):
             for task in done:
                 task.result()
         except (OSError, ValueError, asyncio.IncompleteReadError) as exc:
+            if stage in ('login', 'char'):
+                self.login_phase = 'failed'
             self.error = str(exc)
             print(f'Conexão {stage} interrompida: {exc}')
         finally:
@@ -1616,7 +1850,9 @@ class SessionRelay(QuestRelay):
                 self.tracker.observer.restore_character(kept)
                 self.inventory.reset()
                 self.stage = 'map_disconnected'
-                if self.hunt is not None:
+                self.login_phase = ('loading' if getattr(self, 'hunt_transfer_until', 0) else
+                                    'failed' if self.login_phase == 'failed' else 'disconnected')
+                if self.hunt is not None and not getattr(self, 'hunt_transfer_until', 0):
                     self.hunt.pause('conexão de mapa encerrada')
             for writer in (client_writer, upstream):
                 if writer is not None:
@@ -1663,6 +1899,7 @@ class SessionRelay(QuestRelay):
             print(f'Ataque único enviado por pacote ao ID {target_id}; aguardando resposta do servidor.')
 
     async def close(self):
+        self.drops.close()
         self.allow_commands = False
         if self.hunt is not None:
             self.hunt.pause('relay encerrado')
@@ -2080,8 +2317,12 @@ async def run(args):
         last_display = 0
         last_skill_message = None
         last_heartbeat = 0
+        last_login_sync = 0
         while True:
             await asyncio.sleep(.02)
+            if time.monotonic()-last_login_sync >= .1:
+                relay.sync_auto_login_pause()
+                last_login_sync = time.monotonic()
             if hunt_mode:
                 relay.process_control(lambda: controls.connected(relay.game_peer, relay.game_local))
                 relay.finish_buff_learning(time.monotonic())
@@ -2133,8 +2374,11 @@ async def run(args):
                         relay.status()
                     previous_hunt_key = hunt_key
                     route_travel = await relay.quest_tick(lambda: controls.connected(relay.game_peer,relay.game_local))
+                    await relay.send_mob_info(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                     if relay.hunt.enabled and not route_travel:
-                        if not controls.connected(relay.game_peer, relay.game_local):
+                        if relay.waiting_hunt_transfer(controls.connected(relay.game_peer, relay.game_local)):
+                            pass
+                        elif not controls.connected(relay.game_peer, relay.game_local):
                             relay.hunt.pause('conexão do jogo indisponível')
                             print(f'Caça pausada: conexão do jogo indisponível. {relay.hunt_key_name} retoma.')
                         elif relay.manual_control(time.monotonic()) or await relay.update_presence_hold():
