@@ -1,6 +1,6 @@
 {
- "version": "2026.11.04.4",
- "published_at": "2026-11-04T01:10:46",
+ "version": "2026.11.04.5",
+ "published_at": "2026-11-04T01:36:18",
  "notes": "Fix",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
@@ -1431,6 +1431,7 @@
   "nrobot/grf.py",
   "nrobot/grf_header.py",
   "nrobot/group_hunt.py",
+  "nrobot/immediate_monster_removal.py",
   "nrobot/item_names.py",
   "nrobot/kuchiyose_dialog.py",
   "nrobot/lua_tables.py",
@@ -2080,5 +2081,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "279d95eb22f1"
+ "files_digest": "65a5180008d8"
 }

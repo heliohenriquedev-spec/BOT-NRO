@@ -1,4 +1,4 @@
-"""Leitor somente-leitura de arquivos GRF 0x200 (RF-03)."""
+"""Leitor somente-leitura de arquivos GRF 0x200 e 0x300 (RF-03)."""
 from __future__ import annotations
 
 import configparser
@@ -30,29 +30,56 @@ class Entry:
 
 
 def read_index(path: str) -> dict[str, Entry]:
-    """Devolve as entradas do GRF, indexadas pelo nome em minúsculas."""
+    """Devolve as entradas do GRF, indexadas pelo nome em minúsculas.
+
+    0x200: tabela em offset de 32 bits e entradas com offset de 32 bits.
+    0x300 (GRF Editor, arquivos grandes): offset da tabela em 64 bits (sem semente) e
+    entradas com offset de 64 bits; a tabela pode vir precedida de 4 bytes. As duas formas
+    são conferidas (descompressão e offsets dentro do arquivo) antes de aceitar."""
+    size_on_disk = os.path.getsize(path)
     with open(path, "rb") as f:
         header = f.read(HEADER_SIZE)
         if not header.startswith(MAGIC):
             raise GrfError(f"{path}: não é um GRF")
-        table_offset, _seed, _count, version = struct.unpack("<IIII", header[30:46])
-        if version != 0x200:
+        version = struct.unpack_from("<I", header, 42)[0]
+        if version == 0x200:
+            table_offset = struct.unpack_from("<I", header, 30)[0]
+            layouts = [(0, 4)]
+        elif version == 0x300:
+            table_offset = struct.unpack_from("<Q", header, 30)[0]
+            layouts = [(4, 8), (0, 8)]
+        else:
             raise GrfError(f"{path}: versão {version:#x} não suportada")
-        f.seek(HEADER_SIZE + table_offset)
-        compressed, _size = struct.unpack("<II", f.read(8))
-        table = zlib.decompress(f.read(compressed))
+        for skip, offset_size in layouts:
+            try:
+                f.seek(HEADER_SIZE + table_offset + skip)
+                compressed, _size = struct.unpack("<II", f.read(8))
+                table = zlib.decompress(f.read(compressed))
+                return _entries(path, table, offset_size, size_on_disk)
+            except (struct.error, zlib.error, ValueError, OverflowError):
+                continue
+    raise GrfError(f"{path}: tabela de arquivos ilegível (versão {version:#x})")
 
+
+def _entries(path, table, offset_size, size_on_disk):
     entries: dict[str, Entry] = {}
     pos = 0
+    record = 13+offset_size
     while pos < len(table):
         end = table.index(b"\0", pos)
         name = table[pos:end].decode("cp949", "replace")
         pos = end + 1
-        comp, aligned, size, flags, offset = struct.unpack("<IIIBI", table[pos:pos + 17])
-        pos += 17
+        comp, aligned, size, flags = struct.unpack("<IIIB", table[pos:pos + 13])
+        offset = struct.unpack("<Q" if offset_size == 8 else "<I", table[pos+13:pos+record])[0]
+        pos += record
         if flags & FLAG_FILE:
+            if HEADER_SIZE+offset+aligned > size_on_disk:
+                raise ValueError("entrada fora do arquivo")
             entries[name.lower()] = Entry(path, name, comp, aligned, size, flags, offset)
     return entries
+
+
+WARNED: set[str] = set()
 
 
 class GrfSet:
@@ -68,11 +95,22 @@ class GrfSet:
         names = [data[k] for k in sorted(data, key=int)]
         self.entries: dict[str, Entry] = {}
         self.alternates: dict[str, list[Entry]] = {}
+        self.skipped: list[str] = []
         for name in names:
             grf = os.path.join(game_dir, name)
             if not os.path.isfile(grf):
                 continue
-            for key, entry in read_index(grf).items():
+            try:
+                index = read_index(grf)
+            except (GrfError, OSError, ValueError) as exc:
+                # One unreadable GRF (other format, damaged, locked) must not hide every other one:
+                # without them no map collision loads and the hunt cannot move at all.
+                self.skipped.append(f"{name}: {exc}")
+                if name not in WARNED:
+                    WARNED.add(name)
+                    print(f"GRF ignorado (os outros continuam valendo): {name} - {exc}")
+                continue
+            for key, entry in index.items():
                 if key in self.entries:
                     self.alternates.setdefault(key, []).append(entry)
                 else:

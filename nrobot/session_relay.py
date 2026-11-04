@@ -188,6 +188,7 @@ class SessionRelay(QuestRelay):
         from .manual_skill_diagnostic import ManualSkillDiagnostic
         self.manual_skill_diagnostic = ManualSkillDiagnostic()
         self.manual_skill_pending = None
+        self.manual_kunai_trace = None
 
     def inspect_manual_skill(self, data):
         observer = self.tracker.observer
@@ -1368,6 +1369,11 @@ class SessionRelay(QuestRelay):
                                                   'request_source': 'bot' if bot_skill else manual.get('origin', 'manual'),
                                                   'event': trace}, ensure_ascii=False)+'\n')
                         self.skill_trace_count += 1
+                if self.manual_kunai_trace is not None:
+                    target, deadline = self.manual_kunai_trace
+                    if time.monotonic() >= deadline or any(
+                            e['kind'] in ('map_change', 'map_transfer') for e in events):
+                        self.manual_kunai_trace = None
                 if manual is not None:
                     if manual['target_id'] == self.tracker.observer.player_id:
                         ack = any(e['kind'] == 'skill_no_damage' and e['skill_id'] == manual['skill_id']
@@ -1389,8 +1395,18 @@ class SessionRelay(QuestRelay):
                         if (event['kind'] == 'skill_damage' and event['source_id'] == self.tracker.observer.player_id
                             and all(event[key] == manual[key] for key in ('skill_id', 'level', 'target_id'))):
                             self.record_hunt({**event, 'kind': 'manual_skill_confirmed'})
+                            if event['skill_id'] == 524:
+                                self.manual_kunai_trace = (event['target_id'], time.monotonic()+8)
                             self.manual_skill_pending = None
                             print('Dano da habilidade manual confirmado e registrado para comparação.')
+                            break
+                if self.manual_kunai_trace is not None:
+                    target, _ = self.manual_kunai_trace
+                    for event in events:
+                        if event['kind'] == 'remove' and event.get('entity_id') == target and event.get('reason') == 1:
+                            self.record_hunt({'kind': 'manual_kunai_target_death', 'target_id': target,
+                                              'map': self.tracker.observer.map_name, 'opcode': event.get('opcode')})
+                            self.manual_kunai_trace = None
                             break
                 if any(e['kind'] in ('map_change', 'map_transfer') for e in events):
                     self.map_validation = None
@@ -1509,10 +1525,26 @@ class SessionRelay(QuestRelay):
 
             async def server_to_client():
                 frames = HandshakeFrames(stage, self.account)
+                removal = None
+                if stage == 'map' and (Path(__file__).resolve().parents[1]/'perfis'/'remocao_visual_imediata').is_file():
+                    from .immediate_monster_removal import ImmediateMonsterRemoval
+                    from .map_monsters import is_confirmed_monster
+
+                    def confirmed_monster(entity_id):
+                        entity = self.inventory.entities.get(entity_id)
+                        if entity is None or not is_confirmed_monster(entity, self.tracker.observer.player_id):
+                            return False
+                        self.record_hunt({'kind': 'immediate_monster_removal', 'target_id': entity_id,
+                                          'map': self.tracker.observer.map_name})
+                        return True
+
+                    removal = ImmediateMonsterRemoval(self.account, confirmed_monster)
                 while data := await remote_reader.read(65536):
                     if stage == 'map':
-                        client_writer.write(data)
-                        await client_writer.drain()
+                        visible = removal.feed(data) if removal is not None else data
+                        if visible:
+                            client_writer.write(visible)
+                            await client_writer.drain()
                         self.mirror_map(data)
                     else:
                         frames.feed(data)
@@ -1535,6 +1567,9 @@ class SessionRelay(QuestRelay):
                     if time.monotonic()-self.last_saved > .5:
                         self.last_saved = time.monotonic()
                         self.status()
+                if removal is not None and (remaining := removal.flush()):
+                    client_writer.write(remaining)
+                    await client_writer.drain()
                 if stage == 'map':
                     self.record_hunt({'kind': 'connection_eof', 'source': 'remote_server', 'recent_map_sends': list(self.recent_map_sends)})
             jobs = [asyncio.create_task(client_to_server()), asyncio.create_task(server_to_client())]
