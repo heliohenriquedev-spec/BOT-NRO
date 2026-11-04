@@ -338,3 +338,15 @@ def test_switch_button_only_saves_the_choice_for_this_character(tmp_path, monkey
     assert sent == []  # nothing is equipped now; the queue uses the choice
     saved = quest_extras.load()
     assert saved['characters']['Uadaweu2'] == dict(mount_item=2643, combat_items=[16813, 13254]) and saved['mount_enabled']
+
+
+def test_mount_received_this_session_is_listed_by_its_name_with_the_mount_slots():
+    from nrobot import item_names
+    items = [dict(index=60, item_id=2643, type=5, equip_location=35, worn=35),
+             dict(index=79, item_id=2642, type=5, equip_location=0, worn=0),  # 0A0A: slots not sent
+             dict(index=80, item_id=999, type=5, equip_location=0, worn=0)]
+    names = {2643: 'Montaria - Raposa', 2642: 'Montaria - Lobo', 999: 'Chapeu'}
+    descriptions = {2642: 'Um lobo muito veloz, perfeito para longas viagens'}
+    mounts = item_names.mount_choices(items, descriptions, names)
+    assert [(m['item_id'], m['equip_location']) for m in mounts] == [(2643, 35), (2642, 35)]
+    assert item_names.combat_choices(items, descriptions, names) == []

@@ -7,11 +7,13 @@ import copy
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QFormLayout,QLabel,QPushButton,QListWidget,QListWidgetItem,
     QLineEdit,QDialog,QDialogButtonBox,QTableWidget,QTableWidgetItem,QComboBox,QMessageBox,QTabWidget,QGroupBox,QSpinBox,
-    QInputDialog)
+    QInputDialog,QCheckBox)
 from .quest_routes import load, save, validate_routes
 from .responsive_ui import FlowLayout, scroll_page
 from .npc_labels import clean, plain, rank, mission_label, mission_option
 from . import map_routes
+from .portals import PortalGuard
+map_routes_key=PortalGuard.key
 
 TYPES={'walk':'Caminhar','portal':'Entrar no portal','npc':'Falar com NPC','select':'Escolher opcao',
        'next':'Proximo dialogo','close':'Fechar dialogo','cancel':'Cancelar/fechar menu','wait_map':'Confirmar mapa de chegada','wait_transfer':'Aguardar teletransporte Retorno',
@@ -28,6 +30,18 @@ def rank_order(label):
     if not found:return (len(RANK_LETTERS)+1,0,plain(label))
     letter=RANK_LETTERS.index(found[1]) if found[1] in RANK_LETTERS else len(RANK_LETTERS)
     return (letter,int(found[2] or 0),plain(label))
+
+
+def linked_missions(route=None):
+    """{mission id: [names of the other quests that already take it]}."""
+    try:routes=load()
+    except (OSError,ValueError):return {}
+    own=(route or {}).get('id');result={}
+    for other in routes:
+        if own and other.get('id')==own:continue
+        for identity in other.get('mission_ids',[]):
+            result.setdefault(identity,[]).append(other.get('name') or 'sem nome')
+    return result
 
 
 def mission_choices(library):
@@ -85,11 +99,19 @@ class RouteEditor(QDialog):
         self.library=lib.load();self.choices={c['key']:c for c in mission_choices(self.library)}
         self.mission_list=QListWidget();self.mission_list.setMinimumHeight(220);layout.addWidget(self.mission_list,1)
         chosen=list(route.get('mission_ids',[]))
+        self.linked=linked_missions(route)
+        self.only_free=QCheckBox('Mostrar so as missoes ainda sem quest (as ja vinculadas a outra quest ficam em amarelo)')
+        layout.insertWidget(layout.indexOf(self.mission_list),self.only_free)
+        from PySide6.QtGui import QBrush,QColor
         for key in [k for k in chosen if k not in self.choices]+list(self.choices):
             choice=self.choices.get(key)
-            item=QListWidgetItem(choice['label'] if choice else 'Cadastro ausente: '+key);item.setData(Qt.UserRole,key)
+            label=choice['label'] if choice else 'Cadastro ausente: '+key
+            if self.linked.get(key):label+='   • ja na quest: '+', '.join(self.linked[key])
+            item=QListWidgetItem(label);item.setData(Qt.UserRole,key)
+            if self.linked.get(key):item.setForeground(QBrush(QColor(240,200,90)))
             item.setFlags(item.flags()|Qt.ItemIsUserCheckable);item.setCheckState(Qt.Checked if key in chosen else Qt.Unchecked)
             self.mission_list.addItem(item)
+        self.only_free.toggled.connect(self.filter_linked)
         self.counter=QLabel();self.counter.setWordWrap(True);layout.addWidget(self.counter)
         from .responsive_ui import WrappingCheckBox
         self.ignore_finished=WrappingCheckBox('Ignorar os monstros que ja completaram a quantidade e os que nao sao da quest '
@@ -110,6 +132,12 @@ class RouteEditor(QDialog):
         accept=QDialogButtonBox(QDialogButtonBox.Save|QDialogButtonBox.Cancel);accept.accepted.connect(self.accept);accept.rejected.connect(self.reject);root.addWidget(accept)
         accept.button(QDialogButtonBox.Save).setText('Salvar rota');accept.button(QDialogButtonBox.Cancel).setText('Cancelar')
         screen=self.screen().availableGeometry();self.resize(min(900,screen.width()-40),min(640,screen.height()-60))
+
+    def filter_linked(self,only_free):
+        """Hide the missions another quest already takes (the ones marked here stay visible)."""
+        for i in range(self.mission_list.count()):
+            item=self.mission_list.item(i)
+            item.setHidden(bool(only_free and self.linked.get(item.data(Qt.UserRole)) and item.checkState()!=Qt.Checked))
 
     def hunting_map(self):
         chosen=self.map_route.currentData()
@@ -189,7 +217,10 @@ class RouteEditor(QDialog):
         known=[m for m in missions if m.get('monster_targets')]
         text=', '.join(f"{t['name']} {t['count']}" for t in self.preview(known)) or 'nenhum ainda'
         later=len(missions)-len(known)
-        self.counter.setText('Contador: '+text+(f' (+ {later} missao(oes) com monstros lidos do quadro ao pegar)' if later else ''))
+        shared=[self.choices[k]['mission']['name']+' ('+', '.join(self.linked[k])+')' for k in self.selected_missions()
+                if k in self.choices and self.linked.get(k)]
+        self.counter.setText('Contador: '+text+(f' (+ {later} missao(oes) com monstros lidos do quadro ao pegar)' if later else '')+
+                             (' • Atencao, ja vinculadas a outra quest: '+'; '.join(shared) if shared else ''))
 
     @staticmethod
     def preview(missions):
@@ -231,7 +262,7 @@ class MapRoutesPanel(QWidget):
     command_requested=Signal(str,dict)
 
     def __init__(self):
-        super().__init__();self.entries=[];self.stamp=None;self.was_recording=False
+        super().__init__();self.entries=[];self.stamp=None;self.was_recording=False;self.recorded_maps=[]
         layout=QVBoxLayout(self)
         intro=QLabel('Grave uma vez o caminho ate cada mapa de caca: posicione o personagem onde o bot vai partir (onde o Retorno te deixa), '
                      'clique em Gravar nova rota, caminhe, entre nos portais e fale com os NPCs de transporte. No mapa de caca, '
@@ -275,8 +306,40 @@ class MapRoutesPanel(QWidget):
         else:self.notice.setText('Selecione uma rota para executar')
 
     def finish(self):
-        name,ok=QInputDialog.getText(self,'Salvar rota de mapa','Nome (vazio = origem → destino):')
-        if ok:self.request('quest_map_save',name=name.strip())
+        """One name per map passed (each becomes a route), with the monsters seen there as a hint."""
+        maps=self.recorded_maps[1:]
+        if not maps:
+            name,ok=QInputDialog.getText(self,'Salvar rota de mapa','Nome (vazio = origem → destino):')
+            if ok:self.request('quest_map_save',name=name.strip())
+            return
+        start=self.recorded_maps[0];key=map_routes_key
+        dialog=QDialog(self);dialog.setWindowTitle('Salvar rota de mapa');dialog.resize(760,420);layout=QVBoxLayout(dialog)
+        layout.addWidget(QLabel('Cada mapa do percurso vira uma rota a partir de '+start+'. Dê um nome a cada um '
+                                '(vazio mantém o nome atual ou usa origem → destino). Os monstros já vistos em cada mapa ajudam a reconhecê-lo.'))
+        table=QTableWidget(len(maps),3);table.setHorizontalHeaderLabels(['Mapa','Nome','Monstros vistos no mapa'])
+        table.verticalHeader().setVisible(False);table.horizontalHeader().setStretchLastSection(True)
+        edits={}
+        for row,map_name in enumerate(maps):
+            old=next((e['name'] for e in self.entries if key(e['target_map'])==key(map_name) and key(e['start_map'])==key(start)),'')
+            item=QTableWidgetItem(map_name+(' (destino)' if row==len(maps)-1 else ''));item.setFlags(Qt.ItemIsEnabled)
+            table.setItem(row,0,item)
+            edit=QLineEdit(old);edit.setPlaceholderText(start+' → '+map_name);table.setCellWidget(row,1,edit);edits[map_name]=edit
+            monsters=self.monsters_on(map_name)
+            item=QTableWidgetItem(monsters or 'nenhum monstro visto ainda neste mapa');item.setToolTip(monsters);item.setFlags(Qt.ItemIsEnabled)
+            table.setItem(row,2,item)
+        table.setColumnWidth(0,170);table.setColumnWidth(1,220);layout.addWidget(table,1)
+        buttons=QDialogButtonBox(QDialogButtonBox.Save|QDialogButtonBox.Cancel)
+        buttons.accepted.connect(dialog.accept);buttons.rejected.connect(dialog.reject);layout.addWidget(buttons)
+        if dialog.exec()!=QDialog.Accepted:return
+        names={m:e.text().strip() for m,e in edits.items()}
+        self.request('quest_map_save',name=names[maps[-1]],names=names)
+
+    @staticmethod
+    def monsters_on(map_name):
+        from .monster_db import names_for_map
+        try:seen=names_for_map(map_name)
+        except (OSError,ValueError):return ''
+        return ', '.join(sorted({n for names in seen.values() for n in names},key=str.casefold))
 
     def rename(self):
         entry=self.selected()
@@ -314,7 +377,7 @@ class MapRoutesPanel(QWidget):
         dialog.resize(700,500);dialog.exec()
 
     def update_state(self,state):
-        q=state.get('quests',{});recording=q.get('recording_scope')=='map';busy=bool(q.get('recording')) or q.get('phase') in ('pickup','travel','hunt','delivery','return')
+        q=state.get('quests',{});recording=q.get('recording_scope')=='map';self.recorded_maps=q.get('recorded_maps') or [];busy=bool(q.get('recording')) or q.get('phase') in ('pickup','travel','hunt','delivery','return')
         stamp=map_routes.FILE.stat().st_mtime_ns if map_routes.FILE.exists() else None
         if stamp!=self.stamp:self.reload()
         for b in self.idle_buttons:b.setEnabled(not busy)
@@ -371,7 +434,7 @@ class SwitchDialog(QDialog):
         super().__init__(parent);self.setWindowTitle('Switch de '+name)
         from . import item_names
         layout=QVBoxLayout(self);tabs=QTabWidget();layout.addWidget(tabs)
-        mounts=item_names.mount_choices(inventory,descriptions);combat=item_names.combat_choices(inventory,descriptions)
+        mounts=item_names.mount_choices(inventory,descriptions,names);combat=item_names.combat_choices(inventory,descriptions,names)
         saved_mount=chosen.get('mount_item')
         self.mounts=ItemsTable(mounts,[saved_mount],names,descriptions,single=True)
         self.combat=ItemsTable(combat,chosen.get('combat_items') or [i['item_id'] for i in combat if i.get('worn')],

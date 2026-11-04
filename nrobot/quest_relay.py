@@ -215,6 +215,8 @@ class QuestRelay(SharedQuestRelay):
             full=copy.deepcopy(steps)
             steps=map_routes.compact(steps)  # NPCs, choices, each map's way out and the end; walking is computed
             entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals);name=(request.get('name') or '').strip()
+            # A name for each map passed, typed in the save window; an empty one keeps the old name.
+            names={PortalGuard.key(m):(n or '').strip() for m,n in (request.get('names') or {}).items()}
             # Every map passed on the way gets its own route too (start -> that map), ready to be chosen.
             for index,step in enumerate(full[:-1]):
                 if step['kind']!='wait_map' or PortalGuard.key(step['map'])==PortalGuard.key(o.map_name):continue
@@ -222,8 +224,9 @@ class QuestRelay(SharedQuestRelay):
                 same=next((e for e in entries if PortalGuard.key(e['target_map'])==PortalGuard.key(step['map'])
                            and PortalGuard.key(e['steps'][0]['map'])==PortalGuard.key(full[0]['map'])),None)
                 inner=map_routes.inner_portals(partial,self.portals)
-                if same:same['steps']=partial;same['inner_portals']=inner
-                else:entries.append(dict(name='',target_map=step['map'],steps=partial,inner_portals=inner))
+                label=names.get(PortalGuard.key(step['map']),'')
+                if same:same['steps']=partial;same['inner_portals']=inner;same['name']=label or same['name']
+                else:entries.append(dict(name=label,target_map=step['map'],steps=partial,inner_portals=inner))
             inner=map_routes.inner_portals(full,self.portals)
             entry=dict(id=recording.get('replace_id') or None,name=name,target_map=o.map_name,steps=steps,inner_portals=inner)
             old=next((e for e in entries if entry['id'] and e.get('id')==entry['id']),None) or next(

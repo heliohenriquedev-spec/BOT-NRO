@@ -1,7 +1,7 @@
 {
- "version": "2026.11.03.9",
- "published_at": "2026-11-03T21:34:55",
- "notes": "Att",
+ "version": "2026.11.04.1",
+ "published_at": "2026-11-04T00:26:41",
+ "notes": "Montaria",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -54,6 +54,8 @@
   "data/monstros_base/sprites/1783.png",
   "data/monstros_base/sprites/1788.png",
   "data/monstros_base/sprites/1790.png",
+  "data/monstros_base/sprites/1829.png",
+  "data/monstros_base/sprites/1830.png",
   "data/monstros_base/sprites/1831.png",
   "data/monstros_base/sprites/1917.png",
   "data/monstros_base/sprites/1983.png",
@@ -2072,5 +2074,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "a7074e53d5f0"
+ "files_digest": "44fa3abee0fe"
 }

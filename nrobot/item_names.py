@@ -14,22 +14,33 @@ SLOTS = [(0x100, 'topo'), (0x200, 'meio'), (0x1, 'baixo'), (0x10, 'armadura'), (
 MOUNT_SLOTS = 0x1 | 0x2 | 0x20  # baixo, mao direita, mao esquerda: what a mount takes
 
 
-def is_mount(item, description=''):
-    """Mounts say so in their description and take the three slots at once."""
+def is_mount(item, description='', name=''):
+    """Mounts say so in their name or description and take the three slots at once.
+
+    An item received during the session (0A0A) comes without its equip slots: "Montaria - Lobo"
+    shows slot 0 until the next inventory list, so the name alone is enough for equipment."""
     where = item.get('equip_location', 0)
-    if item.get('type') == 10 or not where & MOUNT_SLOTS:
+    if item.get('type') == 10:
         return False
-    return where & MOUNT_SLOTS == MOUNT_SLOTS or 'montaria' in description.casefold()
+    said = 'montaria' in name.casefold() or 'montaria' in description.casefold()
+    if not where:
+        return said and item.get('type') in EQUIPPABLE
+    return bool(where & MOUNT_SLOTS) and (where & MOUNT_SLOTS == MOUNT_SLOTS or said)
 
 
-def combat_choices(items, descriptions):
+def combat_choices(items, descriptions, names=None):
     """What the mount takes off (baixo / mao direita / mao esquerda) and ammo (kunai, shuriken)."""
+    names = names or {}
     return [i for i in items if i.get('type') == 10 or
-            (i.get('equip_location', 0) & MOUNT_SLOTS and not is_mount(i, descriptions.get(i['item_id'], '')))]
+            (i.get('equip_location', 0) & MOUNT_SLOTS
+             and not is_mount(i, descriptions.get(i['item_id'], ''), names.get(i['item_id'], '')))]
 
 
-def mount_choices(items, descriptions):
-    return [i for i in items if is_mount(i, descriptions.get(i['item_id'], ''))]
+def mount_choices(items, descriptions, names=None):
+    """Mounts of the inventory; one whose slots are not known yet takes the three mount slots."""
+    names = names or {}
+    return [dict(i, equip_location=i.get('equip_location') or MOUNT_SLOTS) for i in items
+            if is_mount(i, descriptions.get(i['item_id'], ''), names.get(i['item_id'], ''))]
 
 
 def clean(text):

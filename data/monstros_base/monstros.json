@@ -1,4 +1,22 @@
 {
+ "8": {
+  "species_id": 8,
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Mula sem Cabesa",
+  "max_hp": 5768624,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "0015@tower": [
+    "Mula sem Cabesa"
+   ],
+   "0045@tower": [
+    "Mula sem Cabesa"
+   ]
+  }
+ },
  "1005": {
   "species_id": 1005,
   "maps": {
@@ -63,7 +81,12 @@
   "walk_speed_ms": 200,
   "name": "Kyodaija",
   "max_hp": 36500,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "moc_fild13": [
+    "Kyodaija"
+   ]
+  }
  },
  "1027": {
   "species_id": 1027,
@@ -81,13 +104,27 @@
   "maps": {
    "hospital2": 1,
    "moc_fild13": 6,
-   "yuno_fild05": 14
+   "yuno_fild05": 14,
+   "0015@tower": 0,
+   "0045@tower": 0
   },
-  "walk_speed_ms": 300,
-  "name": "Namekuji",
-  "max_hp": 33000,
+  "walk_speed_ms": 150,
+  "name": "Mula sem Cabesa",
+  "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
-  "captured_sprite": true
+  "captured_sprite": true,
+  "names_by_map": {
+   "0015@tower": [
+    "Deca",
+    "Gomen",
+    "Lost in Light",
+    "Mula sem Cabesa"
+   ],
+   "0045@tower": [
+    "Deca",
+    "Mula sem Cabesa"
+   ]
+  }
  },
  "1032": {
   "species_id": 1032,
@@ -132,7 +169,12 @@
   "walk_speed_ms": 250,
   "name": "Nidachou",
   "max_hp": 81000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "moc_fild08": [
+    "Nidachou"
+   ]
+  }
  },
  "1037": {
   "species_id": 1037,
@@ -177,7 +219,8 @@
   "species_id": 1040,
   "maps": {
    "ve_fild04": 16,
-   "ein_fild01": 3
+   "ein_fild01": 3,
+   "pay_fild10": 0
   },
   "walk_speed_ms": 300,
   "name": "Manmosukas",
@@ -185,6 +228,9 @@
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "ve_fild04": [
+    "Manmosukas"
+   ],
+   "pay_fild10": [
     "Manmosukas"
    ]
   }
@@ -229,7 +275,7 @@
    "pvp_n_1-1": 5
   },
   "walk_speed_ms": 150,
-  "name": "Bicouchuu",
+  "name": "Bikouchuu",
   "max_hp": 900,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -433,6 +479,9 @@
   "names_by_map": {
    "ve_fild04": [
     "Coelho"
+   ],
+   "pay_fild10": [
+    "Coelho"
    ]
   }
  },
@@ -461,7 +510,12 @@
   "name": "Akamaru",
   "max_hp": 69000,
   "sprite_source": "Akamaru1.spr (Naruto Ultimate)",
-  "captured_sprite": true
+  "captured_sprite": true,
+  "names_by_map": {
+   "moc_fild08": [
+    "Akamaru"
+   ]
+  }
  },
  "1114": {
   "species_id": 1114,
@@ -577,7 +631,12 @@
   "walk_speed_ms": 150,
   "name": "Doki",
   "max_hp": 980100,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "ra_fild03": [
+    "Doki"
+   ]
+  }
  },
  "1188": {
   "species_id": 1188,
@@ -720,6 +779,9 @@
    ],
    "pvp_n_1-1": [
     "Akino"
+   ],
+   "moc_fild01": [
+    "Akino"
    ]
   }
  },
@@ -857,7 +919,12 @@
   "walk_speed_ms": 280,
   "name": "Abelha Rainha Gigante",
   "max_hp": 9200,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "cmd_fild09": [
+    "Abelha Rainha Gigante"
+   ]
+  }
  },
  "1304": {
   "species_id": 1304,
@@ -977,22 +1044,34 @@
  "1372": {
   "species_id": 1372,
   "maps": {
-   "lhz_fild02": 0
+   "lhz_fild02": 0,
+   "0015@tower": 0
   },
   "name": "Bandido",
   "max_hp": 1000000,
   "walk_speed_ms": 165,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "0015@tower": [
+    "Bandido"
+   ]
+  }
  },
  "1381": {
   "species_id": 1381,
   "maps": {
-   "ve_fild03": 8
+   "ve_fild03": 8,
+   "0015@tower": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 165,
   "name": "Katsuyo",
-  "max_hp": 2468000
+  "max_hp": 2468000,
+  "names_by_map": {
+   "0015@tower": [
+    "Katsuyo"
+   ]
+  }
  },
  "1401": {
   "species_id": 1401,
@@ -1060,18 +1139,38 @@
  "1418": {
   "species_id": 1418,
   "maps": {
-   "ve_fild03": 18
+   "ve_fild03": 18,
+   "0015@tower": 0,
+   "0045@tower": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 200,
   "name": "Manda",
-  "max_hp": 2468000
+  "max_hp": 2468000,
+  "names_by_map": {
+   "0015@tower": [
+    "Manda"
+   ],
+   "0045@tower": [
+    "Manda"
+   ]
+  }
  },
  "1447": {
   "species_id": 1447,
   "symbol": "G_GRYPHON",
   "sprite_source": "dados do jogo",
-  "maps": {}
+  "maps": {
+   "0015@tower": 0
+  },
+  "name": "inhegas",
+  "max_hp": 2000000,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "0015@tower": [
+    "inhegas"
+   ]
+  }
  },
  "1448": {
   "species_id": 1448,
@@ -1119,7 +1218,8 @@
   "species_id": 1517,
   "maps": {
    "ve_fild04": 35,
-   "ein_fild01": 6
+   "ein_fild01": 6,
+   "pay_fild10": 0
   },
   "walk_speed_ms": 165,
   "name": "Sanjuu Kyodaireo",
@@ -1127,6 +1227,9 @@
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "ve_fild04": [
+    "Sanjuu Kyodaireo"
+   ],
+   "pay_fild10": [
     "Sanjuu Kyodaireo"
    ]
   }
@@ -1222,7 +1325,12 @@
   "name": "Saru",
   "max_hp": 34000,
   "sprite_source": "Saru.spr (Naruto Ultimate)",
-  "captured_sprite": true
+  "captured_sprite": true,
+  "names_by_map": {
+   "moc_fild13": [
+    "Saru"
+   ]
+  }
  },
  "1632": {
   "species_id": 1632,
@@ -1245,23 +1353,46 @@
    "areia": 15,
    "yuno_fild11": 6,
    "ra_fild03": 38,
-   "lhz_fild02": 0
+   "lhz_fild02": 0,
+   "0015@tower": 0,
+   "0045@tower": 0
   },
   "walk_speed_ms": 170,
   "name": "Jounin",
   "max_hp": 5537991,
   "sprite_source": "Jounin.spr (Naruto Ultimate)",
-  "captured_sprite": true
+  "captured_sprite": true,
+  "names_by_map": {
+   "0015@tower": [
+    "Jounin"
+   ],
+   "0045@tower": [
+    "Jounin"
+   ],
+   "ra_fild03": [
+    "Líder Jounin"
+   ]
+  }
  },
  "1635": {
   "species_id": 1635,
   "maps": {
-   "ve_fild03": 10
+   "ve_fild03": 10,
+   "0015@tower": 0,
+   "0045@tower": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 180,
   "name": "Anbu",
-  "max_hp": 1200000
+  "max_hp": 1200000,
+  "names_by_map": {
+   "0015@tower": [
+    "Anbu"
+   ],
+   "0045@tower": [
+    "Anbu"
+   ]
+  }
  },
  "1636": {
   "species_id": 1636,
@@ -1274,7 +1405,13 @@
   "name": "Chunin",
   "max_hp": 252000,
   "sprite_source": "Chunin.spr (Naruto Ultimate)",
-  "captured_sprite": true
+  "captured_sprite": true,
+  "names_by_map": {
+   "moc_fild08": [
+    "Chunin",
+    "Líder Chunin"
+   ]
+  }
  },
  "1656": {
   "species_id": 1656,
@@ -1283,15 +1420,54 @@
    "ein_fild08": 15
   },
   "walk_speed_ms": 100,
-  "name": "Genin",
+  "name": "Líder Genin",
   "max_hp": 36000,
   "sprite_source": "Genin.spr (Naruto Ultimate)",
   "captured_sprite": true,
   "names_by_map": {
    "cmd_fild09": [
-    "Genin"
+    "Genin",
+    "Líder Genin"
    ]
   }
+ },
+ "1737": {
+  "species_id": 1737,
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Ichibi",
+  "max_hp": 25000000,
+  "walk_speed_ms": 100,
+  "names_by_map": {
+   "0015@tower": [
+    "Ichibi"
+   ],
+   "0045@tower": [
+    "Ichibi"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1738": {
+  "species_id": 1738,
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Hachibi",
+  "max_hp": 42500000,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "0015@tower": [
+    "Hachibi"
+   ],
+   "0045@tower": [
+    "Hachibi"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
  },
  "1769": {
   "species_id": 1769,
@@ -1388,6 +1564,40 @@
   "sprite_source": "dados do jogo",
   "maps": {}
  },
+ "1829": {
+  "species_id": 1829,
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Guardião Chefe",
+  "max_hp": 753000,
+  "walk_speed_ms": 170,
+  "names_by_map": {
+   "0015@tower": [
+    "Guardião Chefe"
+   ],
+   "0045@tower": [
+    "Guardião Chefe"
+   ]
+  },
+  "captured_sprite": true
+ },
+ "1830": {
+  "species_id": 1830,
+  "maps": {
+   "0015@tower": 0
+  },
+  "name": "Guardião Arqueiro",
+  "max_hp": 399000,
+  "walk_speed_ms": 170,
+  "names_by_map": {
+   "0015@tower": [
+    "Guardião Arqueiro"
+   ]
+  },
+  "captured_sprite": true
+ },
  "1831": {
   "species_id": 1831,
   "maps": {
@@ -1398,7 +1608,12 @@
   "name": "Camaleon",
   "max_hp": 307934,
   "sprite_source": "Salamandra.spr (Naruto Ultimate)",
-  "captured_sprite": true
+  "captured_sprite": true,
+  "names_by_map": {
+   "ra_fild03": [
+    "Camaleon"
+   ]
+  }
  },
  "1836": {
   "species_id": 1836,
@@ -1434,6 +1649,30 @@
   },
   "sprite_source": "GRF prioritário"
  },
+ "1916": {
+  "species_id": 1916,
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Mula sem Cabesa",
+  "max_hp": 2300000,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "0015@tower": [
+    "Black Over",
+    "Deca",
+    "Gomen",
+    "Lost in Light",
+    "Mula sem Cabesa"
+   ],
+   "0045@tower": [
+    "Deca",
+    "Mula sem Cabesa"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1917": {
   "species_id": 1917,
   "maps": {
@@ -1447,7 +1686,96 @@
  "1983": {
   "species_id": 1983,
   "captured_sprite": true,
-  "maps": {}
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Shichibi",
+  "max_hp": 40000000,
+  "walk_speed_ms": 190,
+  "names_by_map": {
+   "0015@tower": [
+    "Shichibi"
+   ],
+   "0045@tower": [
+    "Shichibi"
+   ]
+  }
+ },
+ "1984": {
+  "species_id": 1984,
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Nibi",
+  "max_hp": 27500000,
+  "walk_speed_ms": 100,
+  "names_by_map": {
+   "0015@tower": [
+    "Nibi"
+   ],
+   "0045@tower": [
+    "Nibi"
+   ]
+  }
+ },
+ "1985": {
+  "species_id": 1985,
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Rokubi",
+  "max_hp": 37500000,
+  "walk_speed_ms": 300,
+  "names_by_map": {
+   "0015@tower": [
+    "Rokubi"
+   ],
+   "0045@tower": [
+    "Rokubi"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1986": {
+  "species_id": 1986,
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Sanbi",
+  "max_hp": 30000000,
+  "walk_speed_ms": 250,
+  "names_by_map": {
+   "0015@tower": [
+    "Sanbi"
+   ],
+   "0045@tower": [
+    "Sanbi"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1992": {
+  "species_id": 1992,
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Capitão ANBU",
+  "max_hp": 10000000,
+  "walk_speed_ms": 165,
+  "names_by_map": {
+   "0015@tower": [
+    "Capitão ANBU"
+   ],
+   "0045@tower": [
+    "Capitão ANBU"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
  },
  "2407": {
   "species_id": 2407,
@@ -2480,6 +2808,27 @@
   "symbol": "E_SALAMANDER",
   "sprite_source": "GRF prioritário",
   "maps": {}
+ },
+ "4010": {
+  "species_id": 4010,
+  "maps": {
+   "0015@tower": 0,
+   "0045@tower": 0
+  },
+  "name": "Deca",
+  "max_hp": 3739404,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "0015@tower": [
+    "Black Over",
+    "Deca",
+    "Gomen",
+    "Lost in Light"
+   ],
+   "0045@tower": [
+    "Deca"
+   ]
+  }
  },
  "20571": {
   "species_id": 20571,

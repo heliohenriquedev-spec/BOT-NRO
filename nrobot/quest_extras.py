@@ -270,7 +270,8 @@ class Errand:
         if self.attempts > self.config['attempts']:
             return ('fail', 'O servidor nao equipou a montaria apos '+str(self.config['attempts'])+' tentativas')
         self.pending = (now, index); self.reason = 'equipando a montaria'
-        return ('equip', (index, mount.get('location') or body.position_of(index)))
+        from .item_names import MOUNT_SLOTS  # slots unknown (received this session): a mount takes these three
+        return ('equip', (index, mount.get('location') or body.position_of(index) or MOUNT_SLOTS))
 
     def gear(self, body, now):
         """Put back what the mount took off, one item at a time."""

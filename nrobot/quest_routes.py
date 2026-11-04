@@ -1130,4 +1130,13 @@ class QuestRoutes:
                     recorded_menus=len(self.recording.get('observed_menus',[])) if self.recording else 0,
                     recorded_options=len({s for menu in self.recording.get('observed_menus',[]) for s in menu}) if self.recording else 0,
                     validation=copy.deepcopy(self.validation),
-                    recorded_steps=len(self.recording['steps']) if self.recording else 0)
+                    recorded_steps=len(self.recording['steps']) if self.recording else 0,
+                    recorded_maps=self.recorded_maps())
+
+    def recorded_maps(self):
+        """Maps of the recording in order: where it started, then each map reached (one entry each)."""
+        if not self.recording or not self.recording['steps']:return []
+        steps=self.recording['steps'];maps=[steps[0]['map']]
+        for step in steps:
+            if step['kind']=='wait_map' and PortalGuard.key(step['map']) not in {PortalGuard.key(m) for m in maps}:maps.append(step['map'])
+        return maps
