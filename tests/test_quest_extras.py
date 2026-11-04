@@ -334,7 +334,12 @@ def test_switch_button_only_saves_the_choice_for_this_character(tmp_path, monkey
     box.command_requested.connect(lambda c, v: sent.append((c, v)))
     box.item_tables = ({}, {})
     box.state = {'own_look': {'name': 'Uadaweu2'}, 'quests': {'inventory': [dict(item_id=2643, type=5, equip_location=0x23, worn=0)]}}
+    from PySide6.QtWidgets import QMessageBox
+    shown = []
+    monkeypatch.setattr(QMessageBox, 'information', lambda *a: shown.append(a[2]))
+    monkeypatch.setattr(QMessageBox, 'warning', lambda *a: shown.append('ERRO '+a[2]))
     box.choose_items()
+    assert shown and shown[0].startswith('Switch de Uadaweu2 salvo')  # confirmed, not a passing status line
     assert sent == []  # nothing is equipped now; the queue uses the choice
     saved = quest_extras.load()
     assert saved['characters']['Uadaweu2'] == dict(mount_item=2643, combat_items=[16813, 13254]) and saved['mount_enabled']
@@ -350,3 +355,38 @@ def test_mount_received_this_session_is_listed_by_its_name_with_the_mount_slots(
     mounts = item_names.mount_choices(items, descriptions, names)
     assert [(m['item_id'], m['equip_location']) for m in mounts] == [(2643, 35), (2642, 35)]
     assert item_names.combat_choices(items, descriptions, names) == []
+
+
+def test_switch_save_survives_the_other_process_holding_the_file(tmp_path, monkeypatch):
+    from pathlib import Path
+    from nrobot import quest_extras
+    path = tmp_path/'quest_extras.json'
+    real, calls = Path.replace, []
+
+    def busy_then_free(self, target):
+        calls.append(1)
+        if len(calls) < 4:
+            raise PermissionError(5, 'Acesso negado')  # the relay is reading it
+        return real(self, target)
+    monkeypatch.setattr(Path, 'replace', busy_then_free)
+    config = quest_extras.load(path)
+    config['characters'] = {'Uadaweu2': dict(mount_item=2642, combat_items=[27895])}
+    quest_extras.save(config, path)
+    assert quest_extras.load(path)['characters']['Uadaweu2']['mount_item'] == 2642
+    assert not list(tmp_path.glob('*.tmp'))
+
+
+def test_a_file_read_mid_write_is_read_again_not_taken_as_empty(tmp_path, monkeypatch):
+    import json
+    from pathlib import Path
+    from nrobot import quest_extras
+    path = tmp_path/'quest_extras.json'
+    path.write_text(json.dumps(dict(characters={'A': dict(mount_item=1)})), encoding='utf-8')
+    real, calls = Path.read_text, []
+
+    def half_then_whole(self, *args, **kwargs):
+        calls.append(1)
+        return '{"charac' if len(calls) == 1 else real(self, *args, **kwargs)
+    monkeypatch.setattr(Path, 'read_text', half_then_whole)
+    assert quest_extras.load(path)['characters'] == {'A': dict(mount_item=1)}
+

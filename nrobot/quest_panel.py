@@ -462,7 +462,9 @@ class ExtrasBox(QGroupBox):
         super().__init__('Ao terminar a caca e na locomocao')
         from .responsive_ui import WrappingCheckBox
         from . import quest_extras
-        self.config=quest_extras.load();layout=QVBoxLayout(self)
+        try:self.config=quest_extras.load()
+        except OSError:self.config=quest_extras.load_defaults()
+        layout=QVBoxLayout(self)
         self.voltar=WrappingCheckBox('Ao concluir as quests da rota: parar, matar os monstros ao redor e usar @voltar '
                                      '(fora de combate; se a conjuracao for cancelada por dano, mata os monstros e tenta de novo)')
         self.mount=WrappingCheckBox('Usar a montaria para se locomover entre os destinos (equipa fora de combate; ao comecar a '
@@ -522,22 +524,36 @@ class ExtrasBox(QGroupBox):
         if self.item_tables is None:
             self.status.setText('Carregando os nomes dos itens do jogo; tente de novo em alguns segundos.');return
         names,descriptions=self.item_tables
-        self.config=quest_extras.load();mine=self.config.setdefault('characters',{}).setdefault(name,{})
+        try:self.config=quest_extras.load()
+        except OSError as exc:QMessageBox.warning(self,'Switch',str(exc));return
+        mine=self.config.setdefault('characters',{}).setdefault(name,{})
         dialog=SwitchDialog(name,inventory,mine,names,descriptions,self)
         if not dialog.exec():return
-        mine.update(dialog.selection())
-        if mine.get('mount_item'):self.config['mount_enabled']=True
-        try:quest_extras.save(self.config)
-        except OSError as exc:self.status.setText(str(exc));return
-        self.show_config()
+        selection=dialog.selection()
+        try:
+            self.config=quest_extras.load()  # fresh: the relay may have saved @voltar meanwhile
+            mine=self.config.setdefault('characters',{}).setdefault(name,{});mine.update(selection)
+            if mine.get('mount_item'):self.config['mount_enabled']=True
+            quest_extras.save(self.config)
+            saved=quest_extras.load().get('characters',{}).get(name,{})
+            if saved.get('mount_item')!=selection['mount_item'] or saved.get('combat_items')!=selection['combat_items']:
+                raise OSError('O Switch nao ficou gravado em '+str(quest_extras.FILE)+'; tente de novo.')
+        except OSError as exc:
+            # A message box: the status line is rewritten on every refresh and would hide the error.
+            QMessageBox.warning(self,'Switch nao salvo',str(exc));return
+        self.extras_stamp=None;self.show_config()
+        mount=selection['mount_item']
+        QMessageBox.information(self,'Switch salvo',f"Switch de {name} salvo: montaria "+(str(mount) if mount else 'nenhuma')+
+                                f", {len(selection['combat_items'])} item(ns) de combate.")
 
     def store(self,*args):
         from . import quest_extras
-        self.config=quest_extras.load()
-        self.config.update(voltar_enabled=self.voltar.isChecked(),mount_enabled=self.mount.isChecked(),
-                           calm_seconds=self.calm.value(),clear_radius=self.radius.value(),cast_timeout=self.timeout.value())
-        try:quest_extras.save(self.config)
-        except OSError as exc:self.status.setText(str(exc));return
+        try:
+            self.config=quest_extras.load()
+            self.config.update(voltar_enabled=self.voltar.isChecked(),mount_enabled=self.mount.isChecked(),
+                               calm_seconds=self.calm.value(),clear_radius=self.radius.value(),cast_timeout=self.timeout.value())
+            quest_extras.save(self.config)
+        except OSError as exc:QMessageBox.warning(self,'Opcoes nao salvas',str(exc));return
         self.show_config()
 
     def update_state(self,state):
@@ -545,8 +561,16 @@ class ExtrasBox(QGroupBox):
         self.state=state or {}
         q=state.get('quests',{});learning=q.get('learning')
         if not learning:
-            fresh=quest_extras.load()
-            if fresh!=self.config:self.config=fresh;self.show_config()
+            # Read again only when the file changed: reading it on every refresh competed with the
+            # relay's writes (Windows refuses to replace a file another process is reading).
+            try:stamp=quest_extras.FILE.stat().st_mtime_ns
+            except OSError:stamp=None
+            if stamp!=getattr(self,'extras_stamp',None):
+                try:fresh=quest_extras.load()
+                except OSError:fresh=None
+                if fresh is not None:
+                    self.extras_stamp=stamp
+                    if fresh!=self.config:self.config=fresh;self.show_config()
         busy=bool(learning) or q.get('phase') in ('pickup','travel','hunt','delivery','return')
         for b in (self.learn_voltar,self.learn_mount,self.switch):b.setEnabled(not busy)
         self.cancel.setEnabled(bool(learning))

@@ -1681,7 +1681,12 @@
   "walk_speed_ms": 400,
   "name": "Polvo Gigante",
   "max_hp": 4690000,
-  "sprite_source": "GRF prioritário"
+  "sprite_source": "GRF prioritário",
+  "names_by_map": {
+   "tur_dun03": [
+    "Polvo Gigante"
+   ]
+  }
  },
  "1983": {
   "species_id": 1983,

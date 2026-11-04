@@ -9,6 +9,7 @@
 """
 import copy
 import json
+import time
 import uuid
 from pathlib import Path
 
@@ -33,22 +34,54 @@ def for_character(config, name):
 
 
 def load(path=None):
-    try:
-        data = json.loads(Path(path or FILE).read_text(encoding='utf-8'))
-    except (OSError, ValueError):
-        data = {}
+    """The panel and the relay are two processes reading and writing this file: a read that meets
+    the file while it is being replaced (or locked by an antivirus) is tried again, so a passing
+    failure never looks like an empty configuration that the next save would write back."""
+    path = Path(path or FILE)
+    data = {}
+    for attempt in range(20):
+        try:
+            data = json.loads(path.read_text(encoding='utf-8'))
+            break
+        except FileNotFoundError:
+            break
+        except (OSError, ValueError):
+            if attempt == 19:
+                raise OSError('Nao foi possivel ler '+path.name+' (arquivo em uso por outro programa?)')
+            time.sleep(.05)
     result = copy.deepcopy(DEFAULTS)
     result.update({k: v for k, v in (data if isinstance(data, dict) else {}).items() if k in DEFAULTS})
     return result
 
 
+def load_defaults():
+    return copy.deepcopy(DEFAULTS)
+
+
 def save(config, path=None):
+    """Written to a temporary file and swapped in; Windows refuses the swap while the other process
+    reads the file, so it is retried for up to 3 s and then reported (never silently lost)."""
     data = {k: config.get(k, v) for k, v in DEFAULTS.items()}
     path = Path(path or FILE)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp')
     temporary.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')
-    temporary.replace(path)
+    try:
+        for attempt in range(60):
+            try:
+                temporary.replace(path)
+                return data
+            except PermissionError:
+                if attempt == 59:
+                    raise OSError('Nao foi possivel salvar '+path.name+': o arquivo esta em uso (antivirus ou '
+                                  'outro programa?). Tente de novo.')
+                time.sleep(.05)
+    finally:
+        if temporary.exists():
+            try:
+                temporary.unlink()
+            except OSError:
+                pass
     return data
 
 

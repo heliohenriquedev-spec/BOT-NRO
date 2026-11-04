@@ -24,7 +24,8 @@ class QuestRelay(SharedQuestRelay):
 
     def quest_control(self,command,request,game_gate):
         from . import map_routes, quest_daily, quest_extras
-        self.quests.extras=quest_extras.for_character(quest_extras.load(),(self.own_look or {}).get('name'))
+        try:self.quests.extras=quest_extras.for_character(quest_extras.load(),(self.own_look or {}).get('name'))
+        except OSError as exc:print('[ROTA] '+str(exc))  # keeps the last read
         if command=='quest_extras_equip':
             from .quest_extras import Errand
             if self.quests.active or self.quests.recording:raise ValueError('Pause a fila antes de equipar pelo painel')
