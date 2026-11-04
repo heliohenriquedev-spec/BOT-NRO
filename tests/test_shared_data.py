@@ -56,3 +56,27 @@ def test_missions_recorded_by_the_user_follow_the_published_one_of_the_same_opti
 
 def test_portal_margins_keep_the_smallest_learned():
     assert shared_data.merge_portals({'a': {'1,1': 3}}, {'a': {'1,1': 1, '2,2': 2}}, smallest=True) == {'a': {'1,1': 1, '2,2': 2}}
+
+
+def test_voltar_buffs_and_gm_signs_go_too_but_not_the_switch(tmp_path):
+    dev, user = tmp_path/'dev', tmp_path/'user'
+    write(dev, 'data/rede/quest_extras.json', dict(voltar_frame='f300', voltar_enabled=True, voltar_name='Dev',
+                                                  clear_radius=6, characters={'Dev': dict(mount_item=2642)}, mount=dict(item_id=1)))
+    write(dev, 'data/rede/buffs_aprendidos.json', {'29': 12})
+    write(dev, 'data/jogadores/gm_sinais.json', {'visuais': [7], 'marcas': []})
+    shared_data.export(log=lambda t: None, root=dev)
+    assert 'characters' not in read(dev, 'data/compartilhado/quest_extras.json')
+    import shutil
+    shutil.copytree(dev/'data/compartilhado', user/'data/compartilhado')
+    write(user, 'data/rede/buffs_aprendidos.json', {'8': 1})
+    write(user, 'data/jogadores/gm_sinais.json', {'visuais': [3], 'marcas': ['x']})
+    assert shared_data.merge(user, log=lambda t: None)
+    extras = read(user, 'data/rede/quest_extras.json')
+    assert extras['voltar_frame'] == 'f300' and extras['clear_radius'] == 6 and 'characters' not in extras
+    assert read(user, 'data/rede/buffs_aprendidos.json') == {'8': 1, '29': 12}
+    assert read(user, 'data/jogadores/gm_sinais.json') == {'visuais': [3, 7], 'marcas': ['x']}
+
+
+def test_a_voltar_learned_on_this_pc_is_kept():
+    mine = dict(voltar_frame='mine', voltar_enabled=False, clear_radius=9)
+    assert shared_data.merge_extras(mine, dict(voltar_frame='dev', clear_radius=6)) == mine

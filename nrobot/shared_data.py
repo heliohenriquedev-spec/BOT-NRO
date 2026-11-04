@@ -26,8 +26,14 @@ FILES = {'rotas_quests.json': 'data/rede/rotas_quests.json',
          'quadros_missoes.json': 'data/rede/quadros_missoes.json',
          'rotas_mapas.json': 'data/rede/rotas_mapas.json',
          'portais.json': 'data/mapas/portais.json',
-         'portais_internos.json': 'data/mapas/portais_internos.json'}
+         'portais_internos.json': 'data/mapas/portais_internos.json',
+         'quest_extras.json': 'data/rede/quest_extras.json',
+         'buffs_aprendidos.json': 'data/rede/buffs_aprendidos.json',
+         'gm_sinais.json': 'data/jogadores/gm_sinais.json'}
 PERSONAL_LIBRARY = ('checked_missions',)
+# @voltar learned once by the developer works for everybody (the speaker's name is swapped when
+# sent); the Switch (mount and items of each character) and the learned mount stay personal.
+SHARED_EXTRAS = ('voltar_frame', 'voltar_enabled', 'calm_seconds', 'clear_radius', 'cast_timeout', 'attempts')
 
 
 def _read(path, default):
@@ -65,10 +71,12 @@ def export(log=print, root=ROOT):
             continue
         if name == 'quadros_missoes.json':
             data = {k: v for k, v in data.items() if k not in PERSONAL_LIBRARY}
+        if name == 'quest_extras.json':
+            data = {k: v for k, v in data.items() if k in SHARED_EXTRAS}
         _write(root/SHARED/name, data)
         count += 1
     _write(root/MARKER, {'digest': digest(root)})  # the developer already has all of it
-    log(f'Quests, quadros, rotas de mapa e portais preparados para os usuarios ({count} arquivos).')
+    log(f'Quests, quadros, rotas de mapa, portais, @voltar, buffs e sinais de GM preparados para os usuarios ({count} arquivos).')
 
 
 # -- merging on the user's PC ----------------------------------------------------------------
@@ -159,6 +167,40 @@ def merge_portals(mine, theirs, *, smallest=False):
     return result
 
 
+def merge_extras(mine, theirs):
+    """@voltar: the published one only where this PC has not learned its own; the numbers only
+    for a PC that never set them."""
+    result = copy.deepcopy(mine) if isinstance(mine, dict) else {}
+    fresh = not result
+    if theirs.get('voltar_frame') and not result.get('voltar_frame'):
+        result['voltar_frame'] = theirs['voltar_frame']
+        result['voltar_enabled'] = theirs.get('voltar_enabled', True)
+        result['voltar_name'] = ''  # the sender's name is put in when sending
+    if fresh:
+        for key in ('calm_seconds', 'clear_radius', 'cast_timeout', 'attempts'):
+            if key in theirs:
+                result[key] = theirs[key]
+    return result
+
+
+def merge_flat(mine, theirs):
+    """{key: value} learned tables (buffs): what this PC lacks is added."""
+    result = copy.deepcopy(mine) if isinstance(mine, dict) else {}
+    for key, value in (theirs or {}).items():
+        result.setdefault(key, copy.deepcopy(value))
+    return result
+
+
+def merge_lists(mine, theirs):
+    """{name: [values]} (GM signs): union, the user's order first."""
+    result = copy.deepcopy(mine) if isinstance(mine, dict) else {}
+    for key, values in (theirs or {}).items():
+        known = result.setdefault(key, [])
+        if isinstance(known, list) and isinstance(values, list):
+            known.extend(copy.deepcopy(v) for v in values if v not in known)
+    return result
+
+
 def backup(root, log):
     root = Path(root)
     present = [own for own in FILES.values() if (root/own).is_file()]
@@ -194,6 +236,12 @@ def merge(root=ROOT, log=print, force=False):
         result['portais.json'] = merge_portals(own['portais.json'], shared['portais.json'], smallest=True)
     if shared['portais_internos.json'] is not None:
         result['portais_internos.json'] = merge_portals(own['portais_internos.json'], shared['portais_internos.json'])
+    if shared['quest_extras.json'] is not None:
+        result['quest_extras.json'] = merge_extras(own['quest_extras.json'], shared['quest_extras.json'])
+    if shared['buffs_aprendidos.json'] is not None:
+        result['buffs_aprendidos.json'] = merge_flat(own['buffs_aprendidos.json'], shared['buffs_aprendidos.json'])
+    if shared['gm_sinais.json'] is not None:
+        result['gm_sinais.json'] = merge_lists(own['gm_sinais.json'], shared['gm_sinais.json'])
     try:  # everything checked before anything is written: a bad publication changes nothing
         from . import map_routes, quest_library, quest_routes
         if 'quadros_missoes.json' in result:
@@ -211,5 +259,5 @@ def merge(root=ROOT, log=print, force=False):
     for name, data in result.items():
         _write(root/FILES[name], data)
     _write(root/MARKER, {'digest': current, 'imported_at': datetime.now().isoformat(timespec='seconds')})
-    log('Quests, quadros, rotas de mapa e portais publicados foram recebidos.')
+    log('Quests, quadros, rotas de mapa, portais, @voltar, buffs e sinais de GM publicados foram recebidos.')
     return True

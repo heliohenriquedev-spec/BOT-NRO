@@ -1,7 +1,7 @@
 {
- "version": "2026.11.04.6",
- "published_at": "2026-11-04T01:51:01",
- "notes": "Fix",
+ "version": "2026.11.04.7",
+ "published_at": "2026-11-04T01:57:43",
+ "notes": "fix",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -10,9 +10,12 @@
   "RESTAURAR_CONEXAO_ORIGINAL.bat",
   "atualizacao.json",
   "data/catalogo/catalogo.json",
+  "data/compartilhado/buffs_aprendidos.json",
+  "data/compartilhado/gm_sinais.json",
   "data/compartilhado/portais.json",
   "data/compartilhado/portais_internos.json",
   "data/compartilhado/quadros_missoes.json",
+  "data/compartilhado/quest_extras.json",
   "data/compartilhado/rotas_mapas.json",
   "data/compartilhado/rotas_quests.json",
   "data/monstros_base/monstros.json",
@@ -2081,5 +2084,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "65a5180008d8"
+ "files_digest": "59d6dbb34414"
 }
