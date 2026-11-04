@@ -780,11 +780,17 @@ class SessionRelay(QuestRelay):
         if not choices:
             return True
         prefix = monster_choice_key(self.tracker.observer.map_name, species, '')
-        if not any(key.startswith(prefix) for key in choices):
+        # Only a name left unchecked restricts this sprite: with every name of it checked (or none
+        # chosen), it is attacked like before, without waiting for anything else.
+        if not any(key.startswith(prefix) and not enabled for key, enabled in choices.items()):
             return True
         entity = self.inventory.entities.get(identity)
-        from .map_monsters import is_confirmed_monster
-        if not entity or not is_confirmed_monster(entity, self.tracker.observer.player_id):
+        from .network_targets import is_player_id
+        from .monster_db import is_known_player
+        # The name tells the monsters of one sprite apart; HP is not needed for that (some PCs never
+        # receive it with the name, and then nothing was ever attacked).
+        if (not entity or not entity.get('name') or is_player_id(identity) or is_known_player(entity['name'])
+                or entity.get('owner_id') or entity.get('summoned')):
             return False
         name = entity['name']
         if prefix+name in choices:

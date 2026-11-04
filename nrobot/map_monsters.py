@@ -28,7 +28,13 @@ def is_confirmed_monster(entity, player_id=None):
     if entity.get('object_type_raw') not in (None, 0, 5) or entity.get('owner_id') or entity.get('summoned'):
         return False
     name = entity.get('name')
-    return bool(name and not is_known_player(name) and entity.get('max_hp', 0) > 0)
+    if not name or is_known_player(name):
+        return False
+    # The server writes "HP: x/y" in the name reply of monsters; when that reply comes without it
+    # (seen on other PCs), a named unit with a monster sprite is still a monster, otherwise
+    # nothing was ever confirmed there and the bot only patrolled.
+    from .monster_db import is_monster_species
+    return entity.get('max_hp', 0) > 0 or is_monster_species(entity.get('species_id') or 0)
 
 
 def confirmed_types(inventory, player_id=None, *, by_name=False):
