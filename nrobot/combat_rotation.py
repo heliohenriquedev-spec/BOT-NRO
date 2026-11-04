@@ -47,6 +47,10 @@ class CombatRotation:
     def __init__(self, profiles, *, response_timeout=1.5, attempts=3, defer=8, interval=.5, global_delay=.12, priority=None,
                  fast=False, burst=False, burst_interval=.05, ignore_animation=False):
         self.ignore_animation = ignore_animation
+        # Cells kept inside each skill's range. With the movement in the player's hands a skill sent
+        # at the very edge made the server walk the character up to the target (rAthena chases
+        # out-of-range casts), so then the target must be clearly inside.
+        self.range_margin = 0
         self.fast = fast  # offensives ignore the manual interval: only server cooldowns and delay
         # REDE-82: burst sends every offensive in range in turn, one packet per burst_interval,
         # without waiting for the server's answer.
@@ -94,10 +98,21 @@ class CombatRotation:
 
     RENEW_BEFORE = 2.5  # seconds before a buff's learned end it is cast again
 
-    def _fail(self, skill_id, now, reason):
+    # A summon refused at once was not cast (usually the previous creature lives a few seconds past
+    # its configured duration): tried again every second, up to 10 times, then its interval waits.
+    SUMMON_RETRY = 1.0
+    SUMMON_REFUSALS = 10
+
+    def _fail(self, skill_id, now, reason, cause=None):
         pending = self.pending.pop(skill_id, None)
         if pending and pending['role'] == 'summon':
             self.summons.failed(skill_id, now, reason == 'servidor recusou')
+            if reason == 'sem confirmação':
+                # NRO never answers a summon: silence is the normal start (the queue counts it as
+                # started), not a failure that should push the next attempts back.
+                self.failures[skill_id] = 0
+                self.ready[skill_id] = max(self.ready.get(skill_id, 0), now+.3)
+                return
         if pending and pending['role'] == 'buff':
             # Not confirmed (cut by a step, a cooldown...): try again later, waiting longer each
             # time in a row, instead of never renewing the buff again.
@@ -109,11 +124,20 @@ class CombatRotation:
             self.after_skill_delay = min(self.MAX_AFTER_SKILL_DELAY, self.after_skill_delay+.05)
         count = self.failures.get(skill_id, 0)+1
         self.failures[skill_id] = count
-        self.ready[skill_id] = max(self.ready.get(skill_id, 0) if pending and pending['role'] == 'summon' else 0,
-                                   now+(self.defer if count >= self.attempts else .3))
-        if count >= self.attempts:
-            self.failures[skill_id] = 0
-        self.log.append({'kind': 'rotation_failed', 'skill_id': skill_id, 'reason': reason, 'failures': count})
+        refused_summon = pending and pending['role'] == 'summon' and reason == 'servidor recusou'
+        if refused_summon and count < self.SUMMON_REFUSALS:
+            # Refused at once (e.g. the previous creature still there): nothing was cast, so its
+            # interval was not spent. Charging it left the character with no summon for 30-60 s.
+            self.ready[skill_id] = now+self.SUMMON_RETRY
+        else:
+            self.ready[skill_id] = max(self.ready.get(skill_id, 0) if pending and pending['role'] == 'summon' else 0,
+                                       now+(self.defer if count >= self.attempts else .3))
+            if count >= max(self.attempts, self.SUMMON_REFUSALS if refused_summon else 0):
+                self.failures[skill_id] = 0
+        entry = {'kind': 'rotation_failed', 'skill_id': skill_id, 'reason': reason, 'failures': count}
+        if cause is not None:
+            entry['cause_raw'] = cause
+        self.log.append(entry)
 
     def observe(self, events, player_id, now):
         self.summons.observe(events, player_id, now)
@@ -169,7 +193,7 @@ class CombatRotation:
             if kind == 'skill_cast' and event['source_id'] == player_id:
                 pending['deadline'] = max(pending['deadline'], now+min(event['duration_ms']/1000, 30)+self.response_timeout)
             if kind == 'skill_failed':
-                self._fail(skill_id, now, 'servidor recusou')
+                self._fail(skill_id, now, 'servidor recusou', event.get('cause_raw'))
             elif (kind == 'skill_damage' and pending['role'] == 'offensive'
                   and event['source_id'] == player_id
                   and (pending.get('cast_mode') == 'self' or event['target_id'] == pending['target_id'])
@@ -239,7 +263,7 @@ class CombatRotation:
         configured = [p for p in self.profiles if p['enabled'] and p['role'] == 'summon'
                       and p['skill_id'] in known and known[p['skill_id']]['level'] >= p['level']
                       and known[p['skill_id']].get('target_flags') in (2,4,16)]
-        if not configured or self.summon_monster(state, target_id, near_only=False) is None:
+        if not configured:
             return False
         if self.summons.waiting is not None:
             return True
@@ -350,9 +374,9 @@ class CombatRotation:
                 if target is None:
                     continue
             elif profile['role'] == 'summon':
+                # One summon is kept up all the time, also while patrolling with no monster around:
+                # waiting for a monster within 12 cells left the character alone for seconds.
                 nearby = self.summon_monster(state, target_id)
-                if nearby is None:
-                    continue
                 if not self.summons.may_invoke(profile, now):
                     continue
                 if flags not in (2, 4, 16):
@@ -372,7 +396,7 @@ class CombatRotation:
                 bounds = entity.get('attack_positions') or [entity.get('effective_position', entity['position'])]
                 if not entity.get('attack_positions') and entity.get('destination') and not entity.get('arrival_estimated'):
                     bounds.append(entity['destination'])
-                if max(math.dist(own, p) for own in (state.get('combat_player_positions') or [state['player_position']]) for p in bounds) > configured_range(profile, meta):
+                if max(math.dist(own, p) for own in (state.get('combat_player_positions') or [state['player_position']]) for p in bounds) > configured_range(profile, meta)-self.range_margin:
                     continue
                 if entity.get('position_age_seconds', 0) > 1.5 and not entity.get('position_usable'):
                     continue
@@ -385,7 +409,7 @@ class CombatRotation:
                 action['combat_target_id'] = target_id
                 action['cast_mode'] = 'self'
             elif profile['role'] == 'summon':
-                action['combat_target_id'] = nearby['entity_id']
+                action['combat_target_id'] = nearby['entity_id'] if nearby else None
                 action['cast_mode'] = 'ground' if flags == 2 else 'self'
                 # Aim beside the current position, never at an unvalidated distant cell.
                 own = (state.get('combat_player_positions') or [state['player_position']])[0]

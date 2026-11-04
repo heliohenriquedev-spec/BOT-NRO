@@ -120,3 +120,36 @@ def test_relay_patrol_shares_pending_panic_and_target_priority_guards(tmp_path):
             await relay.send_hunt_action(action, game_gate=lambda: True)
         assert len(relay.upstream.packets) == 1
     asyncio.run(scenario())
+
+
+def test_monster_already_declined_does_not_stop_the_patrol_step(tmp_path):
+    """Log of 2026-11-04 13:40: a monster across a wall was declined by the hunt, but the relay
+    cancelled each patrol step for it ("Alvo apareceu"), 154 times in 25 s, standing still."""
+    async def scenario():
+        relay = SessionRelay('127.0.0.1', folder=tmp_path, allow_commands=True)
+        relay.hunt = PacketHunt(patrol=True)
+        relay.hunt.start()
+        class Writer:
+            def __init__(self): self.packets = []
+            def write(self, data): self.packets.append(data)
+            async def drain(self): pass
+        relay.upstream = Writer()
+        observer = relay.tracker.observer
+        observer.player_id, observer.player, observer.player_at = 1, [20, 20], time.monotonic()
+        action = relay.hunt.plan(relay.status(), time.monotonic(), 100)
+        observer.species = {1051}
+        observer.registry.update(Entity(2, 1051, 21, 20, time.monotonic(), 'monster'))
+        relay.hunt.passed_over = {2}  # weighed by the hunt when it chose to keep patrolling
+        await relay.send_hunt_action(action, game_gate=lambda: True)
+        assert len(relay.upstream.packets) == 1
+    asyncio.run(scenario())
+
+
+def test_patrol_chosen_past_a_walled_monster_remembers_it():
+    from nrobot.map_navigation import CollisionMap
+    collision = CollisionMap(60, 40, [int(not (x == 20 and y <= 34)) for y in range(40) for x in range(60)])
+    hunt = PacketHunt(patrol=True); hunt.start()
+    seen = {'state': 'tracking', 'player_position_recent': True, 'player_position': [15, 5],
+            'recent_entities': [{'entity_id': 101, 'position': [25, 5]}]}
+    action = hunt.plan(seen, 0, 100, collision)
+    assert action['purpose'] == 'patrol' and hunt.passed_over == {101}

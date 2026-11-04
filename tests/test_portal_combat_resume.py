@@ -68,7 +68,7 @@ def test_fragmented_map_server_portal_keeps_client_connected_through_relay():
 
 def test_monster_close_behind_wall_is_approached_instead_of_kited():
     width = height = 20
-    cells = [int(x != 9 or y >= 15) for y in range(height) for x in range(width)]
+    cells = [int(x != 9 or y >= 8) for y in range(height) for x in range(width)]  # short way around
     collision = CollisionMap(width, height, cells)
     hunt = PacketHunt(); hunt.auto_attacks = False; hunt.start()
     state = dict(state='tracking', player_position_recent=True, player_position=[7, 5], engagement_range=6,
@@ -143,3 +143,13 @@ def test_map_to_map_connection_handoff_preserves_hunt_and_receives_new_position(
             source.close(); target.close()
             await source.wait_closed(); await target.wait_closed()
     asyncio.run(scenario())
+
+
+def test_monster_close_behind_a_long_wall_is_neither_kited_nor_chased():
+    width = height = 20
+    cells = [int(x != 9 or y >= 15) for y in range(height) for x in range(width)]
+    collision = CollisionMap(width, height, cells)
+    hunt = PacketHunt(); hunt.auto_attacks = False; hunt.start()
+    state = dict(state='tracking', player_position_recent=True, player_position=[7, 5], engagement_range=6,
+                 recent_entities=[dict(entity_id=20, position=[11, 5])])
+    assert hunt.plan(state, 0, 100, collision) is None and hunt.target is None

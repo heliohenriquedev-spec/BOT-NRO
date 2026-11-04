@@ -183,3 +183,69 @@ def test_patrol_hunt_prefers_monsters_ahead_over_slightly_closer_ones_behind():
     hunt = PacketHunt(); hunt.start()
     no_patrol = state([50, 50], [(30, [41, 50]), (31, [60, 50])])
     assert hunt.plan(no_patrol, 0)['target_id'] == 30  # without patrol: simply the closest
+
+
+def walled_map():
+    """60x40 open ground with a wall at x=20 from the top down to y=34 (way around at the bottom)."""
+    from nrobot.map_navigation import CollisionMap
+    width, height = 60, 40
+    return CollisionMap(width, height, [int(not (x == 20 and y <= 34)) for y in range(height) for x in range(width)])
+
+
+def test_monster_across_a_wall_is_not_chosen_over_a_reachable_one():
+    collision = walled_map()
+    hunt = PacketHunt(); hunt.start()
+    # 101 is 10 cells away in a straight line but ~70 steps around the wall; 102 is 15 cells away on this side.
+    seen = state([15, 5], [(101, [25, 5]), (102, [5, 20])])
+    action = hunt.plan(seen, 0, collision=collision)
+    assert action['kind'] == 'move' and action['target_id'] == 102
+    assert hunt.wall_checks[101][3]
+
+
+def test_only_monsters_across_the_wall_leave_the_character_where_it_is():
+    collision = walled_map()
+    hunt = PacketHunt(); hunt.start()
+    assert hunt.plan(state([15, 5], [(101, [25, 5])]), 0, collision=collision) is None
+    assert hunt.target is None
+
+
+def test_current_target_found_across_a_wall_is_dropped_unless_it_attacks():
+    collision = walled_map()
+    hunt = PacketHunt(); hunt.start()
+    hunt.target, hunt.target_since = 101, 0
+    assert hunt.plan(state([15, 5], [(101, [25, 5])]), 0, collision=collision) is None
+    assert hunt.target is None and 101 in hunt.excluded_until
+    fighting = PacketHunt(); fighting.start()
+    fighting.target, fighting.target_since, fighting.aggressors = 101, 0, {101: 0}
+    action = fighting.plan(state([15, 5], [(101, [25, 5])]), 0, collision=collision)
+    assert action['kind'] == 'move' and action['target_id'] == 101  # it is hitting us: go get it
+
+
+def test_a_short_way_around_is_still_hunted():
+    from nrobot.map_navigation import CollisionMap
+    collision = CollisionMap(40, 40, [int(not (x == 20 and 3 <= y <= 7)) for y in range(40) for x in range(40)])
+    hunt = PacketHunt(); hunt.start()
+    action = hunt.plan(state([15, 5], [(101, [25, 5])]), 0, collision=collision)
+    assert action['kind'] == 'move' and action['target_id'] == 101
+
+
+def test_walled_monster_is_not_dropped_and_repicked_every_tick_with_deferral_off():
+    """Log of 2026-11-04: target deferral 0 s; the rotation picked the walled monster again every
+    tick and the hunt dropped it again (1958 times in 51 s, standing still)."""
+    collision = walled_map()
+    hunt = PacketHunt(); hunt.TARGET_DEFER = 0; hunt.start()
+    seen = state([15, 5], [(101, [25, 5])])
+    for tick in range(20):
+        hunt.target = 101  # what the skill rotation did each tick
+        hunt.plan(seen, tick*.02, collision=collision)
+    ignored = [d for d in hunt.diagnostics if d['kind'] == 'target_ignored']
+    assert len(ignored) <= 1 and hunt.walled(101, .3)
+
+
+def test_detour_around_blocked_cells_is_not_a_wall():
+    from nrobot.map_navigation import CollisionMap
+    collision = CollisionMap(40, 40, [1]*1600)
+    hunt = PacketHunt(); hunt.start()
+    hunt.blocked_until = {(17, y): 99 for y in range(0, 12)}  # failed steps, not walls
+    action = hunt.plan(state([15, 5], [(101, [22, 5])]), 0, collision=collision)
+    assert action['kind'] == 'move' and action['target_id'] == 101

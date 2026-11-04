@@ -30,7 +30,7 @@ PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/m
              'data/rede/rotas_mapas.json', 'data/rede/missoes_concluidas.json',
              'data/rede/slots_missoes.json', 'data/rede/quest_extras.json',
              'data/rede/progresso_quests.json', 'data/x1',
-             'data/rede/login_automatico.json', 'data/rede/compartilhado_importado.json',
+             'data/rede/compartilhado_importado.json',
              'data/rede/alvos_importados.json')
 # Kept in the repository for development, not needed to run the bot.
 NOT_DISTRIBUTED = ('tests', 'tools', 'Arquivos_grf', '.gitignore', '.gitattributes')

@@ -101,7 +101,8 @@ class ContinuousTracker:
         target = self.observer.choose(now) if healthy else None
         candidates = [e for e in self.observer.registry.entities.values() if self.observer.registry.current(e, now)
                       and e.alive and ((e.kind == 'monster' and e.species_id in self.observer.species)
-                                       or (e.kind == 'player' and e.entity_id in self.observer.pinned))]
+                                       or (e.kind == 'player' and (e.entity_id in self.observer.pinned
+                                                                   or e.entity_id in self.observer.pvp)))]
         return {'state': 'invalid' if self.failed else 'waiting_fresh_events' if self.delivery_lag > 2 else 'tracking' if healthy else 'waiting_reorder',
                 'reason': self.failed, 'messages': self.messages, 'packets': self.packet_count,
                 'delivery_lag_seconds': round(self.delivery_lag, 3),

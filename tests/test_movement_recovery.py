@@ -152,6 +152,6 @@ def test_in_range_combat_does_not_recompute_a_walk_route(monkeypatch):
     monkeypatch.setattr(collision,'route',unnecessary)
     hunt=PacketHunt();hunt.start()
     assert hunt.plan(state((10,10),((20,(11,10)),)),0,collision=collision)['kind']=='attack'
-    hunt.auto_attacks=False
+    hunt.auto_attacks=False;hunt.melee_approach=False;hunt.kite=True
     s=state((10,10),((20,(15,10)),));s['engagement_range']=6
     assert hunt.plan(s,1,collision=collision) is None

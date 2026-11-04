@@ -1,33 +1,98 @@
-"""Read-only observations plus explicit human review of possible monster/item links."""
+"""Items and the monsters that drop them (server @mi sheets plus what was seen falling).
+
+Tables are only rebuilt when the database changes on disk or the search changes: rebuilding
+them every 2 s with columns sized to contents took ~9 s per refresh and froze the window."""
 import json
 import sqlite3
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox,
                                QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QTabWidget, QWidget)
 
 from . import drop_db
 
 
+def chance(source):
+    if source['rate'] is not None:
+        return f"{source['rate']:.2f}%" + (' (MVP)' if source['mvp'] else '')
+    return f"visto {source['seen']}x" if source['seen'] else '—'
+
+
+def fill(table, rows):
+    """Writes rows of text in one pass; columns are sized once, on the first fill."""
+    table.setUpdatesEnabled(False)
+    try:
+        table.setRowCount(len(rows))
+        for row, values in enumerate(rows):
+            for column, value in enumerate(values):
+                table.setItem(row, column, QTableWidgetItem(str(value)))
+        if not table.property('sized') and rows:
+            table.resizeColumnsToContents()
+            table.setProperty('sized', True)
+    finally:
+        table.setUpdatesEnabled(True)
+
+
+def make_table(headers, stretch=()):
+    table = QTableWidget(0, len(headers))
+    table.setHorizontalHeaderLabels(headers)
+    table.setEditTriggers(QTableWidget.NoEditTriggers)
+    table.setSelectionBehavior(QTableWidget.SelectRows)
+    table.setSelectionMode(QTableWidget.SingleSelection)
+    table.verticalHeader().setVisible(False)
+    header = table.horizontalHeader()
+    header.setSectionResizeMode(QHeaderView.Interactive)
+    for column in stretch:
+        header.setSectionResizeMode(column, QHeaderView.Stretch)
+    return table
+
+
+class ItemSourcesDialog(QDialog):
+    """Every monster that drops one item, with its own chance."""
+
+    def __init__(self, parent, item):
+        super().__init__(parent)
+        self.setWindowTitle(f"Quem dropa {item['item_name']} ({item['item_id'] or '?'})")
+        self.resize(760, 420)
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel('Chance informada pelo servidor (@mi); "Vistos" conta os drops associados a cada monstro '
+                                'nas observacoes do jogo. Monstros sem chance ainda nao tiveram a ficha @mi consultada.'))
+        from .monster_db import all_monsters
+        maps = {m['species_id']: sorted(set(m.get('maps') or []) | set(m.get('seen_maps') or [])) for m in all_monsters()}
+        table = make_table(['Monstro', 'ID', 'Chance', 'Vistos', 'Mapas'], stretch=(4,))
+        fill(table, [[s['monster_name'] or f"Monstro {s['species_id']}", s['species_id'], chance(s), s['seen'],
+                      ', '.join(maps.get(s['species_id'], [])[:8]) or '—'] for s in item['sources']])
+        layout.addWidget(table, 1)
+        close = QPushButton('Fechar'); close.clicked.connect(self.accept)
+        layout.addWidget(close)
+
+
 class DropDatabaseDialog(QDialog):
     def __init__(self, parent=None, species=None):
         super().__init__(parent)
-        self.species, self.entries = species, []
-        self.setWindowTitle('Database de itens e drops')
+        self.species, self.entries, self.items, self.stamp, self.query = species, [], [], None, None
+        self.setWindowTitle('Database de itens e drops' + (f' — monstro {species}' if species else ''))
         self.resize(1050, 600)
         layout = QVBoxLayout(self)
-        note = QLabel('Coleta passiva: itens no chao, mortes observadas e possiveis associacoes. Proximidade nao prova '
-                      'origem: jogadores tambem podem jogar itens no chao. Confirme um vinculo somente apos conferir no jogo. '
-                      'Contagens observadas nao sao taxas oficiais de drop.')
-        note.setWordWrap(True); layout.addWidget(note)
         self.search = QLineEdit(); self.search.setPlaceholderText('Buscar item, ID, monstro ou mapa')
-        self.search.textChanged.connect(self.reload); layout.addWidget(self.search)
+        self.typing = QTimer(self); self.typing.setSingleShot(True); self.typing.setInterval(300)
+        self.typing.timeout.connect(self.reload)
+        self.search.textChanged.connect(self.typing.start)
+        layout.addWidget(self.search)
         self.summary = QLabel(); layout.addWidget(self.summary)
         tabs = QTabWidget(); layout.addWidget(tabs, 1)
+
+        items = QWidget(); items_layout = QVBoxLayout(items)
+        items_layout.addWidget(QLabel('Cada item com os monstros de maior chance. Duplo clique: todos os monstros que '
+                                      'dropam o item e a chance de cada um.'))
+        self.item_table = make_table(['ID item', 'Item', 'Maior chance', '2ª', '3ª', 'Monstros'], stretch=(1,))
+        self.item_table.doubleClicked.connect(self.open_item)
+        items_layout.addWidget(self.item_table, 1)
+        tabs.addTab(items, 'Itens')
+
         server = QWidget(); server_layout = QVBoxLayout(server)
-        server_note = QLabel('Lista completa enviada pelo servidor com o comando @mi ID (taxas do servidor, inclusive itens raros). '
-                             'O bot consulta sozinho cada monstro novo que aparece, uma vez, com intervalo entre os comandos. '
-                             '"Vistos" conta os drops associados a esse monstro nas observacoes.')
+        server_note = QLabel('Lista enviada pelo servidor com o comando @mi ID (taxas do servidor, inclusive itens raros). '
+                             'O bot consulta sozinho cada monstro novo que aparece, uma vez, com intervalo entre os comandos.')
         server_note.setWordWrap(True); server_layout.addWidget(server_note)
         ask = QHBoxLayout(); server_layout.addLayout(ask)
         ask.addWidget(QLabel('ID do monstro:'))
@@ -35,31 +100,23 @@ class DropDatabaseDialog(QDialog):
         ask.addWidget(self.species_box)
         query = QPushButton('Consultar @mi agora'); query.clicked.connect(self.ask_server); ask.addWidget(query)
         ask.addStretch(1)
-        self.server_table = QTableWidget(0, 7)
-        self.server_table.setHorizontalHeaderLabels(['ID monstro', 'Monstro', 'ID item', 'Item', 'Chance', 'Tipo', 'Vistos'])
-        self.server_table.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.server_table.setSelectionBehavior(QTableWidget.SelectRows)
-        self.server_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.server_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.server_table = make_table(['ID monstro', 'Monstro', 'ID item', 'Item', 'Chance', 'Tipo', 'Vistos'], stretch=(3,))
         server_layout.addWidget(self.server_table, 1)
-        tabs.addTab(server, 'Drops do servidor (@mi)')
-        observed = QWidget(); observed_layout = QVBoxLayout(observed); observed_layout.setContentsMargins(0, 0, 0, 0)
-        tabs.addTab(observed, 'Observacoes no jogo')
-        self.table = QTableWidget(0, 9)
-        self.table.setHorizontalHeaderLabels(['ID item', 'Item', 'ID monstro', 'Monstro observado', 'Mapa',
-                                             'Observacoes', 'Quantidade', 'Evidencia', 'Estado'])
-        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.table.setSelectionBehavior(QTableWidget.SelectRows)
-        self.table.setSelectionMode(QTableWidget.SingleSelection)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        tabs.addTab(server, 'Por monstro (@mi)')
+
+        observed = QWidget(); observed_layout = QVBoxLayout(observed)
+        note = QLabel('Coleta passiva: itens no chao, mortes observadas e possiveis associacoes. Proximidade nao prova '
+                      'origem: jogadores tambem podem jogar itens no chao. Confirme um vinculo somente apos conferir no jogo.')
+        note.setWordWrap(True); observed_layout.addWidget(note)
+        self.table = make_table(['ID item', 'Item', 'ID monstro', 'Monstro observado', 'Mapa',
+                                 'Observacoes', 'Quantidade', 'Evidencia', 'Estado'], stretch=(1, 3))
         observed_layout.addWidget(self.table, 1)
         buttons = QHBoxLayout(); observed_layout.addLayout(buttons)
         review = QPushButton('Confirmar vinculo conferido no jogo'); review.clicked.connect(self.review); buttons.addWidget(review)
         export = QPushButton('Exportar consulta JSON'); export.clicked.connect(self.export); buttons.addWidget(export)
-        refresh = QPushButton('Atualizar'); refresh.clicked.connect(self.reload); buttons.addWidget(refresh)
-        self.timer = QTimer(self); self.timer.setInterval(2000); self.timer.timeout.connect(self.reload)
+        tabs.addTab(observed, 'Observacoes no jogo')
+
+        self.timer = QTimer(self); self.timer.setInterval(2000); self.timer.timeout.connect(self.refresh)
         self.reload()
 
     def showEvent(self, event):
@@ -68,38 +125,40 @@ class DropDatabaseDialog(QDialog):
     def hideEvent(self, event):
         self.timer.stop(); super().hideEvent(event)
 
+    def refresh(self):
+        """Every 2 s: only a database written meanwhile rebuilds the tables."""
+        if drop_db.data_stamp() != self.stamp:
+            self.reload()
+
     def reload(self):
-        selected = self.table.currentRow()
-        key = self.key(self.entries[selected]) if 0 <= selected < len(self.entries) else None
+        text = self.search.text()
+        self.stamp = drop_db.data_stamp()
         try:
-            self.entries = drop_db.rows(self.search.text(), self.species)
+            self.items = drop_db.item_overview(text, self.species)
+            self.entries = drop_db.rows(text, self.species)
+            official = drop_db.server_drops(text, self.species)
         except (sqlite3.Error, OSError) as exc:
             self.summary.setText('Database temporariamente indisponivel: '+str(exc)); return
-        self.table.setRowCount(len(self.entries))
-        for row, entry in enumerate(self.entries):
-            status = {'candidate': 'Candidato; revisar', 'reviewed': 'Revisado pelo usuario', 'unlinked': 'Sem vinculo'}[entry['status']]
-            evidence = 'Morte proxima no tempo e espaco' if entry['species_id'] else (
-                'Inventario; origem nao informada' if entry['source'] == 'inventory' else
-                'Item novo no chao' if entry['fresh'] else 'Ja estava no chao')
-            values = [entry['item_id'], entry['item_name'], entry['species_id'] or '—', entry['monster_name'] or 'Nao identificado',
-                      entry['map'], entry['observations'], entry['quantity'], evidence, status]
-            for column, value in enumerate(values):
-                self.table.setItem(row, column, QTableWidgetItem(str(value)))
-            if self.key(entry) == key:
-                self.table.selectRow(row)
-        try:
-            official = drop_db.server_drops(self.search.text(), self.species)
-        except (sqlite3.Error, OSError):
-            official = []
-        self.server_table.setRowCount(len(official))
-        for row, entry in enumerate(official):
-            values = [entry['species_id'], entry['monster_name'], entry['item_id'] or '?', entry['item_name'],
-                      f"{entry['rate']:.2f}%", 'MVP' if entry['mvp'] else 'Drop', entry['seen']]
-            for column, value in enumerate(values):
-                self.server_table.setItem(row, column, QTableWidgetItem(str(value)))
-        monsters = len({entry['species_id'] for entry in official})
-        self.summary.setText(f'{len(official)} drops do servidor ({monsters} monstros) e {len(self.entries)} registros observados '
-                             '(limite 500). Coleta enquanto conectado, mesmo com a caca pausada.')
+        best = lambda item, n: (f"{item['sources'][n]['monster_name']} {chance(item['sources'][n])}"
+                                if len(item['sources']) > n else '')
+        fill(self.item_table, [[i['item_id'] or '?', i['item_name'], best(i, 0), best(i, 1), best(i, 2), len(i['sources'])]
+                               for i in self.items])
+        fill(self.server_table, [[e['species_id'], e['monster_name'], e['item_id'] or '?', e['item_name'],
+                                  f"{e['rate']:.2f}%", 'MVP' if e['mvp'] else 'Drop', e['seen']] for e in official])
+        status = {'candidate': 'Candidato; revisar', 'reviewed': 'Revisado pelo usuario', 'unlinked': 'Sem vinculo'}
+        fill(self.table, [[e['item_id'], e['item_name'], e['species_id'] or '—', e['monster_name'] or 'Nao identificado',
+                           e['map'], e['observations'], e['quantity'],
+                           'Morte proxima no tempo e espaco' if e['species_id'] else (
+                               'Inventario; origem nao informada' if e['source'] == 'inventory' else
+                               'Item novo no chao' if e['fresh'] else 'Ja estava no chao'),
+                           status[e['status']]] for e in self.entries])
+        monsters = len({e['species_id'] for e in official})
+        self.summary.setText(f'{len(self.items)} itens • {len(official)} drops do servidor ({monsters} monstros) • '
+                             f'{len(self.entries)} registros observados (limite 500).')
+
+    def open_item(self, index):
+        if 0 <= index.row() < len(self.items):
+            ItemSourcesDialog(self, self.items[index.row()]).exec()
 
     def ask_server(self):
         owner = self.parent().window() if self.parent() is not None else None
@@ -108,10 +167,6 @@ class DropDatabaseDialog(QDialog):
             self.summary.setText('Abra a conexao pelo painel principal para consultar o servidor.'); return
         command('mob_info', species_id=self.species_box.value())
         self.summary.setText(f'Consulta @mi {self.species_box.value()} enviada ao bot; o resultado aparece aqui em alguns segundos.')
-
-    @staticmethod
-    def key(entry):
-        return entry['item_id'], entry['species_id'], entry['monster_name'], entry['map'], entry['status'], entry['source']
 
     def review(self):
         row = self.table.currentRow()

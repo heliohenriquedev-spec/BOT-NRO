@@ -163,3 +163,73 @@ def test_pvp_targets_are_opt_in_and_cleared_on_map_change(tmp_path):
     relay.apply_settings(DEFAULTS)
     assert not relay.player_target_allowed(2003138)
     assert 2003138 not in relay.tracker.observer.registry.entities
+
+
+def test_players_checked_in_the_pvp_list_reach_the_automatic_battle(tmp_path):
+    """Before, only a captured player was a combat candidate: the PvP list chose nobody."""
+    from nrobot.packet_settings import DEFAULTS
+    relay = _relay(tmp_path)
+    relay.apply_settings({**DEFAULTS, 'pvp_enabled': True, 'pvp_targets': [2003137], 'species': [], 'pvp_first': True})
+    now = time.monotonic()
+    players = [{'kind': 'appearance', 'entity_id': identity, 'species_id': 26, 'position': [13, 10], 'object_type': 0}
+               for identity in (2003137, 2003138)]
+    relay.presence.observe(players, 1, now)
+    relay.track_players(players)
+    relay.sync_pvp_targets()
+    state = relay.status()
+    assert [(e['entity_id'], e['kind']) for e in state['recent_entities']] == [(2003137, 'player')]
+    relay.hunt.start()
+    action = relay.hunt.plan(state, now, 100)
+    assert action['target_id'] == 2003137
+    relay.apply_settings({**DEFAULTS, 'pvp_enabled': True, 'pvp_targets': [], 'species': []})
+    assert not relay.status()['recent_entities']  # unchecked: no longer a target
+
+
+def test_priority_is_dropped_when_the_player_leaves_the_screen(tmp_path):
+    relay = _relay(tmp_path)
+    assert relay.capture_player(2003137, 'painel')
+    now = time.monotonic()
+    assert not relay.expire_captured(now)  # on screen: kept
+    relay.presence.players.discard(2003137)
+    assert not relay.expire_captured(now+1)  # just left: a moment of grace
+    assert not relay.expire_captured(now+2)
+    assert relay.expire_captured(now+4.5)
+    assert relay.captured_player is None and relay.hunt.priority_target is None
+    assert 2003137 not in relay.tracker.observer.pinned
+
+
+def test_priority_survives_a_short_blink_and_is_dropped_in_hide(tmp_path):
+    relay = _relay(tmp_path)
+    assert relay.capture_player(2003137, 'painel')
+    now = time.monotonic()
+    relay.presence.players.discard(2003137)
+    relay.expire_captured(now)
+    relay.presence.players.add(2003137)
+    assert not relay.expire_captured(now+2) and not relay.expire_captured(now+5)  # back in view: kept
+    relay.presence.hidden[2003137] = {'option': 0x40, 'seen_at': now, 'position': [13, 10]}
+    relay.expire_captured(now+6)
+    assert relay.expire_captured(now+9.5) and relay.captured_player is None
+
+
+def test_pvp_table_checks_targets_and_one_priority():
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QApplication
+    app = QApplication.instance() or QApplication([])
+    from nrobot.pvp_panel import PvpTargets, TARGET, PRIORITY
+    panel = PvpTargets()
+    asked, cleared, changed = [], [], []
+    panel.priority_requested.connect(asked.append)
+    panel.priority_cleared.connect(lambda: cleared.append(True))
+    panel.targets_changed.connect(lambda: changed.append(True))
+    state = {'players_nearby': [{'entity_id': 2003137, 'name': 'Radiance', 'distance': 3.0},
+                                {'entity_id': 2003138, 'name': None, 'distance': 5.0}]}
+    panel.update_state(state)
+    assert panel.table.rowCount() == 2
+    panel.table.item(1, TARGET).setCheckState(Qt.Checked)
+    assert panel.targets == {2003138} and changed
+    panel.table.item(0, PRIORITY).setCheckState(Qt.Checked)
+    assert asked == [2003137]
+    panel.update_state({**state, 'captured_player': {'entity_id': 2003137, 'name': 'Radiance', 'origin': 'painel'}})
+    assert panel.table.item(0, PRIORITY).checkState() == Qt.Checked and 'Radiance' in panel.status.text()
+    panel.table.item(0, PRIORITY).setCheckState(Qt.Unchecked)
+    assert cleared

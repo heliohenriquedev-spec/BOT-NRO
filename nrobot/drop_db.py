@@ -246,3 +246,54 @@ def server_drops(search='', species=None, path=None):
         result.append(dict(species_id=identity, monster_name=monster, item_id=item, item_name=label,
                            rate=rate, mvp=bool(mvp), stamp=stamp, seen=seen))
     return result
+
+
+def item_overview(search='', species=None, path=None):
+    """One entry per item: every monster that drops it, highest chance first.
+
+    Chances come from the server's @mi sheets; items only seen falling (no sheet yet) list the
+    monsters they were linked to, by how many times."""
+    items = {}
+
+    def entry(item_id, label):
+        return items.setdefault(item_id or label, dict(item_id=item_id, item_name=label, sources={}))
+    for row in server_drops(path=path):
+        source = entry(row['item_id'], row['item_name'])['sources'].setdefault(
+            row['species_id'], dict(species_id=row['species_id'], monster_name=row['monster_name'], rate=None, mvp=False, seen=0))
+        if source['rate'] is None or row['rate'] > source['rate']:
+            source.update(rate=row['rate'], mvp=row['mvp'])
+        source['seen'] = max(source['seen'], row['seen'])
+    for row in rows(path=path):
+        item = entry(row['item_id'], row['item_name'])
+        if row['species_id'] and row['status'] != 'rejected':
+            source = item['sources'].setdefault(
+                row['species_id'], dict(species_id=row['species_id'], monster_name=row['monster_name'], rate=None, mvp=False, seen=0))
+            if source['rate'] is None:
+                source['seen'] += row['observations']
+    result = []
+    folded = search.casefold().strip()
+    for item in items.values():
+        sources = sorted(item['sources'].values(),
+                         key=lambda s: (s['rate'] is None, -(s['rate'] or 0), -s['seen'], s['species_id']))
+        if species is not None and not any(s['species_id'] == species for s in sources):
+            continue
+        text = ' '.join([str(item['item_id']), item['item_name'], *(f"{s['species_id']} {s['monster_name']}" for s in sources)])
+        if folded and folded not in text.casefold():
+            continue
+        result.append(dict(item_id=item['item_id'], item_name=item['item_name'], sources=sources))
+    result.sort(key=lambda i: (not i['sources'] or i['sources'][0]['rate'] is None,
+                               -((i['sources'] or [{}])[0].get('rate') or 0), i['item_name'].casefold()))
+    return result
+
+
+def data_stamp(path=None):
+    """Changes whenever the database (or its write-ahead log) is written."""
+    path = Path(path or FILE)
+    stamp = []
+    for name in (path, path.with_name(path.name+'-wal')):
+        try:
+            info = name.stat()
+            stamp.append((info.st_mtime_ns, info.st_size))
+        except OSError:
+            stamp.append(None)
+    return tuple(stamp)

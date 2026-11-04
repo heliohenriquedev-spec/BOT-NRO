@@ -3,8 +3,11 @@ import struct
 
 
 class ClientFrameGuard:
+    # Used only for what the client's own table (hash-checked NRO.exe) does not list. In this
+    # client 0094 is 14 bytes and 007E 102: the classic 6 here made every 0094 the game sent (when
+    # players come into view) leave 8 bytes read as a command - "1600/1A00 sem enquadramento".
     SIZES = {0x8c: 11, 0xa7: 8, 0x89: 8, 0x190: 19, 0x72: 25, 0x118: 2,
-             0x7d: 2, 0x7e: 6, 0x2ba: 11, 0x94: 6,
+             0x7d: 2, 0x2ba: 11,
              # REDE-43: CZ_LESSEFFECT, OpenKore tables/aRO/recvpackets.txt.
              0x21d: 6,
              # REDE-44: rAthena clif_packetdb.hpp, GuildCheckMaster.
@@ -39,7 +42,7 @@ class ClientFrameGuard:
         self.buffer.extend(data)
         while len(self.buffer) >= 2:
             opcode = struct.unpack_from('<H', self.buffer)[0]
-            size = self.SIZES.get(opcode, self.fallback().get(opcode))
+            size = self.fallback().get(opcode, self.SIZES.get(opcode))
             if size == -1:
                 # Variable frames (e.g. 00F3 public chat) carry their length after the opcode.
                 if len(self.buffer) < 4:

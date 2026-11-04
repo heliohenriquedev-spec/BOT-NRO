@@ -35,10 +35,12 @@ def test_modal_queue_modes_choose_continuous_cycle_or_highest_ready(mode,expecte
 @pytest.mark.parametrize('entity',[None,dict(entity_id=20,kind='player',position=[11,10]),
                                   dict(entity_id=20,kind='monster',position=[30,10]),
                                   dict(entity_id=20,kind='monster',position=[11,10],position_age_seconds=10)])
-def test_kuchiyose_needs_recent_nearby_target_monster(entity):
+def test_kuchiyose_is_kept_up_even_with_no_monster_near(entity):
+    """One summon is always kept: waiting for a monster within 12 cells left the character alone."""
     profiles=[profile(700,0,2)];s=state(profiles)
     s['recent_entities']=[entity] if entity else []
-    assert CombatRotation(profiles).plan(s,0,20) is None
+    action=CombatRotation(profiles).plan(s,0,20)
+    assert action['skill_id']==700 and action['combat_target_id'] is None
 
 
 def test_animation_wait_is_ignored_but_server_cooldown_and_global_delay_remain():

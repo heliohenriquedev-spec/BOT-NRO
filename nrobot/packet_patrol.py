@@ -27,6 +27,22 @@ class PacketPatrol:
         self.rng = rng if rng is not None else random.Random()
         self.reset()
 
+    def route(self, collision, start, goal, **options):
+        """Route that keeps off walls, unless that costs a long detour: in mazes of one-cell
+        corridors keeping off walls chose ways 3-4 times longer (gl_sew02: 436 steps for a
+        119-step trip), back and forth over the same ground."""
+        route = collision.route(start, goal, **options)
+        if not route or options.get('partial') or not options.get('wall_cost'):
+            return route
+        steps = len(route)-1
+        straight = max(abs(goal[0]-start[0]), abs(goal[1]-start[1]))
+        if steps <= straight*1.25+10:
+            return route  # nearly straight: no shorter way to look for
+        shortest = collision.route(start, goal, **{**options, 'wall_cost': 0})
+        if shortest and steps > (len(shortest)-1)*1.25+10:
+            return shortest
+        return route
+
     def wall_cost(self):
         """Walking next to a wall costs more, much more when walls are to be avoided."""
         return 6 if self.layout.get('avoid_walls') else 3
@@ -58,6 +74,7 @@ class PacketPatrol:
         self.sweep_order = []
         self.done = set()
         self.walked = set()  # 4x4 sectors walked this cycle: routes prefer fresh ground
+        self.partial_ends = {}  # waypoint -> ends of partial routes already walked toward it
         self.cycle_number = 1
         self.deferred = {}
         self.retried = False
@@ -128,6 +145,7 @@ class PacketPatrol:
         self.route_cache_key = self.route_cache = None
         self.deferred = {}
         self.failed_edges = {}
+        self.partial_ends = {}
         saved = self.map_memory.get(id(collision))
         if saved is not None and saved['tour'].collision is collision and tuple(position) in saved['tour'].cells:
             for field, value in saved.items():
@@ -148,6 +166,7 @@ class PacketPatrol:
         self.done.clear()
         self.walked.clear()
         self.deferred.clear()
+        self.partial_ends = {}
         self.goal = self.goal_block = None
         self.mark_seen(position)
         if not self.remaining:  # tiny map: everything is in view from here
@@ -158,6 +177,13 @@ class PacketPatrol:
         candidates = self.remaining-set(self.deferred)
         if not candidates:
             return None
+        if self.tour.corridor_mode:
+            # Mazes (sewers, ant hills): the pending waypoint nearest by walking. A fixed circuit
+            # there left waypoints behind and crossed the maze back for them (simulated: 20-25%
+            # fewer steps to cover gl_sew02, prt_sewb4 and anthell02; open fields keep the circuit).
+            distances = self.tour.distances(position)
+            reachable = [block for block in candidates if block in distances]
+            return min(reachable, key=lambda block: (distances[block], block)) if reachable else None
         ordered = next((block for block in self.sweep_order if block in candidates), None)
         if ordered is not None:
             return ordered
@@ -266,22 +292,36 @@ class PacketPatrol:
                     route = self.route_cache[self.route_cache.index(tuple(position)):]
                 elif portal is not None and tuple(portal) != tuple(position):
                     # The waypoint is on the other side of an inner portal: walk onto the portal.
-                    route = collision.route(position, portal, exact=True, max_nodes=self.ROUTE_NODES*4,
+                    route = self.route(collision, position, portal, exact=True, max_nodes=self.ROUTE_NODES*4,
                                             greed=self.ROUTE_GREED, wall_cost=self.wall_cost())
                 else:
-                    route = collision.route(position, self.goal, exact=self.search_destination is None,
+                    route = self.route(collision, position, self.goal, exact=self.search_destination is None,
                                             max_nodes=self.ROUTE_NODES, greed=self.ROUTE_GREED, wall_cost=self.wall_cost())
+                    if route is None and self.search_destination is None:
+                        # Narrow corridors cost more next to walls and spread the search: one bigger
+                        # search (~0.1 s, kept in the route cache) finds the real way around. The
+                        # partial fallback below heads for the cell closest in a straight line, which
+                        # may be a dead end facing the waypoint: in and out of it, over and over.
+                        route = self.route(collision, position, self.goal, exact=True, max_nodes=self.ROUTE_NODES*5,
+                                                greed=self.ROUTE_GREED, wall_cost=self.wall_cost())
                     if route is None and self.search_destination is None:
                         # Every search stays bounded so the relay never stalls on a big map: a far
                         # goal behind a detour is approached through a cell a few blocks along the
                         # block path, then by the closest point the search reached.
                         stone = self.tour.stepping_stone(position, self.goal_block) if self.goal_block else None
                         if stone is not None and tuple(stone) != tuple(position):
-                            route = collision.route(position, stone, exact=True, max_nodes=self.ROUTE_NODES,
+                            route = self.route(collision, position, stone, exact=True, max_nodes=self.ROUTE_NODES,
                                                     greed=self.ROUTE_GREED, partial=True, wall_cost=self.wall_cost())
                         if not route or len(route) < 2:
-                            route = collision.route(position, self.goal, exact=True, max_nodes=self.ROUTE_NODES,
+                            route = self.route(collision, position, self.goal, exact=True, max_nodes=self.ROUTE_NODES,
                                                     greed=self.ROUTE_GREED, partial=True, wall_cost=self.wall_cost())
+                        if route and len(route) > 1 and tuple(route[-1]) != tuple(self.goal):
+                            # The same partial end twice for one waypoint: a dead end, the waypoint waits.
+                            ends = self.partial_ends.setdefault(self.goal, set())
+                            if tuple(route[-1]) in ends:
+                                route = None
+                            else:
+                                ends.add(tuple(route[-1]))
                 self.route_cache_key, self.route_cache = cache_key, route
                 if route and len(route) > 1:
                     self.heading = tuple(route[1][i]-position[i] for i in (0, 1))

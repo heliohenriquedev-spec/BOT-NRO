@@ -5,6 +5,7 @@ paths to hunting maps are recorded once in "Mapas de caca" and picked by name.
 """
 import copy
 from PySide6.QtCore import Qt, Signal, QItemSelectionModel
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QWidget,QVBoxLayout,QFormLayout,QLabel,QPushButton,QListWidget,QListWidgetItem,
     QLineEdit,QDialog,QDialogButtonBox,QTableWidget,QTableWidgetItem,QComboBox,QMessageBox,QTabWidget,QGroupBox,QSpinBox,
     QInputDialog,QCheckBox)
@@ -604,6 +605,15 @@ class ExtrasBox(QGroupBox):
         else:self.status.setText(self.learned)
 
 
+def route_done_today(route,missions,daily):
+    """(missions of the route done today, missions in the route), from the board's daily marks."""
+    from . import quest_daily
+    by_id={m['id']:m for m in missions}
+    chosen=[by_id[i] for i in route.get('mission_ids',[]) if i in by_id]
+    done=sum(quest_daily.done_today(m['board_id'],m.get('rank') or m['name'],daily) for m in chosen)
+    return done,len(chosen)
+
+
 class QuestPanel(QWidget):
     command_requested=Signal(str,dict)
 
@@ -650,18 +660,42 @@ class QuestPanel(QWidget):
         except (ValueError,OSError) as exc:self.notice.setText(str(exc));return
         try:
             from .quest_library import load as load_library
-            names={m['id']:m['name'] for m in load_library()['missions']}
-        except (OSError,ValueError):names={}
+            library=load_library()['missions'];names={m['id']:m['name'] for m in library}
+        except (OSError,ValueError):library,names=[],{}
+        from . import quest_daily
+        daily=quest_daily.load();running,paused=self.route_marks()
         self.list.blockSignals(True);self.list.clear()
         for i,r in enumerate(self.routes):
             missions=', '.join(names.get(m,'?') for m in r['mission_ids']) or 'nenhuma missao'
-            item=QListWidgetItem(f"{i+1}. {r['name']}  |  {r['target_map'] or 'escolha o mapa de caca'}  |  {missions}"
+            done,total=route_done_today(r,library,daily)
+            mark=('▶ em andamento  ' if r['name']==running else '⏸ fila pausada aqui  ' if r['id']==paused else
+                  '✔ concluida hoje  ' if total and done==total else f'◐ {done}/{total} hoje  ' if done else '')
+            item=QListWidgetItem(f"{mark}{i+1}. {r['name']}  |  {r['target_map'] or 'escolha o mapa de caca'}  |  {missions}"
                                  +('  |  ⛓ encadeada com a proxima' if r.get('chain_next') else ''))
+            if total and done==total and r['name']!=running:item.setForeground(QColor('#5fd68a'))
+            elif r['name']==running:item.setForeground(QColor('#ffd166'))
             item.setData(Qt.UserRole,r['id'])
             item.setFlags(item.flags()|Qt.ItemIsUserCheckable);item.setCheckState(Qt.Checked if r['enabled'] else Qt.Unchecked);self.list.addItem(item)
             item.setSelected(r['id'] in selected_ids)
             if r['id']==identity:self.list.setCurrentRow(i,QItemSelectionModel.NoUpdate)
         self.list.blockSignals(False)
+
+    def route_marks(self):
+        """(name of the route the queue is running, id of the route a paused queue would resume)."""
+        q=(self.state or {}).get('quests',{})
+        running=q.get('quest') if q.get('phase') in ('pickup','travel','hunt','delivery','return') else None
+        try:
+            from . import quest_progress
+            paused=(quest_progress.load() or {}).get('route_id')
+        except (OSError,ValueError):paused=None
+        return running,paused
+
+    def marks_key(self):
+        from . import quest_daily
+        try:stamp=quest_daily.FILE.stat().st_mtime_ns
+        except OSError:stamp=None
+        import datetime
+        return stamp,datetime.date.today(),self.route_marks()
 
     def persist(self):
         try:self.routes=save(self.routes);self.reload();return True
@@ -725,6 +759,9 @@ class QuestPanel(QWidget):
         saved=quest_progress.load()
         self.resume.setEnabled(bool(saved) and not active and not recording)
         self.progress.setText(quest_progress.describe(saved))
+        key=self.marks_key()
+        if key!=getattr(self,'shown_marks',None):  # a mission done, the queue moved on, a new day
+            self.shown_marks=key;self.reload()
         self.map_panel.update_state(state)
         self.library_panel.update_state(state)
         self.extras.update_state(state)

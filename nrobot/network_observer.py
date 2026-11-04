@@ -208,6 +208,7 @@ class Observer:
         self.species = species
         self.registry = TargetRegistry(ttl=entity_ttl)
         self.pinned = set()  # REDE-67: characters captured as targets
+        self.pvp = set()  # characters checked in the PvP list: targets like the captured one
         from .server_clock import ServerClock
         self.clock = ServerClock()
         self.collision_provider = None  # REDE-69: returns the current map's CollisionMap
@@ -354,7 +355,7 @@ class Observer:
                 duration = sum(step_durations(path, self.walk_speed_ms))
             self.player_motion = {'origin': list(origin), 'destination': list(event['destination']), 'at': started,
                                   'duration': duration, 'path': path}
-        elif kind == 'appearance' and event['entity_id'] in self.pinned:
+        elif kind == 'appearance' and (event['entity_id'] in self.pinned or event['entity_id'] in self.pvp):
             x, y = event['position']
             self.registry.update(Entity(event['entity_id'], event['species_id'], x, y, now, 'player',
                                         destination=tuple(event['destination']) if event.get('destination') else None,

@@ -59,9 +59,7 @@ def test_override_controls_planning_navigation_and_basic_attack_priority():
 
 def test_invocation_needs_ground_type_but_no_enemy_and_respects_interval():
     p=profile('summon');r=CombatRotation([p],fast=True,burst=True)
-    s=snapshot(flags=2,reach=4);entities=s['recent_entities'];s['recent_entities']=[]
-    assert r.plan(s,0) is None  # summons require nearby targets
-    s['recent_entities']=entities
+    s=snapshot(flags=2,reach=4)
     a=r.plan(s,0)
     assert a['cast_mode']=='ground' and a['target_id']==1
     r.sent(a,0)

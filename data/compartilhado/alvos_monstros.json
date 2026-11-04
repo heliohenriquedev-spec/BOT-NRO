@@ -50,6 +50,25 @@
   "poring_w01:1051:Bikochuu": false,
   "poring_w01:1051:Bikouhuu": false,
   "poring_w01:1051:Bikouchu": false,
-  "poring_w01:1051:Bikoucuu": false
+  "poring_w01:1051:Bikoucuu": false,
+  "prt_sewb4:1053:Barata Macho": true,
+  "prt_sewb4:1201:Shinobi Ladrão": true,
+  "prt_sewb4:1209:Ratasana": true,
+  "tur_dun01:1368:Pequena Planta Carnívor": false,
+  "tur_dun01:1780:Planta": false,
+  "tur_dun01:1067:Cornutus": true,
+  "tur_dun03:1312:General Tartaruga": true,
+  "tur_dun03:1039:Monstro Marinho": true,
+  "tur_dun03:1066:Crustáceo": false,
+  "anthell01:1305:Verme Mestre": true,
+  "anthell01:1099:Verme Chefe": true,
+  "gl_sew02:1618:Barata": false,
+  "gl_sew02:1769:Shinobi Sanguinário": false,
+  "gl_sew02:1589:Shinobi Assassino": true,
+  "tur_dun01:1318:Pequena Tartaruga": true,
+  "tur_dun02:1073:Caranguejo": false,
+  "tur_dun02:1118:Planta Carnívora": false,
+  "tur_dun02:1266:Estrela-do-Mar": false,
+  "tur_dun02:1601:Tartaruga": false
  }
 }

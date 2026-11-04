@@ -66,7 +66,6 @@ class PacketPanel(QMainWindow):
         game_row.addWidget(self.game_label)
         layout.addLayout(game_row)
         self.show_game_folder()
-        self.build_auto_login(layout)
         self.status_label = QLabel('Conexão fechada • abra a conexão e entre pelo perfil local')
         self.status_label.setWordWrap(True)
         layout.addWidget(self.status_label)
@@ -135,9 +134,12 @@ class PacketPanel(QMainWindow):
         self.auto_movement.setToolTip('Desmarque para atacar e usar habilidades ao alcance sem caminhada automática.')
         form.addRow(self.auto_movement)
         self.manual_movement = QCheckBox('Movimentação manual: eu ando pelo mapa; o bot só combate e não pausa quando clico no chão')
-        self.manual_movement.setToolTip('Desliga a caminhada automática e a patrulha. Ataques, habilidades e buffs continuam; '
-                                        'seus cliques no chão não pausam o bot.')
-        self.manual_movement.toggled.connect(lambda on: self.auto_movement.setEnabled(not on))
+        self.manual_movement.setToolTip('Desliga a caminhada automática e a patrulha: o bot nunca anda até o alvo. Cada habilidade '
+                                        'só é enviada com o alvo dentro do alcance dela (com 1 célula de folga) e o ataque básico '
+                                        'só com o alvo colado; seus cliques no chão não pausam o bot.')
+        # one excludes the other: walking by the bot, or by the player
+        self.manual_movement.toggled.connect(lambda on: on and self.auto_movement.setChecked(False))
+        self.auto_movement.toggled.connect(lambda on: on and self.manual_movement.setChecked(False))
         form.addRow(self.manual_movement)
         self.patrol = QCheckBox('Explorar áreas menos visitadas, variando trajetos e diagonais')
         form.addRow(self.patrol)
@@ -211,11 +213,8 @@ class PacketPanel(QMainWindow):
         self.game_overlay = GameOverlay()
         from .game_overlay import QuestCounter
         self.quest_counter = QuestCounter()
-        self.priority_panel.capture_requested.connect(self.start_player_selection)
         self.priority_panel.minimap.toggled.connect(lambda checked: self.update_overlay())
-        self.priority_panel.release_requested.connect(lambda: self.command('release_player'))
-        self.priority_panel.target_requested.connect(lambda identity: self.command('set_player_target', entity_id=identity))
-        tabs.addTab(self.priority_panel, 'Prioridade')
+        tabs.addTab(self.priority_panel, 'Ordem das habilidades')
         from .monster_panel import MonsterPanel
         self.monster_panel = MonsterPanel()
         tabs.addTab(self.monster_panel, 'Monstros')
@@ -224,14 +223,15 @@ class PacketPanel(QMainWindow):
         self.pvp_enabled = QCheckBox('Ativar PvP')
         self.pvp_all = QCheckBox('Atacar todos os jogadores visíveis')
         self.pvp_first = QCheckBox('Priorizar jogadores sobre monstros')
-        self.pvp_list = QListWidget()
-        self.pvp_targets = set()
-        self.pvp_rows = None
         for box in (self.pvp_enabled, self.pvp_all, self.pvp_first):
             pvp_layout.addWidget(box)
-        pvp_layout.addWidget(QLabel('Jogadores visíveis no mapa atual'))
-        pvp_layout.addWidget(self.pvp_list)
-        self.pvp_list.itemChanged.connect(self.pvp_target_changed)
+        from .pvp_panel import PvpTargets
+        self.pvp_panel = PvpTargets()
+        self.pvp_panel.targets_changed.connect(self.schedule_save)
+        self.pvp_panel.priority_requested.connect(lambda identity: self.command('set_player_target', entity_id=identity))
+        self.pvp_panel.priority_cleared.connect(lambda: self.command('release_player'))
+        self.pvp_panel.capture_requested.connect(self.start_player_selection)
+        pvp_layout.addWidget(self.pvp_panel, 1)
         from .x1_panel import X1Box
         self.x1_box = X1Box()
         pvp_layout.addWidget(self.x1_box)
@@ -304,9 +304,18 @@ class PacketPanel(QMainWindow):
         form.insertRow(form.rowCount()-1, presence_box)
         self.advanced = QCheckBox('Combinar habilidades configuradas e buffs por intervalos individuais')
         combat_form.addRow(self.advanced)
-        self.auto_attacks = QCheckBox('Ataque básico: vai até o monstro e intercala um ataque básico após cada habilidade '
-                                      '(desligado: só habilidades, correndo para manter a distância do alcance delas)')
+        self.auto_attacks = QCheckBox('Intercalar ataque básico: um ataque básico após cada habilidade, quando o alvo '
+                                      'estiver no alcance do ataque básico')
         combat_form.addRow(self.auto_attacks)
+        self.melee_approach = QCheckBox('Aproximação melee: vai até o alcance do ataque básico')
+        combat_form.addRow(self.melee_approach)
+        self.kite = QCheckBox('Kite: recua para manter a distância do alcance das habilidades')
+        combat_form.addRow(self.kite)
+        combat_form.addRow(QLabel('Aproximação melee e kite não ficam ligados juntos. Com os dois desligados, o bot vai '
+                                  'só até o alcance das habilidades e fica ali.'))
+        # one excludes the other; both may stay off
+        self.melee_approach.toggled.connect(lambda on: on and self.kite.setChecked(False))
+        self.kite.toggled.connect(lambda on: on and self.melee_approach.setChecked(False))
         self.fast_offensives = QCheckBox('Habilidades ofensivas na velocidade máxima (cada uma assim que estiver no '
                                          'alcance e fora do cooldown; o bot aprende o menor intervalo que o servidor aceita)')
         combat_form.addRow(self.fast_offensives)
@@ -373,12 +382,13 @@ class PacketPanel(QMainWindow):
         self.pvp_enabled.setChecked(settings['pvp_enabled'])
         self.pvp_all.setChecked(settings['pvp_all'])
         self.pvp_first.setChecked(settings['pvp_first'])
-        self.pvp_targets = set(settings['pvp_targets'])
-        self.pvp_rows = None
+        self.pvp_panel.set_targets(settings['pvp_targets'])
         self.skills.setChecked(settings['skills'])
         self.strict_map.setChecked(settings['require_collision'])
         self.advanced.setChecked(settings['advanced_combat'])
         self.auto_attacks.setChecked(settings['auto_attacks'])
+        self.melee_approach.setChecked(settings['melee_approach'])
+        self.kite.setChecked(settings['kite'])
         self.fast_offensives.setChecked(settings['fast_offensives'])
         self.hotkey_hunt.setCurrentText(settings['hotkey_hunt'])
         self.hotkey_minimap.setCurrentText(settings['hotkey_minimap'])
@@ -430,8 +440,9 @@ class PacketPanel(QMainWindow):
                 'require_collision': self.strict_map.isChecked(), 'auto_movement': self.auto_movement.isChecked(),
                 'manual_movement': self.manual_movement.isChecked(),
                 'pvp_enabled': self.pvp_enabled.isChecked(), 'pvp_all': self.pvp_all.isChecked(),
-                'pvp_first': self.pvp_first.isChecked(), 'pvp_targets': sorted(self.pvp_targets), 'advanced_combat': self.advanced.isChecked(),
-                'auto_attacks': self.auto_attacks.isChecked(), 'skill_profiles': self.skill_panel.profiles(),
+                'pvp_first': self.pvp_first.isChecked(), 'pvp_targets': sorted(self.pvp_panel.targets), 'advanced_combat': self.advanced.isChecked(),
+                'auto_attacks': self.auto_attacks.isChecked(), 'melee_approach': self.melee_approach.isChecked(),
+                'kite': self.kite.isChecked(), 'skill_profiles': self.skill_panel.profiles(),
                 'skill_priority': self.priority_panel.priority(),
                 'summon_queue_mode': self.skill_panel.summon_queue_mode,
                 'pause_on_players': self.pause_players.isChecked(), 'pause_on_disguised': self.pause_disguised.isChecked(),
@@ -449,6 +460,8 @@ class PacketPanel(QMainWindow):
             field.setValue(DEFAULTS[key])
         self.advanced.setChecked(DEFAULTS['advanced_combat'])
         self.auto_attacks.setChecked(DEFAULTS['auto_attacks'])
+        self.melee_approach.setChecked(DEFAULTS['melee_approach'])
+        self.kite.setChecked(DEFAULTS['kite'])
         self.notice.setText('Padrões de combate restaurados na edição. Clique em Salvar e aplicar para usá-los.')
 
     def apply(self):
@@ -524,114 +537,8 @@ class PacketPanel(QMainWindow):
                                                 '--game-dir', str(game)])
             self.open_button.setEnabled(False)
             self.notice.setText('Entre no jogo por NRO - BOT LOCAL (TESTE), depois clique em Iniciar.')
-            self.start_auto_login(game)
         except (OSError, ValueError) as exc:
             self.notice.setText(str(exc))
-
-    # -- login automatico ------------------------------------------------------------------
-    def build_auto_login(self, layout):
-        from . import auto_login
-        from PySide6.QtWidgets import QLineEdit as Line, QSpinBox as Spin, QGroupBox as Group, QGridLayout
-        config = auto_login.load()
-        box = Group('Login automático'); grid = QGridLayout(box)
-        self.login_enabled = QCheckBox('Ativar login automatico: credenciais e personagem por pacotes')
-        self.login_enabled.setChecked(config['enabled'])
-        self.login_user = Line(config['user']); self.login_user.setPlaceholderText('Login da conta')
-        self.login_password = Line(); self.login_password.setEchoMode(Line.Password)
-        self.login_password.setPlaceholderText('senha salva (protegida pelo Windows)' if config['password'] else 'Senha')
-        self.login_character = Line(config['character']); self.login_character.setPlaceholderText('Nome do personagem')
-        self.login_server = Spin(); self.login_server.setRange(1, 10); self.login_server.setValue(config['server_index'])
-        self.login_when_open = QCheckBox('Avancar pelas telas reconhecidas (usa dados ficticios para iniciar o cliente)')
-        self.login_when_open.setChecked(config.get('screen_login', True))
-        self.login_wait = Spin(); self.login_wait.setRange(3, 60); self.login_wait.setSuffix(' s'); self.login_wait.setValue(config['login_wait'])
-        self.login_wait.setToolTip('Tempo maximo para uma tela responder; nao repete tentativas sem confirmacao')
-        self.login_server.setToolTip('Mundo escolhido na lista recebida apos autenticar (ex.: NRO(50)). A conexao BOT LOCAL e identificada pelo perfil instalado.')
-        save_login = QPushButton('Salvar login'); save_login.clicked.connect(self.save_auto_login)
-        grid.addWidget(self.login_enabled, 0, 0, 1, 6)
-        for column, (title, widget) in enumerate((('Login', self.login_user), ('Senha', self.login_password),
-                                                  ('Personagem', self.login_character), ('Servidor nº', self.login_server))):
-            grid.addWidget(QLabel(title), 1, column*2 if column < 2 else column*2); grid.addWidget(widget, 1, column*2+1)
-        grid.addWidget(self.login_when_open, 2, 0, 1, 4)
-        grid.addWidget(QLabel('Espera da tela de login'), 2, 4); grid.addWidget(self.login_wait, 2, 5)
-        grid.addWidget(save_login, 2, 7)
-        self.pause_login_button = QPushButton('Retomar login automatico' if config.get('paused') else 'Pausar login automatico')
-        self.pause_login_button.setToolTip('Pausa somente o login e a escolha automatica do personagem. Mantem a conexao e permite capturar as telas.')
-        self.pause_login_button.clicked.connect(self.toggle_auto_login_pause)
-        grid.addWidget(self.pause_login_button, 3, 0, 1, 8)
-        self.login_runner = None
-        layout.addWidget(box)
-
-    def toggle_auto_login_pause(self):
-        from . import auto_login
-        config = auto_login.load()
-        config['paused'] = not config.get('paused', False)
-        try:
-            auto_login.save(config)
-        except OSError as exc:
-            self.notice.setText('Nao foi possivel alterar a pausa do login: '+str(exc)); return
-        self.pause_login_button.setText('Retomar login automatico' if config['paused'] else 'Pausar login automatico')
-        self.notice.setText('Login automatico pausado. Pode navegar manualmente e tirar os prints.' if config['paused'] else
-                            'Login automatico retomado.' if config['enabled'] else 'Pausa removida; ative e salve o login para usar a automacao.')
-        if not config['paused'] and config['enabled'] and getattr(self, 'session', None) is not None:
-            from .game_folder import saved
-            game = saved()
-            if game is not None and self.process.state() != QProcess.NotRunning:
-                self.start_auto_login(game)
-
-    def save_auto_login(self):
-        from . import auto_login
-        config = auto_login.load()
-        try:
-            if self.login_password.text():
-                config['password'] = auto_login.protect(self.login_password.text())
-        except OSError as exc:
-            self.notice.setText(str(exc)); return
-        config.update(enabled=self.login_enabled.isChecked(), user=self.login_user.text().strip(),
-                      character=self.login_character.text().strip(), server_index=self.login_server.value(),
-                      screen_login=self.login_when_open.isChecked(), login_wait=self.login_wait.value())
-        auto_login.save(config)
-        self.login_password.clear(); self.login_password.setPlaceholderText('senha salva (protegida pelo Windows)' if config['password'] else 'Senha')
-        self.notice.setText('Login automático salvo.' if config['enabled'] else 'Login automático desligado.')
-        if config['enabled'] and not config.get('paused') and self.session is not None and self.process.state() != QProcess.NotRunning:
-            from .game_folder import saved
-            game = saved()
-            if game is not None:
-                self.start_auto_login(game)
-
-    def start_auto_login(self, game):
-        """Open the client if needed; never type into an unverified game screen."""
-        from . import auto_login
-        config = auto_login.load()
-        if config.get('paused'):
-            self.notice.setText('Login automatico pausado. Use Retomar login automatico quando quiser continuar.')
-            return
-        if not config['enabled']:
-            return
-        try:
-            opened = auto_login.launch_game(game)
-        except OSError as exc:
-            self.notice.setText('Login automatico: '+str(exc)); return
-        self.login_messages = []
-        if self.login_runner is not None:
-            self.login_runner.stop()
-        from .login_runner import LoginRunner
-        self.login_runner = LoginRunner(game, self.session, self.login_messages.append)
-        self.login_runner.start()
-        if not config['user'] or not config['password']:
-            self.login_messages.append('Salve login e senha no painel para habilitar a substituicao por pacote.')
-        if opened:
-            self.login_messages.append('Cliente aberto; aguardando inicio nativo da autenticacao pelo NRO - BOT LOCAL.')
-
-    def show_login_messages(self):
-        """The login runs in the background: its steps show in Diagnóstico and on the notice line."""
-        messages = getattr(self, 'login_messages', None)
-        if hasattr(self, 'pause_login_button'):
-            from .auto_login import load
-            self.pause_login_button.setText('Retomar login automatico' if load().get('paused') else 'Pausar login automatico')
-        while messages:
-            text = messages.pop(0)
-            self.log.appendPlainText(text)
-            self.notice.setText(text)
 
     def command(self, command, **values):
         if self.process.state() == QProcess.NotRunning or self.session is None:
@@ -679,8 +586,6 @@ class PacketPanel(QMainWindow):
             self.open_button.setEnabled(True)
 
     def close_relay(self):
-        if getattr(self, 'login_runner', None) is not None:
-            self.login_runner.stop()
         if self.process.state() != QProcess.NotRunning:
             # The venv python.exe is a launcher: the relay runs in its child process, which
             # would survive and keep port 16900 busy. End the whole process tree.
@@ -695,32 +600,9 @@ class PacketPanel(QMainWindow):
                 self.process.kill()
                 self.process.waitForFinished(500)
 
-    def pvp_target_changed(self, item):
-        identity = item.data(Qt.UserRole)
-        if item.checkState() == Qt.Checked:
-            self.pvp_targets.add(identity)
-        else:
-            self.pvp_targets.discard(identity)
-        self.schedule_save()
-
-    def refresh_pvp(self, players):
-        rows = [(row['entity_id'], row.get('name')) for row in players]
-        if rows == self.pvp_rows:
-            return
-        self.pvp_rows = rows
-        self.pvp_list.blockSignals(True)
-        self.pvp_list.clear()
-        for identity, name in rows:
-            item = QListWidgetItem(f'{name or "Jogador"} (ID {identity})', self.pvp_list)
-            item.setData(Qt.UserRole, identity)
-            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-            item.setCheckState(Qt.Checked if identity in self.pvp_targets else Qt.Unchecked)
-        self.pvp_list.blockSignals(False)
-
     def refresh(self):
-        self.show_login_messages()
         if self.session is None or self.process.state() == QProcess.NotRunning:
-            self.refresh_pvp([])
+            self.pvp_panel.update_state({})
             if self.player_panel.isVisible():
                 self.player_panel.update_state({})  # the history stays readable offline
             return
@@ -729,7 +611,7 @@ class PacketPanel(QMainWindow):
             hunt = state.get('hunt', {})
             self.targets.show_map(state.get('map_name'), {m['species_id']: m for m in state.get('map_monsters', [])},
                                   variants=state.get('map_monster_names', []))
-            self.refresh_pvp(state.get('players_nearby', []))
+            self.pvp_panel.update_state(state)
             self.player_panel.check_watch(state)  # status line of the lista de observação
             self.x1_box.set_character((state.get('own_look') or {}).get('name'))
             # The relay stops itself on a watched character or anyone in @hide; this shows it.
@@ -752,7 +634,6 @@ class PacketPanel(QMainWindow):
                 names = {skill['skill_id']: self.skill_panel.local_names.get(skill.get('name'), skill.get('name'))
                          for skill in state.get('learned_skills', [])}
                 self.priority_panel.sync(self.skill_panel.profiles(), names)
-                self.priority_panel.update_targets(state)
             result = state.get('control_result') or {}
             if result.get('id') == self.pending_command and self.pending_command:
                 self.notice.setText(result['message'])
@@ -849,7 +730,6 @@ class PacketPanel(QMainWindow):
     def refresh_overlays(self):
         """10 Hz state for the in-game drawings; the dashboard keeps its own slower refresh."""
         self.check_minimap_key()
-        self.show_login_messages()
         if self.session is None or self.process.state() == QProcess.NotRunning:
             return
         if not (self.game_overlay.isVisible() or self.overlay.isVisible() or self.quest_counter.isVisible() or self.priority_panel.minimap.isChecked()):
@@ -934,7 +814,7 @@ class PacketPanel(QMainWindow):
             field.valueChanged.connect(self.schedule_save)
         for box in (self.pvp_enabled, self.pvp_all, self.pvp_first, self.auto_map_targets, self.auto_movement, self.manual_movement, self.patrol, self.patrol_avoid_walls, self.skills, self.strict_map, self.fast_offensives,
                     self.sit_on_players, self.limit_failures, self.defer_failed, self.skill_burst,
-                    self.advanced, self.auto_attacks, self.pause_players, self.pause_disguised, self.pause_hidden):
+                    self.advanced, self.auto_attacks, self.melee_approach, self.kite, self.pause_players, self.pause_disguised, self.pause_hidden):
             box.toggled.connect(self.schedule_save)
         for field in (self.radius, self.step, self.patrol_spacing, self.patrol_coverage, self.patrol_wall_margin, self.patrol_give_up,
                       self.ignore_attackers, *self.combat_fields.values()):

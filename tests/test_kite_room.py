@@ -8,6 +8,7 @@ from tests.test_map_skills_melee import hunt_state
 def kite_hunt():
     hunt = PacketHunt()
     hunt.auto_attacks = False
+    hunt.melee_approach, hunt.kite = False, True  # skills only, keeping their distance
     hunt.start()
     return hunt
 

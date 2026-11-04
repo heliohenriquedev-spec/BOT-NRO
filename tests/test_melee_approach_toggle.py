@@ -24,18 +24,45 @@ def test_two_cells_must_approach_then_attack_without_losing_target():
     assert action==dict(kind='attack',target_id=20)
 
 
-def test_toggle_basic_attack_switches_between_approach_and_retreat():
+def test_toggle_switches_between_melee_approach_kite_and_holding_at_skill_range():
     collision=CollisionMap(30,30,bytes([1])*900)
     hunt=PacketHunt();hunt.start();s=state([12,10])
-    hunt.auto_attacks=False
+    hunt.melee_approach,hunt.kite=False,True
     retreat=hunt.plan(s,0,collision=collision)
     assert retreat['purpose']=='keep_distance'
-    hunt.auto_attacks=True
+    hunt.melee_approach,hunt.kite=True,False
     approach=hunt.plan(s,1,collision=collision)
     assert approach['destination']==[11,10] and approach.get('purpose')!='keep_distance'
-    hunt.auto_attacks=False
+    hunt.melee_approach,hunt.kite=False,True
     assert hunt.plan(s,2,collision=collision)['purpose']=='keep_distance'
     assert hunt.target==20
+
+
+def test_both_off_waits_at_skill_range_without_walking_or_retreating():
+    collision=CollisionMap(30,30,bytes([1])*900)
+    hunt=PacketHunt();hunt.start();hunt.melee_approach=hunt.kite=False
+    assert hunt.plan(state([12,10]),0,collision=collision) is None  # in skill range: no walk, no retreat
+    far=hunt.plan(state([25,10]),1,collision=collision)
+    assert far['kind']=='move' and far['destination'][0]<=19  # only up to the skills' range (6)
+
+
+def test_basic_attack_interleaves_only_with_the_target_in_reach():
+    collision=CollisionMap(30,30,bytes([1])*900)
+    hunt=PacketHunt();hunt.start();hunt.melee_approach=hunt.kite=False
+    assert hunt.plan(state([11,10]),0,collision=collision)==dict(kind='attack',target_id=20)
+    hunt.auto_attacks=False
+    assert hunt.plan(state([11,10]),1,collision=collision) is None
+
+
+def test_old_settings_keep_their_behaviour_and_both_movements_cannot_be_on():
+    from nrobot.packet_settings import validate
+    old_kite=validate({'auto_attacks':False})
+    assert (old_kite['melee_approach'],old_kite['kite'])==(False,True)
+    old_melee=validate({'auto_attacks':True})
+    assert (old_melee['melee_approach'],old_melee['kite'])==(True,False)
+    assert validate({'auto_attacks':True,'melee_approach':False,'kite':False})['kite'] is False
+    with pytest.raises(ValueError,match='kite'):
+        validate({'melee_approach':True,'kite':True})
 
 
 def test_blocked_diagonal_is_not_basic_attack_reach():

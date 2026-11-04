@@ -14,7 +14,7 @@ def state(player,monster):
 
 
 def test_range_six_kites_to_five_without_passing_the_requested_spacing():
-    hunt=PacketHunt();hunt.auto_attacks=False;hunt.start()
+    hunt=PacketHunt();hunt.auto_attacks=False;hunt.melee_approach=False;hunt.kite=True;hunt.start()
     collision=CollisionMap(40,40,bytes([1])*1600)
     action=hunt.plan(state([20,20],[21,20]),0,200,collision)
     assert action['purpose']=='keep_distance' and action['destination']==[16,20]
@@ -25,7 +25,7 @@ def test_range_six_kites_to_five_without_passing_the_requested_spacing():
 
 
 def test_kiting_does_not_reuse_rejected_cells_or_cross_them():
-    hunt=PacketHunt();hunt.auto_attacks=False;hunt.start()
+    hunt=PacketHunt();hunt.auto_attacks=False;hunt.melee_approach=False;hunt.kite=True;hunt.start()
     collision=CollisionMap(40,40,bytes([1])*1600)
     hunt.blocked_until[(16,20)]=10
     action=hunt.plan(state([20,20],[21,20]),0,200,collision)
@@ -82,7 +82,7 @@ def test_unresolved_path_keeps_received_endpoints_instead_of_inventing_a_cell(mo
 
 
 def test_diagonal_kite_reaches_five_and_waits_for_diagonal_travel_time():
-    hunt=PacketHunt();hunt.auto_attacks=False;hunt.start()
+    hunt=PacketHunt();hunt.auto_attacks=False;hunt.melee_approach=False;hunt.kite=True;hunt.start()
     collision=CollisionMap(40,40,bytes([1])*1600)
     action=hunt.plan(state([20,20],[21,21]),0,200,collision)
     assert math.dist(action['destination'],[21,21])==5

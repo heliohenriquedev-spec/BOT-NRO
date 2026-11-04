@@ -24,9 +24,15 @@ class PacketHunt:
     MELEE_RANGE = 2  # the server itself takes the last step of an attack request
     KITE_MARGIN = 1  # flee when the monster is closer than skill range minus this
     ATTACK_RESPONSE_TIMEOUT = 1.2  # a basic attack is answered well within this; then the next one goes
+    # A monster close in a straight line but with a long walk around a wall is not a target: going
+    # for it took the character away until it left the view, then back, over and over.
+    WALL_DETOUR = 10    # extra steps accepted beyond the straight distance (or the distance itself)
+    WALL_CHECKS = 6     # routes measured per decision
 
     def __init__(self, patrol=False, patrol_step=8, use_skills=False):
         self.auto_attacks = True
+        self.melee_approach = True
+        self.kite = False
         self.use_skills = use_skills
         self.skill_disabled = False
         self.skill_ready_at = 0
@@ -60,6 +66,8 @@ class PacketHunt:
         self.priority_target = None  # REDE-67: captured character
         self.approach_cache = None
         self.awaiting_map = False
+        self.wall_checks = {}  # entity id -> (until, player, monster point, behind a wall)
+        self.passed_over = set()  # monsters in view when the last patrol step was chosen
 
     def map_transition(self):
         """Keep the run/pause choice, discard commands and IDs from the previous area."""
@@ -90,6 +98,49 @@ class PacketHunt:
         path = collision.route(player, target, blocked, max_nodes=16000)
         self.approach_cache = dict(key=key, goal=tuple(target), origin=tuple(player), path=path, retry_at=now+.75)
         return path
+
+    def behind_wall(self, collision, player, point, steps=None):
+        """True when walking to point takes far more steps than the straight distance (or no
+        route at all): the monster is on the other side of a wall."""
+        straight = max(abs(point[0]-player[0]), abs(point[1]-player[1]))
+        if steps is None:
+            path = collision.route(player, point, max_nodes=8000)
+            if not path:
+                return True
+            steps = len(path)-1
+        return steps > straight+max(self.WALL_DETOUR, straight)
+
+    def walled(self, identity, now):
+        """Found across a wall a moment ago: not picked again (even with target deferral off),
+        which made the hunt drop and re-pick it every tick while standing still."""
+        check = self.wall_checks.get(identity)
+        return bool(check and check[3] and now < check[0])
+
+    def reachable_targets(self, candidates, collision, player, now):
+        """Candidates in order of preference, leaving out the ones behind a wall."""
+        if collision is None:
+            return candidates
+        result, checked = [], 0
+        for e in candidates:
+            point = tuple((e.get('attack_positions') or [e.get('destination') or e.get('effective_position', e['position'])])[0])
+            cached = self.wall_checks.get(e['entity_id'])
+            if collision.line_clear(player, point):
+                wall = False  # nothing in between: no route to measure
+            elif (cached and now < cached[0] and math.dist(cached[1], player) <= 3 and math.dist(cached[2], point) <= 3):
+                wall = cached[3]
+            elif checked >= self.WALL_CHECKS:
+                break
+            else:
+                checked += 1
+                wall = self.behind_wall(collision, player, point)
+                self.wall_checks[e['entity_id']] = (now+2, tuple(player), point, wall)
+                if wall:
+                    self.record('target_behind_wall', target_id=e['entity_id'], position=list(point))
+            if not wall:
+                result.append(e)
+        if len(self.wall_checks) > 200:
+            self.wall_checks = {i: c for i, c in self.wall_checks.items() if c[0] > now}
+        return result
 
     def replan_action(self, now, reason, action=None):
         if action and action.get('purpose') == 'patrol' and self.patrol is not None and action.get('origin'):
@@ -502,7 +553,8 @@ class PacketHunt:
                 self.skill_attempts.pop(identity, None)
         self.excluded_until = {i: t for i, t in self.excluded_until.items() if t > now}
         entities = {e['entity_id']: e for e in state['recent_entities']
-                    if e['entity_id'] not in self.excluded_until}
+                    if e['entity_id'] not in self.excluded_until
+                    and (not self.walled(e['entity_id'], now) or e['entity_id'] in self.aggressors)}
         player = state['player_position']
         self.blocked_until = {p: t for p, t in self.blocked_until.items() if t > now}
         blocked = set(self.blocked_until)
@@ -518,6 +570,10 @@ class PacketHunt:
                 self.engage(attackers[0], now)
         if self.engaged is not None and self.target != self.engaged:
             self.target, self.attempts, self.target_since, self.pending = self.engaged, 0, now, None
+        if not self.auto_movement and self.target is not None and self.target != self.priority_target:
+            # The player moves the character: never stay on a target left behind, take the nearest
+            # each time (the one the skills can reach), instead of waiting for one far away.
+            self.target = None
         entity = entities.get(self.target)
         def distance_to(e):
             return math.dist(player, (e.get('attack_positions') or [e.get('destination') or e.get('effective_position', e['position'])])[0])
@@ -539,11 +595,17 @@ class PacketHunt:
             return distance*(1+max(0, -alignment(e))) if distance > 4 else distance
         nearby = [e for e in entities.values() if distance_to(e) <= self.SEARCH_RADIUS
                   and not (alignment(e) < -.3 and distance_to(e) > self.SEARCH_RADIUS/2)]
+        if entity is None and nearby:
+            nearby = self.reachable_targets(sorted(nearby, key=lambda e: (weighed(e), e['entity_id'])),
+                                            collision, player, now)
         closest = min(nearby, key=lambda e: (weighed(e), e['entity_id'])) if nearby else None
         # REDE-57: keep a visible valid target until removal; proximity does not override it.
         if entity is None:
             if not nearby:
                 self.target = None
+                # Everything in view was weighed and declined (behind a wall, behind the sweep, too far,
+                # put aside): the relay must not stop this patrol step for one of them.
+                self.passed_over = {e['entity_id'] for e in state['recent_entities']}
                 if self.auto_movement and self.patrol is not None:
                     search_goal = state.get('search_goal')
                     if collision is not None:
@@ -581,13 +643,16 @@ class PacketHunt:
                        and state['player_sp'] >= metadata.get('sp_cost', 65535))
         combat_range = state.get('engagement_range', min(6, metadata['range']) if wants_skill else 2)
         closest = min(math.dist(player, point) for point in range_positions)
-        melee = self.auto_attacks and not wants_skill  # the old Kunai-only mode keeps its range
+        # Three separate choices: basic attacks between skills (auto_attacks), walking up to the
+        # basic-attack range (melee_approach) and running back to keep the skills' distance (kite).
+        # Approach and kite exclude each other; with both off the bot stops at the skills' range.
+        melee = self.melee_approach and not wants_skill  # the old Kunai-only mode keeps its range
         if melee:
             combat_range = self.MELEE_RANGE  # go hand to hand: basic attacks between the skills
         # The configured rotation supplies engagement_range and handles shooting while
         # retreating. The legacy Kunai planner must reach its cast/response checks first;
         # otherwise a nearby target always produces a walk instead of a ready skill.
-        elif (self.auto_movement and not self.auto_attacks and combat_range >= 3
+        elif (self.auto_movement and self.kite and combat_range >= 3
               and (collision is None or all(collision.line_clear(player, point) for point in range_positions))):
             spacing = max(1, combat_range-1)
             if closest < spacing-.25:
@@ -609,8 +674,15 @@ class PacketHunt:
                 if skill_action is None:
                     return None
                 return skill_action
-            if not melee or max(math.dist(player, point) for point in range_positions) > 2:
-                self.reason = ('mantendo distância; só habilidades' if not self.auto_attacks
+            # The server takes the last step of an attack request: with the movement in the player's
+            # hands the target must already be right next to the character.
+            reach = self.MELEE_RANGE if self.auto_movement else 1.5
+            adjacent = (max(math.dist(player, point) for point in range_positions) <= reach
+                        and (collision is None or all(collision.melee_reachable(player, point) for point in range_positions)))
+            if not self.auto_attacks or not adjacent:
+                # Without melee approach a basic attack is only sent to a target already in reach:
+                # the server would otherwise walk the character up to it.
+                self.reason = ('mantendo distância; só habilidades' if self.kite or not self.auto_attacks
                                else 'mantendo alcance; aguardando habilidade disponivel')
                 return None
             return {'kind': 'attack', 'target_id': self.target}
@@ -624,6 +696,12 @@ class PacketHunt:
             return None
         if collision and not path:
             self.abandon(now, 'sem rota livre até o alvo; procurando outro')
+            return None
+        if (collision and self.target not in self.aggressors and not collision.line_clear(player, chase_position)
+                and not self.reachable_targets([entity], collision, player, now)):
+            # Unless it is fighting us, a monster across a wall is left for when the patrol gets there.
+            # Measured without the cells blocked by failed steps (a detour around them is no wall).
+            self.abandon(now, 'monstro do outro lado da parede; procurando outro')
             return None
         # REDE-46: route may contain only the origin when the predicted target
         # is adjacent but its observed position still lies outside combat range.

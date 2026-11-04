@@ -30,6 +30,9 @@ HOTKEYS = {name: code for name, code in (
 DEFAULTS.update(hotkey_hunt='Home', hotkey_minimap='End', sit_on_players=False, resume_delay=10,
                 limit_target_failures=True, defer_failed_targets=True, skill_burst=False, skill_burst_interval=.05)
 DEFAULTS.update(allowed_players=[], summon_queue_mode='cycle')
+# Movement in combat: walk up to the basic-attack range, or run back to keep the skills' distance
+# (never both). Older settings had both tied to auto_attacks.
+DEFAULTS.update(melee_approach=True, kite=False)
 DEFAULTS.update(group_enabled=False, group_role='follower', group_leader='', group_members=[], group_follow_only=False, group_distance=3)
 THROWS_TOKEN = 'throws'
 
@@ -47,6 +50,10 @@ def learned_buff_links(path=None):
 def validate(data, *, links_path=None):
     if not isinstance(data, dict):
         raise ValueError('Configuração deve ser um objeto')
+    data = dict(data)
+    if 'melee_approach' not in data and 'kite' not in data and 'auto_attacks' in data:
+        # Before: basic attacks on meant walking up to the target, off meant keeping the distance.
+        data['melee_approach'], data['kite'] = bool(data['auto_attacks']), not data['auto_attacks']
     result = {**DEFAULTS, **data}
     if result['summon_queue_mode'] not in ('cycle', 'priority'):
         raise ValueError('Modo da fila Kuchiyose invalido')
@@ -93,9 +100,11 @@ def validate(data, *, links_path=None):
         raise ValueError('Espera por resposta deve ser maior ou igual ao intervalo da habilidade')
     for key in ('pvp_enabled', 'pvp_all', 'pvp_first', 'patrol', 'skills', 'require_collision', 'auto_movement', 'manual_movement', 'patrol_avoid_walls', 'auto_attacks', 'advanced_combat', 'auto_map_targets',
                 'pause_on_players', 'pause_on_disguised', 'pause_on_hidden', 'fast_offensives', 'sit_on_players',
-                'limit_target_failures', 'defer_failed_targets', 'skill_burst'):
+                'limit_target_failures', 'defer_failed_targets', 'skill_burst', 'melee_approach', 'kite'):
         if type(result[key]) is not bool:
             raise ValueError(f'{key}: valor deve ser booleano')
+    if result['melee_approach'] and result['kite']:
+        raise ValueError('Aproximação melee e kite não podem ficar ligados juntos')
     targets = result['pvp_targets']
     if not isinstance(targets, list) or any(type(i) is not int or i <= 0 for i in targets):
         raise ValueError('Seleção PvP inválida')

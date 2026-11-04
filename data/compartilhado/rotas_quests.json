@@ -615,7 +615,7 @@
  },
  {
   "name": "Kami 1 - Andar 1",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1018,
@@ -731,7 +731,7 @@
  },
  {
   "name": "Kami 1 - Andar 2",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1114,
@@ -861,7 +861,7 @@
  },
  {
   "name": "Kami 1 - Andar 3",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1128,

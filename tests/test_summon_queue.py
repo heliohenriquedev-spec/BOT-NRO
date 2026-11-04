@@ -396,3 +396,42 @@ def test_server_cooldown_and_no_enabled_summons_do_not_stop_basic_or_skills(tmp_
     r.profiles[0]['enabled']=False
     assert not r.summon_maintenance_required(s,100,20)
     assert r.plan(s,100,20)['role']=='offensive'
+
+
+def refused(identity, cause=0):
+    return dict(kind='skill_failed', skill_id=identity, cause_raw=cause, flag_raw=0)
+
+
+def test_refused_summon_is_tried_again_soon_and_not_charged_its_interval():
+    """Log of 2026-11-04 18:45:45: 744 and 745 refused at once kept their 46 s interval; no summon for 27 s."""
+    profiles=[dict(p(744,1,20),interval=46.),dict(p(745,2,20),interval=46.)]
+    r=CombatRotation(profiles);s=state(profiles)
+    a=r.plan(s,0);assert a['skill_id']==744;r.sent(a,0)
+    r.observe([refused(744,cause=10)],1,.01)
+    a=r.plan(s,.2);assert a['skill_id']==745  # the next summon may go at once
+    assert r.log[-1]['cause_raw']==10
+    r.sent(a,.2);r.observe([refused(745)],1,.21)
+    a=r.plan(s,1.1);assert a and a['skill_id']==744  # the same summon again, a second later
+    r.sent(a,1.1);r.observe([ack(744)],1,1.2)
+    assert r.summons.active['skill_id']==744 and r.ready[744]>=1.1+46  # accepted: interval applies
+
+
+def test_a_summon_refused_again_and_again_waits_its_interval():
+    profiles=[dict(p(744,1,20),interval=46.)]
+    r=CombatRotation(profiles);s=state(profiles)
+    now=0
+    for attempt in range(10):
+        a=r.plan(s,now);assert a and a['skill_id']==744;r.sent(a,now)
+        r.observe([refused(744)],1,now+.01)
+        now+=1.1
+    assert r.ready[744]>=46  # tenth refusal in a row: no more retries every second
+
+
+def test_silence_after_a_summon_is_its_normal_start_not_a_failure():
+    """NRO never answers summons: each one was counted as a failure and refusals soon waited 46 s."""
+    profiles=[dict(p(744,1,20),interval=46.)]
+    r=CombatRotation(profiles,response_timeout=1.5);s=state(profiles)
+    for start in (0,60,120):
+        a=r.plan(s,start);assert a and a['skill_id']==744;r.sent(a,start)
+        r.plan(s,start+2)  # no answer: started unconfirmed
+        assert r.summons.active['skill_id']==744 and r.failures.get(744,0)==0

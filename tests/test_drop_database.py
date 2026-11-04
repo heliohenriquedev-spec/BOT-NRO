@@ -103,5 +103,6 @@ def test_dialog_queries_passive_records():
     dialog = DropDatabaseDialog()
     assert dialog.table.rowCount() == 1
     dialog.search.setText('impossible-item-name')
+    dialog.reload()  # typing waits 300 ms before rebuilding the tables
     assert dialog.table.rowCount() == 0
     dialog.close()

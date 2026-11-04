@@ -159,9 +159,6 @@ class SessionRelay(QuestRelay):
         self.mirror_sequence = 0
         self.stage = 'starting'
         self.login_phase = 'waiting'
-        self.login_transport = 'waiting'
-        self.login_world_count = 0
-        self.login_world_selected = False
         self.error = None
         self.last_saved = 0
         self.last_inventory_map = None
@@ -281,6 +278,8 @@ class SessionRelay(QuestRelay):
             self.hunt.TARGET_DEFER = 0
         self.hunt.use_skills = settings['skills']
         self.hunt.auto_attacks = settings['auto_attacks']
+        self.hunt.melee_approach = settings['melee_approach']
+        self.hunt.kite = settings['kite']
         self.tracker.observer.free_cast_movement = True
         from .combat_rotation import CombatRotation
         previous_rotation = self.rotation
@@ -291,6 +290,8 @@ class SessionRelay(QuestRelay):
             priority=settings['skill_priority'], fast=settings['fast_offensives'],
             burst=settings['skill_burst'], burst_interval=settings['skill_burst_interval'], ignore_animation=True) if settings['skills'] and settings['advanced_combat'] else None
         if self.rotation is not None:
+            if settings.get('manual_movement') or not settings['auto_movement']:
+                self.rotation.range_margin = 1  # never cast at the edge: the server would walk there
             if not settings['limit_target_failures']:
                 self.rotation.attempts = 10**9
             if not settings['defer_failed_targets']:
@@ -396,6 +397,8 @@ class SessionRelay(QuestRelay):
             self.trace_map_send('client', opcode, self.native_frames.sizes[opcode])
         if 0x89 in completed:
             self.tracker.observer.clock.request_sent(time.monotonic())  # answered by 007F
+        if 0x7d in completed:
+            self.map_loaded_at = time.monotonic()  # the client finished loading the map
         for opcode, frame in self.native_frames.frames:
             self.quests.native(opcode,frame,self.tracker.observer.map_name)
             if opcode == 0x8c and len(frame) == 11:
@@ -474,6 +477,30 @@ class SessionRelay(QuestRelay):
             self.tracker.observer.registry.update(Entity(identity, known.get('species_id', 0), *position,
                                                          time.monotonic(), 'player', walk_speed_ms=known.get('walk_speed_ms')))
 
+    PRIORITY_OFF_SCREEN = 3.0  # seconds a priority player may be out of view before it is dropped
+
+    def expire_captured(self, now):
+        """The priority never stays on someone who is not on screen (left the view, @hide)."""
+        if self.captured_player is None:
+            self.captured_missing_since = None
+            return False
+        identity = self.captured_player['entity_id']
+        visible = identity in self.presence.players and identity not in self.presence.hidden
+        if visible:
+            self.captured_missing_since = None
+            return False
+        since = getattr(self, 'captured_missing_since', None)
+        if since is None:
+            self.captured_missing_since = now
+            return False
+        if now-since < self.PRIORITY_OFF_SCREEN:
+            return False
+        name = self.captured_player.get('name') or identity
+        self.release_player()
+        self.captured_missing_since = None
+        print(f'Prioridade removida: {name} saiu da tela.')
+        return True
+
     def release_player(self):
         if self.captured_player is None:
             return
@@ -532,6 +559,9 @@ class SessionRelay(QuestRelay):
             observer.registry.update(self.player_tracks[identity])
         self.presence.allowed.update(eligible)
         self.pvp_registered = eligible
+        # Players chosen in the PvP list are combat candidates like the captured one: before,
+        # only a captured player ever reached the hunt and the list chose nobody.
+        observer.pvp = set(eligible)
 
     def player_target_allowed(self, identity):
         observer = self.tracker.observer
@@ -837,6 +867,13 @@ class SessionRelay(QuestRelay):
                 selected.add(int(species))
         return selected
 
+    SLEEP = 4  # body state (rAthena OPT1_SLEEP) sent to everyone around when a unit falls asleep
+
+    def asleep(self, identity):
+        """Sleeping targets are left alone: any hit wakes them up (yours or the bot's sleep)."""
+        entity = self.inventory.entities.get(identity)
+        return bool(entity and entity.get('present_last_observation', True) and entity.get('body_state') == self.SLEEP)
+
     def monster_name_allowed(self, identity, species):
         from .monster_db import monster_choice_key
         from .monster_origin import excluded_spawn, temporary_reason
@@ -971,55 +1008,6 @@ class SessionRelay(QuestRelay):
         finally:
             path.unlink(missing_ok=True)
         self.status()
-
-    def sync_auto_login_pause(self):
-        from . import auto_login
-        config = auto_login.load()
-        paused = bool(config.get('paused'))
-        previous = getattr(self, 'login_paused', None)
-        self.login_paused = paused
-        if paused or not config['enabled']:
-            task = getattr(self, 'character_choice_task', None)
-            if task is not None and not task.done():
-                task.cancel()
-        elif previous is True and self.stage == 'char' and not getattr(self, 'character_choice_done', False):
-            context = getattr(self, 'character_choice_context', None)
-            if context is not None and not context[1].is_closing():
-                self.schedule_character_choice(*context)
-
-    def schedule_character_choice(self, char_list, upstream):
-        """Login automatico: the character named in the panel is picked from the server's list."""
-        from . import auto_login
-        config = auto_login.load()
-        self.character_choice_context = (char_list, upstream)
-        self.login_paused = bool(config.get('paused'))
-        previous = getattr(self, 'character_choice_task', None)
-        if previous is not None and not previous.done():
-            previous.cancel()
-        if not config['enabled'] or config.get('paused') or not config['character']:
-            return
-        slot = auto_login.character_slot(char_list, config['character'])
-        if slot is None:
-            print(f"Login automatico: personagem {config['character']} nao esta na lista; escolha-o no jogo.")
-            return
-
-        async def choose():
-            await asyncio.sleep(.1)  # let the server list reach the client first
-            current = auto_login.load()
-            if current.get('paused') or not current['enabled'] or self.stage != 'char' or getattr(self, 'character_choice_done', False) or upstream.is_closing():
-                return
-            try:
-                async with self.send_lock:
-                    latest = auto_login.load()
-                    if latest.get('paused') or not latest['enabled'] or self.stage != 'char' or getattr(self, 'character_choice_done', False) or upstream.is_closing():
-                        return
-                    upstream.write(auto_login.select_packet(slot))
-                    await upstream.drain()
-                    self.character_choice_done = True
-                print(f"Login automatico: personagem {config['character']} (slot {slot}) escolhido por pacote.")
-            except (OSError, ConnectionError):
-                print('Login automatico: conexao de personagens encerrada antes da escolha.')
-        self.character_choice_task = asyncio.get_running_loop().create_task(choose())
 
     def collision_map(self):
         if self.map_repository is None:
@@ -1234,12 +1222,15 @@ class SessionRelay(QuestRelay):
                 raise ValueError('Mapa de colisão deixou de estar disponível')
             if self.group_follower() and (not self.group_combat_allowed() or action['role'] in ('offensive','summon') and not self.group_combat_allowed(action.get('combat_target_id',action['target_id']))):
                 return False
-            if action['role'] in ('offensive', 'summon'):
+            if action['role'] == 'summon' and action.get('combat_target_id') is None:
+                pass  # kept up with no monster around: cast on the character itself
+            elif action['role'] in ('offensive', 'summon'):
                 entity = observer.registry.entities.get(action.get('combat_target_id', action['target_id']))
                 if (entity is None or not entity.alive or not observer.registry.current(entity, now)
                     or (entity.kind == 'player' and not self.player_target_allowed(entity.entity_id))
                     or (entity.kind == 'monster' and (entity.species_id not in observer.species
-                    or not self.monster_name_allowed(entity.entity_id, entity.species_id)))):
+                    or not self.monster_name_allowed(entity.entity_id, entity.species_id)))
+                    or self.asleep(entity.entity_id)):
                     return False
                 if action['role'] == 'summon' and (entity.kind != 'monster' or max(math.dist(own, p) for own in observer.combat_positions(now) for p in entity.combat_bounds(now)[0]) > 12):
                     return False
@@ -1305,12 +1296,12 @@ class SessionRelay(QuestRelay):
             self.record_test()
             print('O ataque de teste foi enviado, mas não houve confirmação de dano no prazo. Não repetirei automaticamente.')
         state = self.tracker.snapshot(time.monotonic())
-        state.update(login_phase=self.login_phase, login_transport=self.login_transport,
-                     login_world_count=self.login_world_count, login_world_selected=self.login_world_selected)
+        state.update(login_phase=self.login_phase)
         state['drop_database'] = {'collecting': self.drops.error is None, 'error': self.drops.error}
         state['recent_entities'] = [entity for entity in state['recent_entities']
-                                   if entity.get('kind') == 'player' or self.monster_name_allowed(
-                                       entity['entity_id'], entity.get('species_id'))]
+                                   if (entity.get('kind') == 'player' or self.monster_name_allowed(
+                                       entity['entity_id'], entity.get('species_id')))
+                                   and not self.asleep(entity['entity_id'])]
         from .map_monsters import confirmed_types
         observer = self.tracker.observer
         state['character_sync'] = {'identity_received': observer.player_id is not None,
@@ -1461,6 +1452,7 @@ class SessionRelay(QuestRelay):
             events = self.tracker.feed(self.mirror_sequence, data, time.monotonic())
             if any(e['kind'] == 'player_position_init' for e in events):
                 self.login_phase = 'map'
+                self.native_feed = True  # the server accepted this map connection: frames align from here
             self.quests.observe(events,self.tracker.observer.player_id,self.tracker.observer.map_name,time.monotonic())
             self.quest_events(events,time.monotonic())
             for transition in events:
@@ -1500,6 +1492,9 @@ class SessionRelay(QuestRelay):
                 self.gm_signs = GmSigns()
             self.gm_signs.observe(events, self.tracker.observer.player, time.monotonic())
             self.halt_on_presence()
+            if any(e['kind'] in ('map_change', 'map_transfer') for e in events):
+                self.map_changed_at = time.monotonic()
+            self.check_recall(events, time.monotonic())
             if self.portals.observe(events, self.tracker.observer.map_name, self.tracker.observer.player):
                 self.collision_map()  # apply the new portal area right away
             self.registry.observe(events, self.tracker.observer.player_id,
@@ -1655,6 +1650,44 @@ class SessionRelay(QuestRelay):
         observer.pinned = pinned
         observer.map_name = self.next_map
 
+    MAP_LOAD_LIMIT = 6.0  # without the client's "map loaded" (007D) the bot waits at most this long
+
+    def map_loading(self, now):
+        """True between a map change and the client's 007D: the server drops what the bot sends
+        then (equip, walk, skills), and each lost request cost a timeout of seconds after a portal."""
+        changed = getattr(self, 'map_changed_at', None)
+        if changed is None or now-changed >= self.MAP_LOAD_LIMIT:
+            return False
+        loaded = getattr(self, 'map_loaded_at', None)
+        return loaded is None or loaded < changed
+
+    def check_recall(self, events, now):
+        """Stop everything when the server moves the character while the bot acts (GM @recall)."""
+        if not any(e['kind'] in ('map_change', 'map_transfer') for e in events):
+            return False
+        q = self.quests
+        hunting = self.hunt is not None and self.hunt.enabled
+        if not (hunting or q.active):
+            return False
+        if q.active and (q.phase != 'hunt' or q.errands or now-q.voltar_sent_at < 20):
+            return False  # route travel, NPC warps and @voltar change maps on purpose
+        if q.recording or self.manual_active or now < self.manual_until+5:
+            return False  # the player is moving the character
+        from .recall_guard import unexpected_teleport
+        info = unexpected_teleport(events, self.portals.map_name, self.portals.last_own, self.portals)
+        if info is None:
+            return False
+        reason = (f"teletransporte sem portal ({info['from_map']} {info['origin']} -> "
+                  f"{info['to_map']} {info['position']}): possivel recall de GM")
+        if q.active:
+            self.quest_stop('Parada por seguranca: '+reason)
+        if self.hunt is not None:
+            self.hunt.pause('parada por seguranca: '+reason)
+        self.commands_blocked = True
+        self.record_hunt({'kind': 'recall_detected', **info})
+        print('[ALERTA] Bot parado por seguranca: '+reason+'. Nenhum comando sera enviado ate voce iniciar de novo.')
+        return True
+
     def begin_hunt_transfer(self, now=None):
         if self.hunt is not None:
             self.hunt.map_transition()
@@ -1682,19 +1715,21 @@ class SessionRelay(QuestRelay):
             remote_reader, upstream = await asyncio.open_connection(host, port)
             self.error = None
             self.stage = stage
-            self.character_choice_done = False
-            old_choice = getattr(self, 'character_choice_task', None)
-            if old_choice is not None:
-                old_choice.cancel()
             if stage == 'login':
                 self.login_phase = 'waiting'
-                self.login_transport = 'waiting'
                 self.account = None
                 self.character_id = None
                 self.tracker.observer.clear()
                 self.own_option = 0
             if stage == 'map':
                 self.login_phase = 'loading'
+                self.map_changed_at = time.monotonic()  # a new map server: wait for its 007D too
+                # A new map connection is a new stream: what was left of the old one, and the map
+                # login request (a format the guard does not know), desynchronized the frames
+                # ("Comando nativo 1A00 sem enquadramento", 2026-11-04). Fresh guard, read after 0073.
+                from .client_frame_guard import ClientFrameGuard
+                self.native_frames = ClientFrameGuard()
+                self.native_feed = False
                 if self.upstream is not None:
                     raise ValueError('Já existe conexão de mapa neste relay')
                 self.upstream = upstream
@@ -1721,35 +1756,14 @@ class SessionRelay(QuestRelay):
             print(f'Conexão {stage} encaminhada.')
 
             async def client_to_server():
-                login_adapter = None
-                character_requests = None
-                if stage in ('login', 'char'):
-                    from .auto_login import LoginPacketAdapter, relay_login_config
-                    from .packet_reader import client_lengths
-                    try:
-                        sizes = client_lengths()
-                    except (OSError, ValueError):
-                        sizes = {}
-                    if stage == 'login':
-                        login_adapter = LoginPacketAdapter(relay_login_config(self.folder), sizes)
-                    else:
-                        from .client_frame_guard import ClientFrameGuard
-                        character_requests = ClientFrameGuard(fallback=sizes)
                 while data := await client_reader.read(65536):
                     async with self.send_lock:
-                        if login_adapter is not None:
-                            login_adapter.config = relay_login_config(self.folder)
-                            data = login_adapter.feed(data)
-                            if login_adapter.finished:
-                                self.login_transport = 'unsupported' if login_adapter.unsupported else 'ready'
-                                if login_adapter.rewritten:
-                                    self.login_phase = 'authenticating'
-                                print('Login por pacote: '+login_adapter.reason)
-                                login_adapter = None
-                        if character_requests is not None and 0x66 in character_requests.feed(data):
-                            self.character_choice_done = True  # fragmented/coalesced manual choice wins
                         if stage == 'map':
-                            if self.tracker.observer.player_position_valid(time.monotonic()):
+                            if data[:2] == b'\x7d\x00':
+                                self.map_loaded_at = time.monotonic()  # 007D before the position is known
+                            # Every byte after the server's 0073 is read, position known or not: skipping
+                            # a read while the position was briefly invalid cut frames in half.
+                            if getattr(self, 'native_feed', True):
                                 previous_error = self.native_frames.error
                                 self.inspect_native_frames(data)
                                 if self.native_frames.error and not previous_error:
@@ -1795,19 +1809,14 @@ class SessionRelay(QuestRelay):
                         while (frame := frames.pop()) is not None:
                             op, packet = frame
                             if op == 0x69:
-                                from .auto_login import select_world, load as load_login
-                                packet, self.login_world_selected = select_world(packet, load_login())
                                 self.login_phase = 'world'
-                                self.login_world_count = (len(packet)-47)//32
                                 self.account = packet[8:12]  # in memory only
                                 self.own_look = {'sex': packet[46]} if len(packet) > 46 else {}
                             elif op == 0x6b:
                                 self.login_phase = 'characters'
                                 self.char_list = packet
-                                self.schedule_character_choice(packet, upstream)
                             elif op == 0x71:
                                 self.login_phase = 'loading'
-                                self.character_choice_done = True
                                 self.select_character(struct.unpack_from('<I', packet, 2)[0])
                                 from .packet_reader import character_look
                                 self.own_look.update(character_look(self.char_list, self.character_id) or {})
@@ -2136,10 +2145,15 @@ class SessionRelay(QuestRelay):
                 or not observer.registry.current(entity, time.monotonic())
                 or self.hunt.excluded_until.get(action['target_id'], 0) > time.monotonic()):
                 raise HuntTargetChanged('Alvo removido, antigo ou temporariamente ignorado')
+            if not is_patrol and self.asleep(action['target_id']):
+                raise HuntTargetChanged('Alvo dormindo: nao e atacado para nao acordar')
             player = observer.player
             target = None if is_patrol else entity.combat_bounds(time.monotonic())[0][0]
+            # A monster across a wall is no reason to stop walking: the patrol is what gets there.
             if is_patrol and not group_follow and any(math.dist(player, e['position']) <= self.hunt.SEARCH_RADIUS
                                  and self.hunt.excluded_until.get(e['entity_id'], 0) <= time.monotonic()
+                                 and not self.hunt.walled(e['entity_id'], time.monotonic())
+                                 and e['entity_id'] not in self.hunt.passed_over
                                  for e in state['recent_entities']):
                 raise HuntTargetChanged('Alvo apareceu; patrulha interrompida')
             if not is_patrol and action['target_id'] != self.hunt.target and math.dist(player, target) > self.hunt.SEARCH_RADIUS:
@@ -2317,12 +2331,8 @@ async def run(args):
         last_display = 0
         last_skill_message = None
         last_heartbeat = 0
-        last_login_sync = 0
         while True:
             await asyncio.sleep(.02)
-            if time.monotonic()-last_login_sync >= .1:
-                relay.sync_auto_login_pause()
-                last_login_sync = time.monotonic()
             if hunt_mode:
                 relay.process_control(lambda: controls.connected(relay.game_peer, relay.game_local))
                 relay.finish_buff_learning(time.monotonic())
@@ -2373,8 +2383,11 @@ async def run(args):
                             print('Para iniciar a caça, mantenha o NRO conectado.')
                         relay.status()
                     previous_hunt_key = hunt_key
-                    route_travel = await relay.quest_tick(lambda: controls.connected(relay.game_peer,relay.game_local))
-                    await relay.send_mob_info(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
+                    relay.expire_captured(time.monotonic())
+                    loading = relay.map_loading(time.monotonic())  # nothing is sent until the game shows the map
+                    route_travel = loading or await relay.quest_tick(lambda: controls.connected(relay.game_peer,relay.game_local))
+                    if not loading:
+                        await relay.send_mob_info(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                     if relay.hunt.enabled and not route_travel:
                         if relay.waiting_hunt_transfer(controls.connected(relay.game_peer, relay.game_local)):
                             pass
@@ -2396,7 +2409,8 @@ async def run(args):
                                 # Select a combat target even while a patrol leg is in flight.
                                 own = (state.get('combat_player_positions') or [state['player_position']])[0]
                                 candidates = [e for e in state['recent_entities']
-                                              if relay.hunt.excluded_until.get(e['entity_id'], 0) <= now]
+                                              if relay.hunt.excluded_until.get(e['entity_id'], 0) <= now
+                                              and not relay.hunt.walled(e['entity_id'], now)]
                                 if not relay.group_follower() and candidates and relay.hunt.target not in {e['entity_id'] for e in candidates}:
                                     candidate = min(candidates, key=lambda e: math.dist(own, e.get('effective_position', e['position'])))
                                     if math.dist(own, candidate.get('effective_position', candidate['position'])) <= relay.hunt.SEARCH_RADIUS:

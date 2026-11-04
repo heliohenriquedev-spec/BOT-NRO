@@ -1,13 +1,13 @@
 {
  "schema": 1,
  "files": {
-  "rotas_quests.json": "e9fe783b55266a918e98b89a6decd1398900a052b1c94466bc0d06053fcd466f",
+  "rotas_quests.json": "0d86e36e0cb8713dc4dc3c2f58a4cf5859f03c9f01b1a0f00d00b0976316a348",
   "quadros_missoes.json": "9d287026bfa287e5e06a9821826b0c7c807edc6c3a15095632599493276b91d1",
   "rotas_mapas.json": "e9c9659fb24bc963b69fa1b02de79275afbdab645d2eb9206923d025b753e0a2",
-  "portais.json": "2d7f5505b7b1ee649ecf2e4f84c113c9f96885d5b633a1aadaf58feba5672c14",
-  "portais_internos.json": "f56ef891d77a15bb767978aee15c6aa073abfbdf1c7c595c376650f2a463c4fc",
+  "portais.json": "5a90682ccd73f5b098467149117aeb1295290e1d07421d6195c75e6744da3d32",
+  "portais_internos.json": "eea1c3d9eafc818666419e7c0c91337f3c8e6520612a0f06596400d62ac12f38",
   "quest_extras.json": "ed0e58b8b6173a2d4244b25f9e207032122a6b01466e037576bb20f19e02cb3a",
-  "buffs_aprendidos.json": "31f77f462227f53442ae6f9378629b137eb008ce009800e1ca5ba6c56d16e571",
+  "buffs_aprendidos.json": "4a5d88cb085d34badca0643408b44efea2043ff651f9d836595e05a9796aa051",
   "gm_sinais.json": "0948b17e6db0d9a451e3d2fcf7691f806a117ac70f928f870b492c4784e0a5a6"
  }
 }

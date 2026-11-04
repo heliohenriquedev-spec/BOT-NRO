@@ -63,6 +63,7 @@ def hunt_state(player, monster, engagement=6):
 def test_without_basic_attacks_the_bot_keeps_its_skill_distance():
     hunt = PacketHunt()
     hunt.auto_attacks = False
+    hunt.melee_approach, hunt.kite = False, True  # skills only, keeping their distance
     hunt.start()
     assert hunt.plan(hunt_state([10, 10], [16, 10]), 0)['destination'] == [11,10]  # approaches range minus one
     assert hunt.plan(hunt_state([10, 10], [15, 10]), .1) is None
@@ -82,6 +83,7 @@ def test_running_away_goes_around_a_wall():
     collision = CollisionMap(40, 40, cells)
     hunt = PacketHunt()
     hunt.auto_attacks = False
+    hunt.melee_approach, hunt.kite = False, True  # skills only, keeping their distance
     hunt.start()
     retreat = hunt.plan(hunt_state([10, 20], [12, 20]), 0, collision=collision)
     assert retreat['purpose'] == 'keep_distance' and retreat['destination'][0] > 8
@@ -97,6 +99,7 @@ def test_basic_attacks_on_approach_for_melee_off_preserves_ranged_kiting():
     hunt.target = None
     assert hunt.plan(hunt_state([10,10],[12,10]),1)['kind'] == 'attack'
     hunt.auto_attacks = False
+    hunt.melee_approach, hunt.kite = False, True  # skills only, keeping their distance
     retreat = hunt.plan(hunt_state([10,10],[12,10]),2)
     assert retreat['purpose'] == 'keep_distance'
 

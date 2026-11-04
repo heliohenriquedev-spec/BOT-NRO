@@ -34,6 +34,7 @@ class EntityInventory:
                     'walk_speed_ms': event.get('walk_speed_ms'),
                     'position': event['position'], 'destination': event.get('destination'),
                     'present_last_observation': True, 'removal_reason': None,
+                    'body_state': event.get('body_state', 0),
                     'last_seen': now, 'movements': old.get('movements', 0)}
                 if len(self.entities) > 5000:
                     oldest = min(self.entities, key=lambda i: self.entities[i]['last_seen'])
@@ -43,6 +44,8 @@ class EntityInventory:
                 if kind in ('move', 'position'):
                     entity.update(position=event['position'], destination=event.get('destination'),
                                   last_seen=now, movements=entity['movements']+int(kind == 'move'))
+                elif kind == 'option_change' and 'body_state' in event:
+                    entity['body_state'] = event['body_state']
                 elif kind == 'name':
                     for key in ('name', 'hp', 'max_hp'):
                         if key in event:

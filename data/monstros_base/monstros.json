@@ -36,7 +36,8 @@
   "species_id": 1009,
   "maps": {
    "ve_fild04": 32,
-   "ein_fild01": 13
+   "ein_fild01": 13,
+   "mjolnir_08": 0
   },
   "walk_speed_ms": 150,
   "name": "Condor",
@@ -44,6 +45,9 @@
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "ve_fild04": [
+    "Condor"
+   ],
+   "mjolnir_08": [
     "Condor"
    ]
   }
@@ -77,7 +81,8 @@
   "maps": {
    "moc_fild13": 5,
    "yuno_fild05": 14,
-   "um_fild01": 0
+   "um_fild01": 0,
+   "moc_fild03": 0
   },
   "walk_speed_ms": 200,
   "name": "Kyodaija",
@@ -85,6 +90,9 @@
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "moc_fild13": [
+    "Kyodaija"
+   ],
+   "moc_fild03": [
     "Kyodaija"
    ]
   }
@@ -111,10 +119,11 @@
    "moc_fild13": 6,
    "yuno_fild05": 14,
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "chunin": 0
   },
-  "walk_speed_ms": 300,
-  "name": "Namekuji",
+  "walk_speed_ms": 600,
+  "name": "Apollo",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -131,6 +140,9 @@
    ],
    "moc_fild13": [
     "Namekuji"
+   ],
+   "chunin": [
+    "Apollo"
    ]
   }
  },
@@ -194,7 +206,7 @@
    "gef_fild04": 0
   },
   "walk_speed_ms": 200,
-  "name": "Filhote de Cobra",
+  "name": "Filhote de cobra",
   "max_hp": 45,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -281,7 +293,8 @@
    "cmd_fild09": 194,
    "poring_w01": 71,
    "ein_fild08": 3,
-   "pvp_n_1-1": 5
+   "pvp_n_1-1": 5,
+   "prt_fild01": 0
   },
   "walk_speed_ms": 150,
   "name": "Bikouchuu",
@@ -303,6 +316,9 @@
     "Bikouchuu"
    ],
    "cmd_fild09": [
+    "Bikouchuu"
+   ],
+   "prt_fild01": [
     "Bikouchuu"
    ]
   }
@@ -466,7 +482,10 @@
    "ein_fild08": 3,
    "moc_fild13": 4,
    "ve_fild03": 3,
-   "pay_fild10": 0
+   "pay_fild10": 0,
+   "mjolnir_08": 0,
+   "moc_fild03": 0,
+   "prt_fild01": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 2000,
@@ -484,6 +503,15 @@
    ],
    "moc_fild08": [
     "Planta Medicinal "
+   ],
+   "mjolnir_08": [
+    "Planta Medicinal "
+   ],
+   "moc_fild03": [
+    "Planta Medicinal "
+   ],
+   "prt_fild01": [
+    "Planta Medicinal "
    ]
   }
  },
@@ -492,7 +520,8 @@
   "maps": {
    "ve_fild04": 29,
    "ein_fild01": 8,
-   "pay_fild10": 0
+   "pay_fild10": 0,
+   "mjolnir_08": 0
   },
   "walk_speed_ms": 200,
   "name": "Coelho",
@@ -503,6 +532,9 @@
     "Coelho"
    ],
    "pay_fild10": [
+    "Coelho"
+   ],
+   "mjolnir_08": [
     "Coelho"
    ]
   }
@@ -526,7 +558,8 @@
   "species_id": 1106,
   "maps": {
    "moc_fild08": 10,
-   "hu_fild07": 13
+   "hu_fild07": 13,
+   "mjolnir_07": 0
   },
   "walk_speed_ms": 200,
   "name": "Akamaru",
@@ -535,6 +568,9 @@
   "captured_sprite": true,
   "names_by_map": {
    "moc_fild08": [
+    "Akamaru"
+   ],
+   "mjolnir_07": [
     "Akamaru"
    ]
   }
@@ -648,15 +684,19 @@
   "species_id": 1177,
   "maps": {
    "yuno_fild11": 2,
-   "ra_fild03": 43
+   "ra_fild03": 43,
+   "chunin": 0
   },
   "walk_speed_ms": 150,
-  "name": "Doki",
-  "max_hp": 980100,
+  "name": "Ootsutsuki Kabuto",
+  "max_hp": 2000000,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "ra_fild03": [
     "Doki"
+   ],
+   "chunin": [
+    "Ootsutsuki Kabuto"
    ]
   }
  },
@@ -705,9 +745,9 @@
    "um_dun02": 0,
    "prt_sewb4": 0
   },
-  "name": "Abelha Macho",
+  "name": "Shinobi Ladrão",
   "max_hp": 120000,
-  "walk_speed_ms": 150,
+  "walk_speed_ms": 200,
   "names_by_map": {
    "um_dun02": [
     "Abelha Macho"
@@ -912,7 +952,8 @@
   "species_id": 1296,
   "maps": {
    "moc_fild13": 11,
-   "yuno_fild05": 3
+   "yuno_fild05": 3,
+   "moc_fild03": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 200,
@@ -921,6 +962,9 @@
   "names_by_map": {
    "moc_fild13": [
     "Pakkun"
+   ],
+   "moc_fild03": [
+    "Pakkun"
    ]
   }
  },
@@ -928,7 +972,8 @@
   "species_id": 1303,
   "maps": {
    "cmd_fild09": 71,
-   "ein_fild08": 3
+   "ein_fild08": 3,
+   "prt_fild01": 0
   },
   "walk_speed_ms": 280,
   "name": "Abelha Rainha Gigante",
@@ -937,6 +982,9 @@
   "names_by_map": {
    "cmd_fild09": [
     "Abelha Rainha Gigante"
+   ],
+   "prt_fild01": [
+    "Abelha Rainha Gigante"
    ]
   }
  },
@@ -944,7 +992,8 @@
   "species_id": 1304,
   "maps": {
    "cmd_fild09": 152,
-   "ein_fild08": 16
+   "ein_fild08": 16,
+   "prt_fild01": 0
   },
   "walk_speed_ms": 290,
   "name": "Kyodaigumo",
@@ -952,6 +1001,9 @@
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "cmd_fild09": [
+    "Kyodaigumo"
+   ],
+   "prt_fild01": [
     "Kyodaigumo"
    ]
   }
@@ -997,7 +1049,11 @@
   "max_hp": 1200000,
   "sprite_source": "Ninkame.spr (Naruto Ultimate)",
   "captured_sprite": true,
-  "names_by_map": {}
+  "names_by_map": {
+   "ra_fild03": [
+    "Ninkame"
+   ]
+  }
  },
  "1318": {
   "species_id": 1318,
@@ -1033,7 +1089,8 @@
   "species_id": 1322,
   "maps": {
    "moc_fild08": 10,
-   "hu_fild07": 7
+   "hu_fild07": 7,
+   "mjolnir_07": 0
   },
   "walk_speed_ms": 160,
   "name": "Usagiburaun",
@@ -1042,6 +1099,38 @@
   "names_by_map": {
    "moc_fild08": [
     "Usagiburaun"
+   ],
+   "mjolnir_07": [
+    "Usagiburaun"
+   ]
+  }
+ },
+ "1327": {
+  "species_id": 1327,
+  "maps": {
+   "izlu2dun": 0
+  },
+  "name": "Vapt Vupt",
+  "max_hp": 2000000,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "izlu2dun": [
+    "Vapt Vupt"
+   ]
+  }
+ },
+ "1328": {
+  "species_id": 1328,
+  "maps": {
+   "chunin": 0
+  },
+  "name": "KillaKween",
+  "max_hp": 2000000,
+  "walk_speed_ms": 210,
+  "names_by_map": {
+   "chunin": [
+    "KillaKween",
+    "Portajanela"
    ]
   }
  },
@@ -1117,7 +1206,8 @@
   "maps": {
    "moc_fild13": 6,
    "yuno_fild05": 11,
-   "um_fild01": 0
+   "um_fild01": 0,
+   "moc_fild03": 0
   },
   "walk_speed_ms": 160,
   "name": "Gama-Kichi",
@@ -1126,6 +1216,9 @@
   "captured_sprite": true,
   "names_by_map": {
    "moc_fild13": [
+    "Gama-Kichi"
+   ],
+   "moc_fild03": [
     "Gama-Kichi"
    ]
   }
@@ -1420,6 +1513,9 @@
    ],
    "0045@tower": [
     "Anbu"
+   ],
+   "ve_fild03": [
+    "Anbu"
    ]
   }
  },
@@ -1428,7 +1524,8 @@
   "maps": {
    "moc_fild08": 33,
    "hu_fild07": 26,
-   "lhz_fild02": 0
+   "lhz_fild02": 0,
+   "mjolnir_07": 0
   },
   "walk_speed_ms": 180,
   "name": "Chunin",
@@ -1439,6 +1536,9 @@
    "moc_fild08": [
     "Chunin",
     "Líder Chunin"
+   ],
+   "mjolnir_07": [
+    "Chunin"
    ]
   }
  },
@@ -1446,7 +1546,8 @@
   "species_id": 1656,
   "maps": {
    "cmd_fild09": 192,
-   "ein_fild08": 15
+   "ein_fild08": 15,
+   "prt_fild01": 0
   },
   "walk_speed_ms": 100,
   "name": "Genin",
@@ -1457,6 +1558,9 @@
    "cmd_fild09": [
     "Genin",
     "Líder Genin"
+   ],
+   "prt_fild01": [
+    "Genin"
    ]
   }
  },
@@ -1532,6 +1636,21 @@
   },
   "sprite_source": "GRF prioritário"
  },
+ "1772": {
+  "species_id": 1772,
+  "maps": {
+   "chunin": 0
+  },
+  "name": "Ootsutsuki Kabuto",
+  "max_hp": 2000000,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "chunin": [
+    "Ootsutsuki Kabuto"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1780": {
   "species_id": 1780,
   "maps": {
@@ -1546,6 +1665,25 @@
     "Planta"
    ]
   }
+ },
+ "1781": {
+  "species_id": 1781,
+  "maps": {
+   "kakashi": 0,
+   "chunin": 0
+  },
+  "name": "Ootsutsuki Kabuto",
+  "max_hp": 2000000,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "kakashi": [
+    "Ootsutsuki Kabuto"
+   ],
+   "chunin": [
+    "Ootsutsuki Kabuto"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
  },
  "1783": {
   "species_id": 1783,
@@ -1681,6 +1819,21 @@
   },
   "sprite_source": "GRF prioritário"
  },
+ "1914": {
+  "species_id": 1914,
+  "maps": {
+   "izlu2dun": 0
+  },
+  "name": "Cristal Selado",
+  "max_hp": 26000000,
+  "walk_speed_ms": 400,
+  "names_by_map": {
+   "izlu2dun": [
+    "Cristal Selado"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1916": {
   "species_id": 1916,
   "maps": {
@@ -1810,6 +1963,36 @@
    ],
    "0045@tower": [
     "Capitão ANBU"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1993": {
+  "species_id": 1993,
+  "maps": {
+   "chunin": 0
+  },
+  "name": "Ootsutsuki Kabuto",
+  "max_hp": 2000000,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "chunin": [
+    "Ootsutsuki Kabuto"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1994": {
+  "species_id": 1994,
+  "maps": {
+   "chunin": 0
+  },
+  "name": "Ootsutsuki Kabuto",
+  "max_hp": 2000000,
+  "walk_speed_ms": 600,
+  "names_by_map": {
+   "chunin": [
+    "Ootsutsuki Kabuto"
    ]
   },
   "sprite_source": "GRF prioritário"
