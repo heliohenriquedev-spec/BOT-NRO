@@ -116,3 +116,27 @@ def test_new_user_without_settings_gets_the_targets(tmp_path):
     assert shared_data.merge_targets(tmp_path, log=lambda *_: None)
     config = json.loads((tmp_path/'data/rede/painel_config.json').read_text(encoding='utf-8'))
     assert config['species'] == [1037, 1051]
+
+
+def test_files_from_github_with_other_line_endings_are_still_imported(tmp_path):
+    """The manifest held the hash of this PC's CRLF bytes; GitHub delivers LF: every import was
+    refused as altered and the other PCs had no quests at all."""
+    import hashlib
+    import json
+    from nrobot import shared_data
+    folder = tmp_path/'data/compartilhado'
+    folder.mkdir(parents=True)
+    data = b'{\r\n "missions": [],\r\n "boards": []\r\n}'
+    (folder/'quadros_missoes.json').write_bytes(data.replace(b'\r\n', b'\n'))  # as GitHub delivers
+    (folder/'manifesto.json').write_text(json.dumps({'schema': 1, 'files': {
+        'quadros_missoes.json': hashlib.sha256(data).hexdigest()}}), encoding='utf-8')  # old CRLF hash
+    messages = []
+    shared_data.merge(tmp_path, log=messages.append)
+    assert not any('alterado' in m for m in messages), messages
+    assert shared_data.matches(data, shared_data.content_hash(data.replace(b'\r\n', b'\n')))
+
+
+def test_shared_files_are_written_with_lf(tmp_path):
+    from nrobot import shared_data
+    shared_data._write(tmp_path/'x.json', {'a': [1, 2]})
+    assert b'\r\n' not in (tmp_path/'x.json').read_bytes()

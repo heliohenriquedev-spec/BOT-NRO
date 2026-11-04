@@ -54,8 +54,24 @@ def _write(path, data):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp')
-    temporary.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')
+    # LF on every PC: GitHub delivers these files with LF whatever this PC's git does.
+    temporary.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8', newline='\n')
     temporary.replace(path)
+
+
+def content_hash(data):
+    """Hash of a shared file whatever its line endings. The manifest was hashed with this PC's
+    CRLF while users get LF from GitHub: every import was refused as "alterado" and the queue
+    of quests stayed empty on the other PCs."""
+    return hashlib.sha256(bytes(data).replace(b'\r\n', b'\n')).hexdigest()
+
+
+def matches(data, expected):
+    """The manifests already published hold the hash of the CRLF bytes: those still match."""
+    data = bytes(data)
+    lf = data.replace(b'\r\n', b'\n')
+    return expected in (hashlib.sha256(lf).hexdigest(), hashlib.sha256(data).hexdigest(),
+                        hashlib.sha256(lf.replace(b'\n', b'\r\n')).hexdigest())
 
 
 def digest(root=ROOT):
@@ -88,7 +104,7 @@ def export(log=print, root=ROOT):
             _write(root/SHARED/name, payload[name])
         else:
             (root/SHARED/name).unlink(missing_ok=True)
-    manifest = {name: hashlib.sha256((root/SHARED/name).read_bytes()).hexdigest() for name in payload}
+    manifest = {name: content_hash((root/SHARED/name).read_bytes()) for name in payload}
     _write(root/SHARED/'manifesto.json', {'schema': 1, 'files': manifest})
     _write(root/MARKER, {'digest': digest(root)})  # the developer already has all of it
     config = _read(root/'data/rede/painel_config.json', None)
@@ -273,7 +289,7 @@ def merge(root=ROOT, log=print, force=False):
         manifest = _read(folder/'manifesto.json', None)
         if manifest is not None:
             for name, expected in manifest['files'].items():
-                if name not in FILES or not (folder/name).is_file() or hashlib.sha256((folder/name).read_bytes()).hexdigest() != expected:
+                if name not in FILES or not (folder/name).is_file() or not matches((folder/name).read_bytes(), expected):
                     raise ValueError(f'Arquivo compartilhado ausente ou alterado: {name}')
             validate_references(shared)
     except (ValueError, KeyError, TypeError, OSError) as exc:

@@ -927,13 +927,20 @@ class PacketPanel(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
+    messages = []
     try:  # quests, routes and portals of the version just installed (once per publication)
         from .shared_data import merge, merge_targets
-        merge()
-        merge_targets()  # before the window reads painel_config.json
+        merge(log=messages.append)
+        merge_targets(log=messages.append)  # before the window reads painel_config.json
     except (OSError, ValueError) as exc:
-        print('Dados compartilhados nao aplicados:', exc)
+        messages.append(f'Dados compartilhados nao aplicados: {exc}')
     window = PacketPanel()
+    # Shown in the panel: a refused import used to go to a console nobody sees, leaving the
+    # queue of quests empty without a word.
+    for text in messages:
+        window.log.appendPlainText(text)
+    if any('nao aplicados' in text for text in messages):
+        window.notice.setText(next(text for text in messages if 'nao aplicados' in text))
     window.show()
     sys.exit(app.exec())
 

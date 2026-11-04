@@ -188,8 +188,11 @@ def apply(log=print, root=ROOT, archive=None):
         (root/relative).unlink()
     log(f"Arquivos atualizados: {len(wanted)}; removidos: {len(removed)}.")
     try:  # the new version's quests and routes, merged into the user's own
-        from .shared_data import merge
-        merge(root, log)
+        # With the code just installed: the module loaded in memory is the old version's, which is
+        # what refused every import until the panel was opened again.
+        import importlib
+        from . import shared_data
+        importlib.reload(shared_data).merge(root, log)
     except (OSError, ValueError) as exc:
         log(f'Dados compartilhados nao aplicados: {exc}')
     requirements_after = (root/'requirements.txt').read_bytes() if (root/'requirements.txt').is_file() else b''

@@ -185,6 +185,9 @@ class SessionRelay(QuestRelay):
         # REDE-72: other characters' server paths.
         self.player_tracks = {}
         self.pvp_registered = set()
+        self.pvp_ignored = {}  # player id -> time until which attacks on them stop (no damage taken)
+        self.player_misses = {}  # player id -> attacks in a row with no damage
+        self.instance_maps = {}  # instance map (0045@tower) -> the base map with its layout (5@tower)
         from .group_hunt import GroupHunt
         self.group = GroupHunt()
         self.player_names = {}  # REDE-76: names of characters (0195 replies to the client's 008C)
@@ -551,6 +554,13 @@ class SessionRelay(QuestRelay):
             eligible.discard(observer.player_id)
             if not settings.get('pvp_all'):
                 eligible.intersection_update(settings.get('pvp_targets', ()))
+            else:
+                # "Everyone" never means a friend: whitelist and group members are left out, and so
+                # is anyone whose name has not arrived yet (it could be one of them). The bot hit a
+                # whitelisted player hundreds of times this way (2026-11-04, instance 0045@tower).
+                eligible = {i for i in eligible if self.player_name_known(i) and not self.friendly(i)}
+            now = time.monotonic()
+            eligible = {i for i in eligible if self.pvp_ignored.get(i, 0) <= now}
         for identity in self.pvp_registered - eligible:
             if identity not in observer.pinned:
                 observer.registry.remove(identity)
@@ -563,8 +573,41 @@ class SessionRelay(QuestRelay):
         # only a captured player ever reached the hunt and the list chose nobody.
         observer.pvp = set(eligible)
 
+    def player_name_known(self, identity):
+        return bool(self.player_names.get(identity) or (self.inventory.entities.get(identity) or {}).get('name'))
+
+    def friendly(self, identity):
+        """In the whitelist (Jogadores permitidos) or the group: never a PvP target by "todos"."""
+        from .presence_guard import normalize_player_name
+        name = self.player_names.get(identity) or (self.inventory.entities.get(identity) or {}).get('name')
+        return bool(name) and normalize_player_name(name) in {normalize_player_name(n) for n in self.presence.allowed_names}
+
+    PLAYER_MISSES = 6  # attacks in a row on a player with no damage: the map has no PvP for them
+    PLAYER_IGNORE = 60
+
+    def note_player_attack(self, identity, now):
+        from .network_targets import is_player_id
+        if not is_player_id(identity) or identity == self.tracker.observer.player_id:
+            return
+        misses = self.player_misses.get(identity, 0)+1
+        self.player_misses[identity] = misses
+        if misses < self.PLAYER_MISSES:
+            return
+        self.player_misses.pop(identity, None)
+        self.pvp_ignored[identity] = now+self.PLAYER_IGNORE
+        if self.hunt is not None:
+            self.hunt.excluded_until[identity] = now+self.PLAYER_IGNORE
+            if self.hunt.target == identity:
+                self.hunt.target = self.hunt.pending = None
+        name = self.player_names.get(identity) or identity
+        print(f'[ALERTA] {name}: {self.PLAYER_MISSES} ataques sem dano (mapa sem PvP?); ignorado por {self.PLAYER_IGNORE} s.')
+        self.record_hunt({'kind': 'player_target_ignored', 'entity_id': identity, 'seconds': self.PLAYER_IGNORE})
+        self.sync_pvp_targets()
+
     def player_target_allowed(self, identity):
         observer = self.tracker.observer
+        if self.pvp_ignored.get(identity, 0) > time.monotonic():
+            return False
         if self.settings is None:
             return identity in observer.pinned
         return (self.settings.get('pvp_enabled') and identity in self.presence.players
@@ -1014,6 +1057,9 @@ class SessionRelay(QuestRelay):
             return None
         name = self.tracker.observer.map_name
         collision = self.map_repository.get(name)
+        if collision is None and name and '@' in name:
+            base = self.instance_base(name)
+            collision = self.map_repository.get(base) if base else None
         if collision is not None:
             collision.set_forbidden(self.portals.cells(name))
             collision.links = tuple(self.portals.links(name))
@@ -1028,6 +1074,38 @@ class SessionRelay(QuestRelay):
             if result['error']:
                 print(f"Motivo da colisão indisponível: {result['error']}")
         return collision
+
+    def instance_base(self, name):
+        """The map an instance copy uses (0045@tower -> 5@tower): the game names copies by instance
+        number, the files keep N@map. Several floors share the suffix, so the one where the
+        character and the units around stand on walkable ground is taken."""
+        if name in self.instance_maps:
+            return self.instance_maps[name]
+        own = self.tracker.observer.player
+        if own is None:
+            return None
+        suffix = name[name.index('@'):]
+        points = [tuple(own)]+[tuple(e['position']) for e in self.inventory.entities.values()
+                               if e.get('present_last_observation') and e.get('position')][:40]
+        best = None
+        for floor in range(1, 10):
+            candidate = f'{floor}{suffix}'
+            if candidate.lower() == name.lower():
+                continue
+            try:
+                collision = self.map_repository.get(candidate)
+            except (OSError, ValueError):
+                collision = None
+            if collision is None or not collision.walkable(tuple(own)):
+                continue
+            score = sum(collision.walkable(p) for p in points)/len(points)
+            if score >= .9 and (best is None or score > best[0]):
+                best = (score, candidate)
+        if best is None:
+            return None
+        self.instance_maps[name] = best[1]
+        print(f'Instancia {name}: usando a colisao de {best[1]} ({best[0]:.0%} das posicoes conferem).')
+        return best[1]
 
     def record_hunt(self, event):
         with (self.folder/'caca_eventos.jsonl').open('a', encoding='utf-8') as log:
@@ -1276,6 +1354,8 @@ class SessionRelay(QuestRelay):
             except OSError:
                 self.hunt.pause('envio de rotação falhou ou ficou incerto')
                 raise
+            if action.get('role') == 'offensive':
+                self.note_player_attack(action.get('combat_target_id') or action['target_id'], now)
             self.flush_rotation_diagnostics()
             return True
 
@@ -1600,6 +1680,10 @@ class SessionRelay(QuestRelay):
                 if any(e['kind'] in ('map_change', 'map_transfer') for e in events):
                     self.begin_hunt_transfer()
                 before = self.hunt.confirmed_attacks
+                for event in events:  # damage taken: that player can be fought here
+                    if (event['kind'] in ('skill_damage', 'normal_attack') and event.get('source_id') == self.tracker.observer.player_id
+                            and event.get('target_id') in self.player_misses):
+                        self.player_misses.pop(event['target_id'], None)
                 self.hunt.observe(events, self.tracker.observer.player_id, time.monotonic(),
                                   movement_motion=self.tracker.observer.player_motion)
                 self.flush_hunt_diagnostics()
@@ -2227,6 +2311,8 @@ class SessionRelay(QuestRelay):
             except OSError:
                 self.hunt.pause('envio falhou ou ficou incerto')
                 raise
+            if action['kind'] in ('attack', 'skill'):
+                self.note_player_attack(action['target_id'], time.monotonic())
             self.record_hunt({'kind': 'patrol_sent' if is_patrol else action['kind']+'_sent', 'target_id': action['target_id'],
                               'destination': action.get('destination'), 'packet_length': len(payload),
                               'map': observer.map_name, 'origin': list(player),

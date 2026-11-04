@@ -1,6 +1,6 @@
 {
- "version": "2026.11.04.13",
- "published_at": "2026-11-04T19:41:31",
+ "version": "2026.11.04.14",
+ "published_at": "2026-11-04T20:01:53",
  "notes": "Fix",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
@@ -45,6 +45,7 @@
   "data/monstros_base/sprites/1214.png",
   "data/monstros_base/sprites/1296.png",
   "data/monstros_base/sprites/1315.png",
+  "data/monstros_base/sprites/1328.png",
   "data/monstros_base/sprites/1381.png",
   "data/monstros_base/sprites/1402.png",
   "data/monstros_base/sprites/1405.png",
@@ -1417,6 +1418,7 @@
   "data/rede/habilidades_chao_validacao.json",
   "data/rede/identidades_cliente.json",
   "data/rede/tamanhos_cliente.json",
+  "docs/ATUALIZACOES.md",
   "docs/AUDITORIA_GRF_QUESTS.md",
   "docs/DATABASE_ITENS_DROPS.md",
   "docs/PATRULHA_E_FILA.md",
@@ -2096,5 +2098,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "4fe99866a837"
+ "files_digest": "be7a81c1886b"
 }

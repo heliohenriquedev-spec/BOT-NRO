@@ -122,8 +122,8 @@
    "0045@tower": 0,
    "chunin": 0
   },
-  "walk_speed_ms": 600,
-  "name": "Apollo",
+  "walk_speed_ms": 150,
+  "name": "Mula sem Cabesa",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -135,6 +135,7 @@
     "Mula sem Cabesa"
    ],
    "0045@tower": [
+    "Black Over",
     "Deca",
     "Mula sem Cabesa"
    ],
@@ -1108,31 +1109,44 @@
  "1327": {
   "species_id": 1327,
   "maps": {
-   "izlu2dun": 0
+   "izlu2dun": 0,
+   "0045@tower": 0
   },
-  "name": "Vapt Vupt",
+  "name": "Neji Hyuuga",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "izlu2dun": [
     "Vapt Vupt"
+   ],
+   "0045@tower": [
+    "Neji Hyuuga"
    ]
   }
  },
  "1328": {
   "species_id": 1328,
   "maps": {
-   "chunin": 0
+   "chunin": 0,
+   "hospital2": 0,
+   "0045@tower": 0
   },
-  "name": "KillaKween",
+  "name": "Neji Hyuuga",
   "max_hp": 2000000,
-  "walk_speed_ms": 210,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
     "KillaKween",
     "Portajanela"
+   ],
+   "hospital2": [
+    "Neji Hyuuga"
+   ],
+   "0045@tower": [
+    "Neji Hyuuga"
    ]
-  }
+  },
+  "captured_sprite": true
  },
  "1368": {
   "species_id": 1368,
@@ -1170,7 +1184,8 @@
   "species_id": 1381,
   "maps": {
    "ve_fild03": 8,
-   "0015@tower": 0
+   "0015@tower": 0,
+   "0045@tower": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 165,
@@ -1178,6 +1193,9 @@
   "max_hp": 2468000,
   "names_by_map": {
    "0015@tower": [
+    "Katsuyo"
+   ],
+   "0045@tower": [
     "Katsuyo"
    ]
   }
@@ -1279,14 +1297,18 @@
   "symbol": "G_GRYPHON",
   "sprite_source": "dados do jogo",
   "maps": {
-   "0015@tower": 0
+   "0015@tower": 0,
+   "0045@tower": 0
   },
-  "name": "inhegas",
+  "name": "Fabri",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "0015@tower": [
     "inhegas"
+   ],
+   "0045@tower": [
+    "Fabri"
    ]
   }
  },
@@ -1756,13 +1778,17 @@
  "1830": {
   "species_id": 1830,
   "maps": {
-   "0015@tower": 0
+   "0015@tower": 0,
+   "0045@tower": 0
   },
   "name": "Guardião Arqueiro",
   "max_hp": 399000,
   "walk_speed_ms": 170,
   "names_by_map": {
    "0015@tower": [
+    "Guardião Arqueiro"
+   ],
+   "0045@tower": [
     "Guardião Arqueiro"
    ]
   },
@@ -1840,7 +1866,7 @@
    "0015@tower": 0,
    "0045@tower": 0
   },
-  "name": "Mula sem Cabesa",
+  "name": "Black Over",
   "max_hp": 2300000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -1852,6 +1878,7 @@
     "Mula sem Cabesa"
    ],
    "0045@tower": [
+    "Black Over",
     "Deca",
     "Mula sem Cabesa"
    ]
@@ -1882,7 +1909,7 @@
   },
   "name": "Shichibi",
   "max_hp": 40000000,
-  "walk_speed_ms": 190,
+  "walk_speed_ms": 285,
   "names_by_map": {
    "0015@tower": [
     "Shichibi"
@@ -3207,8 +3234,8 @@
    "0015@tower": 0,
    "0045@tower": 0
   },
-  "name": "Deca",
-  "max_hp": 3739404,
+  "name": "Black Over",
+  "max_hp": 3766740,
   "walk_speed_ms": 150,
   "names_by_map": {
    "0015@tower": [
@@ -3218,7 +3245,9 @@
     "Lost in Light"
    ],
    "0045@tower": [
-    "Deca"
+    "Black Over",
+    "Deca",
+    "Neji Hyuuga"
    ]
   }
  },

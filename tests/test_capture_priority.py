@@ -159,6 +159,9 @@ def test_pvp_targets_are_opt_in_and_cleared_on_map_change(tmp_path):
     relay.presence.observe(players, 1, now)
     relay.track_players(players)
     relay.apply_settings({**DEFAULTS, 'pvp_enabled': True, 'pvp_all': True})
+    assert not relay.player_target_allowed(2003138)  # name not received yet: could be a friend
+    relay.player_names[2003138] = 'Inimigo'
+    relay.sync_pvp_targets()
     assert relay.player_target_allowed(2003138)
     relay.apply_settings(DEFAULTS)
     assert not relay.player_target_allowed(2003138)
