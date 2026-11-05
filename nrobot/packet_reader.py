@@ -159,7 +159,7 @@ LENGTHS = {0x78: 55, 0x7c: 42, 0x22a: 58, 0x22b: 57, 0xc3: 8, 0x1d7: 11, 0x7f: 6
            0xc0: 7, 0x9c: 9, 0x13d: 6, 0x13a: 4, 0xbe: 5, 0x141: 14,
            0x11f: 16, 0x120: 6, 0x1de: 33,
            0xaf: 6, 0xa8: 7, 0xac: 7, 0x1c8: 13, 0x9d: 17, 0x9e: 17, 0xa1: 6,
-           0x73: 11, 0x2eb: 13, 0x43d: 8}
+           0x73: 11, 0x2eb: 13, 0x43d: 8, 0x148: 8}
 
 # Chat-room information is unrelated to targeting but must be framed correctly.
 # 00D7 was observed with length 28 and title [Instrutor] in the local capture.
@@ -290,6 +290,8 @@ def decode(message: bytes) -> dict:
                      position=position(message[50:53]), speed_raw=u16(6))
         if op == 0x22b:
             event['spawned'] = True  # warped/teleported in (or logged in) right there
+        else:
+            event['dead'] = message[55] == 1  # standing packet state: 1 = lying dead, 2 = sitting
         if 50 <= u16(6) <= 2000:
             event['walk_speed_ms'] = u16(6)
         event['look'] = character_look_fields(message, hair=18, weapon=20, bottom=24, top=26, mid=28, hair_color=30,
@@ -451,6 +453,8 @@ def decode(message: bytes) -> dict:
     elif op == 0x91:
         event.update(kind='map_change', map=message[2:18].split(b'\0')[0].decode('cp1252', 'replace'),
                      position=[u16(18), u16(20)])
+    elif op == 0x148 and len(message) == 8:
+        event.update(kind='resurrection', entity_id=u32(2))
     elif op == 0x92:
         event.update(kind='map_transfer', map=message[2:18].split(b'\0')[0].decode('cp1252','replace'),
                      position=[u16(18),u16(20)])

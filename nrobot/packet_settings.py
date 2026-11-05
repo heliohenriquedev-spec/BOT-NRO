@@ -19,6 +19,8 @@ DEFAULTS.update(auto_map_targets=True, skill_global_delay=.12, require_collision
 DEFAULTS.update(skill_priority=[])
 # REDE-70: which presences hold the bot.
 DEFAULTS.update(pause_on_players=True, pause_on_disguised=True, pause_on_hidden=True)
+# GM identification (staff marks, @speed, GM visuals, GM @hide): stops everything when on.
+DEFAULTS.update(gm_detection=True)
 # REDE-80: offensive skills as fast as the server accepts them (manual interval ignored).
 DEFAULTS.update(fast_offensives=True)
 # REDE-82: configurable keys, sitting while a player is near, failure rules and skill bursts.
@@ -99,7 +101,7 @@ def validate(data, *, links_path=None):
     if result['skill_timeout'] < result['skill_interval']:
         raise ValueError('Espera por resposta deve ser maior ou igual ao intervalo da habilidade')
     for key in ('pvp_enabled', 'pvp_all', 'pvp_first', 'patrol', 'skills', 'require_collision', 'auto_movement', 'manual_movement', 'patrol_avoid_walls', 'auto_attacks', 'advanced_combat', 'auto_map_targets',
-                'pause_on_players', 'pause_on_disguised', 'pause_on_hidden', 'fast_offensives', 'sit_on_players',
+                'pause_on_players', 'pause_on_disguised', 'pause_on_hidden', 'gm_detection', 'fast_offensives', 'sit_on_players',
                 'limit_target_failures', 'defer_failed_targets', 'skill_burst', 'melee_approach', 'kite'):
         if type(result[key]) is not bool:
             raise ValueError(f'{key}: valor deve ser booleano')

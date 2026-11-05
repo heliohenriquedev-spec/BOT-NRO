@@ -560,7 +560,7 @@ class SessionRelay(QuestRelay):
                 # whitelisted player hundreds of times this way (2026-11-04, instance 0045@tower).
                 eligible = {i for i in eligible if self.player_name_known(i) and not self.friendly(i)}
             now = time.monotonic()
-            eligible = {i for i in eligible if self.pvp_ignored.get(i, 0) <= now}
+            eligible = {i for i in eligible if self.pvp_ignored.get(i, 0) <= now and not self.dead(i)}
         for identity in self.pvp_registered - eligible:
             if identity not in observer.pinned:
                 observer.registry.remove(identity)
@@ -917,6 +917,12 @@ class SessionRelay(QuestRelay):
         entity = self.inventory.entities.get(identity)
         return bool(entity and entity.get('present_last_observation', True) and entity.get('body_state') == self.SLEEP)
 
+    def dead(self, identity):
+        """Killed (the server's death notice) or lying dead when it came into view: never a target
+        until it is resurrected - a player's body stays on the ground in PvP."""
+        entity = self.inventory.entities.get(identity)
+        return bool(entity and entity.get('dead'))
+
     def monster_name_allowed(self, identity, species):
         from .monster_db import monster_choice_key
         from .monster_origin import excluded_spawn, temporary_reason
@@ -985,9 +991,14 @@ class SessionRelay(QuestRelay):
         path = self.folder/'comando.json'
         if not path.is_file():
             return
-        identity = None
         try:
             request = json.loads(path.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            # Read while the panel was replacing it (Windows refuses): try again next tick. Deleting it
+            # lost the command, the panel waited forever and settings only applied after a relog.
+            return
+        identity = None
+        try:
             identity = request['id']
             if self.control_result and identity == self.control_result['id']:
                 return
@@ -1308,7 +1319,7 @@ class SessionRelay(QuestRelay):
                     or (entity.kind == 'player' and not self.player_target_allowed(entity.entity_id))
                     or (entity.kind == 'monster' and (entity.species_id not in observer.species
                     or not self.monster_name_allowed(entity.entity_id, entity.species_id)))
-                    or self.asleep(entity.entity_id)):
+                    or self.asleep(entity.entity_id) or self.dead(entity.entity_id)):
                     return False
                 if action['role'] == 'summon' and (entity.kind != 'monster' or max(math.dist(own, p) for own in observer.combat_positions(now) for p in entity.combat_bounds(now)[0]) > 12):
                     return False
@@ -1381,7 +1392,7 @@ class SessionRelay(QuestRelay):
         state['recent_entities'] = [entity for entity in state['recent_entities']
                                    if (entity.get('kind') == 'player' or self.monster_name_allowed(
                                        entity['entity_id'], entity.get('species_id')))
-                                   and not self.asleep(entity['entity_id'])]
+                                   and not self.asleep(entity['entity_id']) and not self.dead(entity['entity_id'])]
         from .map_monsters import confirmed_types
         observer = self.tracker.observer
         state['character_sync'] = {'identity_received': observer.player_id is not None,
@@ -2021,6 +2032,8 @@ class SessionRelay(QuestRelay):
 
     def gm_signs_found(self, now):
         """[(row, reasons)] of visible characters that look like GM/staff."""
+        if not self.gm_detection_on():
+            return []
         from .gm_signs import GmSigns
         if not hasattr(self, 'gm_signs'):
             self.gm_signs = GmSigns()
@@ -2035,13 +2048,16 @@ class SessionRelay(QuestRelay):
                 result.append((row, why))
         return result
 
+    def gm_detection_on(self):
+        return bool((self.settings or {}).get('gm_detection', True))
+
     def emergency_detections(self):
         """Watched characters found (any way, @hide included) and anyone in @hide / invisible."""
         from . import watchlist
         from .presence_guard import OPTION_INVISIBLE
         now = time.monotonic()
         entries = self.load_watchlist()
-        hidden_gm = any(h['option'] & OPTION_INVISIBLE for h in self.presence.hidden.values())
+        hidden_gm = self.gm_detection_on() and any(h['option'] & OPTION_INVISIBLE for h in self.presence.hidden.values())
         self.sync_presence_names()
         signs = self.gm_signs_found(now)
         if not entries and not self.presence.ghosts and not hidden_gm and not signs:
@@ -2054,7 +2070,8 @@ class SessionRelay(QuestRelay):
         for d in everyone:
             # Only a confirmed @hide (option 0x40) stops everything; common hide/cloak and
             # characters acting unseen only pause the hunt.
-            if d['kind'] == 'gm_hide' and d['entity_id'] not in found and not self.presence.ignored(d['entity_id']):
+            if (d['kind'] == 'gm_hide' and self.gm_detection_on() and d['entity_id'] not in found
+                    and not self.presence.ignored(d['entity_id'])):
                 found[d['entity_id']] = {**d, 'watched': False}
         for row, why in signs:  # a GM/staff character on screen
             if row['entity_id'] not in found:
@@ -2231,6 +2248,8 @@ class SessionRelay(QuestRelay):
                 raise HuntTargetChanged('Alvo removido, antigo ou temporariamente ignorado')
             if not is_patrol and self.asleep(action['target_id']):
                 raise HuntTargetChanged('Alvo dormindo: nao e atacado para nao acordar')
+            if not is_patrol and self.dead(action['target_id']):
+                raise HuntTargetChanged('Alvo morto: nenhum ataque ou habilidade')
             player = observer.player
             target = None if is_patrol else entity.combat_bounds(time.monotonic())[0][0]
             # A monster across a wall is no reason to stop walking: the patrol is what gets there.
@@ -2471,7 +2490,16 @@ async def run(args):
                     previous_hunt_key = hunt_key
                     relay.expire_captured(time.monotonic())
                     loading = relay.map_loading(time.monotonic())  # nothing is sent until the game shows the map
-                    route_travel = loading or await relay.quest_tick(lambda: controls.connected(relay.game_peer,relay.game_local))
+                    try:
+                        route_travel = loading or await relay.quest_tick(lambda: controls.connected(relay.game_peer,relay.game_local))
+                    except (asyncio.CancelledError, KeyboardInterrupt):
+                        raise
+                    except Exception as exc:  # the queue stops; the connection stays up
+                        import traceback
+                        (relay.folder/'erro_relay.txt').write_text(traceback.format_exc(), encoding='utf-8')
+                        relay.quest_stop(f'erro interno na fila ({type(exc).__name__}); conexão mantida')
+                        print(f'Erro na fila de quests: {type(exc).__name__}: {exc}. Detalhes em erro_relay.txt')
+                        route_travel = False
                     if not loading:
                         await relay.send_mob_info(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                     if relay.hunt.enabled and not route_travel:
@@ -2483,62 +2511,74 @@ async def run(args):
                         elif relay.manual_control(time.monotonic()) or await relay.update_presence_hold():
                             pass
                         else:
-                            state = relay.status()
-                            if relay.pvp_registered and state.get('player_position') is not None:
-                                state = relay.prioritize_pvp(state)
-                            if relay.rotation is not None:
-                                state['engagement_range'] = relay.rotation.navigation_range(state, time.monotonic(), relay.hunt.target)
-                            action = relay.plan_group_or_hunt(state, time.monotonic(), relay.tracker.observer.walk_speed_ms, relay.collision_map())
-                            relay.flush_hunt_diagnostics()
-                            if relay.rotation is not None and relay.group_combat_allowed():
-                                now = time.monotonic()
-                                # Select a combat target even while a patrol leg is in flight.
-                                own = (state.get('combat_player_positions') or [state['player_position']])[0]
-                                candidates = [e for e in state['recent_entities']
-                                              if relay.hunt.excluded_until.get(e['entity_id'], 0) <= now
-                                              and not relay.hunt.walled(e['entity_id'], now)]
-                                if not relay.group_follower() and candidates and relay.hunt.target not in {e['entity_id'] for e in candidates}:
-                                    candidate = min(candidates, key=lambda e: math.dist(own, e.get('effective_position', e['position'])))
-                                    if math.dist(own, candidate.get('effective_position', candidate['position'])) <= relay.hunt.SEARCH_RADIUS:
-                                        relay.hunt.target = candidate['entity_id']
-                                # REDE-84: with basic attacks on, a basic attack follows every skill
-                                # (skill, attack, skill...); with no skill ready it keeps attacking.
-                                summon_maintenance = relay.rotation.summon_maintenance_required(state, now, relay.hunt.target)
-                                attack_turn = (not summon_maintenance and relay.attack_turn(action) and relay.last_combat_packet == 'skill'
-                                               and now >= relay.tracker.observer.cast_until)
-                                skill_sent = False
-                                rotation_action = None if attack_turn else relay.rotation.plan(state, now, relay.hunt.target)
-                                if rotation_action is not None and relay.native_frames.ready:
+                            try:
+                                state = relay.status()
+                                if relay.pvp_registered and state.get('player_position') is not None:
+                                    state = relay.prioritize_pvp(state)
+                                if relay.rotation is not None:
+                                    state['engagement_range'] = relay.rotation.navigation_range(state, time.monotonic(), relay.hunt.target)
+                                action = relay.plan_group_or_hunt(state, time.monotonic(), relay.tracker.observer.walk_speed_ms, relay.collision_map())
+                                relay.flush_hunt_diagnostics()
+                                # Dead or with no position (e.g. killed in PvP): no skill target to measure from.
+                                if (relay.rotation is not None and relay.group_combat_allowed()
+                                        and state.get('player_position') is not None and relay.tracker.observer.player_alive):
+                                    now = time.monotonic()
+                                    # Select a combat target even while a patrol leg is in flight.
+                                    own = (state.get('combat_player_positions') or [state['player_position']])[0]
+                                    candidates = [e for e in state['recent_entities']
+                                                  if relay.hunt.excluded_until.get(e['entity_id'], 0) <= now
+                                                  and not relay.hunt.walled(e['entity_id'], now)]
+                                    if not relay.group_follower() and candidates and relay.hunt.target not in {e['entity_id'] for e in candidates}:
+                                        candidate = min(candidates, key=lambda e: math.dist(own, e.get('effective_position', e['position'])))
+                                        if math.dist(own, candidate.get('effective_position', candidate['position'])) <= relay.hunt.SEARCH_RADIUS:
+                                            relay.hunt.target = candidate['entity_id']
+                                    # REDE-84: with basic attacks on, a basic attack follows every skill
+                                    # (skill, attack, skill...); with no skill ready it keeps attacking.
+                                    summon_maintenance = relay.rotation.summon_maintenance_required(state, now, relay.hunt.target)
+                                    attack_turn = (not summon_maintenance and relay.attack_turn(action) and relay.last_combat_packet == 'skill'
+                                                   and now >= relay.tracker.observer.cast_until)
+                                    skill_sent = False
+                                    rotation_action = None if attack_turn else relay.rotation.plan(state, now, relay.hunt.target)
+                                    if rotation_action is not None and relay.native_frames.ready:
+                                        try:
+                                            if await relay.send_rotation_action(rotation_action, game_gate=lambda: controls.connected(relay.game_peer, relay.game_local)):
+                                                skill_sent = True
+                                                relay.last_combat_packet = 'skill'
+                                        except (OSError, ValueError) as exc:
+                                            relay.hunt.pause(str(exc))
+                                    action = relay.after_rotation_action(action, skill_sent=skill_sent, attack_turn=attack_turn, now=now,
+                                        summon_maintenance=summon_maintenance,
+                                        hold_movement=not skill_sent and rotation_action is not None and rotation_action.get('cast_mode') == 'ground'
+                                            and rotation_action.get('role') == 'summon' and rotation_action.get('cast_range', 1) == 0)
+                                    relay.flush_rotation_diagnostics()
+                                if action is not None and action['kind'] == 'attack' and relay.settings and not relay.settings['auto_attacks']:
+                                    action = None
+                                if not relay.native_frames.ready:
+                                    action = None
+                                if action is not None:
                                     try:
-                                        if await relay.send_rotation_action(rotation_action, game_gate=lambda: controls.connected(relay.game_peer, relay.game_local)):
-                                            skill_sent = True
-                                            relay.last_combat_packet = 'skill'
+                                        await relay.send_hunt_action(action, game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
+                                        if relay.rotation is not None and action['kind'] == 'attack':
+                                            relay.last_combat_packet = 'attack'
+                                            gap = relay.rotation.burst_interval if relay.rotation.burst else .12
+                                            relay.rotation.next_send = max(relay.rotation.next_send, time.monotonic()+gap)
+                                    except HuntTargetChanged as exc:
+                                        relay.hunt.replan_action(time.monotonic(), str(exc), action)
+                                        relay.flush_hunt_diagnostics()
                                     except (OSError, ValueError) as exc:
                                         relay.hunt.pause(str(exc))
-                                action = relay.after_rotation_action(action, skill_sent=skill_sent, attack_turn=attack_turn, now=now,
-                                    summon_maintenance=summon_maintenance,
-                                    hold_movement=not skill_sent and rotation_action is not None and rotation_action.get('cast_mode') == 'ground'
-                                        and rotation_action.get('role') == 'summon' and rotation_action.get('cast_range', 1) == 0)
-                                relay.flush_rotation_diagnostics()
-                            if action is not None and action['kind'] == 'attack' and relay.settings and not relay.settings['auto_attacks']:
-                                action = None
-                            if not relay.native_frames.ready:
-                                action = None
-                            if action is not None:
-                                try:
-                                    await relay.send_hunt_action(action, game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
-                                    if relay.rotation is not None and action['kind'] == 'attack':
-                                        relay.last_combat_packet = 'attack'
-                                        gap = relay.rotation.burst_interval if relay.rotation.burst else .12
-                                        relay.rotation.next_send = max(relay.rotation.next_send, time.monotonic()+gap)
-                                except HuntTargetChanged as exc:
-                                    relay.hunt.replan_action(time.monotonic(), str(exc), action)
-                                    relay.flush_hunt_diagnostics()
-                                except (OSError, ValueError) as exc:
-                                    relay.hunt.pause(str(exc))
-                            if not relay.hunt.enabled:
-                                relay.record_hunt({'kind': 'paused', 'reason': relay.hunt.reason})
-                                print(f'Caça pausada: {relay.hunt.reason}')
+                                if not relay.hunt.enabled:
+                                    relay.record_hunt({'kind': 'paused', 'reason': relay.hunt.reason})
+                                    print(f'Caça pausada: {relay.hunt.reason}')
+                            except (asyncio.CancelledError, KeyboardInterrupt):
+                                raise
+                            except Exception as exc:
+                                # One bad tick must never take the relay down: that dropped the game
+                                # connection at once (death in PvP, 2026-11-04). The hunt pauses instead.
+                                import traceback
+                                (relay.folder/'erro_relay.txt').write_text(traceback.format_exc(), encoding='utf-8')
+                                relay.hunt.pause(f'erro interno na caça ({type(exc).__name__}); conexão mantida')
+                                print(f'Erro na caça: {type(exc).__name__}: {exc}. Caça pausada, conexão mantida; detalhes em erro_relay.txt')
             if relay.upstream is not None and time.monotonic()-last_display >= 1:
                 last_display = time.monotonic()
                 state = relay.status()

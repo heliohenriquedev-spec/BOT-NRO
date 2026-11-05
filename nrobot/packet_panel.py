@@ -282,6 +282,10 @@ class PacketPanel(QMainWindow):
             presence_layout.addWidget(box)
         self.sit_on_players = QCheckBox('Sentar enquanto o bot estiver pausado por um jogador por perto')
         presence_layout.addWidget(self.sit_on_players)
+        self.gm_detection = QCheckBox('Identificação de GM: para tudo ao ver GM/staff na tela (marca no nome, guilda ou '
+                                      'cargo, velocidade anormal, visual de GM) ou um GM em @hide')
+        self.gm_detection.setToolTip('Desligada, só a lista de observação e as pausas acima continuam valendo.')
+        presence_layout.addWidget(self.gm_detection)
         resume_row = QHBoxLayout()
         resume_row.addWidget(QLabel('Voltar a rodar'))
         self.resume_delay = QSpinBox()
@@ -409,6 +413,7 @@ class PacketPanel(QMainWindow):
         self.group_members.setPlainText('\n'.join(settings['group_members']))
         self.pause_disguised.setChecked(settings['pause_on_disguised'])
         self.pause_hidden.setChecked(settings['pause_on_hidden'])
+        self.gm_detection.setChecked(settings['gm_detection'])
         self.skill_panel.saved = settings['skill_profiles']
         self.skill_panel.summon_queue_mode = settings['summon_queue_mode']
         self.priority_panel.saved = settings['skill_priority']
@@ -446,7 +451,7 @@ class PacketPanel(QMainWindow):
                 'skill_priority': self.priority_panel.priority(),
                 'summon_queue_mode': self.skill_panel.summon_queue_mode,
                 'pause_on_players': self.pause_players.isChecked(), 'pause_on_disguised': self.pause_disguised.isChecked(),
-                'pause_on_hidden': self.pause_hidden.isChecked(), 'fast_offensives': self.fast_offensives.isChecked(),
+                'pause_on_hidden': self.pause_hidden.isChecked(), 'gm_detection': self.gm_detection.isChecked(), 'fast_offensives': self.fast_offensives.isChecked(),
                 'hotkey_hunt': self.hotkey_hunt.currentText(), 'hotkey_minimap': self.hotkey_minimap.currentText(),
                 'allowed_players': [n.strip() for n in self.allowed_players.toPlainText().splitlines() if n.strip()],
                 'sit_on_players': self.sit_on_players.isChecked(), 'resume_delay': self.resume_delay.value(),
@@ -549,13 +554,35 @@ class PacketPanel(QMainWindow):
             return
         try:
             request = {'id': uuid.uuid4().hex, 'command': command, **values}
-            temp = self.session/'comando.tmp'
-            temp.write_text(json.dumps(request), encoding='utf-8')
-            temp.replace(self.session/'comando.json')
+            self.write_command(request)
             self.pending_command = request['id']
+            self.pending_request, self.pending_at, self.pending_sends = request, time.monotonic(), 1
             self.notice.setText('Aguardando confirmação: '+command)
         except OSError as exc:
             self.notice.setText(str(exc))
+
+    def write_command(self, request):
+        temp = self.session/'comando.tmp'
+        temp.write_text(json.dumps(request), encoding='utf-8')
+        temp.replace(self.session/'comando.json')
+
+    COMMAND_RETRY = 3.0
+    COMMAND_SENDS = 3
+
+    def retry_command(self):
+        """A command the relay never confirmed is sent again (same id: done only once there), then
+        given up: a lost one used to block every later change until the character relogged."""
+        if not self.pending_command or time.monotonic()-getattr(self, 'pending_at', 0) < self.COMMAND_RETRY:
+            return
+        if getattr(self, 'pending_sends', self.COMMAND_SENDS) >= self.COMMAND_SENDS:
+            self.notice.setText('O relay não confirmou: '+self.pending_request['command']+'. Tente de novo.')
+            self.pending_command = None
+            return
+        try:
+            self.write_command(self.pending_request)
+        except OSError:
+            pass
+        self.pending_at, self.pending_sends = time.monotonic(), self.pending_sends+1
 
     def read_output(self):
         text = bytes(self.process.readAllStandardOutput()).decode('utf-8', 'replace')
@@ -601,6 +628,7 @@ class PacketPanel(QMainWindow):
                 self.process.waitForFinished(500)
 
     def refresh(self):
+        self.retry_command()
         if self.session is None or self.process.state() == QProcess.NotRunning:
             self.pvp_panel.update_state({})
             if self.player_panel.isVisible():
@@ -814,7 +842,7 @@ class PacketPanel(QMainWindow):
             field.valueChanged.connect(self.schedule_save)
         for box in (self.pvp_enabled, self.pvp_all, self.pvp_first, self.auto_map_targets, self.auto_movement, self.manual_movement, self.patrol, self.patrol_avoid_walls, self.skills, self.strict_map, self.fast_offensives,
                     self.sit_on_players, self.limit_failures, self.defer_failed, self.skill_burst,
-                    self.advanced, self.auto_attacks, self.melee_approach, self.kite, self.pause_players, self.pause_disguised, self.pause_hidden):
+                    self.advanced, self.auto_attacks, self.melee_approach, self.kite, self.pause_players, self.pause_disguised, self.pause_hidden, self.gm_detection):
             box.toggled.connect(self.schedule_save)
         for field in (self.radius, self.step, self.patrol_spacing, self.patrol_coverage, self.patrol_wall_margin, self.patrol_give_up,
                       self.ignore_attackers, *self.combat_fields.values()):

@@ -101,7 +101,8 @@
   "species_id": 1027,
   "maps": {
    "moc_fild08": 10,
-   "hu_fild07": 10
+   "hu_fild07": 10,
+   "mjolnir_07": 0
   },
   "walk_speed_ms": 200,
   "name": "Togashiro",
@@ -109,6 +110,9 @@
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "moc_fild08": [
+    "Togashiro"
+   ],
+   "mjolnir_07": [
     "Togashiro"
    ]
   }
@@ -120,10 +124,11 @@
    "yuno_fild05": 14,
    "0015@tower": 0,
    "0045@tower": 0,
-   "chunin": 0
+   "chunin": 0,
+   "moc_fild03": 0
   },
   "walk_speed_ms": 150,
-  "name": "Mula sem Cabesa",
+  "name": "Deca",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -144,6 +149,9 @@
    ],
    "chunin": [
     "Apollo"
+   ],
+   "moc_fild03": [
+    "Namekuji"
    ]
   }
  },
@@ -206,7 +214,7 @@
    "pvp_n_1-1": 7,
    "gef_fild04": 0
   },
-  "walk_speed_ms": 200,
+  "walk_speed_ms": 800,
   "name": "Filhote de cobra",
   "max_hp": 45,
   "sprite_source": "GRF prioritário",
@@ -242,7 +250,8 @@
   "maps": {
    "ve_fild04": 16,
    "ein_fild01": 3,
-   "pay_fild10": 0
+   "pay_fild10": 0,
+   "mjolnir_08": 0
   },
   "walk_speed_ms": 300,
   "name": "Manmosukas",
@@ -253,6 +262,9 @@
     "Manmosukas"
    ],
    "pay_fild10": [
+    "Manmosukas"
+   ],
+   "mjolnir_08": [
     "Manmosukas"
    ]
   }
@@ -297,7 +309,7 @@
    "pvp_n_1-1": 5,
    "prt_fild01": 0
   },
-  "walk_speed_ms": 150,
+  "walk_speed_ms": 600,
   "name": "Bikouchuu",
   "max_hp": 900,
   "sprite_source": "GRF prioritário",
@@ -486,7 +498,8 @@
    "pay_fild10": 0,
    "mjolnir_08": 0,
    "moc_fild03": 0,
-   "prt_fild01": 0
+   "prt_fild01": 0,
+   "mjolnir_07": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 2000,
@@ -512,6 +525,9 @@
     "Planta Medicinal "
    ],
    "prt_fild01": [
+    "Planta Medicinal "
+   ],
+   "mjolnir_07": [
     "Planta Medicinal "
    ]
   }
@@ -1245,7 +1261,8 @@
   "species_id": 1405,
   "maps": {
    "ve_fild04": 22,
-   "ein_fild01": 6
+   "ein_fild01": 6,
+   "mjolnir_08": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 200,
@@ -1253,6 +1270,9 @@
   "max_hp": 152000,
   "names_by_map": {
    "ve_fild04": [
+    "Chamu"
+   ],
+   "mjolnir_08": [
     "Chamu"
    ]
   }
@@ -1361,7 +1381,8 @@
   "maps": {
    "ve_fild04": 35,
    "ein_fild01": 6,
-   "pay_fild10": 0
+   "pay_fild10": 0,
+   "mjolnir_08": 0
   },
   "walk_speed_ms": 165,
   "name": "Sanjuu Kyodaireo",
@@ -1372,6 +1393,9 @@
     "Sanjuu Kyodaireo"
    ],
    "pay_fild10": [
+    "Sanjuu Kyodaireo"
+   ],
+   "mjolnir_08": [
     "Sanjuu Kyodaireo"
    ]
   }
@@ -1463,7 +1487,8 @@
   "maps": {
    "moc_fild13": 8,
    "yuno_fild05": 4,
-   "um_fild01": 0
+   "um_fild01": 0,
+   "moc_fild03": 0
   },
   "walk_speed_ms": 300,
   "name": "Saru",
@@ -1472,6 +1497,9 @@
   "captured_sprite": true,
   "names_by_map": {
    "moc_fild13": [
+    "Saru"
+   ],
+   "moc_fild03": [
     "Saru"
    ]
   }
@@ -1866,7 +1894,7 @@
    "0015@tower": 0,
    "0045@tower": 0
   },
-  "name": "Black Over",
+  "name": "Deca",
   "max_hp": 2300000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -1999,11 +2027,12 @@
   "maps": {
    "chunin": 0
   },
-  "name": "Ootsutsuki Kabuto",
+  "name": "Massacrento",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
+    "Massacrento",
     "Ootsutsuki Kabuto"
    ]
   },
@@ -2014,11 +2043,12 @@
   "maps": {
    "chunin": 0
   },
-  "name": "Ootsutsuki Kabuto",
+  "name": "Massacrento",
   "max_hp": 2000000,
-  "walk_speed_ms": 600,
+  "walk_speed_ms": 112,
   "names_by_map": {
    "chunin": [
+    "Massacrento",
     "Ootsutsuki Kabuto"
    ]
   },
@@ -3234,7 +3264,7 @@
    "0015@tower": 0,
    "0045@tower": 0
   },
-  "name": "Black Over",
+  "name": "Deca",
   "max_hp": 3766740,
   "walk_speed_ms": 150,
   "names_by_map": {

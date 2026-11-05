@@ -34,7 +34,7 @@ class EntityInventory:
                     'walk_speed_ms': event.get('walk_speed_ms'),
                     'position': event['position'], 'destination': event.get('destination'),
                     'present_last_observation': True, 'removal_reason': None,
-                    'body_state': event.get('body_state', 0),
+                    'body_state': event.get('body_state', 0), 'dead': bool(event.get('dead')),
                     'last_seen': now, 'movements': old.get('movements', 0)}
                 if len(self.entities) > 5000:
                     oldest = min(self.entities, key=lambda i: self.entities[i]['last_seen'])
@@ -53,6 +53,10 @@ class EntityInventory:
                 elif kind == 'remove':
                     entity.update(present_last_observation=False, removal_reason=event.get('reason'),
                                   removed_at=now)
+                    if event.get('reason') == 1:
+                        entity['dead'] = True  # a player's body stays on the ground
+                elif kind == 'resurrection':
+                    entity.update(dead=False, present_last_observation=True)
 
     def snapshot(self, now):
         from .monster_origin import temporary_reason

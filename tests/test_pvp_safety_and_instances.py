@@ -65,3 +65,40 @@ def test_instance_copy_uses_the_floor_where_everyone_stands(tmp_path):
     relay.tracker.observer.player = [20, 20]  # walkable only on floor b
     assert relay.collision_map() is floor_b
     assert relay.instance_maps['0045@tower.gat'] == '5@tower.gat'
+
+
+def test_dead_state_and_resurrection_are_read():
+    import struct
+    from nrobot.packet_reader import decode
+    standing = bytearray(58); struct.pack_into('<H', standing, 0, 0x22a); struct.pack_into('<I', standing, 2, 2002329)
+    standing[55] = 1
+    assert decode(bytes(standing))['dead'] is True
+    standing[55] = 2  # sitting
+    assert decode(bytes(standing))['dead'] is False
+    assert decode(struct.pack('<HIH', 0x148, 2002329, 0)) == {'opcode': '0148', 'kind': 'resurrection', 'entity_id': 2002329}
+
+
+def test_dead_players_get_no_skill_or_attack_until_resurrected(tmp_path):
+    import asyncio
+    import pytest
+    from nrobot.session_relay import HuntTargetChanged
+    relay = relay_with_players(tmp_path, [(2002329, 'Inimigo')], pvp_targets=[2002329])
+    assert [e['entity_id'] for e in relay.status()['recent_entities']] == [2002329]
+    relay.inventory.observe([{'kind': 'remove', 'entity_id': 2002329, 'reason': 1}], time.monotonic())  # killed
+    relay.inventory.observe([{'kind': 'appearance', 'entity_id': 2002329, 'species_id': 26, 'position': [12, 10],
+                              'object_type': 0, 'dead': True}], time.monotonic())  # body seen again
+    relay.sync_pvp_targets()
+    assert relay.dead(2002329) and relay.status()['recent_entities'] == []
+    relay.hunt.start()
+
+    class Writer:
+        def __init__(self): self.packets = []
+        def write(self, data): self.packets.append(data)
+        async def drain(self): pass
+    relay.upstream = Writer()
+    with pytest.raises(HuntTargetChanged):  # refused (gone from the targets, or dead)
+        asyncio.run(relay.send_hunt_action({'kind': 'attack', 'target_id': 2002329}, game_gate=lambda: True))
+    assert relay.upstream.packets == []
+    relay.inventory.observe([{'kind': 'resurrection', 'entity_id': 2002329}], time.monotonic())
+    relay.sync_pvp_targets()
+    assert not relay.dead(2002329) and [e['entity_id'] for e in relay.status()['recent_entities']] == [2002329]

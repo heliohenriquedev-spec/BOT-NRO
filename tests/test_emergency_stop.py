@@ -96,3 +96,24 @@ def test_gm_signs_speed_guild_teleports_and_listed_visuals(tmp_path):
     for t in (1, 10):
         signs.observe([{'kind': 'appearance', 'entity_id': 2000444, 'position': [12, 10], 'spawned': True}], [10, 10], t)
     assert signs.teleported_often(2000444, 11) and signs.reasons(row, {}, 150, 11) == []  # portals: a note, never a stop
+
+
+def test_gm_identification_can_be_switched_off(tmp_path, monkeypatch):
+    """Off: no stop for GM @hide or a staff-marked name; the watch list keeps working."""
+    from nrobot.packet_settings import DEFAULTS
+
+    async def scenario():
+        relay = relay_for(tmp_path, monkeypatch, watch=[str(WATCHED)])
+        relay.apply_settings({**DEFAULTS, 'species': [1037], 'gm_detection': False})
+        relay.hunt.start()
+        see(relay, [decode(struct.pack('<HIHHIB', 0x229, 2000999, 0, 0, 0x40, 0))], 0)  # @hide switched on
+        staff = {'kind': 'appearance', 'entity_id': GM, 'species_id': 25, 'position': [12, 10], 'option': 0}
+        relay.player_names[GM] = '[GM] Suporte'
+        see(relay, [staff, {'kind': 'name', 'entity_id': GM, 'name': '[GM] Suporte'}], 1)
+        assert relay.hunt.enabled and relay.emergency is None and relay.gm_signs_found(time.monotonic()) == []
+        see(relay, [{'kind': 'appearance', 'entity_id': WATCHED, 'species_id': 25, 'position': [12, 10], 'option': 0}], 2)
+        assert not relay.hunt.enabled and 'observacao' in relay.emergency['reason']  # the list still stops
+        restart(relay)
+        relay.apply_settings({**DEFAULTS, 'species': [1037], 'gm_detection': True})
+        assert relay.gm_signs_found(time.monotonic())  # on again: the staff name is caught
+    asyncio.run(scenario())
