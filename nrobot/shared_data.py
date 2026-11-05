@@ -28,19 +28,13 @@ FILES = {'rotas_quests.json': 'data/rede/rotas_quests.json',
          'portais.json': 'data/mapas/portais.json',
          'portais_internos.json': 'data/mapas/portais_internos.json',
          'quest_extras.json': 'data/rede/quest_extras.json',
-         'buffs_aprendidos.json': 'data/rede/buffs_aprendidos.json',
          'gm_sinais.json': 'data/jogadores/gm_sinais.json'}
 PERSONAL_LIBRARY = ('checked_missions',)
 # @voltar learned once by the developer works for everybody (the speaker's name is swapped when
 # sent); the Switch (mount and items of each character) and the learned mount stay personal.
-SHARED_EXTRAS = ('voltar_frame', 'voltar_enabled', 'calm_seconds', 'clear_radius', 'cast_timeout', 'attempts')
-# Monster targets of the Monstros tab (IDs marked to attack and the names checked or unchecked on
-# each map). The monster registry itself (IDs, names per map, HP) goes in data/monstros_base.
-# Merged only when the panel opens, before it reads painel_config.json: an open panel saves its
-# settings when closing and would undo a merge made by the updater.
-TARGETS = 'alvos_monstros.json'
-TARGETS_MARKER = 'data/rede/alvos_importados.json'
-SHARED_TARGETS = ('species', 'monster_name_choices')
+SHARED_EXTRAS = ('voltar_frame', 'voltar_enabled')  # what the routes need; the numbers are each PC's own
+# Never published: skill setups (buffs aprendidos), the Monstros tab targets and every other
+# hunt/combat/PvP setting. Each PC keeps its own, per character (data/rede/personagens).
 
 
 def _read(path, default):
@@ -107,14 +101,8 @@ def export(log=print, root=ROOT):
     manifest = {name: content_hash((root/SHARED/name).read_bytes()) for name in payload}
     _write(root/SHARED/'manifesto.json', {'schema': 1, 'files': manifest})
     _write(root/MARKER, {'digest': digest(root)})  # the developer already has all of it
-    config = _read(root/'data/rede/painel_config.json', None)
-    if isinstance(config, dict):
-        targets = {k: config[k] for k in SHARED_TARGETS if k in config}
-        _write(root/SHARED/TARGETS, targets)
-        _write(root/TARGETS_MARKER, {'digest': hashlib.sha256((root/SHARED/TARGETS).read_bytes()).hexdigest()[:16]})
-        log(f"Alvos da aba Monstros preparados: {len(targets.get('species', []))} IDs e "
-            f"{len(targets.get('monster_name_choices', {}))} nomes por mapa.")
-    log(f'Quests, quadros, rotas de mapa, portais, @voltar, buffs e sinais de GM preparados para os usuarios ({len(payload)} arquivos).')
+    (root/SHARED/'alvos_monstros.json').unlink(missing_ok=True)  # published before: personal now
+    log(f'Quests, quadros, rotas de mapa, portais, @voltar e sinais de GM preparados para os usuarios ({len(payload)} arquivos).')
 
 
 def validate_references(payload):
@@ -309,8 +297,6 @@ def merge(root=ROOT, log=print, force=False):
         result['portais_internos.json'] = merge_portals(own['portais_internos.json'], shared['portais_internos.json'])
     if shared['quest_extras.json'] is not None:
         result['quest_extras.json'] = merge_extras(own['quest_extras.json'], shared['quest_extras.json'])
-    if shared['buffs_aprendidos.json'] is not None:
-        result['buffs_aprendidos.json'] = merge_flat(own['buffs_aprendidos.json'], shared['buffs_aprendidos.json'])
     if shared['gm_sinais.json'] is not None:
         result['gm_sinais.json'] = merge_lists(own['gm_sinais.json'], shared['gm_sinais.json'])
     try:  # everything checked before anything is written: a bad publication changes nothing
@@ -330,54 +316,5 @@ def merge(root=ROOT, log=print, force=False):
     for name, data in result.items():
         _write(root/FILES[name], data)
     _write(root/MARKER, {'digest': current, 'imported_at': datetime.now().isoformat(timespec='seconds')})
-    log('Quests, quadros, rotas de mapa, portais, @voltar, buffs e sinais de GM publicados foram recebidos.')
-    return True
-
-
-def merge_targets_data(mine, theirs):
-    """IDs: union (the user's own stay). Names per map: the published choice only where the user
-    never chose."""
-    result = copy.deepcopy(mine) if isinstance(mine, dict) else {}
-    if 'species' in theirs:
-        from .packet_settings import DEFAULTS
-        species = list(result.get('species', DEFAULTS['species']))
-        species += [i for i in theirs['species'] if isinstance(i, int) and i not in species]
-        result['species'] = species
-    choices = dict(result.get('monster_name_choices') or {})
-    for key, enabled in (theirs.get('monster_name_choices') or {}).items():
-        if isinstance(enabled, bool):
-            choices.setdefault(key, enabled)
-    result['monster_name_choices'] = choices
-    return result
-
-
-def merge_targets(root=ROOT, log=print, force=False):
-    """The developer's Monstros targets into this PC's settings, once per publication."""
-    root = Path(root)
-    source = root/SHARED/TARGETS
-    if not source.is_file():
-        return False
-    current = hashlib.sha256(source.read_bytes()).hexdigest()[:16]
-    if not force and _read(root/TARGETS_MARKER, {}).get('digest') == current:
-        return False
-    theirs = _read(source, None)
-    own_path = root/'data/rede/painel_config.json'
-    mine = _read(own_path, None)
-    if not isinstance(theirs, dict) or mine is not None and not isinstance(mine, dict):
-        log('Alvos compartilhados nao aplicados: arquivo invalido')
-        return False
-    from .packet_settings import validate
-    try:
-        result = validate(merge_targets_data(mine or {}, theirs))
-    except (ValueError, KeyError, TypeError) as exc:
-        log(f'Alvos compartilhados nao aplicados (invalidos): {exc}')
-        return False
-    if own_path.is_file():
-        target = root/'backups'/f"antes-dos-alvos-compartilhados-{datetime.now().strftime('%Y%m%d-%H%M%S')}.zip"
-        target.parent.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(target, 'w', zipfile.ZIP_DEFLATED) as bundle:
-            bundle.write(own_path, 'data/rede/painel_config.json')
-    _write(own_path, result)
-    _write(root/TARGETS_MARKER, {'digest': current, 'imported_at': datetime.now().isoformat(timespec='seconds')})
-    log(f"Alvos da aba Monstros recebidos: {len(result['species'])} IDs marcados.")
+    log('Quests, quadros, rotas de mapa, portais, @voltar e sinais de GM publicados foram recebidos.')
     return True

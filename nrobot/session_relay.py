@@ -480,6 +480,13 @@ class SessionRelay(QuestRelay):
             self.tracker.observer.registry.update(Entity(identity, known.get('species_id', 0), *position,
                                                          time.monotonic(), 'player', walk_speed_ms=known.get('walk_speed_ms')))
 
+    def player_focus(self):
+        """A priority player is on screen: PvP focus, players only."""
+        if self.captured_player is None:
+            return False
+        identity = self.captured_player['entity_id']
+        return identity in self.presence.players and identity not in self.presence.hidden and not self.dead(identity)
+
     PRIORITY_OFF_SCREEN = 3.0  # seconds a priority player may be out of view before it is dropped
 
     def expire_captured(self, now):
@@ -1393,6 +1400,11 @@ class SessionRelay(QuestRelay):
                                    if (entity.get('kind') == 'player' or self.monster_name_allowed(
                                        entity['entity_id'], entity.get('species_id')))
                                    and not self.asleep(entity['entity_id']) and not self.dead(entity['entity_id'])]
+        state['player_focus'] = self.player_focus()
+        if state['player_focus']:
+            # A player focused with the mouse (or given priority in PvP): monsters and summons are
+            # ignored, attackers included; only players are fought until the focus ends.
+            state['recent_entities'] = [entity for entity in state['recent_entities'] if entity.get('kind') == 'player']
         from .map_monsters import confirmed_types
         observer = self.tracker.observer
         state['character_sync'] = {'identity_received': observer.player_id is not None,
@@ -2534,7 +2546,9 @@ async def run(args):
                                             relay.hunt.target = candidate['entity_id']
                                     # REDE-84: with basic attacks on, a basic attack follows every skill
                                     # (skill, attack, skill...); with no skill ready it keeps attacking.
-                                    summon_maintenance = relay.rotation.summon_maintenance_required(state, now, relay.hunt.target)
+                                    # Focused on a player: keeping the own summon up never holds the attacks back.
+                                    summon_maintenance = (not state.get('player_focus')
+                                                          and relay.rotation.summon_maintenance_required(state, now, relay.hunt.target))
                                     attack_turn = (not summon_maintenance and relay.attack_turn(action) and relay.last_combat_packet == 'skill'
                                                    and now >= relay.tracker.observer.cast_until)
                                     skill_sent = False

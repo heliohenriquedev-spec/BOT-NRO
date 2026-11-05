@@ -3,7 +3,8 @@
   "species_id": 8,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Mula sem Cabesa",
   "max_hp": 5768624,
@@ -13,6 +14,9 @@
     "Mula sem Cabesa"
    ],
    "0045@tower": [
+    "Mula sem Cabesa"
+   ],
+   "0035@tower": [
     "Mula sem Cabesa"
    ]
   }
@@ -125,10 +129,11 @@
    "0015@tower": 0,
    "0045@tower": 0,
    "chunin": 0,
-   "moc_fild03": 0
+   "moc_fild03": 0,
+   "0035@tower": 0
   },
   "walk_speed_ms": 150,
-  "name": "Deca",
+  "name": "Mula sem Cabesa",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -152,6 +157,10 @@
    ],
    "moc_fild03": [
     "Namekuji"
+   ],
+   "0035@tower": [
+    "Deca",
+    "Mula sem Cabesa"
    ]
   }
  },
@@ -1318,7 +1327,8 @@
   "sprite_source": "dados do jogo",
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Fabri",
   "max_hp": 2000000,
@@ -1328,6 +1338,9 @@
     "inhegas"
    ],
    "0045@tower": [
+    "Fabri"
+   ],
+   "0035@tower": [
     "Fabri"
    ]
   }
@@ -1788,7 +1801,8 @@
   "species_id": 1829,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Guardião Chefe",
   "max_hp": 753000,
@@ -1799,6 +1813,9 @@
    ],
    "0045@tower": [
     "Guardião Chefe"
+   ],
+   "0035@tower": [
+    "Guardião Chefe"
    ]
   },
   "captured_sprite": true
@@ -1807,7 +1824,8 @@
   "species_id": 1830,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Guardião Arqueiro",
   "max_hp": 399000,
@@ -1817,6 +1835,9 @@
     "Guardião Arqueiro"
    ],
    "0045@tower": [
+    "Guardião Arqueiro"
+   ],
+   "0035@tower": [
     "Guardião Arqueiro"
    ]
   },
@@ -1892,9 +1913,10 @@
   "species_id": 1916,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
-  "name": "Deca",
+  "name": "Mula sem Cabesa",
   "max_hp": 2300000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -1908,6 +1930,9 @@
    "0045@tower": [
     "Black Over",
     "Deca",
+    "Mula sem Cabesa"
+   ],
+   "0035@tower": [
     "Mula sem Cabesa"
    ]
   },
@@ -1951,7 +1976,8 @@
   "species_id": 1984,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Nibi",
   "max_hp": 27500000,
@@ -1961,6 +1987,9 @@
     "Nibi"
    ],
    "0045@tower": [
+    "Nibi"
+   ],
+   "0035@tower": [
     "Nibi"
    ]
   }
@@ -2007,7 +2036,8 @@
   "species_id": 1992,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Capitão ANBU",
   "max_hp": 10000000,
@@ -2017,6 +2047,9 @@
     "Capitão ANBU"
    ],
    "0045@tower": [
+    "Capitão ANBU"
+   ],
+   "0035@tower": [
     "Capitão ANBU"
    ]
   },
@@ -3262,7 +3295,8 @@
   "species_id": 4010,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Deca",
   "max_hp": 3766740,
@@ -3278,6 +3312,9 @@
     "Black Over",
     "Deca",
     "Neji Hyuuga"
+   ],
+   "0035@tower": [
+    "Deca"
    ]
   }
  },

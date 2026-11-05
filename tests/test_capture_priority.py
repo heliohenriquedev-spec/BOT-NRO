@@ -236,3 +236,27 @@ def test_pvp_table_checks_targets_and_one_priority():
     assert panel.table.item(0, PRIORITY).checkState() == Qt.Checked and 'Radiance' in panel.status.text()
     panel.table.item(0, PRIORITY).setCheckState(Qt.Unchecked)
     assert cleared
+
+
+def test_focusing_a_player_ignores_every_monster_and_summon(tmp_path):
+    from nrobot.network_targets import Entity
+    from nrobot.packet_settings import DEFAULTS
+    relay = _relay(tmp_path)
+    relay.apply_settings({**DEFAULTS, 'species': [1037], 'pvp_enabled': True, 'auto_map_targets': False})
+    relay.hunt.start()
+    now = time.monotonic()
+    monster = {'kind': 'appearance', 'entity_id': 110000001, 'species_id': 1037, 'position': [11, 10], 'object_type': 5}
+    relay.inventory.observe([monster], now)
+    relay.tracker.observer.registry.update(Entity(110000001, 1037, 11, 10, now, 'monster'))
+    assert [e['entity_id'] for e in relay.status()['recent_entities']] == [110000001]
+    assert relay.capture_player(2003137, 'mouse no jogo')
+    state = relay.status()
+    assert state['player_focus'] and [e['entity_id'] for e in state['recent_entities']] == [2003137]
+    relay.hunt.aggressors[110000001] = now  # the monster hits us: still ignored while focused
+    planning = {'state': 'tracking', 'player_position_recent': True, 'player_position': [10, 10],
+                'recent_entities': state['recent_entities']}
+    relay.hunt.plan(planning, now, 100)
+    assert relay.hunt.target == 2003137
+    relay.release_player()
+    state = relay.status()
+    assert not state['player_focus'] and 110000001 in [e['entity_id'] for e in state['recent_entities']]

@@ -187,3 +187,33 @@ def save(data, path=CONFIG):
         links_temp.write_text(json.dumps(links, indent=2), encoding='utf-8')
         links_temp.replace(links_path)
     return data
+
+
+# Each character keeps its own hunt, combat, skill and PvP settings on this PC (never published).
+CHARACTERS = CONFIG.with_name('personagens')
+
+
+def character_file(name, folder=None):
+    safe = ''.join(c if c.isalnum() or c in ' -_.' else '_' for c in (name or '').strip())[:40].strip() or '_'
+    return Path(folder or CHARACTERS)/f'{safe}.json'
+
+
+def read_character(name, folder=None):
+    """This character's saved settings, or None when it has none yet."""
+    path = character_file(name, folder)
+    if not path.is_file():
+        return None
+    try:
+        return validate(json.loads(path.read_text(encoding='utf-8')), links_path=CONFIG.with_name('buffs_aprendidos.json'))
+    except (OSError, ValueError):
+        return None
+
+
+def save_character(name, data, folder=None):
+    path = character_file(name, folder)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = validate(data, links_path=CONFIG.with_name('buffs_aprendidos.json'))
+    temp = path.with_suffix('.tmp')
+    temp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+    temp.replace(path)
+    return data

@@ -58,64 +58,32 @@ def test_portal_margins_keep_the_smallest_learned():
     assert shared_data.merge_portals({'a': {'1,1': 3}}, {'a': {'1,1': 1, '2,2': 2}}, smallest=True) == {'a': {'1,1': 1, '2,2': 2}}
 
 
-def test_voltar_buffs_and_gm_signs_go_too_but_not_the_switch(tmp_path):
+def test_voltar_and_gm_signs_go_but_no_personal_setting(tmp_path):
+    """Updates carry what the routes need; skills, hunt, combat and the Switch stay on each PC."""
     dev, user = tmp_path/'dev', tmp_path/'user'
     write(dev, 'data/rede/quest_extras.json', dict(voltar_frame='f300', voltar_enabled=True, voltar_name='Dev',
                                                   clear_radius=6, characters={'Dev': dict(mount_item=2642)}, mount=dict(item_id=1)))
     write(dev, 'data/rede/buffs_aprendidos.json', {'29': 12})
+    write(dev, 'data/rede/painel_config.json', {'species': [1051], 'radius': 5})
     write(dev, 'data/jogadores/gm_sinais.json', {'visuais': [7], 'marcas': []})
     shared_data.export(log=lambda t: None, root=dev)
-    assert 'characters' not in read(dev, 'data/compartilhado/quest_extras.json')
+    published = {path.name for path in (dev/'data/compartilhado').iterdir()}
+    assert 'buffs_aprendidos.json' not in published and 'alvos_monstros.json' not in published
+    assert read(dev, 'data/compartilhado/quest_extras.json') == {'voltar_frame': 'f300', 'voltar_enabled': True}
     import shutil
     shutil.copytree(dev/'data/compartilhado', user/'data/compartilhado')
     write(user, 'data/rede/buffs_aprendidos.json', {'8': 1})
     write(user, 'data/jogadores/gm_sinais.json', {'visuais': [3], 'marcas': ['x']})
     assert shared_data.merge(user, log=lambda t: None)
     extras = read(user, 'data/rede/quest_extras.json')
-    assert extras['voltar_frame'] == 'f300' and extras['clear_radius'] == 6 and 'characters' not in extras
-    assert read(user, 'data/rede/buffs_aprendidos.json') == {'8': 1, '29': 12}
+    assert extras['voltar_frame'] == 'f300' and 'clear_radius' not in extras and 'characters' not in extras
+    assert read(user, 'data/rede/buffs_aprendidos.json') == {'8': 1}  # untouched
     assert read(user, 'data/jogadores/gm_sinais.json') == {'visuais': [3, 7], 'marcas': ['x']}
 
 
 def test_a_voltar_learned_on_this_pc_is_kept():
     mine = dict(voltar_frame='mine', voltar_enabled=False, clear_radius=9)
     assert shared_data.merge_extras(mine, dict(voltar_frame='dev', clear_radius=6)) == mine
-
-
-def test_monster_targets_reach_other_users_once(tmp_path):
-    import json
-    from nrobot import shared_data
-    dev, user = tmp_path/'dev', tmp_path/'user'
-    (dev/'data/rede').mkdir(parents=True); (user/'data/rede').mkdir(parents=True)
-    (dev/'data/rede/painel_config.json').write_text(json.dumps({
-        'species': [1051, 1303], 'radius': 5, 'hotkey_hunt': 'F5',
-        'monster_name_choices': {'cmd_fild09:1656:Genin': True, 'poring_w01:1051:Bikoucuu': False}}), encoding='utf-8')
-    shared_data.export(log=lambda *_: None, root=dev)
-    assert not shared_data.merge_targets(dev, log=lambda *_: None)  # the developer already has them
-    (user/'data/compartilhado').mkdir(parents=True)
-    (user/'data/compartilhado/alvos_monstros.json').write_bytes((dev/'data/compartilhado/alvos_monstros.json').read_bytes())
-    (user/'data/rede/painel_config.json').write_text(json.dumps({
-        'species': [1037], 'radius': 20, 'auto_map_targets': True,
-        'monster_name_choices': {'cmd_fild09:1656:Genin': False}}), encoding='utf-8')
-    assert shared_data.merge_targets(user, log=lambda *_: None)
-    config = json.loads((user/'data/rede/painel_config.json').read_text(encoding='utf-8'))
-    assert config['species'] == [1037, 1051, 1303]
-    assert config['monster_name_choices'] == {'cmd_fild09:1656:Genin': False, 'poring_w01:1051:Bikoucuu': False}
-    assert config['radius'] == 20 and config['auto_map_targets'] and config['hotkey_hunt'] == 'Home'  # only targets travel
-    config['species'] = [1037]
-    (user/'data/rede/painel_config.json').write_text(json.dumps(config), encoding='utf-8')
-    assert not shared_data.merge_targets(user, log=lambda *_: None)  # once per publication: removals stay
-    assert list((user/'backups').glob('antes-dos-alvos-compartilhados-*.zip'))
-
-
-def test_new_user_without_settings_gets_the_targets(tmp_path):
-    import json
-    from nrobot import shared_data
-    (tmp_path/'data/compartilhado').mkdir(parents=True)
-    (tmp_path/'data/compartilhado/alvos_monstros.json').write_text(json.dumps({'species': [1051]}), encoding='utf-8')
-    assert shared_data.merge_targets(tmp_path, log=lambda *_: None)
-    config = json.loads((tmp_path/'data/rede/painel_config.json').read_text(encoding='utf-8'))
-    assert config['species'] == [1037, 1051]
 
 
 def test_files_from_github_with_other_line_endings_are_still_imported(tmp_path):

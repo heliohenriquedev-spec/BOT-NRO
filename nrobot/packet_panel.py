@@ -368,6 +368,23 @@ class PacketPanel(QMainWindow):
         except (OSError, ValueError) as exc:
             self.notice.setText('Configuração inválida: '+str(exc))
             settings = DEFAULTS.copy()
+        self.character = None  # settings are kept per character (data/rede/personagens)
+        self.show_settings(settings)
+        from .responsive_ui import PanelLayout
+        self.responsive_layout = PanelLayout(self, locals())
+        self.watch_settings()
+        self.load_ui()
+        self.responsive_layout.fit_to_screen()
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.refresh)
+        self.timer.start(700)
+        self.overlay_timer = QTimer(self)
+        self.overlay_timer.timeout.connect(self.refresh_overlays)
+        self.overlay_timer.start(100)
+        tabs.currentChanged.connect(lambda index: self.refresh())
+
+    def show_settings(self, settings):
+        """Fill every field from a settings dict (at start and when another character logs in)."""
         self.targets.selected = set(settings['species'])
         self.targets.name_choices = dict(settings['monster_name_choices'])
         self.targets.shown = ()
@@ -415,22 +432,36 @@ class PacketPanel(QMainWindow):
         self.pause_hidden.setChecked(settings['pause_on_hidden'])
         self.gm_detection.setChecked(settings['gm_detection'])
         self.skill_panel.saved = settings['skill_profiles']
+        self.skill_panel.signature = None  # rebuilt from these profiles
         self.skill_panel.summon_queue_mode = settings['summon_queue_mode']
         self.priority_panel.saved = settings['skill_priority']
+        self.priority_panel.available = None
         for key, field in self.combat_fields.items():
             field.setValue(settings[key])
-        from .responsive_ui import PanelLayout
-        self.responsive_layout = PanelLayout(self, locals())
-        self.watch_settings()
-        self.load_ui()
-        self.responsive_layout.fit_to_screen()
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.refresh)
-        self.timer.start(700)
-        self.overlay_timer = QTimer(self)
-        self.overlay_timer.timeout.connect(self.refresh_overlays)
-        self.overlay_timer.start(100)
-        tabs.currentChanged.connect(lambda index: self.refresh())
+
+    def store(self, settings):
+        """Saved for this PC and for the character playing (each one keeps its own setup)."""
+        from .packet_settings import save_character
+        settings = save(settings)
+        if self.character:
+            save_character(self.character, settings)
+        return settings
+
+    def switch_character(self, name):
+        """Another character logged in: its own settings replace the panel's."""
+        from .packet_settings import read_character, save_character
+        if self.character and self.save_timer.isActive():
+            self.save_timer.stop()
+            save_character(self.character, self.settings())  # the previous one keeps its last changes
+        self.character = name
+        mine = read_character(name)
+        if mine is None:
+            save_character(name, self.settings())  # first time: starts from the current setup
+            self.notice.setText(f'Configuração de {name} criada a partir da atual.')
+            return
+        self.show_settings(mine)
+        self.schedule_save()  # saved and sent to the relay
+        self.notice.setText(f'Configuração de {name} carregada.')
 
     def settings(self):
         return {'group_enabled':self.group_enabled.isChecked(),'group_role':self.group_role.currentData(),
@@ -471,7 +502,7 @@ class PacketPanel(QMainWindow):
 
     def apply(self):
         try:
-            settings = save(self.settings())
+            settings = self.store(self.settings())
             self.skill_panel.saved = settings['skill_profiles']
             if self.process.state() != QProcess.NotRunning:
                 self.command('apply', settings=settings)
@@ -533,7 +564,7 @@ class PacketPanel(QMainWindow):
             self.game_field.setFocus()
             return
         try:
-            save(self.settings())
+            self.store(self.settings())
             self.session = ROOT/'logs/relay'/datetime.now().strftime('%Y%m%d-%H%M%S-%f-painel')
             self.session.mkdir(parents=True)
             self.pending_command = None
@@ -642,6 +673,9 @@ class PacketPanel(QMainWindow):
             self.pvp_panel.update_state(state)
             self.player_panel.check_watch(state)  # status line of the lista de observação
             self.x1_box.set_character((state.get('own_look') or {}).get('name'))
+            name = (state.get('own_look') or {}).get('name')
+            if name and name != self.character:
+                self.switch_character(name)
             # The relay stops itself on a watched character or anyone in @hide; this shows it.
             emergency = state.get('emergency_stop')
             if emergency and emergency['id'] != getattr(self, 'emergency_seen', None):
@@ -878,7 +912,7 @@ class PacketPanel(QMainWindow):
 
     def autosave(self):
         try:
-            settings = save(self.settings())
+            settings = self.store(self.settings())
         except (OSError, ValueError) as exc:
             self.notice.setText('Configuração não salva: '+str(exc))
             return
@@ -957,9 +991,8 @@ def main():
     app.setStyle('Fusion')
     messages = []
     try:  # quests, routes and portals of the version just installed (once per publication)
-        from .shared_data import merge, merge_targets
+        from .shared_data import merge
         merge(log=messages.append)
-        merge_targets(log=messages.append)  # before the window reads painel_config.json
     except (OSError, ValueError) as exc:
         messages.append(f'Dados compartilhados nao aplicados: {exc}')
     window = PacketPanel()

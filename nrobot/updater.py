@@ -31,7 +31,7 @@ PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/m
              'data/rede/slots_missoes.json', 'data/rede/quest_extras.json',
              'data/rede/progresso_quests.json', 'data/x1',
              'data/rede/compartilhado_importado.json',
-             'data/rede/alvos_importados.json')
+             'data/rede/alvos_importados.json', 'data/rede/personagens')
 # Kept in the repository for development, not needed to run the bot.
 NOT_DISTRIBUTED = ('tests', 'tools', 'Arquivos_grf', '.gitignore', '.gitattributes')
 TIMEOUT = 30

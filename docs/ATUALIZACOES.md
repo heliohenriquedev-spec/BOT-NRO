@@ -15,9 +15,8 @@ e, ao atualizar, recebe tudo o que foi publicado nesse meio-tempo.
   - quests da fila (`rotas_quests.json`), com as missões, os IDs e o mapa de caça de cada uma;
   - quadros e missões (`quadros_missoes.json`);
   - rotas de mapa (`rotas_mapas.json`) e portais, inclusive os internos;
-  - @voltar e as opções gerais das quests (`quest_extras.json`, sem o Switch de cada personagem);
-  - buffs aprendidos e sinais de GM;
-  - alvos da aba Monstros (`alvos_monstros.json`).
+  - o @voltar aprendido (`quest_extras.json`, só ele);
+  - sinais de GM.
 - **Base de monstros** (`data/monstros_base`): IDs, nomes por mapa, HP e sprites.
 
 ## Como chega no PC de cada usuário
@@ -27,19 +26,24 @@ e, ao atualizar, recebe tudo o que foi publicado nesse meio-tempo.
    (uma vez por publicação): o que veio publicado substitui a cópia anterior do mesmo item, o que
    o usuário criou continua, e as escolhas dele (rotas marcadas na fila, missões do dia,
    progresso, Switch, configurações de combate) não mudam. Antes, uma cópia vai para `backups/`.
-3. Ao abrir o painel, a mesclagem é conferida de novo e os alvos da aba Monstros são somados aos
-   do usuário.
+3. Ao abrir o painel, a mesclagem é conferida de novo.
 4. Se algo for recusado, o motivo aparece no painel (Diagnóstico e linha de aviso), nunca só num
    console invisível.
 
 Como cada publicação é completa, pular versões não perde nada: a mesclagem compara com o que o
 usuário já importou e aplica o conjunto atual inteiro.
 
-## O que nunca é enviado
+## O que nunca é enviado: configuração é de cada PC e de cada personagem
 
-Login e senha, configurações de combate e de patrulha (`painel_config.json`, exceto os alvos da
-aba Monstros), Switch de montaria e equipamentos, progresso da fila, missões concluídas no dia,
-registro de jogadores, database de drops e logs.
+Nenhuma configuração vai na atualização. Cada computador mantém a sua, **separada por personagem**
+(`data/rede/personagens/<nome>.json`): caça e patrulha, combate (ataque básico, aproximação,
+kite), habilidades e a ordem delas, buffs aprendidos, alvos da aba Monstros, PvP, pausas de
+presença e identificação de GM. Quando outro personagem entra, o painel carrega a configuração
+dele; um personagem novo começa com a configuração atual.
+
+Também ficam só no PC: Switch de montaria e equipamentos, os números de caça das quests (raio de
+limpeza, tempo de calma, tentativas), progresso da fila, missões concluídas no dia, registro de
+jogadores, database de drops e logs.
 
 ## Por que outros usuários "perdiam" atualizações (corrigido em 2026-11-04)
 

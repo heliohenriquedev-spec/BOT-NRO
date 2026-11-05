@@ -1,8 +1,4 @@
 {
  "voltar_enabled": true,
- "voltar_frame": "f30017005561646177657532203a2040766f6c74617200",
- "calm_seconds": 10,
- "clear_radius": 6,
- "cast_timeout": 15,
- "attempts": 6
+ "voltar_frame": "f30017005561646177657532203a2040766f6c74617200"
 }

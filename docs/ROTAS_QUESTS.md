@@ -497,12 +497,9 @@ atualizar ou abrir o painel, esses dados são mesclados uma vez por publicação
 - o que o usuário criou continua, e a escolha de ativar ou não cada quest na fila é mantida;
 - antes de mesclar, os arquivos do usuário são copiados para `backups/antes-dos-dados-compartilhados-*.zip`.
 
-Os monstros também vão: o registro (IDs, nomes por mapa, HP e sprites) em `data/monstros_base`,
-e os alvos da aba Monstros em `data/compartilhado/alvos_monstros.json`. Ao abrir o painel,
-antes de ler a configuração, os IDs marcados do desenvolvedor são somados aos do usuário e
-os nomes marcados/desmarcados por mapa entram onde o usuário ainda não escolheu; o resto da
-configuração não muda. Isso ocorre uma vez por publicação (um ID desmarcado depois continua
-desmarcado), com cópia em `backups/antes-dos-alvos-compartilhados-*.zip`.
+A base de monstros também vai (`data/monstros_base`: IDs, nomes por mapa, HP e sprites). As
+configurações de caça, combate e habilidades, inclusive os alvos da aba Monstros, nunca vão: cada
+PC mantém as suas, por personagem (veja `docs/ATUALIZACOES.md`).
 
 Não são compartilhados: missões concluídas no dia, vagas, progresso da fila, @voltar
 aprendido, Switch (montaria e equipamentos de cada personagem) e login.
