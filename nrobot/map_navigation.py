@@ -108,6 +108,16 @@ class CollisionMap:
         return (0 <= x < self.width-1 and 0 <= y < self.height-1 and bool(self.cells[y*self.width+x])
                 and (not self.forbidden or (x, y) not in self.forbidden))
 
+    def ground(self, point):
+        """Walkable ground, portal areas included."""
+        x, y = point
+        return 0 <= x < self.width-1 and 0 <= y < self.height-1 and bool(self.cells[y*self.width+x])
+
+    def start_ok(self, point):
+        """Where a walk may start: the character can stand inside a portal's area (it arrives
+        there); only stepping onto one of its cells warps, so leaving it is allowed."""
+        return self.walkable(point) or self.ground(point)
+
     def set_forbidden(self, cells):
         """Cells no route, step or patrol may use (portal areas); clears derived caches."""
         cells = frozenset(cells)
@@ -143,14 +153,15 @@ class CollisionMap:
         return 3
 
     def segment(self, start, end, blocked=frozenset(), *, max_steps=4, wall_margin=0):
+        """The cells the server walks for a move request: its direct path goes diagonally first,
+        then straight (rAthena path_search). Checking an even line instead let gl_sew02's first step
+        go diagonally into its portal while the bot thought it walked straight past it."""
         start, end = tuple(start), tuple(end)
-        dx, dy = end[0]-start[0], end[1]-start[1]
-        steps = max(abs(dx), abs(dy))
-        if not self.walkable(start) or not 1 <= steps <= max_steps:
+        steps = max(abs(end[0]-start[0]), abs(end[1]-start[1]))
+        if not self.start_ok(start) or not 1 <= steps <= max_steps:
             return False
         point = start
-        for step in range(1, steps+1):
-            nxt = tuple(round(start[i]+(end[i]-start[i])*step/steps) for i in (0, 1))
+        for nxt in server_line(start, end):
             if not self.edge(point, nxt, blocked) or (wall_margin and self.clearance(nxt) < wall_margin):
                 return False
             point = nxt
@@ -161,7 +172,7 @@ class CollisionMap:
         """A* path. greed > 1 weights the heuristic (much faster, slightly longer paths);
         partial returns the path to the expanded cell closest to target when the budget runs out."""
         start, target = tuple(start), tuple(target)
-        if not self.walkable(start) or not self.walkable(target):
+        if not self.start_ok(start) or not self.walkable(target):
             return None
         # Adjacent ground avoids attacking through thin walls or across a gap.
         def goal(p):
@@ -207,7 +218,7 @@ class CollisionMap:
 
     def reachable(self, start):
         start = tuple(start)
-        if not self.walkable(start):
+        if not self.start_ok(start):
             return frozenset()
         if start in self.components:
             return self.components[start]
@@ -346,6 +357,7 @@ class MapRepository:
                     if result is None:
                         raise ValueError('Mapa sem colisao na base do bot; atualize os recursos do bot: '+name)
                     self.sources[name] = 'base independente do bot (GRFs visuais ignoradas)'
+                    result.name = PureWindowsPath(name).name.lower()
                     self.cache[name] = result
                     return result
                 resource = 'data\\'+key
@@ -365,5 +377,22 @@ class MapRepository:
             self.errors[name] = str(exc)+('' if self.server_maps else
                 f'; copie o map_cache.dat (rAthena) ou os .mcache (Hercules) do servidor para {self.CACHE_FOLDER}')
             result = None
+        if result is not None:
+            result.name = PureWindowsPath(name).name.lower()  # e.g. 'gl_sew02.gat'
         self.cache[name] = result
         return result
+
+
+def server_line(start, end):
+    """Cells of the server's direct walk from start to end: diagonal first, then straight."""
+    x, y = start
+    sx, sy = (end[0] > x)-(end[0] < x), (end[1] > y)-(end[1] < y)
+    cells = []
+    while (x, y) != tuple(end):
+        x, y = x+sx, y+sy
+        cells.append((x, y))
+        if x == end[0]:
+            sx = 0
+        if y == end[1]:
+            sy = 0
+    return cells

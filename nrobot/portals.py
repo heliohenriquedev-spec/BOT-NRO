@@ -21,6 +21,7 @@ FILE = Path(__file__).resolve().parents[1]/'data'/'mapas'/'portais.json'
 WARP_SPRITES = {45, 139}
 WARP_SKILL_UNITS = {0x80, 0x81}
 MARGIN = 3  # cells around the portal (Chebyshev); common warps trigger within 1-2
+WIDEST = 5  # an area learned from an accidental warp never grows past this
 
 
 def chebyshev(a, b):
@@ -35,6 +36,12 @@ class PortalGuard:
         except (OSError, ValueError):
             self.known = {}  # {map: {"x,y": margin}}
         self.links_path = self.path.with_name('portais_internos.json')
+        # Areas proved by an accidental warp: never shrunk again (arriving next to a portal does).
+        self.widened_path = self.path.with_name('portais_ampliados.json')
+        try:
+            self.widened = json.loads(self.widened_path.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            self.widened = {}  # {map: {"x,y": margin}}
         try:
             self.internal = json.loads(self.links_path.read_text(encoding='utf-8'))
         except (OSError, ValueError):
@@ -69,7 +76,7 @@ class PortalGuard:
                 if cell not in portals:
                     # Standing here unwarped proves the own cell is outside the touch area.
                     near = chebyshev(own_position, event['position'])-1 if own_position else MARGIN
-                    portals[cell] = max(0, min(MARGIN, near))
+                    portals[cell] = max(self.floor(map_name, cell), min(MARGIN, near))
                     self.dirty = True
             elif kind == 'ground_effect' and event.get('effect_type') in WARP_SKILL_UNITS:
                 self.temporary[event['effect_id']] = tuple(event['position'])
@@ -83,11 +90,17 @@ class PortalGuard:
             return True
         return False
 
+    def floor(self, map_name, cell):
+        return self.widened.get(self.key(map_name), {}).get(cell, 0)
+
     def arrived(self, map_name, position):
+        """Landing next to a portal usually means its area ends before there; not for the ones an
+        accidental warp proved wider (gl_sew02 lands the character inside its portal's area)."""
         for cell, margin in self.known.get(self.key(map_name), {}).items():
             distance = chebyshev(position, tuple(map(int, cell.split(','))))
-            if distance-1 < margin:
-                self.known[self.key(map_name)][cell] = max(0, distance-1)
+            smaller = max(distance-1, self.floor(map_name, cell))
+            if smaller < margin:
+                self.known[self.key(map_name)][cell] = max(0, smaller)
                 self.dirty = True
 
     def learn_link(self, map_name, origin, destination):
@@ -107,12 +120,36 @@ class PortalGuard:
             self.dirty = True
             self.version += 1
 
+    def widen(self, map_name, path):
+        """The character was warped walking along path: the nearest portal's area reached it.
+        Returns (portal cell, new margin) or None."""
+        best = None
+        for cell, margin in self.portals(map_name):
+            if cell in {c for c, _ in self.links(map_name)}:
+                continue
+            distance = min(chebyshev(point, cell) for point in path)
+            if distance <= WIDEST and (best is None or distance < best[0]):
+                best = (distance, cell, margin)
+        if best is None:
+            return None
+        distance, cell, margin = best
+        key = '%d,%d' % tuple(cell)
+        portals = self.known.setdefault(self.key(map_name), {})
+        if key not in portals or distance <= margin:
+            return None
+        portals[key] = distance
+        self.widened.setdefault(self.key(map_name), {})[key] = distance
+        self.dirty = True
+        self.version += 1
+        return cell, distance
+
     def links(self, map_name):
         """[(portal cell, arrival cell)] of the inner portals of this map."""
         return [(tuple(map(int, cell.split(','))), tuple(target)) for cell, target in self.internal.get(self.key(map_name), {}).items()]
 
     def portals(self, map_name):
-        known = [(tuple(map(int, cell.split(','))), margin) for cell, margin in self.known.get(self.key(map_name), {}).items()]
+        known = [(tuple(map(int, cell.split(','))), max(margin, self.floor(map_name, cell)))
+                 for cell, margin in self.known.get(self.key(map_name), {}).items()]
         return known+[(cell, MARGIN) for cell in self.temporary.values()]
 
     def cells(self, map_name):
@@ -128,6 +165,10 @@ class PortalGuard:
     def save(self):
         if not self.dirty:
             return
+        # The companion files always sit next to the main one (a test pointing path elsewhere
+        # wrote the real portais_ampliados.json through the old names).
+        self.links_path = self.path.with_name('portais_internos.json')
+        self.widened_path = self.path.with_name('portais_ampliados.json')
         self.path.parent.mkdir(parents=True, exist_ok=True)
         temporary = self.path.with_suffix('.tmp')
         temporary.write_text(json.dumps(self.known, ensure_ascii=False, indent=1), encoding='utf-8')
@@ -136,4 +177,8 @@ class PortalGuard:
             temporary = self.links_path.with_suffix('.tmp')
             temporary.write_text(json.dumps(self.internal, ensure_ascii=False, indent=1), encoding='utf-8')
             os.replace(temporary, self.links_path)
+        if self.widened:
+            temporary = self.widened_path.with_suffix('.tmp')
+            temporary.write_text(json.dumps(self.widened, ensure_ascii=False, indent=1), encoding='utf-8')
+            os.replace(temporary, self.widened_path)
         self.dirty = False

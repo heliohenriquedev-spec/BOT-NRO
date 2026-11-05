@@ -21,7 +21,11 @@ def save(state, path=None):
     temporary = path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp')
     temporary.write_text(json.dumps({**state, 'saved_at': datetime.now().isoformat(timespec='seconds')},
                                     ensure_ascii=False, indent=1), encoding='utf-8')
-    temporary.replace(path)
+    from .quest_daily import replace
+    replace(temporary, path)
+    for stale in path.parent.glob(path.name+'.*.tmp'):  # left by refused replaces before
+        if stale != temporary:
+            stale.unlink(missing_ok=True)
 
 
 def clear(path=None):
@@ -35,7 +39,9 @@ def describe(state):
     if not state:
         return 'Nenhum progresso salvo.'
     stage = {'pickup': 'pegando missoes', 'travel': 'indo ao mapa', 'hunt': 'cacando', 'delivery': 'entregando'}.get(
-        state.get('phase'), state.get('phase'))
+        state.get('stage') or state.get('phase'), state.get('stage') or state.get('phase'))
+    if state.get('map'):
+        stage += ' em '+str(state['map']).removesuffix('.gat')
     from .npc_labels import plain
     counts, named = state.get('kill_counts') or {}, state.get('name_counts') or {}
     kills = ', '.join(f"{t['name']} {min(named.get(plain(t['name']), 0)+sum(counts.get(str(s), 0) for s in t['species']), t['count'])}/{t['count']}"

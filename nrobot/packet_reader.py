@@ -159,7 +159,8 @@ LENGTHS = {0x78: 55, 0x7c: 42, 0x22a: 58, 0x22b: 57, 0xc3: 8, 0x1d7: 11, 0x7f: 6
            0xc0: 7, 0x9c: 9, 0x13d: 6, 0x13a: 4, 0xbe: 5, 0x141: 14,
            0x11f: 16, 0x120: 6, 0x1de: 33,
            0xaf: 6, 0xa8: 7, 0xac: 7, 0x1c8: 13, 0x9d: 17, 0x9e: 17, 0xa1: 6,
-           0x73: 11, 0x2eb: 13, 0x43d: 8, 0x148: 8}
+           0x73: 11, 0x2eb: 13, 0x43d: 8, 0x148: 8,
+           0x22e: 71, 0x22f: 5, 0x230: 12, 0x144: 23}  # homunculus: status, feed answer, state
 
 # Chat-room information is unrelated to targeting but must be framed correctly.
 # 00D7 was observed with length 28 and title [Instrutor] in the local capture.
@@ -283,6 +284,8 @@ def decode(message: bytes) -> dict:
                                                       hair_color=35, clothes=37, guild=41, sex=54, level=63)
         else:
             event['position'] = position(message[37:40] if op == 0x7c else message[47:50])
+            if op == 0x7c:
+                event['spawned'] = True  # created right now (summon, respawn), not walked into view
     elif op in (0x22a, 0x22b):
         # Characters standing still (022A) or spawning/warping in (022B): unlike 022C these
         # carry no object-type byte, so a player is known on sight, before it walks.
@@ -453,6 +456,20 @@ def decode(message: bytes) -> dict:
     elif op == 0x91:
         event.update(kind='map_change', map=message[2:18].split(b'\0')[0].decode('cp1252', 'replace'),
                      position=[u16(18), u16(20)])
+    elif op == 0x144 and len(message) == 23:
+        # clif_viewpoint: minimap mark (type 1 = show, 2 = remove); @showmobs sends one per monster.
+        event.update(kind='viewpoint', npc_id=u32(2), mark_type=u32(6), position=[u32(10), u32(14)],
+                     mark_id=message[18])
+    elif op == 0x22e and len(message) == 71:
+        # rAthena clif_hominfo: name, flags, level, hunger (0-100), intimacy, ..., hp, max hp.
+        event.update(kind='homunculus_status', name=message[2:26].split(b'\0')[0].decode('cp1252', 'replace'),
+                     level=u16(27), hunger=u16(29), intimacy=u16(31), hp=u16(51), max_hp=u16(53))
+    elif op == 0x230 and len(message) == 12:
+        # clif_send_homdata: state 0 = the homunculus (its ID), 1 = intimacy, 2 = hunger.
+        event.update(kind='homunculus_state', homunculus_type=message[2], state=message[3],
+                     entity_id=u32(4), value=u32(8))
+    elif op == 0x22f and len(message) == 5:
+        event.update(kind='homunculus_fed', success=message[2] == 1, item_id=u16(3))
     elif op == 0x148 and len(message) == 8:
         event.update(kind='resurrection', entity_id=u32(2))
     elif op == 0x92:

@@ -233,7 +233,8 @@
   "delivery_confirmation": "",
   "ignore_finished": true,
   "always_attack": [],
-  "chain_next": false
+  "chain_next": false,
+  "attack_priority": {}
  },
  {
   "name": "Kami 2 - Andar 1",
@@ -343,7 +344,8 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {}
  },
  {
   "name": "Kami 2 - Andar 2",
@@ -467,7 +469,8 @@
   "delivery_confirmation": "",
   "ignore_finished": false,
   "always_attack": [],
-  "chain_next": false
+  "chain_next": false,
+  "attack_priority": {}
  },
  {
   "name": "Kami 2 - Andar 3",
@@ -611,11 +614,12 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {}
  },
  {
   "name": "Kami 1 - Andar 1",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1018,
@@ -727,11 +731,12 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {}
  },
  {
   "name": "Kami 1 - Andar 2",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1114,
@@ -857,11 +862,12 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {}
  },
  {
   "name": "Kami 1 - Andar 3",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1128,
@@ -1002,11 +1008,12 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {}
  },
  {
   "name": "Esgoto Suna - Andar 2",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1053,
@@ -1069,11 +1076,12 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {}
  },
  {
   "name": "Esgoto Suna - Andar 3",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1589,
@@ -1147,11 +1155,12 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {}
  },
  {
   "name": "Esgoto Suna - Andar 4",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1196,
@@ -1254,8 +1263,10 @@
   ],
   "target_map": "alde_dun02.gat",
   "lifecycle_enabled": true,
-  "ignore_finished": false,
-  "always_attack": [],
+  "ignore_finished": true,
+  "always_attack": [
+   1401
+  ],
   "chain_next": false,
   "mission_ids": [
    "1840f5bf0a864b6ba7cbd078cfa0dca6",
@@ -1271,11 +1282,14 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {
+   "1401": 1
+  }
  },
  {
   "name": "GT - 1",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1067,
@@ -1379,11 +1393,12 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {}
  },
  {
   "name": "GT - 2",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1041,
@@ -1499,11 +1514,12 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {}
  },
  {
   "name": "GT - 3",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1039,
@@ -1633,6 +1649,7 @@
   "pickup_steps": [],
   "delivery_steps": [],
   "pickup_confirmation": "",
-  "delivery_confirmation": ""
+  "delivery_confirmation": "",
+  "attack_priority": {}
  }
 ]

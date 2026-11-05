@@ -17,14 +17,14 @@ def test_settings_persist_and_reject_invalid_values(tmp_path):
         with pytest.raises(ValueError): validate(invalid)
 
 
-def test_apply_settings_pauses_changes_filters_and_restores_only_recent_sightings(tmp_path):
+def test_apply_settings_keeps_hunting_changes_filters_and_restores_only_recent_sightings(tmp_path):
     relay = SessionRelay('127.0.0.1', folder=tmp_path, allow_commands=True)
     relay.hunt = PacketHunt(patrol=True)
     relay.hunt.start()
     now = time.monotonic()
     relay.inventory.observe([{'kind': 'appearance', 'entity_id': 100, 'species_id': 1212, 'position': [1, 1]}], now)
     relay.apply_settings({**DEFAULTS, 'species': [1212], 'radius': 40, 'patrol': False, 'skills': False})
-    assert not relay.hunt.enabled and relay.hunt.SEARCH_RADIUS == 40
+    assert relay.hunt.enabled and relay.hunt.SEARCH_RADIUS == 40  # saving never stops the bot
     assert relay.hunt.patrol is None and not relay.hunt.use_skills
     assert relay.tracker.observer.species == {1212}
     assert 100 in relay.tracker.observer.registry.entities
@@ -45,10 +45,10 @@ def test_control_acknowledgement_start_guard_and_pause(tmp_path):
     assert request('4', 'stop')['ok'] and relay.commands_blocked and not relay.hunt.enabled
     assert request('5', 'start')['ok'] and not relay.commands_blocked
     assert request('6', 'apply', settings={**DEFAULTS, 'species': [1051]})['ok']
-    assert not relay.hunt.enabled and relay.tracker.observer.species == {1051}
+    assert relay.hunt.enabled and relay.tracker.observer.species == {1051}  # applied while hunting
 
 
-def test_old_config_migrates_and_new_combat_values_reach_paused_planner(tmp_path):
+def test_old_config_migrates_and_new_combat_values_reach_running_planner(tmp_path):
     path = tmp_path/'old.json'
     path.write_text(json.dumps({'species': [1037], 'radius': 28, 'patrol': True, 'patrol_step': 8, 'skills': True}))
     assert read(path)['skill_interval'] == .5
@@ -58,7 +58,7 @@ def test_old_config_migrates_and_new_combat_values_reach_paused_planner(tmp_path
     config = {**DEFAULTS, 'skill_interval': .3, 'skill_timeout': 2, 'skill_attempts': 2,
               'target_defer': 4, 'switch_distance': 10, 'switch_saving': 2, 'switch_ratio_percent': 50}
     relay.apply_settings(config)
-    assert not relay.hunt.enabled
+    assert relay.hunt.enabled
     assert relay.hunt.SKILL_INTERVAL == .3 and relay.hunt.SKILL_RESPONSE_TIMEOUT == 2
     assert relay.hunt.SKILL_ATTEMPTS == 2 and relay.hunt.TARGET_DEFER == 4
     assert relay.hunt.SWITCH_DISTANCE == 10 and relay.hunt.SWITCH_SAVING == 2 and relay.hunt.SWITCH_RATIO == .5

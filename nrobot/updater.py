@@ -213,8 +213,12 @@ def git(*args, check=True):
     return result.stdout.strip()
 
 
+DEVELOPER = ROOT/'perfis'/'desenvolvedor'  # only on the developer's PC: perfis/ is never published
+
+
 def can_publish():
-    if not (ROOT/'.git').is_dir() or shutil.which('git') is None:
+    """Users get the whole bot on every update but never the means to publish one."""
+    if not DEVELOPER.is_dir() or not (ROOT/'.git').is_dir() or shutil.which('git') is None:
         return False
     try:
         return bool(git('remote', 'get-url', 'origin'))

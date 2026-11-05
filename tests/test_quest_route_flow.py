@@ -269,3 +269,32 @@ def test_compact_route_is_walked_by_computed_paths(tmp_path):
     q = QuestRoutes(); q.start_validation(steps, 'field', 0, mode='travel', label='t')
     action = q.plan('town', [5, 5], OPEN, PortalGuard(tmp_path/'p'), 1)
     assert q.steps[q.step]['kind'] == 'portal' and action['kind'] == 'move'
+
+
+def test_missions_this_character_finished_today_are_skipped_without_the_board(tmp_path, monkeypatch):
+    monkeypatch.setattr(quest_daily, 'FILE', tmp_path/'daily.json')
+    monkeypatch.setattr(quest_daily, 'CHARACTER', 'Boa Hancock')
+    d = library(('a', 'Rank A-1'), ('b', 'Rank A-2'))
+    route = dict(id='R', name='R', target_map='field', species=[1], mission_ids=['a', 'b'],
+                 steps=[dict(kind='portal', map='ra_in01', position=[1, 1]), dict(kind='wait_map', map='field')])
+    quest_daily.mark('vip', 'Rank A-1', character='Outro')  # another character: does not count here
+    q = QuestRoutes(); q.start([route], 0, library=d)
+    assert q.phase == 'pickup' and q.current_mission['id'] == 'a'
+    quest_daily.mark('vip', 'Rank A-1')  # seen as Completa by this character
+    q = QuestRoutes(); q.start([route], 0, library=d)
+    assert q.phase == 'pickup' and q.current_mission['id'] == 'b' and 'a' in q.skipped_ids
+    quest_daily.mark('vip', 'Rank A-2')
+    q = QuestRoutes(); q.start([route], 0, library=d)
+    assert q.phase != 'pickup' or q.current_mission is None  # the whole route done today: no trip to the board
+    assert quest_daily.today_keys('Outro') == {quest_daily.key('vip', 'Rank A-1')}
+
+
+def test_old_done_today_file_without_characters_is_still_read(tmp_path, monkeypatch):
+    import json
+    from datetime import date
+    path = tmp_path/'daily.json'
+    path.write_text(json.dumps({quest_daily.key('vip', 'Rank A-1'): date.today().isoformat()}), encoding='utf-8')
+    monkeypatch.setattr(quest_daily, 'FILE', path)
+    monkeypatch.setattr(quest_daily, 'CHARACTER', None)
+    assert quest_daily.done_today('vip', 'Rank A-1')  # the panel still shows it
+    assert quest_daily.today_keys('Boa Hancock') == set()  # but no character is assumed

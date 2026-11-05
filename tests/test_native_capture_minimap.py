@@ -95,13 +95,19 @@ def test_minimap_draws_and_resizes(tmp_path):
     point = minimap.cell_point([0, 59], minimap.view())
     assert point.x() < 10 and point.y() < 30  # north-up: highest y at the top
     minimap.grab()
-    width = minimap.width()
+    assert minimap.pinned and minimap.width() == minimap.height()  # over the game's minimap: the map square only
 
     class Click:
+        def __init__(self, label): self.label = label
         def position(self):
-            return minimap.buttons()['+'].center()
-    minimap.mousePressEvent(Click())
+            return minimap.buttons()[self.label].center()
+    minimap.mousePressEvent(Click('solta'))  # unpinned: header, footer, +/- and dragging
+    assert not minimap.pinned and minimap.height() > minimap.width()
+    width = minimap.width()
+    minimap.mousePressEvent(Click('+'))
     assert minimap.width() > width
+    minimap.mousePressEvent(Click('fixar'))
+    assert minimap.pinned and minimap.zoom_index == 0
     minimap.close()
 
 

@@ -73,7 +73,8 @@ def simulate(name, seed=1):
     if os.environ.get('SPACING'):
         import nrobot.patrol_tour as tour
         tour.SPACING, tour.SEEN_RADIUS = int(os.environ['SPACING']), int(os.environ['SEEN'])
-    patrol = PacketPatrol(rng=random.Random(seed))
+    layout = json.loads(os.environ.get('PATROL_LAYOUT', '{}'))  # e.g. {"spacing": 14, "wall_margin": 3, "avoid_walls": true}
+    patrol = PacketPatrol(rng=random.Random(seed), **layout)
     patrol.plan(position, 0, 150, collision)
     build = time.perf_counter()-started
     walked, now, stalls, near_wall, moves, repeated, invalid = 0, 0.0, 0, 0, 0, 0, 0

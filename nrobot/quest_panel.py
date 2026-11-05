@@ -143,10 +143,15 @@ class RouteEditor(QDialog):
         self.chain_next=WrappingCheckBox('Encadear com a proxima rota da fila: pega as missoes de todas juntas, caca um mapa de '
                                          'cada vez (ate fechar os monstros daquele mapa) e no fim entrega todas juntas')
         self.chain_next.setChecked(route.get('chain_next',False));layout.addWidget(self.chain_next)
-        always=QLabel('Nao ignorar (atacar sempre), mesmo concluido ou fora da quest: marque o monstro que da problema no mapa.')
+        always=QLabel('Nao ignorar (atacar sempre), mesmo concluido ou fora da quest: marque o monstro que da problema no mapa. '
+                      'Prioridade: 1 e finalizado primeiro, depois 2, 3...; vazio = sem prioridade (monstros fortes primeiro).')
         always.setWordWrap(True);layout.addWidget(always)
-        self.always=QListWidget();self.always.setMaximumHeight(130);layout.addWidget(self.always)
+        self.always=QTableWidget(0,2);self.always.setHorizontalHeaderLabels(['Monstro (atacar sempre)','Prioridade'])
+        self.always.verticalHeader().setVisible(False);self.always.horizontalHeader().setStretchLastSection(False)
+        self.always.horizontalHeader().setSectionResizeMode(0,self.always.horizontalHeader().ResizeMode.Stretch)
+        self.always.setMaximumHeight(160);layout.addWidget(self.always)
         self.always_chosen=set(route.get('always_attack',[]))
+        self.always_priority={int(k):v for k,v in (route.get('attack_priority') or {}).items()}
         self.map_route.currentIndexChanged.connect(self.fill_monsters);self.fill_monsters()
         self.error=QLabel();self.error.setWordWrap(True);self.error.setStyleSheet('color:#ffb59e');root.addWidget(self.error)
         self.mission_list.itemChanged.connect(self.update_counter);self.update_counter()
@@ -170,8 +175,8 @@ class RouteEditor(QDialog):
     def fill_monsters(self,*args):
         """Monsters of the hunting map (and of the marked missions), to be attacked always."""
         from .monster_db import monsters_of_map,name_of
-        self.always_chosen=set(self.always_chosen) if not self.always.count() else {
-            self.always.item(i).data(Qt.UserRole) for i in range(self.always.count()) if self.always.item(i).checkState()==Qt.Checked}
+        if self.always.rowCount():
+            self.always_chosen=set(self.always_attack());self.always_priority=self.attack_priority(all_rows=True)
         ids=set(self.always_chosen)
         try:on_map=set(monsters_of_map(self.hunting_map()))
         except (OSError,ValueError,KeyError):on_map=set()
@@ -179,11 +184,14 @@ class RouteEditor(QDialog):
         self.highlight_missions(on_map)
         for key in self.selected_missions():
             ids|=set((self.choices.get(key) or {}).get('mission',{}).get('monster_ids',[]))
-        self.always.clear()
-        for identity in sorted(ids,key=lambda i:name_of(i) or str(i)):
-            item=QListWidgetItem(f'{name_of(identity) or "Monstro"} (ID {identity})');item.setData(Qt.UserRole,identity)
-            item.setFlags(item.flags()|Qt.ItemIsUserCheckable)
-            item.setCheckState(Qt.Checked if identity in self.always_chosen else Qt.Unchecked);self.always.addItem(item)
+        self.always.setRowCount(0)
+        for row,identity in enumerate(sorted(ids,key=lambda i:(self.always_priority.get(i,1000),name_of(i) or str(i)))):
+            self.always.insertRow(row)
+            item=QTableWidgetItem(f'{name_of(identity) or "Monstro"} (ID {identity})');item.setData(Qt.UserRole,identity)
+            item.setFlags((item.flags()|Qt.ItemIsUserCheckable)&~Qt.ItemIsEditable)
+            item.setCheckState(Qt.Checked if identity in self.always_chosen else Qt.Unchecked);self.always.setItem(row,0,item)
+            order=QSpinBox();order.setRange(0,99);order.setSpecialValueText('-');order.setValue(self.always_priority.get(identity,0))
+            order.setToolTip('1 = finalizado primeiro; - = sem prioridade');self.always.setCellWidget(row,1,order)
 
     def suggest_maps(self,*args):
         """Hunting maps where the marked missions' monsters live get a green background; with a
@@ -232,7 +240,16 @@ class RouteEditor(QDialog):
         self.mission_list.blockSignals(False)
 
     def always_attack(self):
-        return sorted(self.always.item(i).data(Qt.UserRole) for i in range(self.always.count()) if self.always.item(i).checkState()==Qt.Checked)
+        return sorted(self.always.item(i,0).data(Qt.UserRole) for i in range(self.always.rowCount())
+                      if self.always.item(i,0).checkState()==Qt.Checked)
+
+    def attack_priority(self,all_rows=False):
+        """{species: order} of the marked monsters with a number (all rows while refilling the list)."""
+        result={}
+        for i in range(self.always.rowCount()):
+            item,order=self.always.item(i,0),self.always.cellWidget(i,1)
+            if order.value() and (all_rows or item.checkState()==Qt.Checked):result[item.data(Qt.UserRole)]=order.value()
+        return result
 
     def selected_missions(self):
         return [self.mission_list.item(i).data(Qt.UserRole) for i in range(self.mission_list.count()) if self.mission_list.item(i).checkState()==Qt.Checked]
@@ -272,6 +289,7 @@ class RouteEditor(QDialog):
             if created:self.library=lib.save(self.library)
             species={i for m in self.library['missions'] if m['id'] in ids for i in m.get('monster_ids',[])}
             self.route.update(ignore_finished=self.ignore_finished.isChecked(),always_attack=self.always_attack(),
+                              attack_priority={str(k):v for k,v in self.attack_priority().items()},
                               chain_next=self.chain_next.isChecked())
             self.route.update(name=self.name.text().strip(),mission_ids=ids,lifecycle_enabled=True,kill_targets=[],
                               species=sorted(species|set(self.route.get('species',[])) if chosen=='' else sorted(species)))

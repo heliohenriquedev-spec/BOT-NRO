@@ -24,13 +24,25 @@ def test_routes_never_cross_a_portal_area(tmp_path):
     assert not PortalGuard(tmp_path/'portais.json').cells('other_map')
 
 
-def test_arrival_and_own_cell_keep_the_way_out_open(tmp_path):
+def test_arrival_keeps_corridors_open_but_never_shrinks_an_area_proved_by_a_warp(tmp_path):
+    from nrobot.map_navigation import CollisionMap
     guard = PortalGuard(tmp_path/'portais.json')
-    guard.observe([warp(15, 15, species=139)], 'map', own_position=[17, 15])
-    assert (17, 15) not in guard.cells('map') and (15, 15) in guard.cells('map')
-    guard.observe([warp(5, 5)], 'map', own_position=[25, 25])
-    guard.observe([{'kind': 'map_change', 'map': 'map', 'position': [7, 5]}], 'map')
-    assert (7, 5) not in guard.cells('map') and (6, 5) in guard.cells('map')
+    # prt_sewb4: landing 2 cells from its portal in a narrow corridor; the way out must stay open.
+    guard.observe([warp(99, 94, species=45)], 'prt_sewb4', own_position=[101, 94])
+    guard.observe([{'kind': 'map_change', 'map': 'prt_sewb4', 'position': [101, 94]}], 'prt_sewb4')
+    assert (101, 93) not in guard.cells('prt_sewb4')
+    # gl_sew02: an accidental warp 2 cells away proved its area; arriving there never shrinks it again.
+    guard.observe([warp(29, 275, species=45)], 'gl_sew02', own_position=[31, 275])
+    guard.widen('gl_sew02', [[31, 275], [31, 274]])
+    guard.observe([{'kind': 'map_change', 'map': 'gl_sew02', 'position': [31, 275]}], 'gl_sew02')
+    cells = guard.cells('gl_sew02')
+    assert (31, 274) in cells and (31, 275) in cells
+    guard.save()
+    assert PortalGuard(tmp_path/'portais.json').cells('gl_sew02') == cells  # remembered
+    collision = CollisionMap(300, 300, [1]*90000)
+    collision.set_forbidden(cells)
+    route = collision.route((31, 275), (31, 262))
+    assert route and all(point not in cells for point in route[1:])  # starts inside, never steps in again
 
 
 def test_warp_portal_skill_is_avoided_until_it_closes(tmp_path):

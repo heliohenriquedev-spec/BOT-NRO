@@ -124,7 +124,7 @@ def test_counts_confirmed_deaths_only_not_disappearances_or_other_players(engine
     assert engine.kills==1
     engine.observe([dict(kind='remove',entity_id=50,reason=1)],1,'field',3)
     assert engine.kills==1
-    engine.observe([spawn,hit,{**hit,'source_id':2},dict(kind='remove',entity_id=50,reason=1)],1,'field',4)
+    engine.observe([spawn,hit,{**hit,'source_id':2000002},dict(kind='remove',entity_id=50,reason=1)],1,'field',4)  # another player
     assert engine.kills==1
     engine.observe([spawn,hit,dict(kind='remove',entity_id=50,reason=1)],1,'field',5)
     assert engine.kills==2  # reused entity ID belongs to a new life

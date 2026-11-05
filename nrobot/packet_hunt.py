@@ -64,6 +64,7 @@ class PacketHunt:
         self.engaged_until = 0
         self.aggressors = {}
         self.priority_target = None  # REDE-67: captured character
+        self.target_priority = {}  # species -> order (1 first): quest monsters to finish before the rest
         self.approach_cache = None
         self.awaiting_map = False
         self.wall_checks = {}  # entity id -> (until, player, monster point, behind a wall)
@@ -459,7 +460,9 @@ class PacketHunt:
         self.pending = None
         self.ready_at = now+.15
 
-    def abandon(self, now, reason):
+    UNREACHABLE_DEFER = 8.0  # s: no way to it / across a wall, even with failed-target deferral off
+
+    def abandon(self, now, reason, defer=None):
         if self.target is not None and self.target == self.engaged:
             if now < self.engaged_until:
                 # Transient failures (cell changed, line blocked, retries) never drop the fight.
@@ -472,7 +475,9 @@ class PacketHunt:
                 return
             self.engaged = None
         if self.target is not None:
-            self.excluded_until[self.target] = now+self.TARGET_DEFER
+            # With deferral off (TARGET_DEFER 0) an unreachable monster was picked again on the next
+            # tick, 2600 times in 30 minutes, the character standing still (2026-11-05).
+            self.excluded_until[self.target] = now+max(self.TARGET_DEFER, defer or 0)
             self.record('target_ignored', target_id=self.target, reason=reason)
         self.reason = reason
         self.target = self.pending = None
@@ -595,10 +600,16 @@ class PacketHunt:
             return distance*(1+max(0, -alignment(e))) if distance > 4 else distance
         nearby = [e for e in entities.values() if distance_to(e) <= self.SEARCH_RADIUS
                   and not (alignment(e) < -.3 and distance_to(e) > self.SEARCH_RADIUS/2)]
+        def rank(e):
+            return self.target_priority.get(e.get('species_id'), 1000)
+        if (entity is not None and self.target_priority and self.target != self.engaged
+                and self.target not in self.aggressors
+                and any(rank(e) < rank(entity) for e in nearby)):
+            entity = None  # a monster that must go first came into reach: switch to it
         if entity is None and nearby:
-            nearby = self.reachable_targets(sorted(nearby, key=lambda e: (weighed(e), e['entity_id'])),
+            nearby = self.reachable_targets(sorted(nearby, key=lambda e: (rank(e), weighed(e), e['entity_id'])),
                                             collision, player, now)
-        closest = min(nearby, key=lambda e: (weighed(e), e['entity_id'])) if nearby else None
+        closest = min(nearby, key=lambda e: (rank(e), weighed(e), e['entity_id'])) if nearby else None
         # REDE-57: keep a visible valid target until removal; proximity does not override it.
         if entity is None:
             if not nearby:
@@ -610,6 +621,10 @@ class PacketHunt:
                     search_goal = state.get('search_goal')
                     if collision is not None:
                         search_goal = None  # coverage cycle owns exploration; old sightings cannot reorder it
+                    # Where @showmobs found most quest monsters: the patrol's next waypoint. As a
+                    # plain search goal a far spot in gl_sew02 had no route and the patrol stood still.
+                    focus = (state.get('showmobs_goal') or {}).get('position')
+                    self.patrol.focus = focus if focus and tuple(focus) != self.patrol.focus_reached else None
                     self.patrol.search_destination = search_goal['position'] if search_goal else None
                     self.reason = ('buscando ultima localizacao recebida de monstro' if search_goal else 'patrulhando setores sem alvo')
                     return self.patrol.plan(player, now, walk_speed_ms, collision)
@@ -695,13 +710,13 @@ class PacketHunt:
             self.ready_at = now+.5
             return None
         if collision and not path:
-            self.abandon(now, 'sem rota livre até o alvo; procurando outro')
+            self.abandon(now, 'sem rota livre até o alvo; procurando outro', defer=self.UNREACHABLE_DEFER)
             return None
         if (collision and self.target not in self.aggressors and not collision.line_clear(player, chase_position)
                 and not self.reachable_targets([entity], collision, player, now)):
             # Unless it is fighting us, a monster across a wall is left for when the patrol gets there.
             # Measured without the cells blocked by failed steps (a detour around them is no wall).
-            self.abandon(now, 'monstro do outro lado da parede; procurando outro')
+            self.abandon(now, 'monstro do outro lado da parede; procurando outro', defer=self.UNREACHABLE_DEFER)
             return None
         # REDE-46: route may contain only the origin when the predicted target
         # is adjacent but its observed position still lies outside combat range.

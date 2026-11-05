@@ -2,6 +2,7 @@
 import copy
 import struct
 import time
+from pathlib import Path
 from .quest_routes import QuestRoutes, load, save, STAGE_FIELDS, text
 from .packet_encoder import move, STAND
 from .portals import PortalGuard
@@ -115,6 +116,7 @@ class QuestRelay(SharedQuestRelay):
             if self.group_follower():raise ValueError('Desative o modo seguidor para executar rotas')
             self.quest_stop('Preparando fila')
             entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
+            self.know_quest_character()
             self.quests.start(map_routes.apply(load(),entries),time.monotonic(),map_routes=entries)
             from . import quest_daily
             self.quests.slot_owner=quest_daily.load_slots()
@@ -129,7 +131,9 @@ class QuestRelay(SharedQuestRelay):
             if not saved:raise ValueError('Nenhum progresso salvo para retomar')
             self.quest_stop('Preparando para retomar')
             entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
-            self.quests.resume_from(map_routes.apply(load(),entries),saved,time.monotonic(),map_routes=entries)
+            self.know_quest_character()
+            self.quests.resume_from(map_routes.apply(load(),entries),saved,time.monotonic(),map_routes=entries,
+                                    map_name=self.tracker.observer.map_name)
             self.quests.slot_owner=quest_daily.load_slots()
             self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
             print('[ROTA] '+self.quests.reason)
@@ -273,18 +277,32 @@ class QuestRelay(SharedQuestRelay):
                 lib.save(data)
             except (OSError,ValueError) as exc:print('[ROTA] Nao foi possivel salvar os monstros aprendidos: '+str(exc))
             self.quests.learned.clear()
+        self.know_quest_character()
         while self.quests.daily_marks:
             board_id,label=self.quests.daily_marks.pop(0)
             try:quest_daily.mark(board_id,label)
             except OSError as exc:print('[ROTA] Nao foi possivel salvar missao concluida: '+str(exc))
 
+    def know_quest_character(self):
+        """Missions done today are kept per character: the one logged in now."""
+        from . import quest_daily
+        name=(getattr(self,'own_look',None) or {}).get('name')
+        if name:quest_daily.CHARACTER=name
+
+    def quest_targets_open(self,q):
+        """Counted monsters still hunted: all of them, or only the unfinished with "ignorar"."""
+        targets=q.route.get('kill_targets',[])
+        if not q.route.get('ignore_finished'):return list(targets)
+        return [t for t,progress in zip(targets,q.progress()) if not progress['complete']]
+
     def quest_name_choices(self,q):
         """One sprite, several NRO monsters: on the hunting map only the names the missions ask for
-        are attacked (e.g. Shinobi Ladrao, not Abelha Macho with the same sprite)."""
+        are attacked (e.g. Shinobi Ladrao, not Abelha Macho with the same sprite). A finished one's
+        names are left out with "ignorar": they brought its sprite back as a target (2026-11-05)."""
         from .monster_db import names_for_map,monster_choice_key
         from .npc_labels import plain
         seen=names_for_map(q.route['target_map']);choices={}
-        for target in q.route.get('kill_targets',[]):
+        for target in self.quest_targets_open(q):
             for species in target['species']:
                 names=seen.get(species,set())
                 if any(plain(n)==plain(target['name']) for n in names):
@@ -318,11 +336,30 @@ class QuestRelay(SharedQuestRelay):
             if state:quest_progress.save(state)
             elif q.phase=='done' and not q.validation:quest_progress.clear()
         except OSError as exc:print('[ROTA] Nao foi possivel salvar o progresso: '+str(exc))
+        self.note_quest_progress()
+
+    def note_quest_progress(self):
+        """logs/progresso_quests.log: where the queue is, started over at midnight."""
+        from .quest_progress_log import QuestProgressLog,describe
+        if getattr(self,'progress_log',None) is None:self.progress_log=QuestProgressLog(self.progress_log_path())
+        q=self.quests
+        if q.validation or q.recording:return
+        try:self.progress_log.note(describe(q.snapshot(),self.tracker.observer.map_name))
+        except OSError:pass
+
+    def progress_log_path(self):
+        folder=Path(self.folder)
+        return (folder.parent.parent if folder.parent.name=='relay' else folder)/'progresso_quests.log'
 
     def quest_events(self,events,now):
         """After every packet batch: save what was learned and trace the answers to @voltar."""
         q=self.quests
         if q.active:self.save_progress(now)
+        if now-getattr(self,'progress_log_pruned',-1e9)>300:
+            self.progress_log_pruned=now
+            from .quest_progress_log import QuestProgressLog
+            try:QuestProgressLog(self.progress_log_path()).prune()
+            except OSError:pass
         if q.learned_extras or q.slots_dirty or q.learned or q.daily_marks:self.flush_daily()
         if now-q.voltar_sent_at<15 and events:
             import json
@@ -373,17 +410,20 @@ class QuestRelay(SharedQuestRelay):
         if q.errands:return await self.quest_errand(now,game_gate)
         if q.phase=='hunt':
             if observer.map_name and PortalGuard.key(q.route['target_map'])!=PortalGuard.key(observer.map_name):
-                self.quest_stop('Mapa mudou durante a quest');return True
+                # Pushed off the hunting map (a portal, a warp): back by the recorded routes.
+                q.enter_stage('travel',now);q.reason='Voltando ao mapa de caca: '+q.route['name']
+                print('[ROTA] '+q.reason);return True
             species=self.quest_species(q)
             if not species:
                 self.hunt.pause('Todos os monstros da quest concluidos');q.finish_hunt(now);self.quest_hunt_id=None;return True
-            key=(q.route['id'],tuple(species))
+            key=(q.route['id'],tuple(species),tuple(t['name'] for t in self.quest_targets_open(q)))
             if self.quest_hunt_id!=key:
                 if isinstance(self.quest_hunt_id,tuple) and self.quest_hunt_id[0]==q.route['id']:
                     print('[ROTA] Monstros atacados agora: '+', '.join(map(str,species)))
                 settings=copy.deepcopy(self.settings)
                 settings.update(species=species,auto_map_targets=False,monster_name_choices=self.quest_name_choices(q),pvp_enabled=False)
                 self.apply_settings(settings);self.hunt.start();self.quest_hunt_id=key
+                self.hunt.target_priority={int(k):v for k,v in (q.route.get('attack_priority') or {}).items()}
             elif not self.hunt.enabled:
                 self.quest_stop('Caca interrompida: '+self.hunt.reason);return True
             if q.hunt_complete():

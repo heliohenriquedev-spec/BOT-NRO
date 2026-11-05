@@ -100,18 +100,31 @@ class CombatRotation:
 
     # A summon refused at once was not cast (usually the previous creature lives a few seconds past
     # its configured duration): tried again every second, up to 10 times, then its interval waits.
-    SUMMON_RETRY = 1.0
+    SUMMON_RETRY = 5.0  # refused (its real cooldown is longer than configured): offensives meanwhile
     SUMMON_REFUSALS = 10
+    SUMMON_PROOF_WAIT = 2.5
+    SUMMON_SILENT_RETRY = .5
+
+    def summon_created(self, creature_id, now):
+        waiting = self.summons.waiting
+        self.summons.creature_created(creature_id, now)
+        if waiting is not None:
+            self.pending.pop(waiting['skill_id'], None)
+            self.failures[waiting['skill_id']] = 0
 
     def _fail(self, skill_id, now, reason, cause=None):
         pending = self.pending.pop(skill_id, None)
         if pending and pending['role'] == 'summon':
-            self.summons.failed(skill_id, now, reason == 'servidor recusou')
+            outcome = self.summons.failed(skill_id, now, reason == 'servidor recusou')
             if reason == 'sem confirmação':
                 # NRO never answers a summon: silence is the normal start (the queue counts it as
-                # started), not a failure that should push the next attempts back.
+                # started), not a failure that should push the next attempts back. When the skill
+                # is known to create a creature and none came, it is sent again right away.
                 self.failures[skill_id] = 0
-                self.ready[skill_id] = max(self.ready.get(skill_id, 0), now+.3)
+                if outcome == 'not_created':
+                    self.ready[skill_id] = now+self.SUMMON_SILENT_RETRY
+                else:
+                    self.ready[skill_id] = max(self.ready.get(skill_id, 0), now+.3)
                 return
         if pending and pending['role'] == 'buff':
             # Not confirmed (cut by a step, a cooldown...): try again later, waiting longer each
@@ -243,6 +256,8 @@ class CombatRotation:
                        state['ammo']['options'].get(p['skill_id'], state['ammo']['options'].get(str(p['skill_id']))))]
         return max(ranges, default=2)
 
+    SUMMON_MONSTER_DISTANCE = 10  # a monster this close: the summon goes before any other skill
+
     def summon_monster(self, state, target_id=None, *, near_only=True):
         own = state.get('combat_player_positions') or ([state['player_position']] if state.get('player_position') else [])
         if not own:
@@ -253,7 +268,7 @@ class CombatRotation:
                 continue
             bounds = e.get('attack_positions') or [e.get('effective_position', e['position'])]
             distance = max(math.dist(a,b) for a in own for b in bounds)
-            if not near_only or distance <= 12:
+            if not near_only or distance <= self.SUMMON_MONSTER_DISTANCE:
                 candidates.append((e['entity_id'] != target_id, distance, e['entity_id'], e))
         return min(candidates, key=lambda x:x[:3])[-1] if candidates else None
 
@@ -265,6 +280,8 @@ class CombatRotation:
                       and known[p['skill_id']].get('target_flags') in (2,4,16)]
         if not configured:
             return False
+        if self.summon_monster(state, target_id) is None:
+            return False  # summons only with a monster to fight within 10 cells
         if self.summons.waiting is not None:
             return True
         cooldowns = state.get('skill_cooldowns', {})
@@ -374,9 +391,11 @@ class CombatRotation:
                 if target is None:
                     continue
             elif profile['role'] == 'summon':
-                # One summon is kept up all the time, also while patrolling with no monster around:
-                # waiting for a monster within 12 cells left the character alone for seconds.
+                # Only with a monster to fight within 10 cells: none is cast while patrolling.
                 nearby = self.summon_monster(state, target_id)
+                if nearby is None:
+                    self.reason = 'invocacao aguardando monstro a ate 10 celulas'
+                    continue
                 if not self.summons.may_invoke(profile, now):
                     continue
                 if flags not in (2, 4, 16):
@@ -499,7 +518,9 @@ class CombatRotation:
         self.last_sent[action['skill_id']] = now
         if action['role'] == 'offensive' and self.order:
             self.cursor = self.order.get(action['skill_id'], len(self.order)+1)
-        self.pending[action['skill_id']] = {**action, 'deadline': now+self.response_timeout}
+        # A summon is proved by its creature, which can take 1.5 s to appear.
+        wait = max(self.response_timeout, self.SUMMON_PROOF_WAIT) if action['role'] == 'summon' else self.response_timeout
+        self.pending[action['skill_id']] = {**action, 'deadline': now+wait}
         offensive = action['role'] == 'offensive'
         interval = 0 if (self.fast or self.burst) and offensive else action['interval']
         self.ready[action['skill_id']] = now+max(interval, self.learned_min_interval.get(action['skill_id'], 0))

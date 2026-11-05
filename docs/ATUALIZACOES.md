@@ -18,6 +18,12 @@ e, ao atualizar, recebe tudo o que foi publicado nesse meio-tempo.
   - o @voltar aprendido (`quest_extras.json`, só ele);
   - sinais de GM.
 - **Base de monstros** (`data/monstros_base`): IDs, nomes por mapa, HP e sprites.
+- **Todo o funcionamento do bot**, inclusive os ajustes visuais (monstro some na hora ao morrer,
+  habilidade multi-hit mostrada como um golpe com o dano inteiro). Eles vêm ligados para todos;
+  quem quiser desligar cria o arquivo vazio `perfis/sem_remocao_visual`.
+
+A cópia dos usuários **não publica**: o botão de publicar só existe no PC do desenvolvedor (com
+git, repositório de origem e a pasta `perfis/desenvolvedor`, que nunca vai nas atualizações).
 
 ## Como chega no PC de cada usuário
 
@@ -38,8 +44,10 @@ usuário já importou e aplica o conjunto atual inteiro.
 Nenhuma configuração vai na atualização. Cada computador mantém a sua, **separada por personagem**
 (`data/rede/personagens/<nome>.json`): caça e patrulha, combate (ataque básico, aproximação,
 kite), habilidades e a ordem delas, buffs aprendidos, alvos da aba Monstros, PvP, pausas de
-presença e identificação de GM. Quando outro personagem entra, o painel carrega a configuração
+presença, identificação de GM e alimentação do homúnculo. Quando outro personagem entra, o painel carrega a configuração
 dele; um personagem novo começa com a configuração atual.
+
+Nunca vão: os logs (`logs/`), as cópias de segurança (`backups/`) e a pasta `perfis/`.
 
 Também ficam só no PC: Switch de montaria e equipamentos, os números de caça das quests (raio de
 limpeza, tempo de calma, tentativas), progresso da fila, missões concluídas no dia, registro de

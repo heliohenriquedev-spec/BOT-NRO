@@ -27,6 +27,7 @@ FILES = {'rotas_quests.json': 'data/rede/rotas_quests.json',
          'rotas_mapas.json': 'data/rede/rotas_mapas.json',
          'portais.json': 'data/mapas/portais.json',
          'portais_internos.json': 'data/mapas/portais_internos.json',
+         'portais_ampliados.json': 'data/mapas/portais_ampliados.json',
          'quest_extras.json': 'data/rede/quest_extras.json',
          'gm_sinais.json': 'data/jogadores/gm_sinais.json'}
 PERSONAL_LIBRARY = ('checked_missions',)
@@ -204,7 +205,7 @@ def merge_quests(mine, theirs, missions_renamed, maps_renamed):
     return result
 
 
-def merge_portals(mine, theirs, *, smallest=False):
+def merge_portals(mine, theirs, *, smallest=False, largest=False):
     result = copy.deepcopy(mine or {})
     for map_name, cells in (theirs or {}).items():
         known = result.setdefault(map_name, {})
@@ -213,6 +214,8 @@ def merge_portals(mine, theirs, *, smallest=False):
                 known[cell] = copy.deepcopy(value)
             elif smallest and isinstance(value, int) and isinstance(known[cell], int):
                 known[cell] = min(known[cell], value)
+            elif largest and isinstance(value, int) and isinstance(known[cell], int):
+                known[cell] = max(known[cell], value)
     return result
 
 
@@ -295,6 +298,9 @@ def merge(root=ROOT, log=print, force=False):
         result['portais.json'] = merge_portals(own['portais.json'], shared['portais.json'], smallest=True)
     if shared['portais_internos.json'] is not None:
         result['portais_internos.json'] = merge_portals(own['portais_internos.json'], shared['portais_internos.json'])
+    if shared.get('portais_ampliados.json') is not None:
+        # Areas proved by accidental warps: the larger one wins.
+        result['portais_ampliados.json'] = merge_portals(own['portais_ampliados.json'], shared['portais_ampliados.json'], largest=True)
     if shared['quest_extras.json'] is not None:
         result['quest_extras.json'] = merge_extras(own['quest_extras.json'], shared['quest_extras.json'])
     if shared['gm_sinais.json'] is not None:

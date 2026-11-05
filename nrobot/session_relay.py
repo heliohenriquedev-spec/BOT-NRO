@@ -187,6 +187,8 @@ class SessionRelay(QuestRelay):
         self.pvp_registered = set()
         self.pvp_ignored = {}  # player id -> time until which attacks on them stop (no damage taken)
         self.player_misses = {}  # player id -> attacks in a row with no damage
+        from .own_summons import OwnSummons
+        self.own_summons = OwnSummons()  # own summons/homunculus: quest kills and homunculus feeding
         self.instance_maps = {}  # instance map (0045@tower) -> the base map with its layout (5@tower)
         from .group_hunt import GroupHunt
         self.group = GroupHunt()
@@ -207,6 +209,7 @@ class SessionRelay(QuestRelay):
         self.manual_until = 0  # REDE-76: the bot yields while the player walks by hand
         self.manual_active = False
         self.trails = {}  # REDE-76: walked cells per map, for the minimap
+        self.trail_started = {}  # map -> when its trail began (cleared after TRAIL_KEEP)
         from .monster_db import load_captured
         self.monsters_seen = load_captured()  # REDE-79: what the game showed about each monster
         self.monsters_dirty = False
@@ -215,6 +218,8 @@ class SessionRelay(QuestRelay):
         from .mob_info import MobInfoQueue
         self.drops = DropObserver()
         self.mob_info = MobInfoQueue(mob_info_species())  # @mi: the server's drop list of each monster
+        from .mob_scan import MobScan
+        self.mob_scan = MobScan()  # @showmobs in the quest hunt: walk to where the missing monsters are
         self.sprite_state = {}  # species -> 'exists' / 'grf' / 'captured' / None (needs a capture)
         self.minimap_ground_written = None
         self.last_route_written = 0
@@ -267,7 +272,11 @@ class SessionRelay(QuestRelay):
                 self.hunt.priority_target = None
         if self.hunt is None:
             raise ValueError('Modo de caça não está disponível')
-        self.hunt.pause('configuração aplicada; iniciar para retomar')
+        # A saved setting no longer stops the hunt: every PvP checkbox (target, priority) autosaves,
+        # and pausing here left the bot standing, without patrol, until Iniciar (PvP, 2026-11-05).
+        # The current action is dropped so the next plan follows the new setup.
+        self.hunt.pending = self.hunt.target = self.hunt.engaged = None
+        self.hunt.approach_cache = None
         self.hunt.SEARCH_RADIUS = settings['radius']
         for attribute, key in (('SKILL_INTERVAL', 'skill_interval'), ('SKILL_RESPONSE_TIMEOUT', 'skill_timeout'),
                                ('SKILL_ATTEMPTS', 'skill_attempts'), ('TARGET_DEFER', 'target_defer'),
@@ -282,6 +291,7 @@ class SessionRelay(QuestRelay):
         self.hunt.use_skills = settings['skills']
         self.hunt.auto_attacks = settings['auto_attacks']
         self.hunt.melee_approach = settings['melee_approach']
+        self.hunt.target_priority = {}  # only the quest hunt sets an order (route "atacar sempre" list)
         self.hunt.kite = settings['kite']
         self.tracker.observer.free_cast_movement = True
         from .combat_rotation import CombatRotation
@@ -404,6 +414,8 @@ class SessionRelay(QuestRelay):
             self.map_loaded_at = time.monotonic()  # the client finished loading the map
         for opcode, frame in self.native_frames.frames:
             self.quests.native(opcode,frame,self.tracker.observer.map_name)
+            if opcode == 0x22d and self.own_summons.learn_feed(frame):
+                print(f'Homúnculo alimentado pelo jogador (fome {self.own_summons.hunger}); pacote registrado: {frame.hex()}.')
             if opcode == 0x8c and len(frame) == 11:
                 self.capture_monster_sprite(struct.unpack_from('<I', frame, 7)[0])
         if time.monotonic() < self.capture_armed_until:
@@ -590,15 +602,19 @@ class SessionRelay(QuestRelay):
         return bool(name) and normalize_player_name(name) in {normalize_player_name(n) for n in self.presence.allowed_names}
 
     PLAYER_MISSES = 6  # attacks in a row on a player with no damage: the map has no PvP for them
+    PLAYER_SILENCE = 5.0  # ...and this long with no damage at all since the first of them
     PLAYER_IGNORE = 60
 
     def note_player_attack(self, identity, now):
+        """Fast skills go out every ~70 ms, well before the first damage arrives: counting sends
+        alone dropped a player who was being hit (PvP, 2026-11-04). Only real silence counts."""
         from .network_targets import is_player_id
         if not is_player_id(identity) or identity == self.tracker.observer.player_id:
             return
-        misses = self.player_misses.get(identity, 0)+1
-        self.player_misses[identity] = misses
-        if misses < self.PLAYER_MISSES:
+        misses, since = self.player_misses.get(identity, (0, now))
+        misses += 1
+        self.player_misses[identity] = (misses, since)
+        if misses < self.PLAYER_MISSES or now-since < self.PLAYER_SILENCE:
             return
         self.player_misses.pop(identity, None)
         self.pvp_ignored[identity] = now+self.PLAYER_IGNORE
@@ -622,12 +638,28 @@ class SessionRelay(QuestRelay):
                 and (identity in self.pvp_registered or identity in observer.pinned))
 
     def prioritize_pvp(self, state):
+        """With "priorizar jogadores sobre monstros": fight registered players first, but only while
+        one is actually reachable. When every player is far, behind a wall or being ignored, the bot
+        goes on hunting monsters (summons included, their IDs are not players) and patrolling instead
+        of standing still on an unattackable player (2026-11-05)."""
+        now = time.monotonic()
         candidates = state['recent_entities']
         players = self.pvp_registered
-        preferred = [row for row in candidates if
-                     (row['entity_id'] in players) == self.settings['pvp_first']
-                     and self.hunt.excluded_until.get(row['entity_id'], 0) <= time.monotonic()
-                     and math.dist(state['player_position'], row['position']) <= self.hunt.SEARCH_RADIUS]
+        own = state['player_position']
+        collision = self.collision_map()
+        def reachable(row):
+            return (self.hunt.excluded_until.get(row['entity_id'], 0) <= now
+                    and self.pvp_ignored.get(row['entity_id'], 0) <= now
+                    and math.dist(own, row['position']) <= self.hunt.SEARCH_RADIUS
+                    and (collision is None or collision.line_clear(own, row['position'])
+                         or self.hunt.auto_movement))
+        players_in_reach = [row for row in candidates if row['entity_id'] in players and reachable(row)]
+        if not players_in_reach:
+            return state  # no player to fight now: keep monsters and summons, keep patrolling
+        preferred = [row for row in candidates
+                     if (row['entity_id'] in players) == self.settings['pvp_first']
+                     and self.hunt.excluded_until.get(row['entity_id'], 0) <= now
+                     and math.dist(own, row['position']) <= self.hunt.SEARCH_RADIUS]
         return {**state, 'recent_entities': preferred} if preferred else state
 
     def attacker_species(self, now):
@@ -783,10 +815,19 @@ class SessionRelay(QuestRelay):
                 print(f'Sprite do monstro {species} capturado do jogo (não existe nos arquivos do cliente).')
         self.sprite_state[species] = state
 
-    def record_trail(self):
+    TRAIL_KEEP = 1800  # s: the walked trail of a map is started over after 30 minutes there
+
+    def record_trail(self, now=None):
+        """Walked cells of the current map only: cleared when the map is left and every 30 minutes."""
         name, player = self.tracker.observer.map_name, self.tracker.observer.player
         if not name or player is None:
             return
+        now = time.monotonic() if now is None else now
+        if set(self.trails)-{name}:
+            self.trails = {name: self.trails.get(name, [])}  # another map's trail: gone on leaving it
+            self.trail_started = {name: self.trail_started.get(name, now)}
+        if now-self.trail_started.setdefault(name, now) >= self.TRAIL_KEEP:
+            self.trails[name], self.trail_started[name] = [], now
         trail = self.trails.setdefault(name, [])
         if not trail or max(abs(trail[-1][i]-player[i]) for i in (0, 1)) >= 2:
             trail.append([int(player[0]), int(player[1])])
@@ -1014,6 +1055,8 @@ class SessionRelay(QuestRelay):
                 self.quest_control(command,request,game_gate)
             elif command == 'apply':
                 self.apply_settings(request['settings'])
+                if self.quests.active:
+                    self.quest_hunt_id = None  # the route puts its own monsters back on its next tick
             elif command == 'pause':
                 if self.quests.active:self.quest_stop('Fila pausada pelo painel')
                 self.hunt.pause('pausada pelo painel')
@@ -1267,6 +1310,58 @@ class SessionRelay(QuestRelay):
             self.upstream.write(payload)
             await self.upstream.drain()
 
+    def quest_missing_species(self):
+        """Monsters the quest still needs on its hunting map (finished counters left out)."""
+        q = self.quests
+        route = q.route or {}
+        targets = route.get('kill_targets') or []
+        if not targets:
+            return sorted(route.get('species', []))
+        return sorted({s for target, progress in zip(targets, q.progress()) if not progress['complete']
+                       for s in target['species']})
+
+    async def send_mob_scan(self, *, game_gate):
+        """From time to time in the quest hunt: @showmobs of each missing monster, then the densest spot."""
+        from .portals import PortalGuard
+        q, observer, now = self.quests, self.tracker.observer, time.monotonic()
+        if (not q.active or q.phase != 'hunt' or q.errands or self.hunt is None or not self.hunt.enabled
+                or not observer.map_name or PortalGuard.key(observer.map_name) != PortalGuard.key(q.route['target_map'])):
+            return
+        # Every 60 s, fighting or not; and early after 10 s with no quest target in sight (unless the
+        # scheduled scan is within 15 s), so a dry spot is left quickly for where the monsters are.
+        if self.hunt.target is not None:
+            self.scan_no_target_since = None
+        elif getattr(self, 'scan_no_target_since', None) is None:
+            self.scan_no_target_since = now
+        early = (getattr(self, 'scan_no_target_since', None) is not None
+                 and now-self.scan_no_target_since >= 10)
+        self.mob_scan.start(observer.map_name, self.quest_missing_species(), now, idle=True, early=early)
+        collision = self.collision_map()
+        found = self.mob_scan.finish(observer.player, now, collision.walkable if collision is not None else None)
+        if found:
+            self.record_hunt({'kind': 'showmobs_goal', **found})
+            print(f"[ROTA] @showmobs: indo onde ha mais monstros da quest ({found['monsters']} de {found['total']} "
+                  f"perto de {found['position']}).")
+        elif self.mob_scan.suspended and not getattr(self, 'mob_scan_warned', False):
+            self.mob_scan_warned = True
+            print('[ROTA] @showmobs nao respondeu neste servidor/mapa; busca por @showmobs desligada nesta conexao.')
+        species = self.mob_scan.next_command(now)
+        name = (self.own_look or {}).get('name')
+        if (species is None or not name or not self.allow_commands or self.commands_blocked
+                or self.login_phase != 'map' or not observer.player_position_valid(now)):
+            return
+        from .mob_info import chat_command
+        payload = chat_command(f'@showmobs {species}', name)
+        if self.native_frames.fallback().get(0xf3) not in (-1, len(payload)):
+            return
+        async with self.send_lock:
+            if not self.native_frames.ready or not game_gate() or self.upstream is None:
+                return
+            self.mob_scan.sent(species, now)
+            self.trace_map_send('bot', 0xf3, len(payload))
+            self.upstream.write(payload)
+            await self.upstream.drain()
+
     async def send_buff_probe(self, request, *, game_gate):
         async with self.send_lock:
             observer = self.tracker.observer
@@ -1319,7 +1414,7 @@ class SessionRelay(QuestRelay):
             if self.group_follower() and (not self.group_combat_allowed() or action['role'] in ('offensive','summon') and not self.group_combat_allowed(action.get('combat_target_id',action['target_id']))):
                 return False
             if action['role'] == 'summon' and action.get('combat_target_id') is None:
-                pass  # kept up with no monster around: cast on the character itself
+                return False  # summons only with a monster to fight
             elif action['role'] in ('offensive', 'summon'):
                 entity = observer.registry.entities.get(action.get('combat_target_id', action['target_id']))
                 if (entity is None or not entity.alive or not observer.registry.current(entity, now)
@@ -1439,6 +1534,8 @@ class SessionRelay(QuestRelay):
             goal = self.map_search.plan(self.inventory, state.get('player_position'), self.tracker.observer.species,
                                         time.monotonic(), self.collision_map()) if self.hunt.patrol is not None else None
             state['search_goal'] = goal
+            scan = self.mob_scan.current_goal(observer.player, time.monotonic()) if self.quests.active else None
+            state['showmobs_goal'] = {'position': scan} if scan else None
             state['map_search'] = self.map_search.summary
             state['hunt'] = self.hunt.snapshot()
             if self.rotation is not None:
@@ -1556,7 +1653,9 @@ class SessionRelay(QuestRelay):
             if any(e['kind'] == 'player_position_init' for e in events):
                 self.login_phase = 'map'
                 self.native_feed = True  # the server accepted this map connection: frames align from here
+            self.observe_own_summons(events, time.monotonic())
             self.quests.observe(events,self.tracker.observer.player_id,self.tracker.observer.map_name,time.monotonic())
+            self.flush_quest_kills()
             self.quest_events(events,time.monotonic())
             for transition in events:
                 if transition['kind'] in ('map_change','map_transfer') and transition.get('map'):
@@ -1572,6 +1671,7 @@ class SessionRelay(QuestRelay):
                     self.drops.close()
                     print('Database de drops indisponivel; jogo e combate continuam: '+str(exc))
             self.mob_info_observe(events, time.monotonic())
+            self.mob_scan.observe(events, time.monotonic())
             from .monster_origin import temporary_reason
             if getattr(self, 'origin_epoch', None) != self.inventory.epoch:
                 self.origin_epoch = self.inventory.epoch
@@ -1784,6 +1884,8 @@ class SessionRelay(QuestRelay):
         info = unexpected_teleport(events, self.portals.map_name, self.portals.last_own, self.portals)
         if info is None:
             return False
+        if self.walked_into_portal(info):
+            return False
         reason = (f"teletransporte sem portal ({info['from_map']} {info['origin']} -> "
                   f"{info['to_map']} {info['position']}): possivel recall de GM")
         if q.active:
@@ -1793,6 +1895,95 @@ class SessionRelay(QuestRelay):
         self.commands_blocked = True
         self.record_hunt({'kind': 'recall_detected', **info})
         print('[ALERTA] Bot parado por seguranca: '+reason+'. Nenhum comando sera enviado ate voce iniciar de novo.')
+        return True
+
+    def walked_into_portal(self, info):
+        """The move in flight passed by a known portal: the bot stepped into it (its area is wider
+        than learned, gl_sew02 2026-11-05). The area grows so it never happens again; not a recall."""
+        pending = self.hunt.pending if self.hunt is not None else None
+        if not pending or pending.get('kind') != 'move' or not info.get('origin'):
+            return False
+        origin = pending.get('origin') or info['origin']  # info's origin is already the move's end
+        destination = pending.get('destination') or origin
+        from .map_navigation import server_line
+        path = [list(origin)]+[list(cell) for cell in server_line(tuple(origin), tuple(destination))]
+        widened = self.portals.widen(info['from_map'], path)
+        if widened is None:
+            return False
+        cell, margin = widened
+        self.portals.save()
+        self.record_hunt({'kind': 'portal_stepped_in', **info, 'portal': list(cell), 'margin': margin})
+        print(f"[ALERTA] O personagem entrou sem querer no portal {list(cell)} de {info['from_map']}; "
+              f"area dele aumentada para {margin} celulas. Nao foi recall.")
+        q = self.quests
+        if q.active and q.phase == 'hunt':
+            q.enter_stage('travel', time.monotonic())
+            q.reason = 'Voltando ao mapa de caca depois do portal: '+q.route['name']
+            print('[ROTA] '+q.reason)
+        elif self.hunt is not None:
+            self.hunt.pause('entrou num portal sem querer; confira o mapa e inicie de novo')
+        return True
+
+    def leave_portal_area(self, now):
+        """Standing in or next to a portal's area (arrival, a fight pushed us there): the first
+        move goes away from it, never towards it, before anything else is planned. Returns the move
+        to send, or None."""
+        collision = self.collision_map()
+        position = self.tracker.observer.player
+        if (collision is None or position is None or self.hunt is None or not self.hunt.enabled
+                or not getattr(self.hunt, 'auto_movement', True)):
+            return None
+        from .portals import chebyshev
+        name = self.tracker.observer.map_name
+        inner = {cell for cell, _ in self.portals.links(name)}
+        # Inside or right at the edge of a portal's area (its learned size, made larger by any
+        # accidental warp there): a diagonal first step from gl_sew02 [31,275] went back through it.
+        near = [(cell, margin) for cell, margin in self.portals.portals(name)
+                if cell not in inner and chebyshev(position, cell) <= margin+1]
+        if not near:
+            return None
+        def clearance(point):
+            return min(chebyshev(point, cell)-margin for cell, margin in near)
+        def ground(point):
+            x, y = point
+            return 0 <= x < collision.width-1 and 0 <= y < collision.height-1 and bool(collision.cells[y*collision.width+x])
+        start = tuple(position)
+        seen, queue = {start}, [start]
+        for point in queue:
+            if clearance(point) >= 3 and ground(point):
+                return point
+            if max(abs(point[i]-start[i]) for i in (0, 1)) >= 8:
+                continue
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    other = (point[0]+dx, point[1]+dy)
+                    # Every step farther from the portal: straight out, never along its edge.
+                    if other not in seen and ground(other) and clearance(other) > clearance(point):
+                        seen.add(other)
+                        queue.append(other)
+        return None
+
+    async def step_out_of_portal(self, now):
+        """Sends the move out of a portal's area; True while that walk is going on."""
+        if now < getattr(self, 'portal_escape_until', 0):
+            return True
+        destination = self.leave_portal_area(now)
+        if destination is None or self.upstream is None or not self.allow_commands or self.commands_blocked:
+            return False
+        position = self.tracker.observer.player
+        async with self.send_lock:
+            if not self.native_frames.ready:
+                return True
+            payload = move(*destination)
+            self.trace_map_send('bot', struct.unpack_from('<H', payload)[0], len(payload))
+            self.upstream.write(payload)
+            await self.upstream.drain()
+        seconds = max(50, min(self.tracker.observer.walk_speed_ms or 150, 2000))/1000
+        steps = max(abs(destination[i]-position[i]) for i in (0, 1))
+        self.portal_escape_until = now+steps*seconds*1.4+.3
+        self.hunt.pending = None
+        self.record_hunt({'kind': 'portal_area_left', 'origin': list(position), 'destination': list(destination)})
+        print(f'Saindo da area do portal antes de andar pelo mapa: {list(position)} -> {list(destination)}.')
         return True
 
     def begin_hunt_transfer(self, now=None):
@@ -1890,7 +2081,10 @@ class SessionRelay(QuestRelay):
                 frames = HandshakeFrames(stage, self.account)
                 endpoints = MapEndpointStream(self.account, self.register, self.begin_hunt_transfer) if stage == 'map' else None
                 removal = None
-                if stage == 'map' and (Path(__file__).resolve().parents[1]/'perfis'/'remocao_visual_imediata').is_file():
+                # Part of the bot for every user (instant death removal, multi-hit shown as one hit):
+                # on unless perfis/sem_remocao_visual exists. It used to need a file in perfis/, which
+                # updates never carry, so only the developer's copy had it.
+                if stage == 'map' and not (Path(__file__).resolve().parents[1]/'perfis'/'sem_remocao_visual').is_file():
                     from .immediate_monster_removal import ImmediateMonsterRemoval
                     from .map_monsters import is_confirmed_monster
 
@@ -2208,6 +2402,154 @@ class SessionRelay(QuestRelay):
         motion = self.tracker.observer.player_motion
         return motion is not None and time.monotonic() < motion['at']+motion['duration']
 
+    def observe_own_summons(self, events, now):
+        """Own summons (appear next to the character right after its summon) and the homunculus."""
+        own = self.own_summons
+        waiting = self.rotation.summons.waiting if self.rotation is not None else None
+        if waiting is not None:
+            own.until = max(own.until, waiting['sent_at']+own.WINDOW)
+        skills = {p['skill_id'] for p in (self.settings or {}).get('skill_profiles', []) if p.get('role') == 'summon'}
+        own.observe(events, self.tracker.observer.player_id, self.tracker.observer.player, now, skills)
+        self.quests.allies = own.allies() | self.group_member_ids()
+        queue = self.rotation if self.rotation is not None else None
+        for entry in own.log:
+            if queue is not None and entry['kind'] == 'own_summon_seen':
+                queue.summon_created(entry['entity_id'], now)
+        if queue is not None:
+            for event in events:
+                if event['kind'] == 'remove' and event.get('reason') != 0:
+                    queue.summons.creature_gone(event.get('entity_id'), now)
+            self.flush_rotation_diagnostics()
+        for identity in own.allies():
+            entity = self.inventory.entities.get(identity)
+            if entity is not None:
+                entity['summoned'] = True  # never a hunt target
+        for entry in own.log:
+            self.record_hunt(entry)
+            if entry['kind'] == 'own_summon_seen':
+                print(f"Invocação reconhecida como sua: {entry['entity_id']} ({entry['evidence']}, {entry['cells']} células).")
+            elif entry['kind'] == 'own_summon_dropped':
+                print(f"Invocação {entry['entity_id']} descartada: {entry['reason']}.")
+            elif entry['kind'] == 'homunculus_seen':
+                print(f"Homúnculo identificado pelo servidor: ID {entry['entity_id']}.")
+            if entry['kind'] == 'homunculus_fed':
+                print(f"Homúnculo alimentado (fome antes: {entry['hunger_before']})." if entry['success'] else
+                      '[ALERTA] O servidor recusou alimentar o homúnculo (comida no inventário?). Nova tentativa em 2 min.')
+        own.log.clear()
+
+    def group_member_ids(self):
+        """Players of the group (leader and members in the Grupo tab) seen here: the server gives
+        party members nearby the quest kill too, so theirs are counted like ours."""
+        from .presence_guard import normalize_player_name
+        settings = self.settings or {}
+        names = {normalize_player_name(n) for n in [settings.get('group_leader', ''), *settings.get('group_members', [])] if n}
+        if not names:
+            return set()
+        own = self.tracker.observer.player_id
+        return {identity for identity, name in self.player_names.items()
+                if identity != own and name and normalize_player_name(name) in names}
+
+    def flush_quest_kills(self):
+        """Every kill the quest counted, with who made it: compare with the game's own counter."""
+        own = self.tracker.observer.player_id
+        homunculus = self.own_summons.homunculus
+        for kill in self.quests.kill_log:
+            by = kill['by']
+            from .network_targets import is_player_id
+            kill['by_kind'] = ('personagem' if by == own else 'homúnculo' if by == homunculus else
+                               f"grupo ({self.player_names.get(by, by)})" if is_player_id(by) else 'invocação')
+            self.record_hunt(kill)
+            print(f"[ROTA] Morte contada: {kill.get('name') or kill['species_id']} (por {kill['by_kind']}"
+                  + ('' if by == own else f' {by}')+').')
+        self.quests.kill_log.clear()
+
+    CALL_HOMUNCULUS, REST_HOMUNCULUS, RESURRECT_HOMUNCULUS = 243, 244, 247  # Invocar / guardar / Remontar Marionete
+    HOMUN_OUT_OF_VIEW = 3.0  # s out of the screen before it is put away and called again
+    HOMUN_SKILL_EVERY = 3.0
+
+    async def keep_homunculus_alive(self, now):
+        """Remontar Marionete when it died; out of the screen (left behind walls): put it away
+        and Invocar Marionete next to the character. Uses only the skills the character has."""
+        own = self.own_summons
+        observer = self.tracker.observer
+        if (not own.homunculus or self.hunt is None or not self.hunt.enabled or observer.player_id is None
+                or not observer.player_alive or self.map_loading(now)
+                or now-getattr(self, 'homun_skill_at', -1e9) < self.HOMUN_SKILL_EVERY):
+            return False
+        entity = self.inventory.entities.get(own.homunculus) or {}
+        if own.dead:
+            skill_id, why = self.RESURRECT_HOMUNCULUS, 'Remontar Marionete (morreu)'
+        elif getattr(self, 'homun_rested_at', None) is not None:
+            skill_id, why = self.CALL_HOMUNCULUS, 'Invocar Marionete (perto do personagem)'
+        elif self.homunculus_far(entity, observer.player, now):
+            since = getattr(self, 'homun_away_since', None)
+            if since is None:
+                self.homun_away_since = now
+                return False
+            if now-since < self.HOMUN_OUT_OF_VIEW:
+                return False
+            # Too far or off the screen: vaporize and resummon it beside the character. Standing
+            # still to wait for it left the bot frozen in mazes (tur_dun01, 2026-11-05: 491 waits).
+            skill_id, why = self.REST_HOMUNCULUS, 'guardando a marionete que ficou longe/fora da tela'
+        else:
+            self.homun_away_since = None
+            return False
+        metadata = observer.skills.get(skill_id)
+        if not metadata or metadata.get('level', 0) < 1:
+            if skill_id not in getattr(self, 'homun_missing_warned', set()):
+                self.homun_missing_warned = getattr(self, 'homun_missing_warned', set()) | {skill_id}
+                print(f'[ALERTA] Marionete: habilidade {skill_id} nao aprendida neste personagem; {why} nao sera feito.')
+            return False
+        if self.upstream is None or not self.allow_commands or self.commands_blocked:
+            return False
+        async with self.send_lock:
+            if not self.native_frames.ready:
+                return False
+            payload = skill(observer.player_id, skill_id, metadata['level'])
+            self.trace_map_send('bot', struct.unpack_from('<H', payload)[0], len(payload))
+            self.upstream.write(payload)
+            await self.upstream.drain()
+        self.homun_skill_at = now
+        if skill_id == self.REST_HOMUNCULUS:
+            self.homun_rested_at, self.homun_away_since = now, None
+        elif skill_id == self.CALL_HOMUNCULUS:
+            self.homun_rested_at = None
+        print(f'Marionete: {why}.')
+        self.record_hunt({'kind': 'homunculus_skill', 'skill_id': skill_id, 'reason': why})
+        return True
+
+    HOMUN_LEASH = 8  # cells: farther than this, the homunculus is vaporized and resummoned close
+
+    def homunculus_far(self, entity, own, now):
+        """Off the screen, or more than HOMUN_LEASH cells away: it must be brought back."""
+        if not entity.get('present_last_observation', True):
+            return True
+        position = entity.get('destination') or entity.get('position')
+        if position is None or own is None:
+            return False
+        return max(abs(position[0]-own[0]), abs(position[1]-own[1])) > self.HOMUN_LEASH
+
+    async def maintain_homunculus(self, now):
+        """Feeds the homunculus when its hunger reaches the chosen number (same command as its menu)."""
+        settings = self.settings or {}
+        if not settings.get('homun_feed') or not self.own_summons.should_feed(settings.get('homun_hunger', 25), now):
+            return False
+        if (self.upstream is None or not self.allow_commands or self.commands_blocked or self.map_loading(now)
+                or not self.tracker.observer.player_alive):
+            return False
+        from .own_summons import feed_packet
+        async with self.send_lock:
+            if not self.native_frames.ready:
+                return False
+            payload = feed_packet(self.own_summons.feed_type)
+            self.trace_map_send('bot', 0x22d, len(payload))
+            self.upstream.write(payload)
+            await self.upstream.drain()
+        self.own_summons.sent(now)
+        print(f'Alimentando o homúnculo (fome {self.own_summons.hunger}, limite {settings.get("homun_hunger", 25)}).')
+        self.record_hunt({'kind': 'homunculus_feed_sent', 'hunger': self.own_summons.hunger})
+        return True
+
     async def send_body_action(self, action):
         """Sit or stand up; False when the connection or the native stream is not ready."""
         if self.upstream is None or not self.allow_commands or self.commands_blocked:
@@ -2453,6 +2795,11 @@ async def run(args):
             if hunt_mode:
                 relay.process_control(lambda: controls.connected(relay.game_peer, relay.game_local))
                 relay.finish_buff_learning(time.monotonic())
+                try:
+                    await relay.maintain_homunculus(time.monotonic())
+                    await relay.keep_homunculus_alive(time.monotonic())
+                except OSError as exc:
+                    print(f'Alimentação do homúnculo não enviada: {exc}')
                 if relay.buff_probe_request is not None:
                     request, relay.buff_probe_request = relay.buff_probe_request, None
                     try:
@@ -2514,13 +2861,15 @@ async def run(args):
                         route_travel = False
                     if not loading:
                         await relay.send_mob_info(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
+                        await relay.send_mob_scan(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                     if relay.hunt.enabled and not route_travel:
                         if relay.waiting_hunt_transfer(controls.connected(relay.game_peer, relay.game_local)):
                             pass
                         elif not controls.connected(relay.game_peer, relay.game_local):
                             relay.hunt.pause('conexão do jogo indisponível')
                             print(f'Caça pausada: conexão do jogo indisponível. {relay.hunt_key_name} retoma.')
-                        elif relay.manual_control(time.monotonic()) or await relay.update_presence_hold():
+                        elif (relay.manual_control(time.monotonic()) or await relay.update_presence_hold()
+                              or await relay.step_out_of_portal(time.monotonic())):
                             pass
                         else:
                             try:
@@ -2541,7 +2890,8 @@ async def run(args):
                                                   if relay.hunt.excluded_until.get(e['entity_id'], 0) <= now
                                                   and not relay.hunt.walled(e['entity_id'], now)]
                                     if not relay.group_follower() and candidates and relay.hunt.target not in {e['entity_id'] for e in candidates}:
-                                        candidate = min(candidates, key=lambda e: math.dist(own, e.get('effective_position', e['position'])))
+                                        candidate = min(candidates, key=lambda e: (relay.hunt.target_priority.get(e.get('species_id'), 1000),
+                                                                                   math.dist(own, e.get('effective_position', e['position']))))
                                         if math.dist(own, candidate.get('effective_position', candidate['position'])) <= relay.hunt.SEARCH_RADIUS:
                                             relay.hunt.target = candidate['entity_id']
                                     # REDE-84: with basic attacks on, a basic attack follows every skill

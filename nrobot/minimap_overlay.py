@@ -4,6 +4,10 @@ Reads the files the relay writes in the session folder: minimapa_chao.json (walk
 once per map) and minimapa_rota.json (walked trail, patrol waypoints done/remaining, current
 goal and route). North is up, like the game's own map. The window never takes focus from the
 game: "+" / "-" resize it, the mouse wheel zooms around the character, dragging moves it.
+
+Pinned (the default): exactly over the game's own minimap, which this client always draws in the
+top-right corner of its window, 128 pixels times the minimap zoom it keeps in the registry
+(UIRectInfo m_minimapZoomWnd). Only the map square is drawn there; a small button unpins it.
 """
 import base64
 import json
@@ -18,6 +22,21 @@ from .radar_overlay import game_client_rect
 
 HEADER = 22
 FOOTER = 34
+GAME_MINIMAP = 128  # pixels of the client's minimap at zoom 1
+UI_KEY = r'Software\Classes\VirtualStore\MACHINE\SOFTWARE\WOW6432Node\Gravity Soft\Ragnarok\UIRectInfo'
+
+
+def game_minimap_zoom():
+    """The client's minimap window zoom (a float stored as its bits), 1.0 when unknown."""
+    try:
+        import struct
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, UI_KEY) as key:
+            raw, _ = winreg.QueryValueEx(key, 'm_minimapZoomWnd')
+        zoom = struct.unpack('<f', struct.pack('<I', int(raw) & 0xffffffff))[0]
+        return zoom if .5 <= zoom <= 4 else 1.0
+    except (OSError, ValueError, ImportError):
+        return 1.0
 
 
 def ground_image(width, height, cells):
@@ -43,6 +62,10 @@ class MinimapOverlay(QWidget):
         self.side_index = 2
         self.zoom_index = 0
         self.offset = None  # position relative to the game's client area once dragged
+        self.pinned = True  # over the game's own minimap, same size and place
+        self.pinned_side = GAME_MINIMAP
+        self.pin_offset = (0, 0)  # fine adjustment from the game's top-right corner (left, down)
+        self.pin_side_adjust = 0  # pixels added to the game-minimap size, set with +/- when pinned
         self.drag = None
         self.on_change = lambda: None  # size, zoom or position changed: the panel saves them
         self.on_hover = lambda inside: None  # cursor over the window: the game's clicks are not sent
@@ -54,11 +77,29 @@ class MinimapOverlay(QWidget):
     # -- data -------------------------------------------------------------------------
     @property
     def side(self):
-        return self.SIDES[self.side_index]
+        return self.pinned_side if self.pinned else self.SIDES[self.side_index]
+
+    @property
+    def header(self):
+        return 0 if self.pinned else HEADER
 
     def apply_size(self):
-        self.resize(self.side, self.side+HEADER+FOOTER)
+        if self.pinned:
+            screen = QGuiApplication.primaryScreen()
+            ratio = screen.devicePixelRatio() if screen else 1
+            self.pinned_side = max(32, round(GAME_MINIMAP*game_minimap_zoom()/ratio)+self.pin_side_adjust)
+            self.resize(self.side, self.side)
+        else:
+            self.resize(self.side, self.side+HEADER+FOOTER)
         self.update()
+
+    def set_pinned(self, pinned):
+        self.pinned = bool(pinned)
+        if self.pinned:
+            self.zoom_index = 0  # the whole map, like the game's
+        self.apply_size()
+        self.follow_game()
+        self.on_change()
 
     def update_state(self, state):
         self.state = state or {}
@@ -93,7 +134,10 @@ class MinimapOverlay(QWidget):
         if rect is None:
             return False
         x, y, width, height = (value/ratio for value in rect)
-        if self.offset is None:
+        if self.pinned:
+            # The game's minimap corner, plus the fine adjustment the user dragged once.
+            target = (x+width-self.width()-self.pin_offset[0], y+self.pin_offset[1])
+        elif self.offset is None:
             target = (x+width-self.width()-10, y+10)
         else:
             target = (x+self.offset[0], y+self.offset[1])
@@ -118,27 +162,36 @@ class MinimapOverlay(QWidget):
     def cell_point(self, cell, view):
         x0, top, span = view
         scale = self.side/span
-        return QPointF((cell[0]+.5-x0)*scale, HEADER+(top-cell[1]-.5)*scale)
+        return QPointF((cell[0]+.5-x0)*scale, self.header+(top-cell[1]-.5)*scale)
 
     def map_rect(self):
-        return QRectF(0, HEADER, self.side, self.side)
+        return QRectF(0, self.header, self.side, self.side)
 
     def buttons(self):
-        return {'+': QRectF(self.side-44, 2, 18, 18), '-': QRectF(self.side-22, 2, 18, 18)}
+        if self.pinned:  # unpin, and nudge the size to match the game's minimap exactly
+            return {'solta': QRectF(2, 2, 14, 14), '+': QRectF(self.side-40, 2, 16, 14),
+                    '-': QRectF(self.side-20, 2, 16, 14)}
+        return {'fixar': QRectF(self.side-84, 2, 36, 18), '+': QRectF(self.side-44, 2, 18, 18),
+                '-': QRectF(self.side-22, 2, 18, 18)}
 
     # -- input --------------------------------------------------------------------------
     def mousePressEvent(self, event):
         point = event.position()
         for label, rect in self.buttons().items():
             if rect.contains(point):
+                if label in ('solta', 'fixar'):
+                    self.set_pinned(label == 'fixar')
+                    return
                 step = 1 if label == '+' else -1
-                self.side_index = max(0, min(len(self.SIDES)-1, self.side_index+step))
+                if self.pinned:
+                    self.pin_side_adjust = max(-GAME_MINIMAP+32, min(400, self.pin_side_adjust+step*4))
+                else:
+                    self.side_index = max(0, min(len(self.SIDES)-1, self.side_index+step))
                 self.apply_size()
-                if self.offset is None:
-                    self.follow_game()
+                self.follow_game()
                 self.on_change()
                 return
-        self.drag = event.globalPosition()-QPointF(self.x(), self.y())
+        self.drag = event.globalPosition()-QPointF(self.x(), self.y())  # drag to align/move it
 
     def enterEvent(self, event):
         self.on_hover(True)
@@ -162,18 +215,25 @@ class MinimapOverlay(QWidget):
         screen = QGuiApplication.primaryScreen()
         ratio = screen.devicePixelRatio() if screen else 1
         if rect is not None:
-            self.offset = (self.x()-rect[0]/ratio, self.y()-rect[1]/ratio)
+            x, y, width, height = (value/ratio for value in rect)
+            if self.pinned:  # keep the drag as an offset from the game's top-right corner
+                self.pin_offset = (round(x+width-self.width()-self.x()), round(self.y()-y))
+            else:
+                self.offset = (self.x()-x, self.y()-y)
             self.on_change()
 
     def wheelEvent(self, event):
+        if self.pinned:
+            return  # the whole map, like the game's minimap under it
         step = 1 if event.angleDelta().y() > 0 else -1
         self.zoom_index = max(0, min(len(self.ZOOMS)-1, self.zoom_index+step))
         self.update()
         self.on_change()
 
     def layout_state(self):
-        return {'side_index': self.side_index, 'zoom_index': self.zoom_index,
-                'offset': list(self.offset) if self.offset is not None else None}
+        return {'side_index': self.side_index, 'zoom_index': self.zoom_index, 'pinned': self.pinned,
+                'offset': list(self.offset) if self.offset is not None else None,
+                'pin_offset': list(self.pin_offset), 'pin_side_adjust': self.pin_side_adjust}
 
     def restore_layout(self, state):
         state = state or {}
@@ -181,6 +241,12 @@ class MinimapOverlay(QWidget):
         self.zoom_index = max(0, min(len(self.ZOOMS)-1, int(state.get('zoom_index', self.zoom_index))))
         offset = state.get('offset')
         self.offset = tuple(offset) if offset else None
+        pin_offset = state.get('pin_offset')
+        self.pin_offset = tuple(pin_offset) if pin_offset else (0, 0)
+        self.pin_side_adjust = int(state.get('pin_side_adjust', 0))
+        self.pinned = bool(state.get('pinned', True))
+        if self.pinned:
+            self.zoom_index = 0
         self.apply_size()
 
     # -- drawing ------------------------------------------------------------------------
@@ -190,8 +256,11 @@ class MinimapOverlay(QWidget):
         painter.setFont(QFont('Segoe UI', 8))
         painter.setPen(QPen(QColor(110, 120, 135), 1.5))
         painter.setBrush(QColor(12, 14, 20, 210))
-        painter.drawRoundedRect(QRectF(.5, .5, self.width()-1, self.height()-1), 8, 8)
-        self.draw_header(painter)
+        if self.pinned:
+            painter.drawRect(QRectF(.5, .5, self.width()-1, self.height()-1))
+        else:
+            painter.drawRoundedRect(QRectF(.5, .5, self.width()-1, self.height()-1), 8, 8)
+            self.draw_header(painter)
         view = self.view()
         map_name = self.state.get('map_name')
         if view is None or (map_name and self.ground['map'] != map_name):
@@ -211,13 +280,16 @@ class MinimapOverlay(QWidget):
             self.draw_route(painter, view, scale)
         self.draw_characters(painter, view)
         painter.restore()
-        self.draw_footer(painter, same_map)
+        if self.pinned:
+            self.draw_pin(painter)
+        else:
+            self.draw_footer(painter, same_map)
 
     def draw_header(self, painter):
         painter.setPen(QColor(225, 225, 225))
         name = (self.ground or {}).get('map') or self.state.get('map_name') or 'minimapa'
         zoom = self.ZOOMS[self.zoom_index]
-        painter.drawText(QRectF(8, 2, self.side-60, 18), Qt.AlignLeft | Qt.AlignVCenter,
+        painter.drawText(QRectF(8, 2, self.side-96, 18), Qt.AlignLeft | Qt.AlignVCenter,
                          f"{name.replace('.gat', '')}  •  zoom {zoom:g}x (roda do mouse)")
         for label, rect in self.buttons().items():
             painter.setPen(QPen(QColor(150, 160, 175), 1))
@@ -311,11 +383,19 @@ class MinimapOverlay(QWidget):
             painter.setBrush(QColor(255, 255, 255))
             painter.drawEllipse(point, 4, 4)
 
+    def draw_pin(self, painter):
+        for label, rect in self.buttons().items():
+            painter.setPen(QPen(QColor(150, 160, 175), 1))
+            painter.setBrush(QColor(40, 46, 58, 200))
+            painter.drawRoundedRect(rect, 3, 3)
+            painter.setPen(QColor(235, 235, 235))
+            painter.drawText(rect, Qt.AlignCenter, '↗' if label == 'solta' else label)
+
     def draw_footer(self, painter, same_map):
         coverage = (self.route.get('coverage') or {}) if same_map else {}
         total = len(coverage.get('waypoints') or {})
         done = len(coverage.get('done') or [])
-        top = HEADER+self.side+2
+        top = self.header+self.side+2
         painter.setPen(QColor(220, 220, 220))
         text = (f"Ciclo {coverage.get('cycle', 1)}: {done}/{total} pontos ({round(100*done/total)}%)" if total
                 else 'Patrulha ainda não iniciada neste mapa')

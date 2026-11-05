@@ -1,7 +1,7 @@
 {
- "version": "2026.11.04.16",
- "published_at": "2026-11-04T21:20:03",
- "notes": "fix",
+ "version": "2026.11.05.1",
+ "published_at": "2026-11-05T12:20:06",
+ "notes": "atualziacoes",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -43,7 +43,10 @@
   "data/monstros_base/sprites/1214.png",
   "data/monstros_base/sprites/1296.png",
   "data/monstros_base/sprites/1315.png",
+  "data/monstros_base/sprites/1324.png",
+  "data/monstros_base/sprites/1325.png",
   "data/monstros_base/sprites/1328.png",
+  "data/monstros_base/sprites/1329.png",
   "data/monstros_base/sprites/1381.png",
   "data/monstros_base/sprites/1402.png",
   "data/monstros_base/sprites/1405.png",
@@ -1454,12 +1457,14 @@
   "nrobot/minimap_overlay.py",
   "nrobot/mission_details.py",
   "nrobot/mob_info.py",
+  "nrobot/mob_scan.py",
   "nrobot/monster_db.py",
   "nrobot/monster_origin.py",
   "nrobot/monster_panel.py",
   "nrobot/network_observer.py",
   "nrobot/network_targets.py",
   "nrobot/npc_labels.py",
+  "nrobot/own_summons.py",
   "nrobot/packet_controls.py",
   "nrobot/packet_encoder.py",
   "nrobot/packet_hunt.py",
@@ -1482,6 +1487,7 @@
   "nrobot/quest_library_relay.py",
   "nrobot/quest_panel.py",
   "nrobot/quest_progress.py",
+  "nrobot/quest_progress_log.py",
   "nrobot/quest_relay.py",
   "nrobot/quest_routes.py",
   "nrobot/quest_slots.py",
@@ -2096,5 +2102,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "b0ea25804143"
+ "files_digest": "d688af8ded91"
 }

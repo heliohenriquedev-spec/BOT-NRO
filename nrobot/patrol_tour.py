@@ -279,6 +279,64 @@ class PatrolTour:
                 break
         return order
 
+    def walking_matrix(self):
+        """Walking distance between every pair of waypoints (computed once per map)."""
+        nodes = sorted(self.points)
+        if getattr(self, '_plan_nodes', None) != nodes:
+            self._plan_nodes = nodes
+            self._plan_index = {node: i for i, node in enumerate(nodes)}
+            self._plan_matrix = []
+            for node in nodes:
+                walked = self.distances(self.points[node])
+                self._plan_matrix.append(array('f', (walked.get(other, math.inf) for other in nodes)))
+        return self._plan_index, self._plan_matrix
+
+    def walk_length(self, initial, order):
+        """Walking length of order from the position initial was measured at."""
+        if not order:
+            return 0.0
+        index, matrix = self.walking_matrix()
+        return initial[order[0]]+sum(matrix[index[a]][index[b]] for a, b in zip(order, order[1:]))
+
+    def plan_order(self, position, nodes):
+        """One continuous walk through nodes from position: the nearest pending point each time,
+        then crossings and doubling back removed (2-opt), so the character sweeps the maze in one
+        go instead of fetching waypoints left behind (prt_sewb4, 2026-11-05)."""
+        initial = self.distances(position)
+        remaining = {node for node in nodes if node in initial}
+        if not remaining:
+            return []
+        index, matrix = self.walking_matrix()
+        def cost(a, b):
+            return matrix[index[a]][index[b]]
+        order, previous = [], None
+        while remaining:
+            node = min(remaining, key=lambda n: (initial[n] if previous is None else cost(previous, n), n))
+            order.append(node)
+            remaining.remove(node)
+            previous = node
+        if self.link_edges:
+            return order  # one-way inner portals: a reversed stretch may not be walkable
+        for _ in range(6):
+            changed = False
+            for i in range(1, len(order)-1):
+                a, b = order[i-1], order[i]
+                for j in range(i+1, len(order)):
+                    c = order[j]
+                    old, new = cost(a, b), cost(a, c)
+                    if j+1 < len(order):
+                        d = order[j+1]
+                        old += cost(c, d)
+                        new += cost(b, d)
+                    if new+.01 < old:
+                        order[i:j+1] = reversed(order[i:j+1])
+                        changed = True
+            if not changed:
+                break
+        if initial[order[0]] > initial[order[-1]]+.01 and not self.link_edges:
+            order.reverse()  # start from the nearer end
+        return order
+
     def branch_order(self, position):
         """Depth-first circuit: finish a corridor before returning to the next fork.
 

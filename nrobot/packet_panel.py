@@ -320,6 +320,18 @@ class PacketPanel(QMainWindow):
         # one excludes the other; both may stay off
         self.melee_approach.toggled.connect(lambda on: on and self.kite.setChecked(False))
         self.kite.toggled.connect(lambda on: on and self.melee_approach.setChecked(False))
+        homun_row = QHBoxLayout()
+        self.homun_feed = QCheckBox('Alimentar o homúnculo quando a fome chegar a')
+        self.homun_feed.setToolTip('A fome vem do servidor (0 a 100; quanto menor, mais faminto). O bot usa o mesmo '
+                                   'comando "Alimentar" do menu do homúnculo; a comida precisa estar no inventário.')
+        homun_row.addWidget(self.homun_feed)
+        self.homun_hunger = QSpinBox()
+        self.homun_hunger.setRange(1, 99)
+        self.homun_hunger.setToolTip('11 a 25 é a faixa "com fome", a que mais aumenta a intimidade ao alimentar.')
+        homun_row.addWidget(self.homun_hunger)
+        homun_row.addWidget(QLabel('ou menos'))
+        homun_row.addStretch(1)
+        combat_form.addRow(homun_row)
         self.fast_offensives = QCheckBox('Habilidades ofensivas na velocidade máxima (cada uma assim que estiver no '
                                          'alcance e fora do cooldown; o bot aprende o menor intervalo que o servidor aceita)')
         combat_form.addRow(self.fast_offensives)
@@ -411,6 +423,8 @@ class PacketPanel(QMainWindow):
         self.melee_approach.setChecked(settings['melee_approach'])
         self.kite.setChecked(settings['kite'])
         self.fast_offensives.setChecked(settings['fast_offensives'])
+        self.homun_feed.setChecked(settings['homun_feed'])
+        self.homun_hunger.setValue(settings['homun_hunger'])
         self.hotkey_hunt.setCurrentText(settings['hotkey_hunt'])
         self.hotkey_minimap.setCurrentText(settings['hotkey_minimap'])
         self.sit_on_players.setChecked(settings['sit_on_players'])
@@ -454,6 +468,8 @@ class PacketPanel(QMainWindow):
             self.save_timer.stop()
             save_character(self.character, self.settings())  # the previous one keeps its last changes
         self.character = name
+        from . import quest_daily
+        quest_daily.CHARACTER = name  # "concluida hoje" marks of this character
         mine = read_character(name)
         if mine is None:
             save_character(name, self.settings())  # first time: starts from the current setup
@@ -478,7 +494,8 @@ class PacketPanel(QMainWindow):
                 'pvp_enabled': self.pvp_enabled.isChecked(), 'pvp_all': self.pvp_all.isChecked(),
                 'pvp_first': self.pvp_first.isChecked(), 'pvp_targets': sorted(self.pvp_panel.targets), 'advanced_combat': self.advanced.isChecked(),
                 'auto_attacks': self.auto_attacks.isChecked(), 'melee_approach': self.melee_approach.isChecked(),
-                'kite': self.kite.isChecked(), 'skill_profiles': self.skill_panel.profiles(),
+                'kite': self.kite.isChecked(), 'homun_feed': self.homun_feed.isChecked(),
+                'homun_hunger': self.homun_hunger.value(), 'skill_profiles': self.skill_panel.profiles(),
                 'skill_priority': self.priority_panel.priority(),
                 'summon_queue_mode': self.skill_panel.summon_queue_mode,
                 'pause_on_players': self.pause_players.isChecked(), 'pause_on_disguised': self.pause_disguised.isChecked(),
@@ -872,11 +889,12 @@ class PacketPanel(QMainWindow):
         for combo in (self.hotkey_hunt, self.hotkey_minimap):
             combo.currentTextChanged.connect(self.schedule_save)
             combo.currentTextChanged.connect(lambda text: self.update_key_notice())
-        for field in (self.resume_delay, self.burst_interval):
+        for field in (self.resume_delay, self.burst_interval, self.homun_hunger):
             field.valueChanged.connect(self.schedule_save)
         for box in (self.pvp_enabled, self.pvp_all, self.pvp_first, self.auto_map_targets, self.auto_movement, self.manual_movement, self.patrol, self.patrol_avoid_walls, self.skills, self.strict_map, self.fast_offensives,
                     self.sit_on_players, self.limit_failures, self.defer_failed, self.skill_burst,
-                    self.advanced, self.auto_attacks, self.melee_approach, self.kite, self.pause_players, self.pause_disguised, self.pause_hidden, self.gm_detection):
+                    self.advanced, self.auto_attacks, self.melee_approach, self.kite, self.pause_players, self.pause_disguised, self.pause_hidden, self.gm_detection,
+                    self.homun_feed):
             box.toggled.connect(self.schedule_save)
         for field in (self.radius, self.step, self.patrol_spacing, self.patrol_coverage, self.patrol_wall_margin, self.patrol_give_up,
                       self.ignore_attackers, *self.combat_fields.values()):

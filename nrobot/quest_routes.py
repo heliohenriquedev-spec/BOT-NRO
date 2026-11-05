@@ -50,6 +50,12 @@ def validate_routes(data):
         route.setdefault('chain_next',False)
         if type(route['chain_next']) is not bool:raise ValueError('Encadeamento de rota invalido')
         route.setdefault('ignore_finished',False);route.setdefault('always_attack',[])
+        # Order in which the "atacar sempre" monsters are finished (1 first): strong ones before the rest.
+        route.setdefault('attack_priority',{})
+        if (not isinstance(route['attack_priority'],dict) or any(not str(k).isdigit() or type(v) is not int or not 1<=v<=99
+                                                                  for k,v in route['attack_priority'].items())):
+            raise ValueError('Prioridade dos monstros invalida (1 a 99)')
+        route['attack_priority']={str(k):v for k,v in route['attack_priority'].items() if int(k) in route['always_attack']}
         if type(route['ignore_finished']) is not bool or not isinstance(route['always_attack'],list) or any(
             type(i) is not int or not 1<=i<=65535 for i in route['always_attack']):raise ValueError('Opcoes de monstros ignorados invalidas')
         route.setdefault('map_route_id','')
@@ -99,6 +105,8 @@ class QuestRoutes:
     def __init__(self):
         self.recording=None;self.routes=[];self.index=0;self.step=0;self.phase='idle'
         self.reason='Fila parada';self.dialog=None;self.npc=None;self.sent_at=0;self.pending=None
+        self.allies=set()  # own summons and homunculus: their kills count like the character's (the server credits the master)
+        self.hit_by={};self.kill_log=[]  # who last hit each monster / kills counted, for the diagnostics
         self.killed=set();self.hit={};self.kills=0;self.kill_counts={};self.name_counts={};self.actors={};self.map=None;self.progress_at=0;self.last_position=None
         self.known_routes=[];self.steps=None
         self.stage_confirmed=False;self.last_npc_text=''
@@ -203,11 +211,29 @@ class QuestRoutes:
             # Taken while delivering the previous route on the same boards.
             self.completed_missions['pickup']=[i for i in self.route['mission_ids'] if i in early['picked']]
             self.skipped=list(early['notes']);self.skipped_ids=set(early['skipped'])
-            first=self.pending_index('pickup',0)
-            if first>=len(self.route['mission_ids']):
-                self.phase='pickup';self.after_pickup(now);return
-            self.enter_stage('pickup',now,first);return
-        self.enter_stage('pickup' if self.route['lifecycle_enabled'] else 'travel',now)
+        if not self.route['lifecycle_enabled']:
+            self.enter_stage('travel',now);return
+        self.skip_done_today()
+        first=self.pending_index('pickup',0)
+        if self.route['mission_ids'] and first>=len(self.route['mission_ids']):
+            self.phase='pickup';self.after_pickup(now);return
+        self.enter_stage('pickup',now,first)
+
+    def skip_done_today(self):
+        """Missions this character already finished today (board said Completa, refused, or
+        delivered) are passed over without walking to the board again."""
+        from . import quest_daily
+        from .quest_library import mission
+        done=quest_daily.today_keys(quest_daily.CHARACTER)
+        if not done or not self.library:return
+        for identity in self.route['mission_ids']:
+            if identity in self.skipped_ids or identity in self.completed_missions['pickup']:continue
+            try:m=mission(self.library,identity)
+            except ValueError:continue
+            if quest_daily.key(m['board_id'],m.get('rank') or m['name']) in done:
+                self.skipped_ids.add(identity)
+                self.skipped.append(m['name']+': ja feita hoje por '+quest_daily.CHARACTER)
+                print('[ROTA] Pulada sem ir ao quadro: '+self.skipped[-1])
 
     def enter_stage(self,phase,now,mission_index=0):
         self.step=0;self.phase=phase
@@ -424,6 +450,7 @@ class QuestRoutes:
         if self.phase=='return' and self.return_context and not self.return_context.get('validation'):
             phase,index=self.return_context['phase'],self.return_context['next_index']
         return dict(route_id=self.route['id'],route_name=self.route['name'],index=self.index,phase=phase,mission_index=index,
+                    stage=self.phase if self.phase in STAGES or self.phase=='hunt' else phase,step=self.step,map=self.map,target_map=self.route['target_map'],
                     mission_ids=list(self.route['mission_ids']),kill_targets=copy.deepcopy(self.route['kill_targets']),
                     species=list(self.route['species']),kill_counts={str(k):v for k,v in self.kill_counts.items()},name_counts=dict(self.name_counts),kills=self.kills,
                     completed_missions=copy.deepcopy(self.completed_missions),skipped=list(self.skipped),
@@ -432,7 +459,7 @@ class QuestRoutes:
                     chain_routes={str(k):dict(mission_ids=self.routes[k]['mission_ids'],kill_targets=self.routes[k]['kill_targets'],
                                               species=self.routes[k]['species']) for k in (self.chain or {}).get('indices',[])})
 
-    def resume_from(self,routes,saved,now,library=None,map_routes=None):
+    def resume_from(self,routes,saved,now,library=None,map_routes=None,map_name=None):
         """Start the queue again where it was: same route and stage, missions done kept, kills kept."""
         self.start(routes,now,library=library,map_routes=map_routes)
         index=next((i for i,r in enumerate(self.routes) if r['id']==saved.get('route_id')),None)
@@ -452,14 +479,23 @@ class QuestRoutes:
         for k,values in (saved.get('chain_routes') or {}).items():
             if int(k)<len(self.routes):self.routes[int(k)].update(copy.deepcopy(values))
         phase=saved.get('phase','pickup')
+        if phase=='pickup':self.skip_done_today()
         if phase in ('pickup','delivery'):
             first=self.pending_index(phase,0)
             if first>=len(route['mission_ids']):
                 if phase=='pickup':self.phase='pickup';self.after_pickup(now)
                 else:self.advance(now)
             else:self.enter_stage(phase,now,first)
+        elif map_name and PortalGuard.key(map_name)==PortalGuard.key(route['target_map']):
+            # Already on the hunting map: hunt at once. No mount, no standing still; the combat
+            # items only when it stopped on the way (they are on already when it was hunting).
+            self.enter_stage('travel',now);self.errands=[]
+            self.phase='hunt';self.last_stage=('hunt',0);self.map=map_name
+            self.reason='Cacando: '+route['name']+' (ja no mapa de caca)'
+            if phase!='hunt':self.queue('gear',now)
         else:
-            self.enter_stage('travel',now)  # hunt or trip: go (back) to the hunting map; already there = hunt
+            self.enter_stage('travel',now)  # elsewhere: back to the hunting map by the recorded routes
+            if map_name:self.reason+=' (de '+str(map_name).removesuffix('.gat')+')'
         self.reason='Retomando: '+self.reason
 
     def resume_after_move(self,map_name,now):
@@ -539,15 +575,17 @@ class QuestRoutes:
                     actor=self.actors.get(identity,{});species=actor.get('species_id')
                     if self.counts_for_quest(species,actor.get('name')):
                         self.kills+=1
+                        self.kill_log.append(dict(kind='quest_kill',target_id=identity,species_id=species,name=actor.get('name'),
+                                                  by=self.hit_by.pop(identity,own)))
                         named=self.target_named(actor.get('name'))
                         if named:self.name_counts[named]=self.name_counts.get(named,0)+1  # by name: exact even with shared sprites
                         elif species:self.kill_counts[species]=self.kill_counts.get(species,0)+1
                 self.actors.pop(identity,None)
             elif kind in ('normal_attack','skill_damage') and self.phase=='hunt' and e.get('damage_raw',0)>0:
-                target=e.get('target_id');actor=self.actors.get(target,{})
-                if e.get('source_id')!=own:self.hit.pop(target,None)
-                elif self.route and actor.get('species_id') in self.route['species']:
-                    self.hit[target]=now
+                target=e.get('target_id');actor=self.actors.get(target,{});source=e.get('source_id')
+                if source==own or source in self.allies:
+                    if self.route and actor.get('species_id') in self.route['species']:self.hit[target]=now;self.hit_by[target]=source
+                elif is_player_id(source or 0):self.hit.pop(target,None)  # another player took it over
             elif kind=='npc_dialog':
                 self.dialog=dict(e)
                 if self.recording and self.recording.get('npc_id')==e.get('entity_id') and e.get('options'):
@@ -708,6 +746,7 @@ class QuestRoutes:
                 if target and chebyshev(position,target)>3:self.stop('Personagem nao chegou ao NPC esperado');return None
                 self.complete_validation();return None
             self.phase='hunt';self.last_stage=('hunt',0);self.reason='Cacando: '+self.route['name'];self.queue('gear',now);return None
+        if not self.validation:self.skip_detour(map_name,position,collision,portals)
         if (self.phase=='travel' and not (self.validation or {}).get('target_position')
             and PortalGuard.key(map_name)==PortalGuard.key(self.route['target_map'])
             and all(s['kind']=='walk' for s in self.steps[self.step:])):
@@ -917,6 +956,25 @@ class QuestRoutes:
         points=[i for i in range(self.step,end+1) if self.steps[i].get('position')]
         nearest=min(points,key=lambda i:(chebyshev(position,self.steps[i]['position']),-i))
         return nearest if nearest>self.step else None
+
+    def skip_detour(self,map_name,position,collision,portals):
+        """A recorded trip that leaves this map and comes back to it (a portal stepped on while
+        recording: alde_dun02 -> gl_prison -> alde_dun02, landing beside the portal it left by).
+        When the step after the return is walkable from here, the detour is not taken."""
+        if collision is None or self.step>=len(self.steps):return
+        step=self.steps[self.step];here=PortalGuard.key(map_name)
+        if step['kind']!='portal' or PortalGuard.key(step['map'])!=here:return
+        for j in range(self.step+1,len(self.steps)):
+            if self.steps[j]['kind']!='wait_map' or PortalGuard.key(self.steps[j]['map'])!=here:continue
+            k=j+1
+            if k>=len(self.steps) or PortalGuard.key(self.steps[k].get('map',''))!=here or 'position' not in self.steps[k]:return
+            target=self.steps[k]
+            c=self.navigation(map_name,collision,portals,target)
+            if self.path_to(c,position,target['position'],target['kind']!='npc',portals.links(map_name)):
+                maps=[s['map'] for s in self.steps[self.step+1:j] if s['kind']=='wait_map']
+                print('[ROTA] Desvio da gravacao pulado ('+' -> '.join([map_name,*maps,map_name])+'): o ponto seguinte e alcancavel andando')
+                self.step=k
+            return
 
     def navigation(self,map_name,collision,portals,step):
         """Collision map with the portals forbidden (but the one this step enters), kept between ticks.

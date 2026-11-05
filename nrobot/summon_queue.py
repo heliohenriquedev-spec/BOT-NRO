@@ -15,6 +15,8 @@ def validated_learning(data):
         if type(effect) is not int or not 0 <= effect <= 65535:
             continue
         record = {'effect_id': effect}
+        if entry.get('creature') is True:
+            record['creature'] = True
         for name in ('last_observed_duration', 'user_observed_duration'):
             value = entry.get(name)
             if type(value) in (int, float) and math.isfinite(value) and 0 < value <= 86400:
@@ -35,6 +37,7 @@ class SummonQueue:
         self.log = []
         self.dirty = False
         self.reason = ''
+        self.silent_misses = 0
 
     @staticmethod
     def key(skill_id, level):
@@ -115,14 +118,53 @@ class SummonQueue:
         self.active = None
         self.reason = 'invocacao encerrada; proxima da fila'
 
+    # The server never answers a summon; the creature it creates is the proof. A summon whose
+    # creature did not appear was not cast (sent during the delay after other skills, or walking):
+    # 41 of 78 on 2026-11-05, while the bot believed one was up and waited 20 s.
+    SILENT_LIMIT = 12  # misses in a row before assuming a summon that creates nothing visible
+
+    def creates_creature(self, skill_id, level):
+        return bool(self.learned.get(self.key(skill_id, level), {}).get('creature'))
+
     def failed(self, skill_id, now, explicit):
         if self.waiting and self.waiting['skill_id'] == skill_id:
             if explicit:
                 self.waiting = None
                 self.reason = 'invocacao recusada; tentando proxima disponivel'
+            elif self.creates_creature(skill_id, self.waiting['level']) and self.silent_misses < self.SILENT_LIMIT:
+                self.silent_misses += 1
+                self.log.append({'kind': 'summon_not_created', 'skill_id': skill_id, 'misses': self.silent_misses})
+                self.waiting = None
+                self.reason = 'invocacao nao saiu (nenhuma criatura criada); tentando de novo'
+                return 'not_created'
             else:
                 # Do not create a second summon when an execution may have succeeded silently.
                 self.start(now, 'unconfirmed')
+
+    def creature_created(self, creature_id, now):
+        """Own creature born right after the summon: it is out for sure."""
+        entry = self.waiting or (self.active if self.active is not None and now-(self.active.get('started_at') or now) <= 3 else None)
+        if entry is not None:
+            key = self.key(entry['skill_id'], entry['level'])
+            if not self.learned.get(key, {}).get('creature'):
+                self.learned.setdefault(key, {})['creature'] = True
+                self.dirty = True
+            if self.waiting is not None:
+                self.start(now, 'creature_created')
+            self.silent_misses = 0
+        elif self.active is not None and now-(self.active.get('started_at') or now) > 3:
+            return  # an old summon's creature (e.g. back into view): not a new one
+        if self.active is not None:
+            self.active.setdefault('creatures', set()).add(creature_id)
+            self.active['confirmed'] = True
+
+    def creature_gone(self, creature_id, now):
+        """Its creature died or vanished: the summon is over, the next one goes at once."""
+        active = self.active
+        if active is not None and creature_id in active.get('creatures', ()):
+            active['creatures'].discard(creature_id)
+            if not active['creatures']:
+                self.finish(now, 'creature_gone')
 
     def observe(self, events, player_id, now):
         for event in events:
@@ -207,7 +249,7 @@ class SummonQueue:
                            'duracao desconhecida: aguardando efeito vinculado ou duracao configurada')
 
     def snapshot(self, profiles, now):
-        active = {k:v for k,v in (self.active or {}).items() if k not in ('candidates', 'initial_effects', 'learn_until')}
+        active = {k:v for k,v in (self.active or {}).items() if k not in ('candidates', 'initial_effects', 'learn_until', 'creatures')}
         if active:
             active['remaining_seconds'] = max(0, active['expires_at']-now) if active['expires_at'] else None
         return {'active': active or None, 'waiting_skill_id': self.waiting['skill_id'] if self.waiting else None,

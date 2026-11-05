@@ -39,12 +39,12 @@ def test_explicitly_checked_players_stay_targets(tmp_path):
 def test_player_who_takes_no_damage_is_left_alone_for_a_minute(tmp_path):
     relay = relay_with_players(tmp_path, [(2002329, 'Inimigo')], pvp_all=True)
     now = time.monotonic()
-    for _ in range(relay.PLAYER_MISSES-1):
-        relay.note_player_attack(2002329, now)
-    assert relay.player_target_allowed(2002329)
-    relay.player_misses[2002329] = 0  # damage confirmed meanwhile: counting starts over
-    for _ in range(relay.PLAYER_MISSES):
-        relay.note_player_attack(2002329, now)
+    for step in range(20):  # a fast burst: many sends before any damage can come back
+        relay.note_player_attack(2002329, now+step*.07)
+    assert relay.player_target_allowed(2002329)  # sends alone never drop a player being fought
+    relay.player_misses.pop(2002329)  # damage confirmed meanwhile: counting starts over
+    for step in range(relay.PLAYER_MISSES+2):
+        relay.note_player_attack(2002329, now+step)  # 7 s of attacks with no damage at all
     assert not relay.player_target_allowed(2002329) and 2002329 not in relay.pvp_registered
     assert relay.hunt.excluded_until[2002329] >= now+59
 
@@ -102,3 +102,21 @@ def test_dead_players_get_no_skill_or_attack_until_resurrected(tmp_path):
     relay.inventory.observe([{'kind': 'resurrection', 'entity_id': 2002329}], time.monotonic())
     relay.sync_pvp_targets()
     assert not relay.dead(2002329) and [e['entity_id'] for e in relay.status()['recent_entities']] == [2002329]
+
+
+def test_prioritize_players_keeps_hunting_when_no_player_is_reachable(tmp_path):
+    import math
+    from nrobot.network_targets import ACCOUNT_IDS
+    relay = relay_with_players(tmp_path, [(2002329, 'Inimigo')], pvp_all=True, pvp_first=True)
+    o = relay.tracker.observer
+    o.player, o.player_at = [10, 10], time.monotonic()
+    monster = {'entity_id': 111700300, 'species_id': 1002, 'kind': 'monster', 'position': [12, 10]}
+    far_player = {'entity_id': 2002329, 'species_id': 0, 'kind': 'player', 'position': [90, 90]}  # out of range
+    state = {'player_position': [10, 10], 'recent_entities': [monster, far_player]}
+    relay.collision_map = lambda: None
+    kept = relay.prioritize_pvp(state)
+    assert any(e['entity_id'] == 111700300 for e in kept['recent_entities'])  # monster still huntable
+    near_player = {'entity_id': 2002329, 'species_id': 0, 'kind': 'player', 'position': [13, 10]}
+    state = {'player_position': [10, 10], 'recent_entities': [monster, near_player]}
+    kept = relay.prioritize_pvp(state)
+    assert [e['entity_id'] for e in kept['recent_entities']] == [2002329]  # player in reach: players only

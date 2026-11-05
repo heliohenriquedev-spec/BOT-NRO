@@ -35,6 +35,8 @@ DEFAULTS.update(allowed_players=[], summon_queue_mode='cycle')
 # Movement in combat: walk up to the basic-attack range, or run back to keep the skills' distance
 # (never both). Older settings had both tied to auto_attacks.
 DEFAULTS.update(melee_approach=True, kite=False)
+# Homunculus: fed by the bot when its hunger (0-100, from the server) drops to this number.
+DEFAULTS.update(homun_feed=False, homun_hunger=25)
 DEFAULTS.update(group_enabled=False, group_role='follower', group_leader='', group_members=[], group_follow_only=False, group_distance=3)
 THROWS_TOKEN = 'throws'
 
@@ -92,7 +94,7 @@ def validate(data, *, links_path=None):
     for key, minimum, maximum in (('radius', 8, 60), ('patrol_step', 1, 8), ('patrol_spacing', 6, 40),
                                   ('patrol_coverage', 30, 100), ('patrol_wall_margin', 1, 8), ('patrol_give_up', 3, 60), ('ignore_attackers', 0, 20), ('skill_attempts', 1, 5),
                                   ('target_defer', 2, 30), ('switch_distance', 4, 28),
-                                  ('switch_saving', 1, 10), ('switch_ratio_percent', 25, 90)):
+                                  ('switch_saving', 1, 10), ('switch_ratio_percent', 25, 90), ('homun_hunger', 1, 99)):
         if type(result[key]) is not int or not minimum <= result[key] <= maximum:
             raise ValueError(f'{key}: valor deve estar entre {minimum} e {maximum}')
     for key, minimum, maximum in (('skill_interval', .25, 3), ('skill_timeout', .75, 8), ('skill_global_delay', .1, 10)):
@@ -102,7 +104,7 @@ def validate(data, *, links_path=None):
         raise ValueError('Espera por resposta deve ser maior ou igual ao intervalo da habilidade')
     for key in ('pvp_enabled', 'pvp_all', 'pvp_first', 'patrol', 'skills', 'require_collision', 'auto_movement', 'manual_movement', 'patrol_avoid_walls', 'auto_attacks', 'advanced_combat', 'auto_map_targets',
                 'pause_on_players', 'pause_on_disguised', 'pause_on_hidden', 'gm_detection', 'fast_offensives', 'sit_on_players',
-                'limit_target_failures', 'defer_failed_targets', 'skill_burst', 'melee_approach', 'kite'):
+                'limit_target_failures', 'defer_failed_targets', 'skill_burst', 'melee_approach', 'kite', 'homun_feed'):
         if type(result[key]) is not bool:
             raise ValueError(f'{key}: valor deve ser booleano')
     if result['melee_approach'] and result['kite']:

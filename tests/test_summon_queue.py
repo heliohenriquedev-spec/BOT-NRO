@@ -113,7 +113,7 @@ def test_existing_linked_summon_survives_disabled_profile_and_config_changes():
 def test_user_observed_end_teaches_fallback_but_not_a_fake_server_duration():
     profiles=[p(700)]
     r=CombatRotation(profiles);s=state(profiles)
-    r.sent(r.plan(s,0),0);r.plan(s,2)
+    r.sent(r.plan(s,0),0);r.plan(s,3)  # 2.5 s waiting for a creature
     r.summons.finish(30,'user_observed_end')
     assert r.summons.learned['700:1']['user_observed_duration']==30
     r.sent(r.plan(s,31),31);r.observe([ack(700)],1,31.1)
@@ -247,11 +247,9 @@ def test_long_range_kite_approaches_summon_radius_then_resumes_offensive_range()
     r,s=combat_with_summon(reach=24)
     s['recent_entities'][0]['position']=[30,10]
     assert r.engagement_range(s)==24
-    assert r.navigation_range(s,0,20)==11
-    s['engagement_range']=r.navigation_range(s,0,20)
-    hunt=PacketHunt();hunt.auto_attacks=False;hunt.start()
-    a=hunt.plan(s,0)
-    assert a['kind']=='move' and a['destination'][0]>10
+    assert r.navigation_range(s,0,20)==24  # 20 cells away: no summon yet, no pull towards it
+    s['recent_entities'][0]['position']=[18,10]
+    assert r.navigation_range(s,0,20)==11  # within 10 cells: stay where the summon can go
     # A confirmed summon restores ordinary ranged spacing.
     entry={**r.profiles[0],'kind':'skill','target_id':1,'sp_cost':50}
     r.sent(entry,0);r.observe([ack(700)],1,.1)
@@ -411,9 +409,10 @@ def test_refused_summon_is_tried_again_soon_and_not_charged_its_interval():
     a=r.plan(s,.2);assert a['skill_id']==745  # the next summon may go at once
     assert r.log[-1]['cause_raw']==10
     r.sent(a,.2);r.observe([refused(745)],1,.21)
-    a=r.plan(s,1.1);assert a and a['skill_id']==744  # the same summon again, a second later
-    r.sent(a,1.1);r.observe([ack(744)],1,1.2)
-    assert r.summons.active['skill_id']==744 and r.ready[744]>=1.1+46  # accepted: interval applies
+    assert r.plan(s,1.1) is None and not r.summon_maintenance_required(s,1.1)  # refused = its cooldown: no priority
+    a=r.plan(s,5.1);assert a and a['skill_id']==744  # tried again 5 s later, not after its 46 s
+    r.sent(a,5.1);r.observe([ack(744)],1,5.2)
+    assert r.summons.active['skill_id']==744 and r.ready[744]>=5.1+46  # accepted: interval applies
 
 
 def test_a_summon_refused_again_and_again_waits_its_interval():
@@ -423,7 +422,7 @@ def test_a_summon_refused_again_and_again_waits_its_interval():
     for attempt in range(10):
         a=r.plan(s,now);assert a and a['skill_id']==744;r.sent(a,now)
         r.observe([refused(744)],1,now+.01)
-        now+=1.1
+        now+=5.1
     assert r.ready[744]>=46  # tenth refusal in a row: no more retries every second
 
 
@@ -433,5 +432,5 @@ def test_silence_after_a_summon_is_its_normal_start_not_a_failure():
     r=CombatRotation(profiles,response_timeout=1.5);s=state(profiles)
     for start in (0,60,120):
         a=r.plan(s,start);assert a and a['skill_id']==744;r.sent(a,start)
-        r.plan(s,start+2)  # no answer: started unconfirmed
+        r.plan(s,start+3)  # no answer (no creature known for it): started unconfirmed
         assert r.summons.active['skill_id']==744 and r.failures.get(744,0)==0
