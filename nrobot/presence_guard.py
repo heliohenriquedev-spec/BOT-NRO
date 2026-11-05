@@ -55,6 +55,8 @@ class PresenceGuard:
         self.resume_delay = 10  # seconds after a player left before the hunt resumes
         self.allowed_names = set()
         self.allowed = set()  # captured targets never hold the bot
+        self.observation_ignored = set()
+        self.observation_ignored_names = set()
         # REDE-70: each kind of presence can be set not to hold the bot (alerts still happen).
         self.hold_players = self.hold_disguised = self.hold_hidden = True
         self.alerts = []
@@ -178,7 +180,11 @@ class PresenceGuard:
 
     def ignored(self, identity):
         allowed = {normalize_player_name(n) for n in self.allowed_names}
-        return identity in self.allowed or self.names.get(identity) in allowed
+        return (identity in self.allowed or self.names.get(identity) in allowed
+                or self.observation_disabled_for(identity))
+
+    def observation_disabled_for(self, identity):
+        return identity in self.observation_ignored or self.names.get(identity) in self.observation_ignored_names
 
     def reason(self, player_position, now):
         # A visible actor may walk beyond the radius without a removal packet.

@@ -1,11 +1,11 @@
 {
  "schema": 1,
  "files": {
-  "rotas_quests.json": "d197b4ef84ebc1e4c3ab3c0d0d396bc1f82011b6f504cda297c85d02440ad2a0",
+  "rotas_quests.json": "e30d4e4b504400852599f29c94ae3edff41711b6ed9c5b1a503bc063c7761b18",
   "quadros_missoes.json": "22234d95e2a661c3f6eba2e37280f0fea1522c79611e549b431d73f8d846feb2",
   "rotas_mapas.json": "3fcd0b13b78e6c83cb5326c8eccdd5baa20402c60fd20048c5da08eab6190cc6",
   "portais.json": "5c13a4cfda6a37cc1016f8789ebad9940ec04d3e9a83617f150ac34745274052",
-  "portais_internos.json": "235618abeb836952a5f195a5a58417a380df69abe271d8f631eac7cb2d92cfe9",
+  "portais_internos.json": "cd11ea237092fd878e22e16a68934a3c64fad3831f7ea555075de4f28ee76e58",
   "quest_extras.json": "7ccaad376442658c4f6ab04c59f019665124ccffe34c022b0c290cbb166dc077",
   "gm_sinais.json": "9f30ad9781cab6977ab2a677ab2da0904fc5952d80ad0c46a39884f039c1864b"
  }

@@ -21,6 +21,11 @@ data/rede/slots_missoes.json
 data/rede/quest_extras.json
 data/rede/progresso_quests.json
 data/rede/progresso_quests.json.bak
+third_party/simplerohook/
+data/recursos/rcx/*.pdb
+data/recursos/rcx/*.lib
+data/recursos/rcx/nro_rcx_1348be82eafb.dll
+data/recursos/rcx/.gitignore
 data/rede/login_automatico.json
 data/rede/compartilhado_importado.json
 data/rede/alvos_importados.json

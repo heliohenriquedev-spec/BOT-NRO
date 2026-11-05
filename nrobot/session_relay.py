@@ -206,6 +206,8 @@ class SessionRelay(QuestRelay):
         self.emergency = None  # {'id', 'reason', 'detections', 'at'} of the last stop
         self.emergency_current = set()  # (id, kind) found now; only a new one stops again
         self.chat_alert = None
+        from .ground_cells import GroundCells
+        self.ground_cells = GroundCells()
         self.char_list = b''
         self.manual_until = 0  # REDE-76: the bot yields while the player walks by hand
         self.manual_active = False
@@ -415,6 +417,10 @@ class SessionRelay(QuestRelay):
             self.map_loaded_at = time.monotonic()  # the client finished loading the map
         for opcode, frame in self.native_frames.frames:
             self.quests.native(opcode,frame,self.tracker.observer.map_name)
+            if opcode == 0x113 and len(frame) == 22:
+                self.ground_cells.preview_cast(struct.unpack_from('<H',frame,9)[0],
+                    [struct.unpack_from('<H',frame,12)[0],struct.unpack_from('<H',frame,20)[0]],time.monotonic())
+                self.publish_ground_cells()
             if opcode == 0x22d and self.own_summons.learn_feed(frame):
                 print(f'Homúnculo alimentado pelo jogador (fome {self.own_summons.hunger}); pacote registrado: {frame.hex()}.')
             if opcode == 0x8c and len(frame) == 11:
@@ -730,6 +736,7 @@ class SessionRelay(QuestRelay):
             self.hunt.patrol=old_patrol
 
     def sync_presence_names(self):
+        self.load_watchlist()
         from .network_targets import is_player_id
         names = {i: e['name'] for i, e in self.inventory.entities.items() if is_player_id(i) and e.get('name')}
         names.update(self.player_names)
@@ -740,7 +747,11 @@ class SessionRelay(QuestRelay):
         self.sync_presence_names()
         player = self.tracker.observer.player
         for alert in self.presence.drain_alerts():
+            if self.observation_suspended_for_route():
+                continue
             identity = alert['entity_id']
+            if self.presence.observation_disabled_for(identity):
+                continue
             name = self.player_names.get(identity) or self.inventory.entities.get(identity, {}).get('name') or 'nome ainda não recebido'
             position = self.presence.positions.get(identity)
             where = f", {round(math.dist(player, position))} células" if player and position else ''
@@ -1457,6 +1468,8 @@ class SessionRelay(QuestRelay):
                         self.rotation.reason = 'nenhuma celula valida para invocacao proxima'
                         return False
                     payload = ground_skill(*point, action['skill_id'], action['level'])
+                    self.ground_cells.preview_cast(action['skill_id'],list(point),now)
+                    self.publish_ground_cells()
                     action = {**action, 'ground_position': list(point)}
                 else:
                     payload = skill(action['target_id'], action['skill_id'], action['level'])
@@ -1511,6 +1524,7 @@ class SessionRelay(QuestRelay):
             'reason':self.group.reason, 'follow_only':bool(self.settings and self.settings['group_follow_only'])}
         state.update(stage=self.stage, relay_error=self.error, ammo=self.ammo.snapshot(time.monotonic()),
                      quests=self.quests.snapshot(),
+                     observation_suspended_for_route=self.observation_suspended_for_route(),
                      presence=self.presence.snapshot(self.tracker.observer.player, time.monotonic()),
                      players_nearby=self.players_nearby(), captured_player=self.captured_player,
                      capture_armed=time.monotonic() < self.capture_armed_until,
@@ -1518,6 +1532,7 @@ class SessionRelay(QuestRelay):
                      own_look=self.own_look or None,
                      emergency_stop=self.emergency,
                      chat_alert=self.chat_alert,
+                     ground_cells={**self.ground_cells.snapshot(), "feed_file": str(self.folder/"rcx_terreno.json")},
                      portals=[{'position': list(cell), 'margin': margin} for cell, margin in self.portals.portals(self.tracker.observer.map_name)],
                      own_hidden=({'option': self.own_option & 0x4046, 'gm_invisible': bool(self.own_option & 0x40)}
                                  if self.own_option & 0x4046 else None),
@@ -1652,6 +1667,13 @@ class SessionRelay(QuestRelay):
                 data = bytes(self.mirror)
                 self.mirror.clear()
             events = self.tracker.feed(self.mirror_sequence, data, time.monotonic())
+            self.ground_cells.observe(events, self.tracker.observer.player_id)
+            if self.ground_cells.map is None:
+                self.ground_cells.map = self.tracker.observer.map_name
+            if any(e["kind"] in ("ground_effect", "ground_effect_removed", "map_change", "map_transfer", "skill_cast", "skill_failed") for e in events):
+                self.publish_ground_cells()
+            if self.ground_cells.map is None:
+                self.ground_cells.map = self.tracker.observer.map_name
             if any(e['kind'] == 'player_position_init' for e in events):
                 self.login_phase = 'map'
                 self.native_feed = True  # the server accepted this map connection: frames align from here
@@ -1841,6 +1863,8 @@ class SessionRelay(QuestRelay):
         self.character_id = identity
 
     def begin_map_observation(self):
+        self.ground_cells.reset()
+        self.publish_ground_cells()
         self.drops.reset()
         self.release_player()
         self.player_tracks.clear()
@@ -2212,6 +2236,8 @@ class SessionRelay(QuestRelay):
             print(f'Ataque único enviado por pacote ao ID {target_id}; aguardando resposta do servidor.')
 
     async def close(self):
+        self.ground_cells.reset()
+        self.publish_ground_cells()
         if self.quests.active:
             self.save_progress(time.monotonic(), force=True)
         self.drops.close()
@@ -2231,6 +2257,8 @@ class SessionRelay(QuestRelay):
         self.status()
 
     def observe_chat_alerts(self, events):
+        if self.observation_suspended_for_route():
+            return
         """Public/private messages alert only when their sender is on the observation list."""
         from .watchlist import watched
         from .presence_guard import normalize_player_name
@@ -2267,14 +2295,27 @@ class SessionRelay(QuestRelay):
 
     def load_watchlist(self):
         from . import watchlist
-        try:
-            info = watchlist.FILE.stat()
-            stamp = (info.st_mtime_ns, info.st_size)
-        except OSError:
-            stamp = None
+        stamp = []
+        for path in (watchlist.FILE, watchlist.FILE.with_name('observacao_opcoes.json')):
+            try:
+                info = path.stat()
+                stamp.append((info.st_mtime_ns, info.st_size))
+            except OSError:
+                stamp.append(None)
+        stamp = tuple(stamp)
         if stamp != self.watch_stamp:
             self.watch_stamp, self.watch_entries = stamp, watchlist.load()
-        return self.watch_entries
+            self.watch_enabled = watchlist.enabled()
+        from .presence_guard import normalize_player_name
+        on = getattr(self, 'watch_enabled', True)
+        self.presence.observation_ignored = {int(e) for e in self.watch_entries if e.isdigit()} if not on else set()
+        self.presence.observation_ignored_names = {normalize_player_name(e) for e in self.watch_entries if not e.isdigit()} if not on else set()
+        # Private/name detections of IDs learned earlier use the same registered identity.
+        if not on:
+            self.presence.observation_ignored_names.update(normalize_player_name(row['name'])
+                for identity, row in self.registry.players.items()
+                if str(identity) in self.watch_entries and row.get('name'))
+        return self.watch_entries if on else []
 
     def gm_signs_found(self, now):
         """[(row, reasons)] of visible characters that look like GM/staff."""
@@ -2297,11 +2338,28 @@ class SessionRelay(QuestRelay):
     def gm_detection_on(self):
         return bool((self.settings or {}).get('gm_detection', True))
 
+    def publish_ground_cells(self):
+        """Small independent RCX feed; a terrain packet does not wait for the full UI snapshot."""
+        try:
+            value = self.ground_cells.snapshot()
+            target = self.folder/'rcx_terreno.json'
+            temp = target.with_suffix('.tmp')
+            temp.write_text(json.dumps(value), encoding='utf-8')
+            temp.replace(target)
+        except OSError:
+            pass  # a display problem must never disconnect the game
+
+    def observation_suspended_for_route(self):
+        q = self.quests
+        return q.active and (q.phase != "hunt" or bool(q.errands))
+
     def emergency_detections(self):
         """Watched characters found (any way, @hide included) and anyone in @hide / invisible."""
         from . import watchlist
         from .presence_guard import OPTION_INVISIBLE
         now = time.monotonic()
+        if self.observation_suspended_for_route():
+            return []
         entries = self.load_watchlist()
         hidden_gm = self.gm_detection_on() and any(h['option'] & OPTION_INVISIBLE for h in self.presence.hidden.values())
         self.sync_presence_names()
@@ -2351,6 +2409,9 @@ class SessionRelay(QuestRelay):
     def halt_on_presence(self):
         """A player just showed up while hunting: stop at once, not at the next hunt tick, so no
         walking is seen when they arrive."""
+        self.sync_presence_names()
+        if self.observation_suspended_for_route():
+            return
         hunting = self.hunt is not None and self.hunt.enabled or getattr(self.quests, 'phase', None) == 'hunt'
         if (not hunting or self.presence_hold is not None or self.commands_blocked or not self.allow_commands
                 or not self.walking_now()):
@@ -2379,7 +2440,7 @@ class SessionRelay(QuestRelay):
     async def update_presence_hold(self):
         """REDE-61: True while the bot must stay still; stops an in-flight walk once."""
         self.sync_presence_names()
-        reason = self.presence.reason(self.tracker.observer.player, time.monotonic())
+        reason = None if self.observation_suspended_for_route() else self.presence.reason(self.tracker.observer.player, time.monotonic())
         if reason is None:
             if self.presence_hold is not None:
                 if self.sitting:
@@ -2914,6 +2975,7 @@ async def run(args):
                     relay.expire_captured(time.monotonic())
                     loading = relay.map_loading(time.monotonic())  # nothing is sent until the game shows the map
                     try:
+                        was_route = relay.observation_suspended_for_route()
                         route_travel = loading or await relay.quest_tick(lambda: controls.connected(relay.game_peer,relay.game_local))
                     except (asyncio.CancelledError, KeyboardInterrupt):
                         raise
@@ -2923,6 +2985,8 @@ async def run(args):
                         relay.quest_stop(f'erro interno na fila ({type(exc).__name__}); conexão mantida')
                         print(f'Erro na fila de quests: {type(exc).__name__}: {exc}. Detalhes em erro_relay.txt')
                         route_travel = False
+                    if was_route and not relay.observation_suspended_for_route():
+                        relay.check_emergency()
                     if not loading:
                         await relay.send_mob_info(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                         await relay.send_mob_scan(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))

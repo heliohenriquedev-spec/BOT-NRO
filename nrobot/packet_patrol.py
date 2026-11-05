@@ -318,6 +318,8 @@ class PacketPatrol:
                 stale = self.goal is not None and now-self.goal_at > self.GOAL_TIMEOUT
                 if stale and self.goal_block is not None:
                     self.deferred[self.goal_block] = now+60
+                    if self.focus is not None:
+                        self.focus_reached, self.focus = tuple(self.focus), None
                 focused = self.focus is not None and self.goal_block is not None and self.goal_block == getattr(self, 'focus_block', None)
                 if (self.goal is None or (self.goal_block not in self.remaining and not focused) or stale
                         or self.focus is not None and not focused):

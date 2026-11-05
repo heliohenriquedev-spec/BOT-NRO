@@ -188,7 +188,11 @@ def client_lengths():
     from .game_folder import saved
     game_dir = CLIENT_GAME_DIR or saved()
     executable = Path(game_dir)/'NRO.exe' if game_dir is not None else Path(data['source_executable'])
-    if not executable.exists() or hashlib.sha256(executable.read_bytes()).hexdigest() != data['sha256']:
+    accepted = {data['sha256']}
+    accepted.update(row['sha256'] for row in data.get('compatible_executables', [])
+                    if isinstance(row, dict) and isinstance(row.get('sha256'), str)
+                    and re.fullmatch('[0-9a-f]{64}', row['sha256']))
+    if not executable.exists() or hashlib.sha256(executable.read_bytes()).hexdigest() not in accepted:
         raise ValueError(f'Tabela de pacotes incompativel ou NRO.exe ausente em {executable}. Confira a pasta do jogo; nao e possivel validar os dados iniciais.')
     return {int(key, 16): value['length'] for key, value in data['entries'].items()
             if value['length'] == -1 or 2 <= value['length'] <= 32768}
@@ -394,7 +398,7 @@ def decode(message: bytes) -> dict:
     elif op == 0x43d and len(message) == 8:
         event.update(kind='skill_cooldown', skill_id=u16(2), duration_ms=u32(4))
     elif op == 0x13e and len(message) == 24:
-        event.update(kind='skill_cast', source_id=u32(2), target_id=u32(6), skill_id=u16(14), duration_ms=u32(20))
+        event.update(kind='skill_cast', source_id=u32(2), target_id=u32(6), skill_id=u16(14), duration_ms=u32(20), position=[u16(10),u16(12)])
     elif op == 0x8a:
         event.update(kind='normal_attack', source_id=u32(2), target_id=u32(6),
                      damage_raw=u16(22), action_type=message[26], source_motion_ms=u32(14))
@@ -413,6 +417,10 @@ def decode(message: bytes) -> dict:
                      position=[u16(10), u16(12)], effect_type=message[14], visible=bool(message[15]))
     elif op == 0x120:
         event.update(kind='ground_effect_removed', effect_id=u32(2))
+    elif op == 0x117 and len(message) == 18:
+        # rAthena clif_skill_poseffect: ground skill executed (skill, caster, level, cell).
+        event.update(kind='ground_skill', skill_id=u16(2), source_id=u32(4), level=u16(8),
+                     position=[u16(10), u16(12)])
     elif op == 0xaf:
         event.update(kind='inventory_removed', inventory_index=u16(2), amount=u16(4))
     elif op in (0xb0, 0xb1):

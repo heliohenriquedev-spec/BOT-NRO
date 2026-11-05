@@ -1,7 +1,7 @@
 [
  {
   "name": "Mamute Suna",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1040,
@@ -238,7 +238,7 @@
  },
  {
   "name": "Kami 2 - Andar 1",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1099,
@@ -349,7 +349,7 @@
  },
  {
   "name": "Kami 2 - Andar 2",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1139,
@@ -474,7 +474,7 @@
  },
  {
   "name": "Kami 2 - Andar 3",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1058,
@@ -619,7 +619,7 @@
  },
  {
   "name": "Kami 1 - Andar 1",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1018,
@@ -736,7 +736,7 @@
  },
  {
   "name": "Kami 1 - Andar 2",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1114,
@@ -867,7 +867,7 @@
  },
  {
   "name": "Kami 1 - Andar 3",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1128,
@@ -1013,7 +1013,7 @@
  },
  {
   "name": "Esgoto Suna - Andar 2",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1053,
@@ -1081,7 +1081,7 @@
  },
  {
   "name": "Esgoto Suna - Andar 3",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1589,
@@ -1160,7 +1160,7 @@
  },
  {
   "name": "Esgoto Suna - Andar 4",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1196,

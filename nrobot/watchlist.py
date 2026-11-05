@@ -40,6 +40,22 @@ def save(entries, path=None):
     os.replace(temporary, path)
 
 
+def enabled():
+    try:
+        data = json.loads(FILE.with_name('observacao_opcoes.json').read_text(encoding='utf-8'))
+        return data.get('enabled', True) is not False
+    except (OSError, ValueError, AttributeError):
+        return True
+
+
+def set_enabled(value):
+    path = FILE.with_name('observacao_opcoes.json')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix('.tmp')
+    temporary.write_text(json.dumps({'enabled': bool(value)}), encoding='utf-8')
+    os.replace(temporary, path)
+
+
 def watched(entry_text, identity, name):
     text = entry_text.strip()
     if text.isdigit():

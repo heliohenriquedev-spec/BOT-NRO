@@ -1,0 +1,2067 @@
+{
+  "source": "https://github.com/rathena/rathena/blob/master/src/map/skill.hpp",
+  "layout_source": "https://github.com/rathena/rathena/blob/master/db/pre-re/skill_db.yml",
+  "note": "Ragnarok defaults; NRO may customize names and preview areas. Actual cells always follow server.",
+  "units": [
+    {
+      "unit_type": 126,
+      "code": "SAFETYWALL",
+      "name": "Safetywall",
+      "skills": [
+        {
+          "skill_id": 12,
+          "code": "MG_SAFETYWALL",
+          "name": "Safety Wall",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 8033,
+          "code": "MH_STEINWAND",
+          "name": "Stone Wall",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 127,
+      "code": "FIREWALL",
+      "name": "Firewall",
+      "skills": [
+        {
+          "skill_id": 18,
+          "code": "MG_FIREWALL",
+          "name": "Fire Wall",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 128,
+      "code": "WARP_WAITING",
+      "name": "Warp Waiting",
+      "skills": []
+    },
+    {
+      "unit_type": 129,
+      "code": "WARP_ACTIVE",
+      "name": "Warp Active",
+      "skills": [
+        {
+          "skill_id": 27,
+          "code": "AL_WARP",
+          "name": "Warp Portal",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 130,
+      "code": "BENEDICTIO",
+      "name": "Benedictio",
+      "skills": []
+    },
+    {
+      "unit_type": 131,
+      "code": "SANCTUARY",
+      "name": "Sanctuary",
+      "skills": [
+        {
+          "skill_id": 70,
+          "code": "PR_SANCTUARY",
+          "name": "Sanctuary",
+          "radius": 2,
+          "shape": "sanctuary",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 132,
+      "code": "MAGNUS",
+      "name": "Magnus",
+      "skills": [
+        {
+          "skill_id": 79,
+          "code": "PR_MAGNUS",
+          "name": "Magnus Exorcismus",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 133,
+      "code": "PNEUMA",
+      "name": "Pneuma",
+      "skills": [
+        {
+          "skill_id": 25,
+          "code": "AL_PNEUMA",
+          "name": "Pneuma",
+          "radius": 1,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 134,
+      "code": "DUMMYSKILL",
+      "name": "Dummyskill",
+      "skills": [
+        {
+          "skill_id": 21,
+          "code": "MG_THUNDERSTORM",
+          "name": "Thunderstorm",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 83,
+          "code": "WZ_METEOR",
+          "name": "Meteor Storm",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 85,
+          "code": "WZ_VERMILION",
+          "name": "Lord of Vermilion",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 86,
+          "code": "WZ_WATERBALL",
+          "name": "Water Ball",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 89,
+          "code": "WZ_STORMGUST",
+          "name": "Storm Gust",
+          "radius": 4,
+          "shape": "square",
+          "ground": true
+        },
+        {
+          "skill_id": 91,
+          "code": "WZ_HEAVENDRIVE",
+          "name": "Heaven's Drive",
+          "radius": 2,
+          "shape": "square",
+          "ground": true
+        },
+        {
+          "skill_id": 254,
+          "code": "CR_GRANDCROSS",
+          "name": "Grand Cross",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 339,
+          "code": "NPC_GRANDDARKNESS",
+          "name": "Grand cross of Darkness",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 428,
+          "code": "SG_SUN_WARM",
+          "name": "Warmth of the Sun",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 429,
+          "code": "SG_MOON_WARM",
+          "name": "Warmth of the Moon",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 430,
+          "code": "SG_STAR_WARM",
+          "name": "Warmth of the Stars",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 516,
+          "code": "GS_DESPERADO",
+          "name": "Desperado",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        },
+        {
+          "skill_id": 536,
+          "code": "NJ_BAKUENRYU",
+          "name": "Raging Fire Dragon",
+          "radius": 2,
+          "shape": "square",
+          "ground": false
+        },
+        {
+          "skill_id": 539,
+          "code": "NJ_HYOUSYOURAKU",
+          "name": "Ice Meteor",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        },
+        {
+          "skill_id": 541,
+          "code": "NJ_RAIGEKISAI",
+          "name": "Lightning Strike of Destruction",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 2213,
+          "code": "WL_COMET",
+          "name": "Comet",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 2446,
+          "code": "SO_EARTHGRAVE",
+          "name": "Earth Grave",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 2447,
+          "code": "SO_DIAMONDDUST",
+          "name": "Diamond Dust",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 2484,
+          "code": "GN_CRAZYWEED_ATK",
+          "name": "Crazy Weed Attack",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 3006,
+          "code": "KO_BAKURETSU",
+          "name": "Kunai Explosion",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 3008,
+          "code": "KO_MUCHANAGE",
+          "name": "Rapid Throw",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 3009,
+          "code": "KO_HUUMARANKA",
+          "name": "Swirling Petal",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 8025,
+          "code": "MH_XENO_SLASHER",
+          "name": "Xeno Slasher",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 135,
+      "code": "FIREPILLAR_WAITING",
+      "name": "Firepillar Waiting",
+      "skills": [
+        {
+          "skill_id": 80,
+          "code": "WZ_FIREPILLAR",
+          "name": "Fire Pillar",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 136,
+      "code": "FIREPILLAR_ACTIVE",
+      "name": "Firepillar Active",
+      "skills": []
+    },
+    {
+      "unit_type": 137,
+      "code": "HIDDEN_TRAP",
+      "name": "Hidden Trap",
+      "skills": []
+    },
+    {
+      "unit_type": 138,
+      "code": "TRAP",
+      "name": "Trap",
+      "skills": []
+    },
+    {
+      "unit_type": 139,
+      "code": "HIDDEN_WARP_NPC",
+      "name": "Hidden Warp Npc",
+      "skills": []
+    },
+    {
+      "unit_type": 140,
+      "code": "USED_TRAPS",
+      "name": "Used Traps",
+      "skills": []
+    },
+    {
+      "unit_type": 141,
+      "code": "ICEWALL",
+      "name": "Icewall",
+      "skills": [
+        {
+          "skill_id": 87,
+          "code": "WZ_ICEWALL",
+          "name": "Ice Wall",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 142,
+      "code": "QUAGMIRE",
+      "name": "Quagmire",
+      "skills": [
+        {
+          "skill_id": 92,
+          "code": "WZ_QUAGMIRE",
+          "name": "Quagmire",
+          "radius": 2,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 143,
+      "code": "BLASTMINE",
+      "name": "Blastmine",
+      "skills": [
+        {
+          "skill_id": 122,
+          "code": "HT_BLASTMINE",
+          "name": "Blast Mine",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 144,
+      "code": "SKIDTRAP",
+      "name": "Skidtrap",
+      "skills": [
+        {
+          "skill_id": 115,
+          "code": "HT_SKIDTRAP",
+          "name": "Skid Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 8209,
+          "code": "MA_SKIDTRAP",
+          "name": "Skid_Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 145,
+      "code": "ANKLESNARE",
+      "name": "Anklesnare",
+      "skills": [
+        {
+          "skill_id": 117,
+          "code": "HT_ANKLESNARE",
+          "name": "Ankle Snare",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 5010,
+          "code": "SC_ESCAPE",
+          "name": "Emergency Escape",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 146,
+      "code": "VENOMDUST",
+      "name": "Venomdust",
+      "skills": [
+        {
+          "skill_id": 140,
+          "code": "AS_VENOMDUST",
+          "name": "Venom Dust",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 147,
+      "code": "LANDMINE",
+      "name": "Landmine",
+      "skills": [
+        {
+          "skill_id": 116,
+          "code": "HT_LANDMINE",
+          "name": "Land Mine",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 8210,
+          "code": "MA_LANDMINE",
+          "name": "Land_Mine",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 148,
+      "code": "SHOCKWAVE",
+      "name": "Shockwave",
+      "skills": [
+        {
+          "skill_id": 118,
+          "code": "HT_SHOCKWAVE",
+          "name": "Shockwave Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 149,
+      "code": "SANDMAN",
+      "name": "Sandman",
+      "skills": [
+        {
+          "skill_id": 119,
+          "code": "HT_SANDMAN",
+          "name": "Sandman",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 8211,
+          "code": "MA_SANDMAN",
+          "name": "Sandman",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 150,
+      "code": "FLASHER",
+      "name": "Flasher",
+      "skills": [
+        {
+          "skill_id": 120,
+          "code": "HT_FLASHER",
+          "name": "Flasher",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 151,
+      "code": "FREEZINGTRAP",
+      "name": "Freezingtrap",
+      "skills": [
+        {
+          "skill_id": 121,
+          "code": "HT_FREEZINGTRAP",
+          "name": "Freezing Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 8212,
+          "code": "MA_FREEZINGTRAP",
+          "name": "Freezing_Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 152,
+      "code": "CLAYMORETRAP",
+      "name": "Claymoretrap",
+      "skills": [
+        {
+          "skill_id": 123,
+          "code": "HT_CLAYMORETRAP",
+          "name": "Claymore Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 153,
+      "code": "TALKIEBOX",
+      "name": "Talkiebox",
+      "skills": [
+        {
+          "skill_id": 125,
+          "code": "HT_TALKIEBOX",
+          "name": "Talkie Box",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 154,
+      "code": "VOLCANO",
+      "name": "Volcano",
+      "skills": [
+        {
+          "skill_id": 285,
+          "code": "SA_VOLCANO",
+          "name": "Volcano",
+          "radius": 3,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 155,
+      "code": "DELUGE",
+      "name": "Deluge",
+      "skills": [
+        {
+          "skill_id": 286,
+          "code": "SA_DELUGE",
+          "name": "Deluge",
+          "radius": 3,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 156,
+      "code": "VIOLENTGALE",
+      "name": "Violentgale",
+      "skills": [
+        {
+          "skill_id": 287,
+          "code": "SA_VIOLENTGALE",
+          "name": "Whirlwind",
+          "radius": 3,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 157,
+      "code": "LANDPROTECTOR",
+      "name": "Landprotector",
+      "skills": [
+        {
+          "skill_id": 288,
+          "code": "SA_LANDPROTECTOR",
+          "name": "Magnetic Earth",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 158,
+      "code": "LULLABY",
+      "name": "Lullaby",
+      "skills": [
+        {
+          "skill_id": 306,
+          "code": "BD_LULLABY",
+          "name": "Lullaby",
+          "radius": 4,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 159,
+      "code": "RICHMANKIM",
+      "name": "Richmankim",
+      "skills": [
+        {
+          "skill_id": 307,
+          "code": "BD_RICHMANKIM",
+          "name": "Mental Sensing",
+          "radius": 4,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 160,
+      "code": "ETERNALCHAOS",
+      "name": "Eternalchaos",
+      "skills": [
+        {
+          "skill_id": 308,
+          "code": "BD_ETERNALCHAOS",
+          "name": "Down Tempo",
+          "radius": 4,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 161,
+      "code": "DRUMBATTLEFIELD",
+      "name": "Drumbattlefield",
+      "skills": [
+        {
+          "skill_id": 309,
+          "code": "BD_DRUMBATTLEFIELD",
+          "name": "Battle Theme",
+          "radius": 4,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 162,
+      "code": "RINGNIBELUNGEN",
+      "name": "Ringnibelungen",
+      "skills": [
+        {
+          "skill_id": 310,
+          "code": "BD_RINGNIBELUNGEN",
+          "name": "Harmonic Lick",
+          "radius": 4,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 163,
+      "code": "ROKISWEIL",
+      "name": "Rokisweil",
+      "skills": [
+        {
+          "skill_id": 311,
+          "code": "BD_ROKISWEIL",
+          "name": "Classical Pluck",
+          "radius": 4,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 164,
+      "code": "INTOABYSS",
+      "name": "Intoabyss",
+      "skills": [
+        {
+          "skill_id": 312,
+          "code": "BD_INTOABYSS",
+          "name": "Power Chord",
+          "radius": 4,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 165,
+      "code": "SIEGFRIED",
+      "name": "Siegfried",
+      "skills": [
+        {
+          "skill_id": 313,
+          "code": "BD_SIEGFRIED",
+          "name": "Acoustic Rhythm",
+          "radius": 4,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 166,
+      "code": "DISSONANCE",
+      "name": "Dissonance",
+      "skills": [
+        {
+          "skill_id": 317,
+          "code": "BA_DISSONANCE",
+          "name": "Unchained Serenade",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 167,
+      "code": "WHISTLE",
+      "name": "Whistle",
+      "skills": [
+        {
+          "skill_id": 319,
+          "code": "BA_WHISTLE",
+          "name": "Perfect Tablature",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 168,
+      "code": "ASSASSINCROSS",
+      "name": "Assassincross",
+      "skills": [
+        {
+          "skill_id": 320,
+          "code": "BA_ASSASSINCROSS",
+          "name": "Impressive Riff",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 169,
+      "code": "POEMBRAGI",
+      "name": "Poembragi",
+      "skills": [
+        {
+          "skill_id": 321,
+          "code": "BA_POEMBRAGI",
+          "name": "Magic Strings",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 170,
+      "code": "APPLEIDUN",
+      "name": "Appleidun",
+      "skills": [
+        {
+          "skill_id": 322,
+          "code": "BA_APPLEIDUN",
+          "name": "Song of Lutie",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 171,
+      "code": "UGLYDANCE",
+      "name": "Uglydance",
+      "skills": [
+        {
+          "skill_id": 325,
+          "code": "DC_UGLYDANCE",
+          "name": "Hip Shaker",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 172,
+      "code": "HUMMING",
+      "name": "Humming",
+      "skills": [
+        {
+          "skill_id": 327,
+          "code": "DC_HUMMING",
+          "name": "Focus Ballet",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 173,
+      "code": "DONTFORGETME",
+      "name": "Dontforgetme",
+      "skills": [
+        {
+          "skill_id": 328,
+          "code": "DC_DONTFORGETME",
+          "name": "Slow Grace",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 174,
+      "code": "FORTUNEKISS",
+      "name": "Fortunekiss",
+      "skills": [
+        {
+          "skill_id": 329,
+          "code": "DC_FORTUNEKISS",
+          "name": "Lady Luck",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 175,
+      "code": "SERVICEFORYOU",
+      "name": "Serviceforyou",
+      "skills": [
+        {
+          "skill_id": 330,
+          "code": "DC_SERVICEFORYOU",
+          "name": "Gypsy's Kiss",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 176,
+      "code": "GRAFFITI",
+      "name": "Graffiti",
+      "skills": [
+        {
+          "skill_id": 220,
+          "code": "RG_GRAFFITI",
+          "name": "Scribble",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 177,
+      "code": "DEMONSTRATION",
+      "name": "Demonstration",
+      "skills": [
+        {
+          "skill_id": 229,
+          "code": "AM_DEMONSTRATION",
+          "name": "Bomb",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 178,
+      "code": "CALLFAMILY",
+      "name": "Callfamily",
+      "skills": [
+        {
+          "skill_id": 336,
+          "code": "WE_CALLPARTNER",
+          "name": "I miss You",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 409,
+          "code": "WE_CALLPARENT",
+          "name": "Call Parent",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 410,
+          "code": "WE_CALLBABY",
+          "name": "Call Baby",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 179,
+      "code": "GOSPEL",
+      "name": "Gospel",
+      "skills": [
+        {
+          "skill_id": 369,
+          "code": "PA_GOSPEL",
+          "name": "Battle Chant",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 180,
+      "code": "BASILICA",
+      "name": "Basilica",
+      "skills": [
+        {
+          "skill_id": 362,
+          "code": "HP_BASILICA",
+          "name": "Basilica",
+          "radius": 2,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 181,
+      "code": "MOONLIT",
+      "name": "Moonlit",
+      "skills": [
+        {
+          "skill_id": 395,
+          "code": "CG_MOONLIT",
+          "name": "Sheltering Bliss",
+          "radius": 4,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 182,
+      "code": "FOGWALL",
+      "name": "Fogwall",
+      "skills": [
+        {
+          "skill_id": 404,
+          "code": "PF_FOGWALL",
+          "name": "Blinding Mist",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 183,
+      "code": "SPIDERWEB",
+      "name": "Spiderweb",
+      "skills": [
+        {
+          "skill_id": 405,
+          "code": "PF_SPIDERWEB",
+          "name": "Fiber Lock",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 184,
+      "code": "GRAVITATION",
+      "name": "Gravitation",
+      "skills": [
+        {
+          "skill_id": 484,
+          "code": "HW_GRAVITATION",
+          "name": "Gravitation Field",
+          "radius": 2,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 185,
+      "code": "HERMODE",
+      "name": "Hermode",
+      "skills": [
+        {
+          "skill_id": 488,
+          "code": "CG_HERMODE",
+          "name": "Wand of Hermode",
+          "radius": 3,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 186,
+      "code": "KAENSIN",
+      "name": "Kaensin",
+      "skills": []
+    },
+    {
+      "unit_type": 187,
+      "code": "SUITON",
+      "name": "Suiton",
+      "skills": [
+        {
+          "skill_id": 538,
+          "code": "NJ_SUITON",
+          "name": "Hidden Water",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 188,
+      "code": "TATAMIGAESHI",
+      "name": "Tatamigaeshi",
+      "skills": [
+        {
+          "skill_id": 527,
+          "code": "NJ_TATAMIGAESHI",
+          "name": "Improvised Defense",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 189,
+      "code": "KAEN",
+      "name": "Kaen",
+      "skills": [
+        {
+          "skill_id": 535,
+          "code": "NJ_KAENSIN",
+          "name": "Crimson Fire Formation",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 190,
+      "code": "GROUNDDRIFT_WIND",
+      "name": "Grounddrift Wind",
+      "skills": [
+        {
+          "skill_id": 521,
+          "code": "GS_GROUNDDRIFT",
+          "name": "Ground Drift",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 191,
+      "code": "GROUNDDRIFT_DARK",
+      "name": "Grounddrift Dark",
+      "skills": []
+    },
+    {
+      "unit_type": 192,
+      "code": "GROUNDDRIFT_POISON",
+      "name": "Grounddrift Poison",
+      "skills": []
+    },
+    {
+      "unit_type": 193,
+      "code": "GD_LEADERSHIP",
+      "name": "Gd Leadership",
+      "skills": [
+        {
+          "skill_id": 10006,
+          "code": "GD_LEADERSHIP",
+          "name": "Great Leadership",
+          "radius": 2,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 194,
+      "code": "GD_GLORYWOUNDS",
+      "name": "Gd Glorywounds",
+      "skills": [
+        {
+          "skill_id": 10007,
+          "code": "GD_GLORYWOUNDS",
+          "name": "Glorious Wounds",
+          "radius": 2,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 195,
+      "code": "GD_SOULCOLD",
+      "name": "Gd Soulcold",
+      "skills": [
+        {
+          "skill_id": 10008,
+          "code": "GD_SOULCOLD",
+          "name": "Cold Heart",
+          "radius": 2,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 196,
+      "code": "GD_HAWKEYES",
+      "name": "Gd Hawkeyes",
+      "skills": [
+        {
+          "skill_id": 10009,
+          "code": "GD_HAWKEYES",
+          "name": "Sharp Gaze",
+          "radius": 2,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 197,
+      "code": "WINDATTACK",
+      "name": "Windattack",
+      "skills": []
+    },
+    {
+      "unit_type": 198,
+      "code": "EARTHQUAKE",
+      "name": "Earthquake",
+      "skills": [
+        {
+          "skill_id": 653,
+          "code": "NPC_EARTHQUAKE",
+          "name": "Earthquake",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 199,
+      "code": "EVILLAND",
+      "name": "Evilland",
+      "skills": [
+        {
+          "skill_id": 670,
+          "code": "NPC_EVILLAND",
+          "name": "Evil Land",
+          "radius": 1,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 200,
+      "code": "DARK_RUNNER",
+      "name": "Dark Runner",
+      "skills": []
+    },
+    {
+      "unit_type": 201,
+      "code": "DARK_TRANSFER",
+      "name": "Dark Transfer",
+      "skills": []
+    },
+    {
+      "unit_type": 202,
+      "code": "EPICLESIS",
+      "name": "Epiclesis",
+      "skills": [
+        {
+          "skill_id": 2044,
+          "code": "AB_EPICLESIS",
+          "name": "Epiclesis",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 203,
+      "code": "EARTHSTRAIN",
+      "name": "Earthstrain",
+      "skills": [
+        {
+          "skill_id": 2216,
+          "code": "WL_EARTHSTRAIN",
+          "name": "Earth Strain",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 204,
+      "code": "MANHOLE",
+      "name": "Manhole",
+      "skills": [
+        {
+          "skill_id": 2299,
+          "code": "SC_MANHOLE",
+          "name": "Man Hole",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 205,
+      "code": "DIMENSIONDOOR",
+      "name": "Dimensiondoor",
+      "skills": [
+        {
+          "skill_id": 2300,
+          "code": "SC_DIMENSIONDOOR",
+          "name": "Dimension Door",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 206,
+      "code": "CHAOSPANIC",
+      "name": "Chaospanic",
+      "skills": [
+        {
+          "skill_id": 2301,
+          "code": "SC_CHAOSPANIC",
+          "name": "Chaos Panic",
+          "radius": 2,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 207,
+      "code": "MAELSTROM",
+      "name": "Maelstrom",
+      "skills": [
+        {
+          "skill_id": 2302,
+          "code": "SC_MAELSTROM",
+          "name": "Maelstrom",
+          "radius": 2,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 208,
+      "code": "BLOODYLUST",
+      "name": "Bloodylust",
+      "skills": [
+        {
+          "skill_id": 2303,
+          "code": "SC_BLOODYLUST",
+          "name": "Bloody Lust",
+          "radius": 3,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 209,
+      "code": "FEINTBOMB",
+      "name": "Feintbomb",
+      "skills": [
+        {
+          "skill_id": 2304,
+          "code": "SC_FEINTBOMB",
+          "name": "Feint Bomb",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 210,
+      "code": "MAGENTATRAP",
+      "name": "Magentatrap",
+      "skills": [
+        {
+          "skill_id": 2249,
+          "code": "RA_MAGENTATRAP",
+          "name": "Magenta Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 211,
+      "code": "COBALTTRAP",
+      "name": "Cobalttrap",
+      "skills": [
+        {
+          "skill_id": 2250,
+          "code": "RA_COBALTTRAP",
+          "name": "Cobalt Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 212,
+      "code": "MAIZETRAP",
+      "name": "Maizetrap",
+      "skills": [
+        {
+          "skill_id": 2251,
+          "code": "RA_MAIZETRAP",
+          "name": "Maize Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 213,
+      "code": "VERDURETRAP",
+      "name": "Verduretrap",
+      "skills": [
+        {
+          "skill_id": 2252,
+          "code": "RA_VERDURETRAP",
+          "name": "Verdure Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 214,
+      "code": "FIRINGTRAP",
+      "name": "Firingtrap",
+      "skills": [
+        {
+          "skill_id": 2253,
+          "code": "RA_FIRINGTRAP",
+          "name": "Firing Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 215,
+      "code": "ICEBOUNDTRAP",
+      "name": "Iceboundtrap",
+      "skills": [
+        {
+          "skill_id": 2254,
+          "code": "RA_ICEBOUNDTRAP",
+          "name": "Icebound Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 216,
+      "code": "ELECTRICSHOCKER",
+      "name": "Electricshocker",
+      "skills": [
+        {
+          "skill_id": 2238,
+          "code": "RA_ELECTRICSHOCKER",
+          "name": "Electric Shocker",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 217,
+      "code": "CLUSTERBOMB",
+      "name": "Clusterbomb",
+      "skills": [
+        {
+          "skill_id": 2239,
+          "code": "RA_CLUSTERBOMB",
+          "name": "Cluster Bomb",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 218,
+      "code": "REVERBERATION",
+      "name": "Reverberation",
+      "skills": [
+        {
+          "skill_id": 725,
+          "code": "NPC_REVERBERATION",
+          "name": "Reverberation 2",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 2414,
+          "code": "WM_REVERBERATION",
+          "name": "Reverberation",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 219,
+      "code": "SEVERE_RAINSTORM",
+      "name": "Severe Rainstorm",
+      "skills": [
+        {
+          "skill_id": 2418,
+          "code": "WM_SEVERE_RAINSTORM",
+          "name": "Severe Rainstorm",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 220,
+      "code": "FIREWALK",
+      "name": "Firewalk",
+      "skills": [
+        {
+          "skill_id": 745,
+          "code": "NPC_FIREWALK",
+          "name": "Fire Walk",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 2443,
+          "code": "SO_FIREWALK",
+          "name": "Fire Walk",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 221,
+      "code": "ELECTRICWALK",
+      "name": "Electricwalk",
+      "skills": [
+        {
+          "skill_id": 744,
+          "code": "NPC_ELECTRICWALK",
+          "name": "Electric Walk",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        },
+        {
+          "skill_id": 2444,
+          "code": "SO_ELECTRICWALK",
+          "name": "Electric Walk",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 222,
+      "code": "NETHERWORLD",
+      "name": "Netherworld",
+      "skills": [
+        {
+          "skill_id": 2419,
+          "code": "WM_POEMOFNETHERWORLD",
+          "name": "Poem of The Netherworld",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 223,
+      "code": "PSYCHIC_WAVE",
+      "name": "Psychic Wave",
+      "skills": [
+        {
+          "skill_id": 2449,
+          "code": "SO_PSYCHIC_WAVE",
+          "name": "Psychic Wave",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 224,
+      "code": "CLOUD_KILL",
+      "name": "Cloud Kill",
+      "skills": [
+        {
+          "skill_id": 739,
+          "code": "NPC_CLOUD_KILL",
+          "name": "Cloud Kill",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        },
+        {
+          "skill_id": 2450,
+          "code": "SO_CLOUD_KILL",
+          "name": "Cloud Kill",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 225,
+      "code": "POISONSMOKE",
+      "name": "Poisonsmoke",
+      "skills": [
+        {
+          "skill_id": 2032,
+          "code": "GC_POISONSMOKE",
+          "name": "Poison Smoke",
+          "radius": 2,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 226,
+      "code": "NEUTRALBARRIER",
+      "name": "Neutralbarrier",
+      "skills": [
+        {
+          "skill_id": 2273,
+          "code": "NC_NEUTRALBARRIER",
+          "name": "Neutral Barrier",
+          "radius": 2,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 227,
+      "code": "STEALTHFIELD",
+      "name": "Stealthfield",
+      "skills": [
+        {
+          "skill_id": 2274,
+          "code": "NC_STEALTHFIELD",
+          "name": "Stealth Field",
+          "radius": 2,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 228,
+      "code": "WARMER",
+      "name": "Warmer",
+      "skills": [
+        {
+          "skill_id": 2452,
+          "code": "SO_WARMER",
+          "name": "Warmer",
+          "radius": 3,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 229,
+      "code": "THORNS_TRAP",
+      "name": "Thorns Trap",
+      "skills": [
+        {
+          "skill_id": 2479,
+          "code": "GN_THORNS_TRAP",
+          "name": "Thorn Trap",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 230,
+      "code": "WALLOFTHORN",
+      "name": "Wallofthorn",
+      "skills": [
+        {
+          "skill_id": 2482,
+          "code": "GN_WALLOFTHORN",
+          "name": "Wall of Thorns",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 231,
+      "code": "DEMONIC_FIRE",
+      "name": "Demonic Fire",
+      "skills": [
+        {
+          "skill_id": 2485,
+          "code": "GN_DEMONIC_FIRE",
+          "name": "Demonic Fire",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 232,
+      "code": "FIRE_EXPANSION_SMOKE_POWDER",
+      "name": "Fire Expansion Smoke Powder",
+      "skills": [
+        {
+          "skill_id": 2487,
+          "code": "GN_FIRE_EXPANSION_SMOKE_POWDER",
+          "name": "Fire Expansion Smoke Powder",
+          "radius": 2,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 233,
+      "code": "FIRE_EXPANSION_TEAR_GAS",
+      "name": "Fire Expansion Tear Gas",
+      "skills": [
+        {
+          "skill_id": 2488,
+          "code": "GN_FIRE_EXPANSION_TEAR_GAS",
+          "name": "Fire Expansion Tear Gas",
+          "radius": 2,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 234,
+      "code": "HELLS_PLANT",
+      "name": "Hells Plant",
+      "skills": [
+        {
+          "skill_id": 2490,
+          "code": "GN_HELLS_PLANT",
+          "name": "Hell's Plant",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 235,
+      "code": "VACUUM_EXTREME",
+      "name": "Vacuum Extreme",
+      "skills": [
+        {
+          "skill_id": 2453,
+          "code": "SO_VACUUM_EXTREME",
+          "name": "Vacuum Extreme",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 236,
+      "code": "BANDING",
+      "name": "Banding",
+      "skills": [
+        {
+          "skill_id": 2319,
+          "code": "LG_BANDING",
+          "name": "Banding",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 237,
+      "code": "FIRE_MANTLE",
+      "name": "Fire Mantle",
+      "skills": [
+        {
+          "skill_id": 8403,
+          "code": "EL_FIRE_MANTLE",
+          "name": "Fire Mantle",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 238,
+      "code": "WATER_BARRIER",
+      "name": "Water Barrier",
+      "skills": [
+        {
+          "skill_id": 8406,
+          "code": "EL_WATER_BARRIER",
+          "name": "Water Barrier",
+          "radius": 1,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 239,
+      "code": "ZEPHYR",
+      "name": "Zephyr",
+      "skills": [
+        {
+          "skill_id": 8409,
+          "code": "EL_ZEPHYR",
+          "name": "Zephyr",
+          "radius": 1,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 240,
+      "code": "POWER_OF_GAIA",
+      "name": "Power Of Gaia",
+      "skills": [
+        {
+          "skill_id": 8412,
+          "code": "EL_POWER_OF_GAIA",
+          "name": "Power of Gaia",
+          "radius": 1,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 241,
+      "code": "FIRE_INSIGNIA",
+      "name": "Fire Insignia",
+      "skills": [
+        {
+          "skill_id": 2465,
+          "code": "SO_FIRE_INSIGNIA",
+          "name": "Fire Insignia",
+          "radius": 1,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 242,
+      "code": "WATER_INSIGNIA",
+      "name": "Water Insignia",
+      "skills": [
+        {
+          "skill_id": 2466,
+          "code": "SO_WATER_INSIGNIA",
+          "name": "Water Insignia",
+          "radius": 1,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 243,
+      "code": "WIND_INSIGNIA",
+      "name": "Wind Insignia",
+      "skills": [
+        {
+          "skill_id": 2467,
+          "code": "SO_WIND_INSIGNIA",
+          "name": "Wind Insignia",
+          "radius": 1,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 244,
+      "code": "EARTH_INSIGNIA",
+      "name": "Earth Insignia",
+      "skills": [
+        {
+          "skill_id": 2468,
+          "code": "SO_EARTH_INSIGNIA",
+          "name": "Earth Insignia",
+          "radius": 1,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 245,
+      "code": "POISON_MIST",
+      "name": "Poison Mist",
+      "skills": [
+        {
+          "skill_id": 8020,
+          "code": "MH_POISON_MIST",
+          "name": "Poison Mist",
+          "radius": 3,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 246,
+      "code": "LAVA_SLIDE",
+      "name": "Lava Slide",
+      "skills": [
+        {
+          "skill_id": 8041,
+          "code": "MH_LAVA_SLIDE",
+          "name": "Lava Slide",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 247,
+      "code": "VOLCANIC_ASH",
+      "name": "Volcanic Ash",
+      "skills": [
+        {
+          "skill_id": 8043,
+          "code": "MH_VOLCANIC_ASH",
+          "name": "Volcanic Ash",
+          "radius": 1,
+          "shape": "square",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 248,
+      "code": "ZENKAI_WATER",
+      "name": "Zenkai Water",
+      "skills": [
+        {
+          "skill_id": 3020,
+          "code": "KO_ZENKAI",
+          "name": "Cast Ninja Spell",
+          "radius": 0,
+          "shape": "point",
+          "ground": true
+        }
+      ]
+    },
+    {
+      "unit_type": 249,
+      "code": "ZENKAI_LAND",
+      "name": "Zenkai Land",
+      "skills": []
+    },
+    {
+      "unit_type": 250,
+      "code": "ZENKAI_FIRE",
+      "name": "Zenkai Fire",
+      "skills": []
+    },
+    {
+      "unit_type": 251,
+      "code": "ZENKAI_WIND",
+      "name": "Zenkai Wind",
+      "skills": []
+    },
+    {
+      "unit_type": 252,
+      "code": "MAKIBISHI",
+      "name": "Makibishi",
+      "skills": [
+        {
+          "skill_id": 3010,
+          "code": "KO_MAKIBISHI",
+          "name": "Makibishi",
+          "radius": 0,
+          "shape": "point",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 253,
+      "code": "VENOMFOG",
+      "name": "Venomfog",
+      "skills": [
+        {
+          "skill_id": 706,
+          "code": "NPC_VENOMFOG",
+          "name": "Venom Fog",
+          "radius": 2,
+          "shape": "square",
+          "ground": false
+        }
+      ]
+    },
+    {
+      "unit_type": 254,
+      "code": "ICEMINE",
+      "name": "Icemine",
+      "skills": []
+    },
+    {
+      "unit_type": 255,
+      "code": "FLAMECROSS",
+      "name": "Flamecross",
+      "skills": []
+    }
+  ]
+}

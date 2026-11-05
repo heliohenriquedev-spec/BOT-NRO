@@ -3143,5 +3143,44 @@
       "0x41b687",
       "dword ptr [eax + 0x10], ecx"
     ]
+  ],
+  "compatible_executables": [
+    {
+      "sha256": "7af66a0d78c23f19ac95e096ca05e40e680d7207b75e2ff3e826016cf05b6b1f",
+      "description": "Variante local camera/tremor; registro dos 627 pacotes identico ao original",
+      "verified_against": "8a77adb20ce94fded406e4d132d969830cd7d6e3cf7359e684bf651871e3b538",
+      "changes": [
+        {
+          "file_offset": "0x10a900",
+          "before": 85,
+          "after": 194
+        },
+        {
+          "file_offset": "0x10a901",
+          "before": 139,
+          "after": 12
+        },
+        {
+          "file_offset": "0x10a902",
+          "before": 236,
+          "after": 0
+        },
+        {
+          "file_offset": "0x10a920",
+          "before": 85,
+          "after": 194
+        },
+        {
+          "file_offset": "0x10a921",
+          "before": 139,
+          "after": 20
+        },
+        {
+          "file_offset": "0x10a922",
+          "before": 236,
+          "after": 0
+        }
+      ]
+    }
   ]
 }

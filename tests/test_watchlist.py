@@ -53,6 +53,7 @@ def test_alert_fires_on_discovery_on_a_stronger_finding_and_again_after_leaving(
     from PySide6.QtWidgets import QApplication
     from nrobot import player_registry
     from nrobot.player_panel import PlayerPanel
+    monkeypatch.setattr('nrobot.player_panel.job_names', lambda: {})
     QApplication.instance() or QApplication([])
     monkeypatch.setattr(watchlist, 'FILE', tmp_path/'observacao.json')
     monkeypatch.setattr(player_registry, 'FILE', tmp_path/'registro.json')

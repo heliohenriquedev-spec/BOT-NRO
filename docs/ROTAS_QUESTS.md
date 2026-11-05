@@ -503,3 +503,15 @@ PC mantém as suas, por personagem (veja `docs/ATUALIZACOES.md`).
 
 Não são compartilhados: missões concluídas no dia, vagas, progresso da fila, @voltar
 aprendido, Switch (montaria e equipamentos de cada personagem) e login.
+
+
+### Retomada da ca?a e observa??o durante percursos (2026-11-05)
+
+A etapa de ca?a ativa a patrulha para buscar os monstros pendentes, mesmo quando a
+patrulha comum estava desmarcada. A op??o de movimento manual continua respeitada.
+Um destino de `@showmobs` sem progresso por 25 segundos deixa de prender a busca:
+o personagem volta ao circuito de explora??o.
+
+Durante coleta, viagens, entrega, retorno e prepara??o de equipamentos, o observador
+de jogadores fica suspenso, sem alterar a lista ou a op??o salva. Ao entrar na etapa
+de ca?a, os jogadores presentes voltam a ser verificados antes do combate.

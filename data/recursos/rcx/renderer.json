@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "build": "be4d5efec895",
+  "dll": "nro_rcx_be4d5efec895.dll",
+  "sha256": "d1548a7412e693354a564653510745211df893be4f63c771b76ef0e582b04afc",
+  "source_sha256": "be4d5efec895b7641c6d924db40c1f808b1b0700f89ef26a90d6e096b8c113fd",
+  "architecture": "x86",
+  "entry": "Run@16"
+}

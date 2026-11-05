@@ -153,3 +153,14 @@ def test_patrol_chosen_past_a_walled_monster_remembers_it():
             'recent_entities': [{'entity_id': 101, 'position': [25, 5]}]}
     action = hunt.plan(seen, 0, 100, collision)
     assert action['purpose'] == 'patrol' and hunt.passed_over == {101}
+
+
+def test_timed_out_showmobs_focus_yields_to_map_coverage():
+    patrol = PacketPatrol()
+    collision = CollisionMap(80, 80, [1]*6400)
+    patrol.focus = [65, 65]
+    assert patrol.plan([10, 10], 0, 100, collision) is not None
+    assert patrol.focus is not None
+    patrol.plan([10, 10], patrol.GOAL_TIMEOUT+1, 100, collision)
+    assert patrol.focus is None and patrol.focus_reached == (65, 65)
+    assert patrol.remaining

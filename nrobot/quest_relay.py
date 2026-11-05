@@ -430,7 +430,7 @@ class QuestRelay(SharedQuestRelay):
                 if isinstance(self.quest_hunt_id,tuple) and self.quest_hunt_id[0]==q.route['id']:
                     print('[ROTA] Monstros atacados agora: '+', '.join(map(str,species)))
                 settings=copy.deepcopy(self.settings)
-                settings.update(species=species,auto_map_targets=False,monster_name_choices=self.quest_name_choices(q),pvp_enabled=False)
+                settings.update(species=species,auto_map_targets=False,monster_name_choices=self.quest_name_choices(q),pvp_enabled=False,patrol=True)
                 self.apply_settings(settings);self.hunt.start();self.quest_hunt_id=key
                 self.hunt.target_priority={int(k):v for k,v in (q.route.get('attack_priority') or {}).items()}
             elif not self.hunt.enabled:

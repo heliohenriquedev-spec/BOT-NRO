@@ -7,6 +7,17 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import pytest  # noqa: E402
 
+_qt_application = None
+
+
+@pytest.fixture(scope='session', autouse=True)
+def keep_qt_application_alive():
+    """UI tests share one application; temporary Python refs must not destroy Qt mid-suite."""
+    global _qt_application
+    from PySide6.QtWidgets import QApplication
+    _qt_application = QApplication.instance() or QApplication([])
+    yield _qt_application
+
 
 @pytest.fixture(autouse=True)
 def isolated_monster_data(tmp_path, monkeypatch):
@@ -14,6 +25,8 @@ def isolated_monster_data(tmp_path, monkeypatch):
     from nrobot import monster_db
     from nrobot import drop_db
     from nrobot import quest_progress
+    from nrobot import watchlist
+    monkeypatch.setattr(watchlist, 'FILE', tmp_path/'jogadores'/'observacao.json')
     monkeypatch.setattr(quest_progress, 'FILE', tmp_path/'rede'/'progresso_quests.json')
     monkeypatch.setattr(drop_db, 'FILE', tmp_path/'database'/'observacoes.sqlite3')
     monkeypatch.setattr(monster_db, 'CAPTURED', tmp_path/'monstros'/'capturados.json')

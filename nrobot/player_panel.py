@@ -54,6 +54,10 @@ class PlayerPanel(QWidget):
         watch_box = QGroupBox('Lista de observação: alerta na tela quando for identificado (inclusive em @hide)')
         watch_layout = QHBoxLayout(watch_box)
         editor = QVBoxLayout()
+        self.observe_enabled = QCheckBox('Ativar observacao: pausar e alertar sobre jogadores da lista')
+        self.observe_enabled.setChecked(watchlist.enabled())
+        self.observe_enabled.toggled.connect(self.toggle_observation)
+        editor.addWidget(self.observe_enabled)
         add_row = QHBoxLayout()
         self.watch_input = QLineEdit()
         self.watch_input.setPlaceholderText('ID ou nome exato do personagem')
@@ -151,6 +155,18 @@ class PlayerPanel(QWidget):
         self.show_watch()
         self.fill()
 
+    def toggle_observation(self, enabled):
+        try:
+            watchlist.set_enabled(enabled)
+            self.alerted.clear()
+            if not enabled:
+                self.watch_status.setText('Observacao desligada: jogadores cadastrados nao pausam nem emitem alertas.')
+        except OSError as exc:
+            self.observe_enabled.blockSignals(True)
+            self.observe_enabled.setChecked(not enabled)
+            self.observe_enabled.blockSignals(False)
+            self.watch_status.setText('Nao foi possivel salvar: '+str(exc))
+
     def add_watch(self):
         text = self.watch_input.text().strip()
         if text:
@@ -174,6 +190,14 @@ class PlayerPanel(QWidget):
     def check_watch(self, state):
         """New detections of watched characters (or a stronger one, e.g. visible -> @hide)."""
         self.update_state(state)
+        if not self.observe_enabled.isChecked():
+            self.alerted.clear()
+            self.watch_status.setText('Observacao desligada: lista preservada; sem pausas ou alertas desses jogadores.')
+            return []
+        if state.get("observation_suspended_for_route"):
+            self.alerted.clear()
+            self.watch_status.setText("Observacao suspensa durante percurso da quest; retorna na caca.")
+            return []
         found = watchlist.detections(self.watch, state, self.players)
         now = {d['entity_id']: d['kind'] for d in found}
         fresh = [d for d in found

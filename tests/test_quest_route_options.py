@@ -172,3 +172,32 @@ def test_a_moment_without_position_during_the_hunt_does_not_stop_the_queue(tmp_p
         await r.quest_tick(lambda: True)
         assert q.phase == 'paused' and '30 s' in q.reason
     asyncio.run(scenario())
+
+
+def test_quest_hunt_enables_exploration_even_if_normal_patrol_is_off(tmp_path):
+    r, q = relay_with(tmp_path, counted_route())
+    q.route['species'] = [1037]
+    q.route['kill_targets'] = [dict(name='Filhote de cobra', count=2, species=[1037])]
+    r.apply_settings({**r.settings, 'patrol': False})
+    assert r.hunt.patrol is None
+    assert asyncio.run(r.quest_tick(lambda: True)) is False
+    assert r.hunt.enabled and r.hunt.patrol is not None
+    assert set(r.tracker.observer.species) == {1037}
+
+
+def test_route_suspends_observation_without_changing_saved_preference(tmp_path):
+    from nrobot import watchlist
+    watchlist.save(['Observado'])
+    watchlist.set_enabled(True)
+    r, q = relay_with(tmp_path, counted_route(), phase='travel')
+    r.player_names[2000555] = 'Observado'
+    r.registry.players[str(2000555)] = {'name': 'Observado'}
+    r.presence.observe([dict(kind='appearance', entity_id=2000555, species_id=25,
+                           position=[6, 5], option=0)], OWN, time.monotonic(), own_position=[5, 5])
+    r.check_emergency()
+    r.observe_chat_alerts([dict(kind='chat_received', channel='private', name='Observado')])
+    assert not r.commands_blocked and r.chat_alert is None
+    assert watchlist.enabled() and watchlist.load() == ['Observado']
+    q.phase = 'hunt'
+    r.check_emergency()
+    assert r.commands_blocked

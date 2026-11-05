@@ -56,6 +56,21 @@ def test_client_hash_validation_is_still_required(portable_client):
         packet_reader.client_lengths()
 
 
+def test_explicitly_verified_visual_variant_is_accepted_but_unknown_change_is_not(portable_client):
+    folder, table = portable_client
+    variant = b'known client with independently verified visual-only changes'
+    data = json.loads(table.read_text())
+    data['compatible_executables'] = [{'sha256': hashlib.sha256(variant).hexdigest(),
+                                      'description': 'verified visual variant'}]
+    table.write_text(json.dumps(data))
+    (folder/'NRO.exe').write_bytes(variant)
+    assert packet_reader.client_lengths()[0x10f] == -1
+    packet_reader.client_lengths.cache_clear()
+    (folder/'NRO.exe').write_bytes(variant+b'unknown modification')
+    with pytest.raises(ValueError, match='incompativel'):
+        packet_reader.client_lengths()
+
+
 def test_installer_preflight_checks_actual_game_folder(portable_client,monkeypatch,capsys):
     monkeypatch.setattr(runtime_check,'check_runtime',lambda:None)
     assert runtime_check.main(['--game'])==0

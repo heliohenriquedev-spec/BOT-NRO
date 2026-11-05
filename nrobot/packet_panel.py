@@ -218,6 +218,9 @@ class PacketPanel(QMainWindow):
         from .monster_panel import MonsterPanel
         self.monster_panel = MonsterPanel()
         tabs.addTab(self.monster_panel, 'Monstros')
+        from .rcx_panel import RcxPanel
+        self.rcx_panel = RcxPanel()
+        tabs.addTab(self.rcx_panel, 'RCX')
         pvp = QWidget()
         pvp_layout = QVBoxLayout(pvp)
         self.pvp_enabled = QCheckBox('Ativar PvP')
@@ -241,6 +244,7 @@ class PacketPanel(QMainWindow):
         tabs.addTab(self.player_panel, 'Jogadores')
         from .watch_alert import WatchAlert
         self.watch_alert = WatchAlert()
+        self.player_panel.observe_enabled.toggled.connect(lambda enabled: self.watch_alert.hide() if not enabled else None)
         from .update_panel import UpdatePanel
         self.update_panel = UpdatePanel(relay_running=lambda: self.process.state() != QProcess.NotRunning)
         self.update_panel.restart_requested.connect(self.restart_after_update)
@@ -693,11 +697,16 @@ class PacketPanel(QMainWindow):
             name = (state.get('own_look') or {}).get('name')
             if name and name != self.character:
                 self.switch_character(name)
+            transit = state.get('observation_suspended_for_route', False)
+            if transit:
+                self.watch_alert.hide()
             chat_alert = state.get('chat_alert')
             if chat_alert and chat_alert['id'] != getattr(self, 'chat_alert_seen', None):
                 self.chat_alert_seen = chat_alert['id']
                 stopped = state.get('emergency_stop') or {}
-                if stopped and not stopped.get('released'):
+                if transit or not self.player_panel.observe_enabled.isChecked():
+                    pass
+                elif stopped and not stopped.get('released'):
                     self.watch_alert.show_alert(stopped['detections'][:1]+chat_alert['detections'], stopped=stopped['reason'])
                 else:
                     self.watch_alert.show_alert(chat_alert['detections'], chat=True)
@@ -705,8 +714,10 @@ class PacketPanel(QMainWindow):
             emergency = state.get('emergency_stop')
             if emergency and emergency['id'] != getattr(self, 'emergency_seen', None):
                 self.emergency_seen = emergency['id']
-                if not emergency.get('released'):
-                    self.watch_alert.show_alert(emergency['detections'], stopped=emergency['reason'])
+                detections = [d for d in emergency['detections']
+                              if self.player_panel.observe_enabled.isChecked() or not d.get('watched')]
+                if not transit and not emergency.get('released') and detections:
+                    self.watch_alert.show_alert(detections, stopped=emergency['reason'])
                     self.log.appendPlainText(f"[PARADA] {emergency['at']}: {emergency['reason']}")
             if self.monster_panel.isVisible():
                 self.monster_panel.reload()
@@ -715,6 +726,7 @@ class PacketPanel(QMainWindow):
                 self.skill_panel.update_catalog(state.get('learned_skills', []), state.get('own_effects', {}), state.get('buff_candidates', {}), state.get('rotation'))
             self.skill_panel.receive_buff_learning(state.get('buff_learning_result'))
             self.quest_panel.update_state(state)
+            self.rcx_panel.update_state(state)
             self.last_state = state
             self.update_overlay()
             if self.priority_panel.isVisible():
@@ -1001,6 +1013,7 @@ class PacketPanel(QMainWindow):
             pass
 
     def closeEvent(self, event):
+        self.rcx_panel.shutdown()
         if self.save_timer.isActive():
             self.save_timer.stop()
             self.autosave()
