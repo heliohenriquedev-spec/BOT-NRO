@@ -693,6 +693,14 @@ class PacketPanel(QMainWindow):
             name = (state.get('own_look') or {}).get('name')
             if name and name != self.character:
                 self.switch_character(name)
+            chat_alert = state.get('chat_alert')
+            if chat_alert and chat_alert['id'] != getattr(self, 'chat_alert_seen', None):
+                self.chat_alert_seen = chat_alert['id']
+                stopped = state.get('emergency_stop') or {}
+                if stopped and not stopped.get('released'):
+                    self.watch_alert.show_alert(stopped['detections'][:1]+chat_alert['detections'], stopped=stopped['reason'])
+                else:
+                    self.watch_alert.show_alert(chat_alert['detections'], chat=True)
             # The relay stops itself on a watched character or anyone in @hide; this shows it.
             emergency = state.get('emergency_stop')
             if emergency and emergency['id'] != getattr(self, 'emergency_seen', None):

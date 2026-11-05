@@ -652,7 +652,8 @@ class QuestPanel(QWidget):
                               ('Executar so coleta da rota',lambda:self.test_stage('pickup')),('Executar so entrega da rota',lambda:self.test_stage('delivery'))]:
             b=QPushButton(name);b.clicked.connect(callback);actions.addWidget(b);self.edit_buttons.append(b)
         execution=FlowLayout();layout.addLayout(execution)
-        self.start=QPushButton('Executar fila marcada');self.start.setObjectName('StartAction');self.start.clicked.connect(lambda:self.request('quest_start'));execution.addWidget(self.start)
+        self.start=QPushButton('Iniciar nova fila');self.start.setObjectName('StartAction');self.start.clicked.connect(self.start_queue);execution.addWidget(self.start)
+        self.start.setToolTip('Inicia do zero. Para preservar as mortes ja contadas, use Retomar fila.')
         self.resume=QPushButton('Retomar fila');self.resume.setToolTip('Continua de onde parou: mesma rota, etapa, missoes ja feitas e contador')
         self.resume.clicked.connect(lambda:self.request('quest_resume'));execution.addWidget(self.resume)
         stop=QPushButton('Pausar fila');stop.clicked.connect(lambda:self.request('quest_stop'));execution.addWidget(stop)
@@ -764,6 +765,16 @@ class QuestPanel(QWidget):
         if route:self.request('quest_test_stage_route',route_id=route['id'],stage=stage)
 
     def request(self,command,**values):self.command_requested.emit(command,values)
+
+    def start_queue(self):
+        from . import quest_progress
+        saved=quest_progress.load()
+        if saved and QMessageBox.question(self,'Iniciar do zero?',
+                quest_progress.describe(saved)+'\n\nIniciar uma nova fila substitui esse ponto de retomada e zera os contadores da execucao. '
+                'Para continuar a contagem, cancele e use Retomar fila.',
+                QMessageBox.Yes|QMessageBox.No,QMessageBox.No)!=QMessageBox.Yes:
+            return
+        self.request('quest_start')
 
     def update_state(self,state):
         self.state=state;q=state.get('quests',{});recording=bool(q.get('recording'));active=q.get('phase') in ('pickup','travel','hunt','delivery','return')

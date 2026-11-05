@@ -205,6 +205,7 @@ class SessionRelay(QuestRelay):
         self.watch_entries, self.watch_stamp = [], None
         self.emergency = None  # {'id', 'reason', 'detections', 'at'} of the last stop
         self.emergency_current = set()  # (id, kind) found now; only a new one stops again
+        self.chat_alert = None
         self.char_list = b''
         self.manual_until = 0  # REDE-76: the bot yields while the player walks by hand
         self.manual_active = False
@@ -1516,6 +1517,7 @@ class SessionRelay(QuestRelay):
                      own_motion=self.own_motion(), clock_now=time.monotonic(),
                      own_look=self.own_look or None,
                      emergency_stop=self.emergency,
+                     chat_alert=self.chat_alert,
                      portals=[{'position': list(cell), 'margin': margin} for cell, margin in self.portals.portals(self.tracker.observer.map_name)],
                      own_hidden=({'option': self.own_option & 0x4046, 'gm_invisible': bool(self.own_option & 0x40)}
                                  if self.own_option & 0x4046 else None),
@@ -1713,6 +1715,7 @@ class SessionRelay(QuestRelay):
                 if event['kind'] == 'look_change' and event['entity_id'] == own and own is not None and event['look_type'] in (0, 1):
                     self.own_look['job' if event['look_type'] == 0 else 'hair'] = event['value']
             self.announce_presence()
+            self.observe_chat_alerts(events)
             self.check_emergency()
             for event in events:
                 if event['kind'] == 'stream_resync':
@@ -2209,6 +2212,8 @@ class SessionRelay(QuestRelay):
             print(f'Ataque único enviado por pacote ao ID {target_id}; aguardando resposta do servidor.')
 
     async def close(self):
+        if self.quests.active:
+            self.save_progress(time.monotonic(), force=True)
         self.drops.close()
         self.allow_commands = False
         if self.hunt is not None:
@@ -2224,6 +2229,41 @@ class SessionRelay(QuestRelay):
         self.account = None
         self.stage = 'stopped'
         self.status()
+
+    def observe_chat_alerts(self, events):
+        """Public/private messages alert only when their sender is on the observation list."""
+        from .watchlist import watched
+        from .presence_guard import normalize_player_name
+        found = []
+        entries = None
+        for event in events:
+            public = event['kind'] == 'actor_signal' and event.get('signal') == 'chat'
+            private = event['kind'] == 'chat_received' and event.get('channel') == 'private'
+            if public or private:
+                if entries is None:
+                    entries = self.load_watchlist()
+                if not entries:
+                    return
+                identity = event.get('entity_id')
+                name = event.get('name') or (self.registry.players.get(str(identity)) or {}).get('name')
+                matched = any(watched(entry, identity, name) for entry in entries)
+                # Whispers carry the sender's name, not its actor ID. Resolve watched IDs
+                # through their latest registered name; never guess an unknown sender's ID.
+                if private and not matched and name:
+                    for entry in entries:
+                        if entry.isdigit():
+                            known = self.registry.players.get(str(int(entry))) or {}
+                            if known.get('name') and normalize_player_name(known['name']) == normalize_player_name(name):
+                                identity, matched = int(entry), True
+                                break
+                if not matched:
+                    continue
+                found.append(dict(kind='chat', watched=True, entity_id=identity,
+                                  name=name, channel='private' if private else 'public',
+                                  text='Mensagem recebida no '+('privado' if private else 'chat geral')))
+        if found:
+            import uuid
+            self.chat_alert = dict(id=uuid.uuid4().hex, detections=found[-4:], count=len(found))
 
     def load_watchlist(self):
         from . import watchlist
@@ -2410,6 +2450,14 @@ class SessionRelay(QuestRelay):
             own.until = max(own.until, waiting['sent_at']+own.WINDOW)
         skills = {p['skill_id'] for p in (self.settings or {}).get('skill_profiles', []) if p.get('role') == 'summon'}
         own.observe(events, self.tracker.observer.player_id, self.tracker.observer.player, now, skills)
+        for event in events:
+            if (event['kind'] in ('appearance', 'move', 'position')
+                    and event.get('entity_id') == own.homunculus):
+                self.homun_rested_at = None
+                self.homun_away_since = None
+                self.homun_call_attempts = 0
+            elif event['kind'] in ('map_change', 'map_transfer'):
+                self.homun_away_since = None
         self.quests.allies = own.allies() | self.group_member_ids()
         queue = self.rotation if self.rotation is not None else None
         for entry in own.log:
@@ -2472,14 +2520,17 @@ class SessionRelay(QuestRelay):
         and Invocar Marionete next to the character. Uses only the skills the character has."""
         own = self.own_summons
         observer = self.tracker.observer
-        if (not own.homunculus or self.hunt is None or not self.hunt.enabled or observer.player_id is None
+        learned = {identity for identity in (self.CALL_HOMUNCULUS, self.REST_HOMUNCULUS, self.RESURRECT_HOMUNCULUS)
+                   if observer.skills.get(identity, {}).get('level', 0) > 0}
+        if (not learned or self.hunt is None or not self.hunt.enabled or observer.player_id is None
                 or not observer.player_alive or self.map_loading(now)
+                or self.manual_control(now) or self.presence_hold is not None
                 or now-getattr(self, 'homun_skill_at', -1e9) < self.HOMUN_SKILL_EVERY):
             return False
         entity = self.inventory.entities.get(own.homunculus) or {}
         if own.dead:
             skill_id, why = self.RESURRECT_HOMUNCULUS, 'Remontar Marionete (morreu)'
-        elif getattr(self, 'homun_rested_at', None) is not None:
+        elif getattr(self, 'homun_rested_at', None) is not None or not own.homunculus:
             skill_id, why = self.CALL_HOMUNCULUS, 'Invocar Marionete (perto do personagem)'
         elif self.homunculus_far(entity, observer.player, now):
             since = getattr(self, 'homun_away_since', None)
@@ -2488,9 +2539,11 @@ class SessionRelay(QuestRelay):
                 return False
             if now-since < self.HOMUN_OUT_OF_VIEW:
                 return False
-            # Too far or off the screen: vaporize and resummon it beside the character. Standing
+            # Only the server's visibility removal authorizes recovery. Standing
             # still to wait for it left the bot frozen in mazes (tur_dun01, 2026-11-05: 491 waits).
-            skill_id, why = self.REST_HOMUNCULUS, 'guardando a marionete que ficou longe/fora da tela'
+            if not {self.REST_HOMUNCULUS, self.CALL_HOMUNCULUS} <= learned:
+                return False
+            skill_id, why = self.REST_HOMUNCULUS, 'guardando a marionete fora da visao recebida do servidor'
         else:
             self.homun_away_since = None
             return False
@@ -2502,6 +2555,18 @@ class SessionRelay(QuestRelay):
             return False
         if self.upstream is None or not self.allow_commands or self.commands_blocked:
             return False
+        # No response must not turn into a successful call, or starve combat forever.
+        if getattr(self, 'homun_call_attempts', 0) >= 3:
+            if now-getattr(self, 'homun_skill_at', now) < 15:
+                return False
+            self.homun_call_attempts = 0
+            if getattr(self, 'homun_rested_at', None) is not None and self.REST_HOMUNCULUS in learned:
+                skill_id, why = self.REST_HOMUNCULUS, 'repetindo recuperacao sem reaparecimento confirmado'
+                metadata = observer.skills[skill_id]
+        if (now < max(observer.cast_until, observer.skill_cooldowns.get(skill_id, 0),
+                      self.rotation.next_send if self.rotation is not None else 0)
+                or observer.sp is not None and observer.sp < metadata.get('sp_cost', 0)):
+            return False
         async with self.send_lock:
             if not self.native_frames.ready:
                 return False
@@ -2512,27 +2577,27 @@ class SessionRelay(QuestRelay):
         self.homun_skill_at = now
         if skill_id == self.REST_HOMUNCULUS:
             self.homun_rested_at, self.homun_away_since = now, None
+            self.homun_call_attempts = 0
         elif skill_id == self.CALL_HOMUNCULUS:
-            self.homun_rested_at = None
+            self.homun_call_attempts = getattr(self, 'homun_call_attempts', 0)+1
+        if self.rotation is not None:
+            self.rotation.next_send = max(self.rotation.next_send, now+self.rotation.global_delay)
         print(f'Marionete: {why}.')
         self.record_hunt({'kind': 'homunculus_skill', 'skill_id': skill_id, 'reason': why})
         return True
 
-    HOMUN_LEASH = 8  # cells: farther than this, the homunculus is vaporized and resummoned close
-
     def homunculus_far(self, entity, own, now):
-        """Off the screen, or more than HOMUN_LEASH cells away: it must be brought back."""
-        if not entity.get('present_last_observation', True):
-            return True
-        position = entity.get('destination') or entity.get('position')
-        if position is None or own is None:
-            return False
-        return max(abs(position[0]-own[0]), abs(position[1]-own[1])) > self.HOMUN_LEASH
+        """Server view, independent of camera zoom; a distant destination is not invisibility."""
+        if self.own_summons.visible is not None:
+            return not self.own_summons.visible
+        return entity.get('present_last_observation') is False
 
     async def maintain_homunculus(self, now):
         """Feeds the homunculus when its hunger reaches the chosen number (same command as its menu)."""
         settings = self.settings or {}
-        if not settings.get('homun_feed') or not self.own_summons.should_feed(settings.get('homun_hunger', 25), now):
+        if (not any(self.tracker.observer.skills.get(identity, {}).get('level', 0) > 0
+                    for identity in (self.CALL_HOMUNCULUS, self.REST_HOMUNCULUS, self.RESURRECT_HOMUNCULUS))
+                or not settings.get('homun_feed') or not self.own_summons.should_feed(settings.get('homun_hunger', 25), now)):
             return False
         if (self.upstream is None or not self.allow_commands or self.commands_blocked or self.map_loading(now)
                 or not self.tracker.observer.player_alive):
@@ -2797,7 +2862,6 @@ async def run(args):
                 relay.finish_buff_learning(time.monotonic())
                 try:
                     await relay.maintain_homunculus(time.monotonic())
-                    await relay.keep_homunculus_alive(time.monotonic())
                 except OSError as exc:
                     print(f'Alimentação do homúnculo não enviada: {exc}')
                 if relay.buff_probe_request is not None:
@@ -2879,9 +2943,13 @@ async def run(args):
                                 if relay.rotation is not None:
                                     state['engagement_range'] = relay.rotation.navigation_range(state, time.monotonic(), relay.hunt.target)
                                 action = relay.plan_group_or_hunt(state, time.monotonic(), relay.tracker.observer.walk_speed_ms, relay.collision_map())
+                                homun_sent = (relay.group_combat_allowed()
+                                              and await relay.keep_homunculus_alive(time.monotonic()))
+                                if homun_sent and action is not None and action['kind'] != 'move':
+                                    action = None
                                 relay.flush_hunt_diagnostics()
                                 # Dead or with no position (e.g. killed in PvP): no skill target to measure from.
-                                if (relay.rotation is not None and relay.group_combat_allowed()
+                                if (not homun_sent and relay.rotation is not None and relay.group_combat_allowed()
                                         and state.get('player_position') is not None and relay.tracker.observer.player_alive):
                                     now = time.monotonic()
                                     # Select a combat target even while a patrol leg is in flight.

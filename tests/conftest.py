@@ -13,6 +13,8 @@ def isolated_monster_data(tmp_path, monkeypatch):
     """Tests never write the monsters learned on this PC (data/monstros)."""
     from nrobot import monster_db
     from nrobot import drop_db
+    from nrobot import quest_progress
+    monkeypatch.setattr(quest_progress, 'FILE', tmp_path/'rede'/'progresso_quests.json')
     monkeypatch.setattr(drop_db, 'FILE', tmp_path/'database'/'observacoes.sqlite3')
     monkeypatch.setattr(monster_db, 'CAPTURED', tmp_path/'monstros'/'capturados.json')
     monkeypatch.setattr(monster_db, 'SPRITES', tmp_path/'monstros'/'sprites')

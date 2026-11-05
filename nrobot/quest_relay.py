@@ -14,7 +14,8 @@ class QuestRelay(SharedQuestRelay):
         self.quests=QuestRoutes();self.quest_base_settings=None;self.quest_hunt_id=None
 
     def quest_stop(self,reason):
-        if self.quests.active:print('[ROTA] Parada: '+reason);self.save_progress(time.monotonic(),force=True)
+        if self.quests.active:print('[ROTA] Parada: '+reason)
+        if self.quests.active or self.quests.phase=='done':self.save_progress(time.monotonic(),force=True)
         if reason!=self.quests.reason:self.quests.resume=None  # paused by the player: stays paused
         self.quests.stop(reason)
         if self.hunt:self.hunt.pause(reason)
@@ -127,8 +128,12 @@ class QuestRelay(SharedQuestRelay):
             if self.quests.recording:raise ValueError('Salve ou descarte o trajeto antes de retomar a fila')
             if not self.allow_commands:raise ValueError('Relay em modo somente observacao')
             if self.upstream is None or not game_gate():raise ValueError('Entre no personagem antes de retomar a fila')
+            self.know_quest_character()
             saved=quest_progress.load()
             if not saved:raise ValueError('Nenhum progresso salvo para retomar')
+            character=(self.own_look or {}).get('name')
+            if saved.get('character') and character and saved['character']!=character:
+                raise ValueError('Progresso salvo pertence ao personagem '+saved['character'])
             self.quest_stop('Preparando para retomar')
             entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
             self.know_quest_character()
@@ -139,6 +144,8 @@ class QuestRelay(SharedQuestRelay):
             print('[ROTA] '+self.quests.reason)
         elif command=='quest_stop':self.quest_stop('Fila pausada pelo usuario')
         else:raise ValueError('Comando de rota desconhecido')
+        if command in ('quest_start','quest_resume'):
+            self.save_progress(time.monotonic(),force=True)
 
     async def quest_errand(self,now,game_gate):
         """@voltar, mount or combat equipment: kill what is around, wait out of combat, then act."""
@@ -326,20 +333,22 @@ class QuestRelay(SharedQuestRelay):
         return sorted(set(route['species'])|always)
 
     def save_progress(self,now,force=False):
-        """Queue progress on disk (every few seconds and on every stop): Retomar fila continues it."""
+        """Persist every changed counter/stage; unchanged packet batches do no disk writes."""
         from . import quest_progress
         q=self.quests
-        if not force and now-getattr(self,'progress_saved_at',0)<3:return
-        self.progress_saved_at=now
         state=q.progress_state()
+        if state:state['character']=(self.own_look or {}).get('name')
+        if not force and state==getattr(self,'progress_saved_state',None):return
         try:
             if state:quest_progress.save(state)
             elif q.phase=='done' and not q.validation:quest_progress.clear()
+            self.progress_saved_state=copy.deepcopy(state)
+            self.progress_saved_at=now
         except OSError as exc:print('[ROTA] Nao foi possivel salvar o progresso: '+str(exc))
         self.note_quest_progress()
 
     def note_quest_progress(self):
-        """logs/progresso_quests.log: where the queue is, started over at midnight."""
+        """Append-only history, retained across midnight and bot restarts."""
         from .quest_progress_log import QuestProgressLog,describe
         if getattr(self,'progress_log',None) is None:self.progress_log=QuestProgressLog(self.progress_log_path())
         q=self.quests
@@ -354,7 +363,7 @@ class QuestRelay(SharedQuestRelay):
     def quest_events(self,events,now):
         """After every packet batch: save what was learned and trace the answers to @voltar."""
         q=self.quests
-        if q.active:self.save_progress(now)
+        if q.active or q.phase=='done':self.save_progress(now)
         if now-getattr(self,'progress_log_pruned',-1e9)>300:
             self.progress_log_pruned=now
             from .quest_progress_log import QuestProgressLog

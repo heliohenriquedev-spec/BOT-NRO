@@ -41,6 +41,7 @@ class OwnSummons:
         self.feed_blocked_until = 0.0
         self.unanswered = 0
         self.dead = False  # its death was seen: Remontar Marionete brings it back
+        self.visible = None  # only appearance/removal packets establish visibility
         self.log = []
 
     def cast(self, now):
@@ -61,15 +62,21 @@ class OwnSummons:
             kind = event['kind']
             identity = event.get('entity_id')
             if identity is not None and identity == self.homunculus:
+                if kind == 'remove':
+                    self.visible = False
                 if kind == 'remove' and event.get('reason') == 1 and not self.dead:
                     self.dead = True
                     self.log.append({'kind': 'homunculus_died', 'entity_id': identity})
                 elif kind == 'appearance':
                     self.dead = False
+                    self.visible = True
+                elif kind in ('move', 'position'):
+                    self.visible = True
             if kind in ('map_change', 'map_transfer'):
                 self.ids.clear()  # summons stay behind; the homunculus follows and is named again
                 self.confirmed.clear()
                 self.seen.clear()
+                self.visible = None
             elif kind in ('skill_cast', 'skill_no_damage') and event.get('source_id') == own_id and event.get('skill_id') in summon_skills:
                 self.cast(now)
             elif kind == 'appearance' and identity is not None and identity not in self.seen:
@@ -100,6 +107,8 @@ class OwnSummons:
                     if event['entity_id'] != self.homunculus:
                         self.log.append({'kind': 'homunculus_seen', 'entity_id': event['entity_id']})
                     self.homunculus = event['entity_id']
+                    if self.homunculus in self.seen:
+                        self.visible = True
                 elif event['state'] == 2 and event['value'] <= 100:
                     self.hunger = event['value']
             elif kind == 'homunculus_status':
@@ -142,6 +151,7 @@ class OwnSummons:
 
     def snapshot(self):
         return {'homunculus_id': self.homunculus, 'homunculus_name': self.homunculus_name,
+                'homunculus_visible': self.visible, 'homunculus_dead': self.dead,
                 'hunger': self.hunger, 'summons': sorted(self.ids), 'summons_following': sorted(self.confirmed)}
 
 

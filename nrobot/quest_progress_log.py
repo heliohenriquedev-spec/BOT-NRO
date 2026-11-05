@@ -1,8 +1,9 @@
-"""Log of where the quest queue is, started over at midnight (only today's lines are kept).
+"""Persistent quest history, including earlier days and earlier bot sessions.
 
 One line each time the progress changes (route, stage, mission, map or a kill), never on every
 tick, so the file stays small and reads as the history of the day."""
 from datetime import datetime
+import os
 from pathlib import Path
 
 FILE = Path(__file__).resolve().parents[1]/'logs'/'progresso_quests.log'
@@ -23,6 +24,8 @@ def describe(snapshot, map_name=None):
     kills = snapshot.get('kill_progress') or []
     if kills:
         parts.append(', '.join(f"{k['name']} {k['done']}/{k['count']}" for k in kills))
+    elif snapshot.get('goal'):
+        parts.append(f"monstros {snapshot.get('kills', 0)}/{snapshot['goal']}")
     if map_name:
         parts.append('mapa '+str(map_name).removesuffix('.gat'))
     if snapshot['phase'] == 'paused' and snapshot.get('reason'):
@@ -36,20 +39,21 @@ class QuestProgressLog:
         self.last = None
 
     def note(self, line, now=None):
-        """Writes the line if it differs from the last one; lines from before midnight go away."""
+        """Append changes durably without rewriting or removing previous sessions."""
         now = now or datetime.now()
         if not line or line == self.last:
             return False
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self.path.open('a', encoding='utf-8') as stream:
+            stream.write(f'{now.strftime(STAMP)} | {line}\n')
+            stream.flush()
+            os.fsync(stream.fileno())
         self.last = line
-        self.write(self.recent(now)+[f'{now.strftime(STAMP)} | {line}'])
         return True
 
     def prune(self, now=None):
-        """Drops yesterday's lines even when nothing new happened (queue stopped overnight)."""
-        rows = self.read()
-        kept = self.recent(now or datetime.now(), rows)
-        if len(kept) != len(rows):
-            self.write(kept)
+        """Kept for older callers; historical progress is never deleted automatically."""
+        return
 
     def recent(self, now, rows=None):
         rows = self.read() if rows is None else rows

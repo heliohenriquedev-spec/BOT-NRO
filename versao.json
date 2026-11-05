@@ -1,7 +1,7 @@
 {
- "version": "2026.11.05.1",
- "published_at": "2026-11-05T12:20:06",
- "notes": "atualziacoes",
+ "version": "2026.11.05.2",
+ "published_at": "2026-11-05T13:14:59",
+ "notes": "Anti GM",
  "files": [
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
@@ -1422,7 +1422,9 @@
   "docs/ATUALIZACOES.md",
   "docs/AUDITORIA_GRF_QUESTS.md",
   "docs/DATABASE_ITENS_DROPS.md",
+  "docs/HOMUNCULO.md",
   "docs/PATRULHA_E_FILA.md",
+  "docs/PROGRESSO_MISSOES.md",
   "docs/ROTAS_QUESTS.md",
   "docs/X1.md",
   "docs/exemplo_x1.json",
@@ -2102,5 +2104,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "d688af8ded91"
+ "files_digest": "bb8d7925a47a"
 }

@@ -340,6 +340,10 @@ def decode(message: bytes) -> dict:
         event.update(kind='actor_signal', signal='chat', entity_id=u32(4))
         if ' : ' in text:
             event['name'] = text.split(' : ', 1)[0].strip()
+    elif op == 0x97 and len(message) >= 28:
+        # Private message received: keep only its channel/sender, never the message body.
+        event.update(kind='chat_received', channel='private',
+                     name=message[4:28].split(b'\0')[0].decode('cp1252', 'replace'))
     elif op == 0xc0:
         event.update(kind='actor_signal', signal='emote', entity_id=u32(2))
     elif op == 0x9c:

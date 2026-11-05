@@ -87,6 +87,7 @@ def test_a_kill_taken_over_by_another_player_does_not_count(tmp_path):
 def test_homunculus_is_fed_at_the_chosen_hunger_with_the_menu_command(tmp_path):
     assert feed_packet() == bytes.fromhex('2d02000001')  # menu command 1 = feed (2 would delete it)
     r = relay(tmp_path, homun_feed=True, homun_hunger=20)
+    r.tracker.observer.skills[243] = {'level': 1}
 
     class Pipe:
         def __init__(self): self.sent = []
@@ -139,7 +140,7 @@ def test_saving_a_setting_keeps_the_hunt_running(tmp_path):
     assert not r.hunt.enabled and r.hunt.reason == 'pausada pelo usuário'
 
 
-def test_quest_progress_log_starts_over_at_midnight(tmp_path):
+def test_quest_progress_log_preserves_history_across_midnight_and_restart(tmp_path):
     log = QuestProgressLog(tmp_path/'progresso_quests.log')
     start = datetime(2026, 11, 5, 22, 0, 0)
     snapshot = dict(quest='Kami 2', phase='hunt', mission=None, mission_index=1, reason='',
@@ -151,11 +152,15 @@ def test_quest_progress_log_starts_over_at_midnight(tmp_path):
     log.note(describe(snapshot), start+timedelta(hours=1, minutes=59))  # 23:59, same day: kept
     assert len(log.read()) == 2
     snapshot['kill_progress'][0]['done'] = 14
-    log.note(describe(snapshot), start+timedelta(hours=2, minutes=1))  # 00:01: yesterday goes away
+    log.note(describe(snapshot), start+timedelta(hours=2, minutes=1))
     rows = log.read()
-    assert len(rows) == 1 and '14/50' in rows[0]
+    assert len(rows) == 3 and '14/50' in rows[-1]
     log.prune(start+timedelta(days=1, hours=3))
-    assert log.read() == []
+    assert log.read() == rows
+    restarted = QuestProgressLog(log.path)
+    assert restarted.read() == rows
+    assert restarted.note('Outra sessao', start+timedelta(days=2))
+    assert restarted.read()[:-1] == rows
 
 
 def test_a_summon_created_farther_away_is_mine_and_leaving_the_view_keeps_it():
@@ -340,7 +345,7 @@ def test_stepping_into_a_portal_by_accident_widens_it_and_is_no_recall(tmp_path)
     assert r.portals.known['gl_sew02']['29,275'] == 3
 
 
-def test_homunculus_too_far_is_vaporized_and_resummoned_without_standing_still(tmp_path):
+def test_visible_homunculus_is_not_vaporized_by_distance_or_destination(tmp_path):
     r = relay(tmp_path)
     r.hunt.start()
     o = r.tracker.observer
@@ -358,10 +363,66 @@ def test_homunculus_too_far_is_vaporized_and_resummoned_without_standing_still(t
                                        'present_last_observation': True}
     assert not asyncio.run(r.keep_homunculus_alive(100.0))  # 15 cells away: a moment first
     assert r.hunt.enabled and r.hunt.pending is None  # never stands still waiting for it
-    assert asyncio.run(r.keep_homunculus_alive(104.0))  # still far: vaporize
-    assert struct.pack('<H', 244) in r.upstream.sent[-1] and r.homun_rested_at == 104.0
-    assert asyncio.run(r.keep_homunculus_alive(107.5))  # resummon next to the character
-    assert struct.pack('<H', 243) in r.upstream.sent[-1] and r.homun_rested_at is None
+    assert not asyncio.run(r.keep_homunculus_alive(104.0))  # still visible, even beyond eight cells
+    r.inventory.entities[111700009]['destination'] = [200, 200]
+    assert not asyncio.run(r.keep_homunculus_alive(105.0))
+    r.observe_own_summons([{'kind': 'remove', 'entity_id': 111700009, 'reason': 0}], 106.0)
+    assert not asyncio.run(r.keep_homunculus_alive(106.0))
+    assert asyncio.run(r.keep_homunculus_alive(110.0))
+    assert struct.pack('<H', 244) in r.upstream.sent[-1] and r.homun_rested_at == 110.0
+    assert asyncio.run(r.keep_homunculus_alive(113.5))
+    assert struct.pack('<H', 243) in r.upstream.sent[-1] and r.homun_rested_at == 110.0
+    assert asyncio.run(r.keep_homunculus_alive(117.0))  # no appearance: retry, not falsely confirmed
+    r.observe_own_summons([{'kind': 'appearance', 'entity_id': 111700009, 'position': [11, 10]}], 118.0)
+    assert r.homun_rested_at is None and not asyncio.run(r.keep_homunculus_alive(121.0))
+
+
+def test_homunculus_recovery_uses_removal_even_without_inventory_entry(tmp_path):
+    r = relay(tmp_path)
+    r.hunt.start()
+    r.tracker.observer.skills = {243: {'level': 1}, 244: {'level': 1}}
+    class Pipe:
+        def __init__(self): self.sent = []
+        def write(self, data): self.sent.append(bytes(data))
+        async def drain(self): pass
+    r.upstream = Pipe()
+    r.observe_own_summons([{'kind': 'homunculus_state', 'state': 0, 'entity_id': 111700009},
+                           {'kind': 'remove', 'entity_id': 111700009, 'reason': 0}], 10)
+    assert not r.inventory.entities
+    assert not asyncio.run(r.keep_homunculus_alive(10))
+    assert asyncio.run(r.keep_homunculus_alive(14))
+    assert asyncio.run(r.keep_homunculus_alive(18))
+    assert asyncio.run(r.keep_homunculus_alive(22))
+    assert asyncio.run(r.keep_homunculus_alive(26))
+    assert not asyncio.run(r.keep_homunculus_alive(30))  # bounded retries; normal hunting remains enabled
+    assert r.hunt.enabled and r.hunt.pending is None
+
+
+def test_homunculus_rules_require_learned_skills_and_respect_server_cooldown(tmp_path):
+    r = relay(tmp_path)
+    r.hunt.start()
+    r.own_summons.homunculus = 111700009
+    r.own_summons.dead = True
+    class Pipe:
+        def __init__(self): self.sent = []
+        def write(self, data): self.sent.append(bytes(data))
+        async def drain(self): pass
+    r.upstream = Pipe()
+    assert not asyncio.run(r.keep_homunculus_alive(10))
+    r.tracker.observer.skills = {247: {'level': 1}}
+    r.tracker.observer.skill_cooldowns[247] = 30
+    assert not asyncio.run(r.keep_homunculus_alive(20)) and not r.upstream.sent
+    assert asyncio.run(r.keep_homunculus_alive(31))
+
+
+def test_homunculus_attacking_nonquest_monster_does_not_change_character_target(tmp_path):
+    r = relay(tmp_path)
+    r.hunt.start()
+    r.hunt.target = MONSTER
+    r.own_summons.homunculus = SUMMON
+    r.observe_own_summons([{'kind': 'normal_attack', 'source_id': SUMMON,
+                           'target_id': 111700099, 'damage_raw': 100}], 10)
+    assert r.hunt.target == MONSTER and r.hunt.enabled and r.hunt.pending is None
 
 
 def test_showmobs_marks_lead_to_the_densest_group_from_time_to_time():
@@ -481,9 +542,12 @@ def test_marionette_is_brought_back_when_dead_or_left_out_of_the_screen(tmp_path
     r.observe_own_summons([{'kind': 'appearance', 'entity_id': 111700009, 'position': [11, 10]}], 11.0)
     assert not r.own_summons.dead
     r.inventory.entities[111700009] = {'entity_id': 111700009, 'position': [40, 40], 'present_last_observation': False}
+    r.observe_own_summons([{'kind': 'remove', 'entity_id': 111700009, 'reason': 0}], 20.0)
     assert not asyncio.run(r.keep_homunculus_alive(20.0))  # just left the screen: a moment
     assert asyncio.run(r.keep_homunculus_alive(24.0)) and r.homun_rested_at == 24.0  # put away
-    assert asyncio.run(r.keep_homunculus_alive(27.5)) and r.homun_rested_at is None  # called next to us
+    assert asyncio.run(r.keep_homunculus_alive(27.5)) and r.homun_rested_at == 24.0
+    r.observe_own_summons([{'kind': 'appearance', 'entity_id': 111700009, 'position': [11, 10]}], 28.0)
+    assert r.homun_rested_at is None
 
 
 def test_strong_monsters_with_priority_are_finished_first(tmp_path):

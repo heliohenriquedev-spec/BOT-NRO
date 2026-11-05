@@ -22,14 +22,16 @@ class WatchAlert(QWidget):
         self.raise_timer = QTimer(self)  # games in front keep being covered while it shows
         self.raise_timer.timeout.connect(self.raise_)
 
-    def show_alert(self, detections, stopped=None):
-        self.title = ('⚠ BOT PARADO ATÉ VOCÊ INICIAR NOVAMENTE' if stopped else
+    def show_alert(self, detections, stopped=None, chat=False):
+        self.title = ('MENSAGEM RECEBIDA NO CHAT' if chat else '⚠ BOT PARADO ATÉ VOCÊ INICIAR NOVAMENTE' if stopped else
                       '⚠ LISTA DE OBSERVAÇÃO: JOGADOR IDENTIFICADO')
         self.lines = []
         for found in detections[:4]:
             name = found['name'] or 'nome não recebido'
-            tag = ('LISTA DE OBSERVAÇÃO' if found.get('watched', True) else 'GM' if found.get('kind') == 'gm' else '@HIDE')
-            line = f"[{tag}] {name} (ID {found['entity_id']}) — {found['text']}"
+            tag = ('PRIVADO' if found.get('channel') == 'private' else 'GERAL') if found.get('kind') == 'chat' else (
+                'LISTA DE OBSERVAÇÃO' if found.get('watched', True) else 'GM' if found.get('kind') == 'gm' else '@HIDE')
+            identity = f" (ID {found['entity_id']})" if found.get('entity_id') is not None else ''
+            line = f"[{tag}] {name}{identity} — {found['text']}"
             details = [d for d in (found.get('detail'), f"célula {found['position']}" if found.get('position') else None) if d]
             self.lines.append((line, ' • '.join(details)))
         screen = QGuiApplication.primaryScreen().availableGeometry()

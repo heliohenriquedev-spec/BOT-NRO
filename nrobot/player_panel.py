@@ -72,6 +72,10 @@ class PlayerPanel(QWidget):
         self.watch_status = QLabel('Ninguém da lista identificado agora.')
         self.watch_status.setWordWrap(True)
         editor.addWidget(self.watch_status)
+        chat_note = QLabel('Mensagens no chat geral ou privado emitem alerta visual e sonoro somente '
+                           'quando enviadas por jogadores desta lista de observacao.')
+        chat_note.setWordWrap(True)
+        editor.addWidget(chat_note)
         editor.addStretch()
         watch_layout.addLayout(editor, 1)
         self.watch_list = QListWidget()

@@ -1,5 +1,6 @@
 """Progress of the quest queue, kept on disk so a stop (player around, disconnect) can be resumed."""
 import json
+import os
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -8,31 +9,44 @@ FILE = Path(__file__).resolve().parents[1]/'data/rede/progresso_quests.json'
 
 
 def load(path=None):
+    path = Path(path or FILE)
+    for candidate in (path, path.with_suffix(path.suffix+'.bak')):
+        try:
+            data = json.loads(candidate.read_text(encoding='utf-8'))
+            if isinstance(data, dict) and data.get('route_id'):
+                return data
+        except (OSError, ValueError):
+            continue
+    return None
+
+
+def atomic_write(path, state):
+    temporary = path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp')
     try:
-        data = json.loads(Path(path or FILE).read_text(encoding='utf-8'))
-        return data if isinstance(data, dict) and data.get('route_id') else None
-    except (OSError, ValueError):
-        return None
+        with temporary.open('w', encoding='utf-8') as stream:
+            json.dump(state, stream, ensure_ascii=False, indent=1)
+            stream.flush()
+            os.fsync(stream.fileno())
+        from .quest_daily import replace
+        replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def save(state, path=None):
     path = Path(path or FILE)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp')
-    temporary.write_text(json.dumps({**state, 'saved_at': datetime.now().isoformat(timespec='seconds')},
-                                    ensure_ascii=False, indent=1), encoding='utf-8')
-    from .quest_daily import replace
-    replace(temporary, path)
-    for stale in path.parent.glob(path.name+'.*.tmp'):  # left by refused replaces before
-        if stale != temporary:
-            stale.unlink(missing_ok=True)
+    previous = load(path)
+    if previous:
+        atomic_write(path.with_suffix(path.suffix+'.bak'), previous)
+    atomic_write(path, {**state, 'saved_at': datetime.now().isoformat(timespec='seconds')})
 
 
 def clear(path=None):
-    try:
-        Path(path or FILE).unlink()
-    except OSError:
-        pass
+    path = Path(path or FILE)
+    # Both must disappear: a completed queue must not be restored from its backup.
+    path.with_suffix(path.suffix+'.bak').unlink(missing_ok=True)
+    path.unlink(missing_ok=True)
 
 
 def describe(state):
