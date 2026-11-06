@@ -153,7 +153,7 @@ class SessionRelay(QuestRelay):
         self.init_quests()
         self.allow_commands = allow_commands
         self.tracker = ContinuousTracker(species or {1051}, player_ttl=None, idle_timeout=None, entity_ttl=None)
-        self.tracker.observer.collision_provider = self.collision_map
+        self.tracker.observer.collision_provider = self.server_collision_map
         self.mirror = bytearray()
         self.mirror_ready = False
         self.mirror_sequence = 0
@@ -225,6 +225,9 @@ class SessionRelay(QuestRelay):
         self.chat_alert = None
         from .ground_cells import GroundCells
         self.ground_cells = GroundCells()
+        from .toxic_ground import ToxicGround
+        self.toxic_ground = ToxicGround()
+        self.toxic_hold_until = 0
         self.ground_stream = None
         self.char_list = b''
         self.manual_until = 0  # REDE-76: the bot yields while the player walks by hand
@@ -281,11 +284,64 @@ class SessionRelay(QuestRelay):
             self.record_hunt({'kind': 'manual_skill_candidate', **event})
             print(f"Habilidade manual registrada: ID {event['skill_id']}, nível {event['level']}, alvo {event['target_id']}.")
 
-    def apply_settings(self, settings):
+    def sync_map_behavior(self):
+        from . import map_behavior
+        from copy import deepcopy
+        if self.hunt is None or not getattr(self, 'map_behavior_base', None):
+            return
+        now = time.monotonic()
+        if now < getattr(self, 'map_behavior_poll', 0):
+            return
+        self.map_behavior_poll = now + .5
+        try:
+            profiles = map_behavior.load()
+            effective, profile = map_behavior.effective(self.map_behavior_base, profiles,
+                self.tracker.observer.map_name, self.quests.active)
+            config = profile.get('combat') if profile else None
+            if config and (self.group_follower() or self.player_focus()):
+                config, profile, effective = None, None, deepcopy(self.map_behavior_base)
+            if config:
+                from .map_combat import settings_for
+                effective = settings_for(config, effective, list(getattr(self.tracker.observer, 'skills', {}).values()))
+            previous_combat = getattr(self, 'map_combat', None)
+            if config and (previous_combat is None or previous_combat.config != config):
+                from .map_combat import MapCombat
+                self.map_combat = MapCombat(config)
+            elif not config:
+                self.map_combat = None
+                if previous_combat is not None:
+                    self.hunt.priority_target = None
+                    self.hunt.target_priority = {}
+            self.map_combat_map = profile['map'] if config else None
+            signature = (self.tracker.observer.map_name, self.quests.active, effective, config)
+            if signature == getattr(self, 'map_behavior_signature', None):
+                return
+            # Do not reset combat timers/actions just because the map changed if rules did not.
+            previous = getattr(self, 'map_behavior_effective', None)
+            if effective != previous:
+                self.apply_settings(effective, map_overlay=True)
+                if self.quests.active:
+                    self.quest_hunt_id = None
+            self.map_behavior_signature = deepcopy(signature)
+            self.map_behavior_effective = deepcopy(effective)
+            print('Comportamento do mapa: '+(profile['name'] if profile else 'configuracoes gerais / quest'))
+        except (OSError, ValueError) as exc:
+            message = str(exc)
+            if message != getattr(self, 'map_behavior_error', None):
+                print('Perfil de mapa nao aplicado: '+message)
+                self.map_behavior_error = message
+
+    def apply_settings(self, settings, *, map_overlay=False):
         from .packet_settings import validate
         from .packet_patrol import PacketPatrol
         from .network_targets import Entity
         settings = validate(settings)
+        if not map_overlay:
+            from copy import deepcopy
+            self.map_behavior_base = deepcopy(settings)
+            self.map_behavior_signature = None
+            self.map_behavior_effective = None
+            self.map_behavior_poll = 0
         if self.settings is not None and any(self.settings[k] != settings[k] for k in ('group_enabled','group_role','group_leader')):
             self.group.target_id = None
             self.group.target_at = 0
@@ -333,6 +389,7 @@ class SessionRelay(QuestRelay):
         if self.rotation is not None and previous_rotation is not None:
             # Saving a setting must not forget what was learned about the server's timing.
             self.rotation.ready = dict(previous_rotation.ready)
+            self.rotation.cooldown_floor = dict(previous_rotation.cooldown_floor)
             self.rotation.learned_min_interval = dict(previous_rotation.learned_min_interval)
             self.rotation.after_skill_delay = previous_rotation.after_skill_delay
             self.rotation.last_throw = previous_rotation.last_throw
@@ -733,8 +790,104 @@ class SessionRelay(QuestRelay):
         if added:
             self.record_hunt({'kind': 'attackers_targeted', 'species': sorted(added)})
 
+    def active_map_combat(self):
+        combat = getattr(self, 'map_combat', None)
+        if combat is None or self.quests.active or self.group_follower():
+            return None
+        from .map_behavior import map_key
+        if (not self.tracker.observer.map_name or self.tracker.observer.map_name.lower().removesuffix('.gat') != self.map_combat_map
+            or self.player_focus()):
+            return None
+        return combat
+
+    def map_combat_intent(self, combat, state, now):
+        collision = self.collision_map()
+        def reachable(rows):
+            rows = [e for e in rows if combat.distance(state,e) <= self.hunt.SEARCH_RADIUS
+                    and self.hunt.excluded_until.get(e['entity_id'],0) <= now
+                    and not self.hunt.walled(e['entity_id'],now)
+                    and (not combat.no_chase(e.get('species_id')) or collision is None
+                         or all(collision.line_clear(own,point) for own in (state.get('combat_player_positions') or [state['player_position']])
+                                for point in (e.get('attack_positions') or [e.get('effective_position',e['position'])])))]
+            return self.hunt.reachable_targets(rows,collision,state['player_position'],now)
+        return combat.decide(state,self.rotation,now,current=self.hunt.target,reachable=reachable)
+
+    def plan_map_rotation(self, state, now, target_id=None):
+        combat = self.active_map_combat()
+        if not combat and getattr(self,'map_combat',None) is not None:
+            return None  # context changed: wait for the ordinary character rotation to be restored
+        if not combat or not state.get('player_position'):
+            return self.rotation.plan(state,now,target_id)
+        intent = self.map_combat_intent(combat,state,now)
+        if intent is None:
+            # Still maintain buffs, but no offensive on an unreachable target.
+            safe={**state,'visible_monsters':state.get('visible_monsters',state['recent_entities']),'recent_entities':[]}
+            return combat.plan(safe,self.rotation,now,None)
+        return combat.plan(state,self.rotation,now,target_id,intent=intent)
+
+    def map_damage_allowed(self, identity, state, now, *, basic=False):
+        combat = self.active_map_combat()
+        if combat is None:
+            return True
+        if not state.get('player_position') or self.rotation is None:
+            return False
+        if basic and not combat.basic_allowed(identity,state):
+            return False
+        intent = self.map_combat_intent(combat,state,now)
+        return bool(intent and intent['mode']=='kill' and intent['target_id']==identity)
+
     def plan_group_or_hunt(self, state, now, speed, collision):
         self.include_attackers(now)
+        combat = self.active_map_combat()
+        if combat and self.rotation is not None and state.get('player_position'):
+            intent = self.map_combat_intent(combat,state,now)
+            if intent and intent['mode']=='emergency':
+                old_patrol=self.hunt.patrol
+                self.hunt.patrol=None
+                try:
+                    self.hunt.plan({**state,'recent_entities':[]},now,speed,collision=collision)
+                finally:self.hunt.patrol=old_patrol
+                return combat.emergency.retreat(state,self.hunt,collision,now,speed)
+            state={**state,'recent_entities':combat.candidates(state,self.rotation,now)}
+            if intent is None:
+                state={**state,'recent_entities':[]}
+                self.hunt.target=self.hunt.engaged=None
+            self.hunt.target_priority = dict(combat.ranks)
+            self.hunt.priority_target = intent['target_id'] if intent else None
+            if intent and self.hunt.target != intent['target_id']:
+                self.hunt.engaged = None
+                self.hunt.target = intent['target_id']
+                self.hunt.approach_cache = None
+            chosen=next((e for e in state['recent_entities'] if intent and e['entity_id']==intent['target_id']),None)
+            limited_approach=combat.approach_nearby(chosen,state)
+            if chosen and combat.no_chase(chosen['species_id']) and not limited_approach:
+                old=(self.hunt.auto_movement,self.hunt.auto_attacks,self.hunt.melee_approach,self.hunt.kite)
+                self.hunt.auto_movement=self.hunt.auto_attacks=self.hunt.melee_approach=self.hunt.kite=False
+                try:return self.hunt.plan(state,now,speed,collision=collision)
+                finally:
+                    self.hunt.auto_movement,self.hunt.auto_attacks,self.hunt.melee_approach,self.hunt.kite=old
+            if limited_approach:
+                # Close Salamandras are acquired without requiring an earlier hit, but the
+                # movement stops at a learned offensive skill's range and never follows farther.
+                state={**state,'engagement_range':self.rotation.engagement_range(state)}
+                old_melee,old_kite=self.hunt.melee_approach,self.hunt.kite
+                self.hunt.melee_approach=self.hunt.kite=False
+                try:return self.hunt.plan(state,now,speed,collision=collision)
+                finally:self.hunt.melee_approach,self.hunt.kite=old_melee,old_kite
+            if intent and intent['mode']=='control':
+                meta = next((s for s in state.get('learned_skills',[]) if s['skill_id']==intent['skill_id']),{})
+                if meta.get('range',0)>0:
+                    from .combat_rotation import configured_range
+                    profile = next((p for p in self.rotation.profiles if p['skill_id']==intent['skill_id']),{})
+                    state['engagement_range'] = configured_range(profile,meta)
+                # Approach within the control skill range, not melee range. No damage before control.
+                old_melee,old_kite=self.hunt.melee_approach,self.hunt.kite
+                self.hunt.melee_approach=self.hunt.kite=False
+                try:
+                    action=self.hunt.plan(state,now,speed,collision=collision)
+                finally:
+                    self.hunt.melee_approach,self.hunt.kite=old_melee,old_kite
+                return action if action is None or action['kind']=='move' else None
         if not self.group_follower():
             return self.hunt.plan(state,now,speed,collision=collision)
         leader_id=self.group_leader_id()
@@ -1002,6 +1155,9 @@ class SessionRelay(QuestRelay):
     def asleep(self, identity):
         """Sleeping targets are left alone: any hit wakes them up (yours or the bot's sleep)."""
         entity = self.inventory.entities.get(identity)
+        combat = self.active_map_combat()
+        if combat and entity and entity.get('species_id') in combat.ranks:
+            return False  # damage is independently gated; silence may target sleeping monsters
         return bool(entity and entity.get('present_last_observation', True) and entity.get('body_state') == self.SLEEP)
 
     def dead(self, identity):
@@ -1105,6 +1261,7 @@ class SessionRelay(QuestRelay):
                 self.hunt.pause('parada pelo painel')
             elif command == 'start':
                 if self.quests.recording:raise ValueError('Salve ou descarte a gravacao antes de iniciar a caca')
+                self.mob_scan.reset_failures()
                 if self.quests.active:self.quest_stop('Controle transferido para caca manual')
                 if not game_gate() or self.upstream is None:
                     raise ValueError('Entre no personagem pelo perfil local antes de iniciar; libere os envios')
@@ -1167,7 +1324,9 @@ class SessionRelay(QuestRelay):
             base = self.instance_base(name)
             collision = self.map_repository.get(base) if base else None
         if collision is not None:
-            collision.set_forbidden(self.portals.cells(name))
+            hazards=self.ground_hazards(time.monotonic())
+            collision.hazard_cells=hazards
+            collision.set_forbidden(set(self.portals.cells(name))|set(hazards))
             collision.links = tuple(self.portals.links(name))
         if name not in self.reported_maps:
             self.reported_maps.add(name)
@@ -1180,6 +1339,79 @@ class SessionRelay(QuestRelay):
             if result['error']:
                 print(f"Motivo da colisão indisponível: {result['error']}")
         return collision
+
+    def ground_hazards(self, now):
+        settings=self.settings or {}
+        return self.toxic_ground.cells(now,
+            include_active=bool(settings.get('avoid_ground_effects', True)),
+            include_forecasts=bool(settings.get('predict_ground_effects', True)))
+
+    def crosses_ground_hazard(self, origin, destination, now):
+        settings=self.settings or {}
+        return self.toxic_ground.crosses(origin,destination,now,
+            include_active=bool(settings.get('avoid_ground_effects', True)),
+            include_forecasts=bool(settings.get('predict_ground_effects', True)))
+
+    def server_collision_map(self):
+        # Hazard avoidance must not distort prediction of paths the server actually walks.
+        collision=self.collision_map()
+        if collision is None or not getattr(collision,'hazard_cells',None):return collision
+        forbidden=frozenset(collision.forbidden)-collision.hazard_cells
+        key=(id(collision),forbidden)
+        cached=getattr(self,'physical_collision_cache',None)
+        if cached and cached[0]==key:return cached[1]
+        from .map_navigation import CollisionMap
+        physical=CollisionMap(collision.width,collision.height,collision.cells)
+        physical.set_forbidden(forbidden)
+        self.physical_collision_cache=(key,physical)
+        return physical
+
+    async def avoid_toxic_ground(self, game_gate):
+        now=time.monotonic();o=self.tracker.observer
+        if (not self.allow_commands or self.commands_blocked or self.upstream is None or not game_gate()
+            or not self.native_frames.ready or not o.player_alive or o.player_id is None or not o.player_position_valid(now)
+            or not (self.quests.active or self.hunt is not None and self.hunt.enabled)
+            or self.manual_control(now)):
+            return False
+        if not self.observation_suspended_for_route() and self.presence.reason(o.player,now):return False
+        if now<self.toxic_hold_until:return True
+        hazards=self.ground_hazards(now)
+        if not hazards:return False
+        positions=o.combat_positions(now)
+        origin=tuple(positions[0] if positions else o.player)
+        motion=o.player_motion
+        threatened=(origin in hazards or any(tuple(p) in hazards for p in positions))
+        crossing=bool(motion and self.walking_now() and self.crosses_ground_hazard(origin,motion['destination'],now))
+        if not threatened and not crossing:return False
+        async with self.send_lock:
+            if self.commands_blocked or not game_gate() or not self.native_frames.ready:return False
+            now=time.monotonic();hazards=self.ground_hazards(now)
+            positions=o.combat_positions(now);origin=tuple(positions[0] if positions else o.player)
+            motion=o.player_motion
+            if (not any(tuple(p) in hazards for p in positions)
+                and not (motion and self.walking_now() and self.crosses_ground_hazard(origin,motion['destination'],now))):
+                return False
+            collision=self.collision_map()
+            blocked={p for p,t in self.hunt.blocked_until.items() if t>now} if self.hunt else set()
+            destination=self.toxic_ground.escape(collision,origin,blocked,now,
+                include_active=bool((self.settings or {}).get('avoid_ground_effects',True)),
+                include_forecasts=bool((self.settings or {}).get('predict_ground_effects',True))) if collision is not None and origin in hazards else None
+            if origin in hazards and destination is None:
+                if self.hunt:self.hunt.reason='nevoa toxica: sem saida segura confirmada'
+                return True
+            destination=destination or origin  # stop an already sent path before it enters the cloud
+            payload=move(*destination)
+            self.trace_map_send('bot',struct.unpack_from('<H',payload)[0],len(payload))
+            self.upstream.write(payload);await self.upstream.drain()
+            self.toxic_hold_until=now+.18
+            if self.hunt:
+                self.hunt.pending=None;self.hunt.approach_cache=None;self.hunt.ready_at=now
+                self.hunt.reason='desviando da nevoa toxica'
+            if self.quests.pending and self.quests.pending.get('kind')=='move':self.quests.pending=None
+            self.quests.path_cache=None
+            self.record_hunt({'kind':'toxic_ground_escape' if destination!=origin else 'toxic_ground_stop',
+                              'origin':list(origin),'destination':list(destination)})
+        return True
 
     def instance_base(self, name):
         """The map an instance copy uses (0045@tower -> 5@tower): the game names copies by instance
@@ -1384,6 +1616,8 @@ class SessionRelay(QuestRelay):
         """Monsters the quest still needs on its hunting map (finished counters left out)."""
         q = self.quests
         route = q.route or {}
+        if route.get('id') == 'database_hunt':
+            return sorted(route.get('showmobs_species') or [])  # only the monsters marked "usar @showmobs"
         targets = route.get('kill_targets') or []
         if not targets:
             return sorted(route.get('species', []))
@@ -1411,7 +1645,12 @@ class SessionRelay(QuestRelay):
         if found:
             self.record_hunt({'kind': 'showmobs_goal', **found})
             print(f"[ROTA] @showmobs: indo onde ha mais monstros da quest ({found['monsters']} de {found['total']} "
-                  f"perto de {found['position']}; soma por tipo: {found.get('species_counts',{})}).")
+                  f"perto de {found['position']}, a {found.get('walk_cells')} celulas; soma por tipo: {found.get('species_counts',{})}).")
+        elif self.mob_scan.map_failed(observer.map_name) and getattr(self, 'mob_scan_failed_note', None) != observer.map_name:
+            self.mob_scan_failed_note = observer.map_name
+            self.record_hunt({'kind': 'showmobs_failed', 'map': observer.map_name})
+            print(f'[ROTA] @showmobs sem resultado em {observer.map_name}: percorrendo o mapa inteiro em linha; '
+                  'o @showmobs volta quando a caca ou a fila for iniciada de novo.')
         elif self.mob_scan.suspended and not getattr(self, 'mob_scan_warned', False):
             self.mob_scan_warned = True
             print('[ROTA] @showmobs nao respondeu neste servidor/mapa; busca por @showmobs desligada nesta conexao.')
@@ -1473,7 +1712,7 @@ class SessionRelay(QuestRelay):
                 return False
             now = time.monotonic()
             state = self.status()
-            if self.rotation.plan(state, now, self.hunt.target) != action:
+            if self.plan_map_rotation(state, now, self.hunt.target) != action:
                 return False
             observer = self.tracker.observer
             if not observer.player_alive or observer.player_id is None:
@@ -1483,7 +1722,12 @@ class SessionRelay(QuestRelay):
                 raise ValueError('Mapa de colisão deixou de estar disponível')
             if self.group_follower() and (not self.group_combat_allowed() or action['role'] in ('offensive','summon') and not self.group_combat_allowed(action.get('combat_target_id',action['target_id']))):
                 return False
-            if action['role'] == 'summon' and action.get('combat_target_id') is None:
+            if action.get('idle_summon'):
+                combat=self.active_map_combat()
+                if (action['role']!='summon' or combat is None
+                    or action['skill_id']!=combat.config.get('idle_summon',{}).get('skill_id') or not combat.idle_clear(state)):
+                    return False
+            elif action['role'] == 'summon' and action.get('combat_target_id') is None:
                 return False  # summons only with a monster to fight
             elif action['role'] in ('offensive', 'summon'):
                 entity = observer.registry.entities.get(action.get('combat_target_id', action['target_id']))
@@ -1495,7 +1739,7 @@ class SessionRelay(QuestRelay):
                     return False
                 if action['role'] == 'summon' and (entity.kind != 'monster' or max(math.dist(own, p) for own in observer.combat_positions(now) for p in entity.combat_bounds(now)[0]) > 12):
                     return False
-                if collision is not None and action['role'] == 'offensive':
+                if collision is not None and action['role'] == 'offensive' and not action.get('emergency_stage'):
                     bounds, _ = entity.combat_bounds(now)
                     if (entity.destination is not None and not entity.position_bounds(now)[1]
                         and not collision.line_clear([entity.x, entity.y], entity.destination)):
@@ -1541,6 +1785,9 @@ class SessionRelay(QuestRelay):
             except OSError:
                 self.hunt.pause('envio de rotação falhou ou ficou incerto')
                 raise
+            combat = self.active_map_combat()
+            if combat and action['kind']=='skill':
+                combat.sent(action,now)
             if action.get('role') == 'offensive':
                 self.note_player_attack(action.get('combat_target_id') or action['target_id'], now)
             self.flush_rotation_diagnostics()
@@ -1566,11 +1813,32 @@ class SessionRelay(QuestRelay):
             print('O ataque de teste foi enviado, mas não houve confirmação de dano no prazo. Não repetirei automaticamente.')
         state = self.tracker.snapshot(time.monotonic())
         state.update(login_phase=self.login_phase)
+        # Map behaviors such as low-HP Namekuji must use server-reported vitals.
+        state.update(player_hp=self.tracker.observer.hp,
+                     player_max_hp=self.tracker.observer.max_hp)
         state['drop_database'] = {'collecting': self.drops.error is None, 'error': self.drops.error}
         state['recent_entities'] = [entity for entity in state['recent_entities']
                                    if (entity.get('kind') == 'player' or self.monster_name_allowed(
                                        entity['entity_id'], entity.get('species_id')))
                                    and not self.asleep(entity['entity_id']) and not self.dead(entity['entity_id'])]
+        for row in state['recent_entities']:
+            received = self.inventory.entities.get(row['entity_id'], {})
+            row['body_state'] = received.get('body_state',0)
+            row['health_state'] = received.get('health_state',0)
+        combat = self.active_map_combat()
+        if combat and combat.config.get('idle_summon'):
+            from .map_monsters import is_confirmed_monster
+            visible={e['entity_id']:e for e in state['recent_entities'] if e.get('kind','monster')=='monster'}
+            state['visible_monsters']=[visible.get(e['entity_id'],dict(entity_id=e['entity_id'],species_id=e['species_id'],
+                kind='monster',position=e['position'],destination=e.get('destination')))
+                for e in self.inventory.entities.values() if e.get('present_last_observation') and not e.get('dead')
+                and is_confirmed_monster(e,self.tracker.observer.player_id)]
+            state.update(idle_summon_skill_id=combat.config['idle_summon']['skill_id'],idle_summon_clear=combat.idle_clear(state))
+        state['map_combat'] = {'active':combat is not None,'reason':combat.reason if combat else None,
+            'emergency': {'phase':combat.emergency.phase,'coelho_confirmed':combat.emergency.confirmed,
+                          'reason':combat.emergency.reason} if combat and combat.emergency else None}
+        state['toxic_ground']={'blocked_cells':len(self.ground_hazards(time.monotonic())),
+            'predicted_casts':len(self.toxic_ground.forecasts)}
         state['player_focus'] = self.player_focus()
         if state['player_focus']:
             # A player focused with the mouse (or given priority in PvP): monsters and summons are
@@ -1619,6 +1887,7 @@ class SessionRelay(QuestRelay):
             state['search_goal'] = goal
             scan = self.mob_scan.current_goal(observer.player, time.monotonic()) if self.quests.active else None
             state['showmobs_goal'] = {'position': scan} if scan else None
+            state['showmobs_failed'] = bool(self.quests.active and self.mob_scan.map_failed(observer.map_name))
             state['map_search'] = self.map_search.summary
             state['hunt'] = self.hunt.snapshot()
             if self.rotation is not None:
@@ -1742,6 +2011,8 @@ class SessionRelay(QuestRelay):
                     if event['kind']=='skill_cast' and event.get('duration_ms',0)<=0:continue
                     rcx_changed=self.preview_rcx_self_skill(event.get('skill_id'),self.tracker.observer.player_id,rcx_now,
                         duration=event.get('duration_ms',0)/1000 if event['kind']=='skill_cast' else .2,confirmed=True) or rcx_changed
+            self.toxic_ground.observe(events,self.inventory,rcx_now,self.ground_cells,
+                                      own_id=self.tracker.observer.player_id)
             for note in self.ground_cells.trace:
                 self.record_hunt(note)  # which spell gave each RCX area (or none): checkable later
             self.ground_cells.trace.clear()
@@ -1765,6 +2036,9 @@ class SessionRelay(QuestRelay):
                     self.next_map=transition['map']
             self.mirror_sequence += len(data)
             self.inventory.observe(events, time.monotonic())
+            combat = getattr(self, 'map_combat', None)
+            if combat:
+                combat.observe(events,self.tracker.observer.player_id,time.monotonic())
             try:
                 self.drops.observe(events, self.tracker.observer.player_id, time.monotonic(),
                                    self.inventory.map_name or self.tracker.observer.map_name)
@@ -2854,12 +3128,17 @@ class SessionRelay(QuestRelay):
                 raise ValueError('Ação anterior ainda pendente ou intervalo de ataque ativo')
             state = self.status()
             observer = self.tracker.observer
+            if action['kind'] in ('attack','skill') and not self.map_damage_allowed(action['target_id'],state,time.monotonic(),basic=action['kind']=='attack'):
+                raise HuntTargetChanged('Perfil de combate: controle de status antes do dano')
             entity = observer.registry.entities.get(action['target_id'])
             if action['kind'] == 'move' and not self.hunt.auto_movement:
                 raise HuntTargetChanged('Movimentação automática desativada')
             group_follow = action.get('purpose') == 'group_follow'
-            is_patrol = action.get('purpose') in ('patrol','group_follow')
-            move_limit = 4 if group_follow or not is_patrol else self.hunt.patrol.max_step
+            retreat = action.get('purpose') == 'map_retreat'
+            if retreat and (self.active_map_combat() is None or not self.active_map_combat().emergency or self.active_map_combat().emergency.phase!='retreat'):
+                raise HuntTargetChanged('Retirada de emergencia nao esta ativa')
+            is_patrol = action.get('purpose') in ('patrol','group_follow','map_retreat')
+            move_limit = 4 if group_follow or retreat or not is_patrol else self.hunt.patrol.max_step
             if group_follow and not self.group_follower():
                 raise HuntTargetChanged('Modo seguidor nao esta ativo')
             if self.group_follower():
@@ -2871,7 +3150,7 @@ class SessionRelay(QuestRelay):
             if (not game_gate() or self.upstream is None or state['state'] != 'tracking'
                 or not observer.player_position_valid(time.monotonic()) or observer.player_id is None):
                 raise ValueError('Foco, personagem ou alvo recente não confirmado')
-            if is_patrol and (action['kind'] != 'move' or (not group_follow and self.hunt.patrol is None)
+            if is_patrol and (action['kind'] != 'move' or (not group_follow and not retreat and self.hunt.patrol is None)
                               or action['target_id'] is not None):
                 raise ValueError('Comando de patrulha inválido')
             captured = entity is not None and entity.kind == 'player' and self.player_target_allowed(entity.entity_id)
@@ -2888,12 +3167,16 @@ class SessionRelay(QuestRelay):
             player = observer.player
             target = None if is_patrol else entity.combat_bounds(time.monotonic())[0][0]
             # A monster across a wall is no reason to stop walking: the patrol is what gets there.
-            if is_patrol and not group_follow and any(math.dist(player, e['position']) <= self.hunt.SEARCH_RADIUS
-                                 and self.hunt.excluded_until.get(e['entity_id'], 0) <= time.monotonic()
-                                 and not self.hunt.walled(e['entity_id'], time.monotonic())
-                                 and e['entity_id'] not in self.hunt.passed_over
-                                 for e in state['recent_entities']):
-                raise HuntTargetChanged('Alvo apareceu; patrulha interrompida')
+            if is_patrol and not group_follow and not retreat:
+                combat=self.active_map_combat()
+                if combat:
+                    interrupt=self.map_combat_intent(combat,state,time.monotonic()) is not None
+                else:
+                    interrupt=any(math.dist(player,e['position'])<=self.hunt.SEARCH_RADIUS
+                                  and self.hunt.excluded_until.get(e['entity_id'],0)<=time.monotonic()
+                                  and not self.hunt.walled(e['entity_id'],time.monotonic())
+                                  and e['entity_id'] not in self.hunt.passed_over for e in state['recent_entities'])
+                if interrupt:raise HuntTargetChanged('Alvo elegivel apareceu; patrulha interrompida')
             if not is_patrol and action['target_id'] != self.hunt.target and math.dist(player, target) > self.hunt.SEARCH_RADIUS:
                 raise HuntTargetChanged('Alvo fora do raio de caça')
             if action['kind'] in ('attack', 'skill'):
@@ -2925,6 +3208,10 @@ class SessionRelay(QuestRelay):
                     payload = attack(entity.entity_id)
             elif action['kind'] == 'move':
                 destination = action['destination']
+                positions=observer.combat_positions(time.monotonic())
+                safe_origin=positions[0] if positions else player
+                if self.crosses_ground_hazard(safe_origin,destination,time.monotonic()):
+                    raise HuntTargetChanged('Nevoa toxica no caminho; recalculando')
                 if action.get('origin', player) != player:
                     raise HuntTargetChanged('Posição própria corrigida antes do envio; recalculando')
                 collision = self.collision_map()
@@ -2949,6 +3236,9 @@ class SessionRelay(QuestRelay):
                 payload = move(*destination)
             else:
                 raise ValueError('Ação de caça não suportada')
+            combat = self.active_map_combat()
+            if combat and action['kind']=='attack':
+                combat.attacked.add(action['target_id'])
             self.hunt.sent(action, time.monotonic())
             if action['kind'] == 'skill':
                 self.skill_trace_count = 0
@@ -3075,6 +3365,7 @@ async def run(args):
             await asyncio.sleep(.02)
             if hunt_mode:
                 relay.process_control(lambda: controls.connected(relay.game_peer, relay.game_local))
+                relay.sync_map_behavior()
                 relay.finish_buff_learning(time.monotonic())
                 try:
                     await relay.maintain_homunculus(time.monotonic())
@@ -3133,7 +3424,8 @@ async def run(args):
                     loading = relay.map_loading(time.monotonic())  # nothing is sent until the game shows the map
                     try:
                         was_route = relay.observation_suspended_for_route()
-                        route_travel = loading or await relay.quest_tick(lambda: controls.connected(relay.game_peer,relay.game_local))
+                        toxic_hold = False if loading else await relay.avoid_toxic_ground(lambda: controls.connected(relay.game_peer,relay.game_local))
+                        route_travel = loading or toxic_hold or await relay.quest_tick(lambda: controls.connected(relay.game_peer,relay.game_local))
                     except (asyncio.CancelledError, KeyboardInterrupt):
                         raise
                     except Exception as exc:  # the queue stops; the connection stays up
@@ -3165,7 +3457,9 @@ async def run(args):
                                 if relay.rotation is not None:
                                     state['engagement_range'] = relay.rotation.navigation_range(state, time.monotonic(), relay.hunt.target)
                                 action = relay.plan_group_or_hunt(state, time.monotonic(), relay.tracker.observer.walk_speed_ms, relay.collision_map())
-                                homun_sent = (relay.group_combat_allowed()
+                                active_combat=relay.active_map_combat()
+                                emergency_active=bool(active_combat and active_combat.emergency and active_combat.emergency.phase)
+                                homun_sent = (not emergency_active and relay.group_combat_allowed()
                                               and await relay.keep_homunculus_alive(time.monotonic()))
                                 if homun_sent and action is not None and action['kind'] != 'move':
                                     action = None
@@ -3189,10 +3483,10 @@ async def run(args):
                                     # Focused on a player: keeping the own summon up never holds the attacks back.
                                     summon_maintenance = (not state.get('player_focus')
                                                           and relay.rotation.summon_maintenance_required(state, now, relay.hunt.target))
-                                    attack_turn = (not summon_maintenance and relay.attack_turn(action) and relay.last_combat_packet == 'skill'
+                                    attack_turn = (relay.map_damage_allowed(relay.hunt.target,state,now,basic=True) and not summon_maintenance and relay.attack_turn(action) and relay.last_combat_packet == 'skill'
                                                    and now >= relay.tracker.observer.cast_until)
                                     skill_sent = False
-                                    rotation_action = None if attack_turn else relay.rotation.plan(state, now, relay.hunt.target)
+                                    rotation_action = None if attack_turn else relay.plan_map_rotation(state, now, relay.hunt.target)
                                     if rotation_action is not None and relay.native_frames.ready:
                                         try:
                                             if await relay.send_rotation_action(rotation_action, game_gate=lambda: controls.connected(relay.game_peer, relay.game_local)):
@@ -3205,6 +3499,8 @@ async def run(args):
                                         hold_movement=not skill_sent and rotation_action is not None and rotation_action.get('cast_mode') == 'ground'
                                             and rotation_action.get('role') == 'summon' and rotation_action.get('cast_range', 1) == 0)
                                     relay.flush_rotation_diagnostics()
+                                if action is not None and action['kind'] in ('attack','skill') and not relay.map_damage_allowed(action['target_id'],state,time.monotonic(),basic=action['kind']=='attack'):
+                                    action = None
                                 if action is not None and action['kind'] == 'attack' and relay.settings and not relay.settings['auto_attacks']:
                                     action = None
                                 if not relay.native_frames.ready:

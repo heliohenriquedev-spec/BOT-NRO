@@ -71,7 +71,8 @@ def database_hunt_route(request, entries, from_map=None, destinations=None, from
         raise ValueError('Para a meta de item, escolha o item e a quantidade')
     if chosen is None:
         chosen = dict(id='', target_map=target+'.gat')  # learned way: steps given here, nothing to apply
-    return dict(steps=automatic or [], goal_minutes=minutes, goal_item_id=item, goal_item_amount=amount,
+    showmobs = sorted({int(s) for s in request.get('showmobs') or [] if type(s) is int and int(s) in species})
+    return dict(steps=automatic or [], showmobs_species=showmobs, goal_minutes=minutes, goal_item_id=item, goal_item_amount=amount,
                 goal_item_name=str(request.get('goal_item_name') or '')[:60],id=DATABASE_HUNT, name='Caca: '+target, enabled=True, map_route_id=chosen['id'],
                 target_map=chosen['target_map'], species=species, always_attack=species,
                 attack_priority={k: v for k, v in priority.items() if int(k) in species},
@@ -107,3 +108,25 @@ def loot_command(text):
     if not LOOT_COMMAND.fullmatch(text):
         raise ValueError('Comando de loot invalido')
     return text
+
+
+SHOWMOBS_FILE = __import__('pathlib').Path(__file__).resolve().parents[1]/'data'/'rede'/'showmobs_monstros.json'
+
+
+def showmobs_marked(path=None):
+    """Monsters marked "usar @showmobs" (window of the monster's loot / hunt window)."""
+    import json
+    try:
+        return {int(s) for s in json.loads((path or SHOWMOBS_FILE).read_text(encoding='utf-8'))}
+    except (OSError, ValueError, TypeError):
+        return set()
+
+
+def mark_showmobs(species_id, enabled, path=None):
+    import json
+    marked = showmobs_marked(path)
+    (marked.add if enabled else marked.discard)(int(species_id))
+    target = path or SHOWMOBS_FILE
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(sorted(marked)), encoding='utf-8')
+    return marked

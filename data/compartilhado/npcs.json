@@ -59,6 +59,26 @@
   "204,73": {
    "name": "",
    "sprite": 991
+  },
+  "228,242": {
+   "name": "",
+   "sprite": 106
+  },
+  "224,237": {
+   "name": "",
+   "sprite": 989
+  },
+  "215,244": {
+   "name": "",
+   "sprite": 837
+  },
+  "223,244": {
+   "name": "",
+   "sprite": 991
+  },
+  "211,234": {
+   "name": "Genin",
+   "sprite": 703
   }
  },
  "ra_in01": {
@@ -71,7 +91,7 @@
    "sprite": 894
   },
   "222,95": {
-   "name": "",
+   "name": "Mapas Exclusivos",
    "sprite": 951
   },
   "212,94": {
@@ -79,11 +99,11 @@
    "sprite": 99
   },
   "202,92": {
-   "name": "",
+   "name": "Troca de Máscara ANBU",
    "sprite": 99
   },
   "219,95": {
-   "name": "",
+   "name": "Quadro de missões",
    "sprite": 837
   },
   "215,91": {
@@ -91,11 +111,11 @@
    "sprite": 819
   },
   "213,80": {
-   "name": "",
+   "name": "Retorno",
    "sprite": 706
   },
   "199,91": {
-   "name": "",
+   "name": "Troca de Chapéu Aka",
    "sprite": 99
   },
   "226,95": {
@@ -683,6 +703,128 @@
   "239,382": {
    "name": "",
    "sprite": 119
+  }
+ },
+ "ra_fild03": {
+  "214,269": {
+   "name": "",
+   "sprite": 423
+  }
+ },
+ "payon_in03": {
+  "22,70": {
+   "name": "Salas de Exames",
+   "sprite": 837
+  },
+  "24,66": {
+   "name": "",
+   "sprite": 121
+  },
+  "12,70": {
+   "name": "",
+   "sprite": 703
+  },
+  "33,66": {
+   "name": "",
+   "sprite": 778
+  },
+  "15,66": {
+   "name": "",
+   "sprite": 882
+  },
+  "92,126": {
+   "name": "",
+   "sprite": 837
+  },
+  "105,126": {
+   "name": "Sala de Invocação",
+   "sprite": 837
+  },
+  "102,131": {
+   "name": "",
+   "sprite": 837
+  },
+  "104,129": {
+   "name": "Estudante",
+   "sprite": 96
+  },
+  "103,118": {
+   "name": "Estudante",
+   "sprite": 102
+  },
+  "13,21": {
+   "name": "Instrutor de Jutsus",
+   "sprite": 882
+  },
+  "7,29": {
+   "name": "Genjutsu",
+   "sprite": 51
+  },
+  "10,29": {
+   "name": "Taijutsu",
+   "sprite": 60
+  },
+  "8,8": {
+   "name": "",
+   "sprite": 70
+  },
+  "14,8": {
+   "name": "",
+   "sprite": 63
+  },
+  "13,29": {
+   "name": "",
+   "sprite": 67
+  },
+  "11,8": {
+   "name": "",
+   "sprite": 51
+  },
+  "4,21": {
+   "name": "Área de Combate",
+   "sprite": 837
+  }
+ },
+ "yuno_in03": {
+  "52,181": {
+   "name": "",
+   "sprite": 96
+  },
+  "52,176": {
+   "name": "",
+   "sprite": 99
+  },
+  "62,173": {
+   "name": "",
+   "sprite": 882
+  },
+  "62,176": {
+   "name": "",
+   "sprite": 402
+  },
+  "56,188": {
+   "name": "",
+   "sprite": 837
+  },
+  "62,179": {
+   "name": "Instrutor de Treinamento",
+   "sprite": 882
+  },
+  "48,179": {
+   "name": "",
+   "sprite": 99
+  },
+  "48,175": {
+   "name": "",
+   "sprite": 96
+  },
+  "44,176": {
+   "name": "Estudante",
+   "sprite": 99
+  },
+  "32,191": {
+   "name": "",
+   "sprite": 837
   }
  }
 }

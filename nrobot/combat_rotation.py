@@ -30,6 +30,7 @@ def configured_range(profile, meta):
 
 class CombatRotation:
     # REDE-60: Shuriken (523) and Kunai (524) take turns; the turn only passes on a confirmed hit.
+    BUFF_COOLDOWNS = {532: 20.0}  # Shinkirou / Imagem Falsa: confirmed successful cast only
     THROWS = (523, 524)
     # Never swap ammo while an unconfirmed throw may still be processed by the server.
     SWAP_SETTLE = 1.5
@@ -61,6 +62,9 @@ class CombatRotation:
         self.next_send = 0
         self.global_delay = global_delay
         self.ready = {}
+        self.server_ready = {}
+        self.cooldown_floor = {}
+        self.control_priority = False
         self.pending = {}
         self.failures = {}
         self.log = []
@@ -71,6 +75,7 @@ class CombatRotation:
         from .summon_queue import SummonQueue
         self.summons = SummonQueue()
         self.blocked_buffs = {}  # buff -> time of the next try after an unconfirmed cast
+        self.buff_refusals = {}  # consecutive server refusals for effectless self-buffs
         self.effect_since = {}  # own effect -> when it was switched on
         self.effect_length = {}  # own effect -> how long it lasted last time (learned)
         self.last_sent = {}
@@ -87,10 +92,12 @@ class CombatRotation:
     def reset_session(self, key=None):
         self.summons.reset()
         self.ready.clear()
+        self.server_ready.clear()
         self.pending.clear()
         self.failures.clear()
         self.next_send = 0
         self.blocked_buffs.clear()
+        self.buff_refusals.clear()
         self.last_sent.clear()
         self.learned_min_interval.clear()
         self.last_throw = None
@@ -127,11 +134,18 @@ class CombatRotation:
                     self.ready[skill_id] = max(self.ready.get(skill_id, 0), now+.3)
                 return
         if pending and pending['role'] == 'buff':
-            # Not confirmed (cut by a step, a cooldown...): try again later, waiting longer each
-            # time in a row, instead of never renewing the buff again.
-            self.blocked_buffs[skill_id] = now+1.5  # keeping the buff up comes first: try again soon
+            if not pending.get('effect_id') and pending.get('effect_duration'):
+                # Effectless profile buffs cannot be renewed from a status packet. Respect any
+                # explicit cooldown and back off if the server only refuses the cast.
+                count = self.buff_refusals.get(skill_id, 0)+1
+                self.buff_refusals[skill_id] = count
+                self.blocked_buffs[skill_id] = now+min(120.0, 5.0*(2**min(count-1,5)))
+            else:
+                # Linked buffs retain their effect-driven short retry after an unconfirmed cast.
+                self.blocked_buffs[skill_id] = now+1.5
         sent = self.last_sent.get(skill_id)
-        if (reason == 'sem confirmação' and sent is not None and self.last_confirmed_at is not None
+        if (pending and pending['role']=='offensive' and not pending.get('control_status') and not pending.get('burst_sent')
+                and reason == 'sem confirmação' and sent is not None and self.last_confirmed_at is not None
                 and 0 <= sent-self.last_confirmed_at < self.after_skill_delay+.25):
             # Sent close to the previous skill and ignored: the server's delay is longer here.
             self.after_skill_delay = min(self.MAX_AFTER_SKILL_DELAY, self.after_skill_delay+.05)
@@ -147,10 +161,17 @@ class CombatRotation:
                                        now+(self.defer if count >= self.attempts else .3))
             if count >= max(self.attempts, self.SUMMON_REFUSALS if refused_summon else 0):
                 self.failures[skill_id] = 0
+        self.ready[skill_id] = max(self.ready.get(skill_id,0),self.cooldown_floor.get(skill_id,0))
         entry = {'kind': 'rotation_failed', 'skill_id': skill_id, 'reason': reason, 'failures': count}
         if cause is not None:
             entry['cause_raw'] = cause
         self.log.append(entry)
+
+    def confirm_cooldown(self, skill_id, now):
+        duration=self.BUFF_COOLDOWNS.get(skill_id,0)
+        if duration:
+            self.cooldown_floor[skill_id]=max(self.cooldown_floor.get(skill_id,0),now+duration)
+            self.ready[skill_id]=max(self.ready.get(skill_id,0),self.cooldown_floor[skill_id])
 
     def observe(self, events, player_id, now):
         self.summons.observe(events, player_id, now)
@@ -166,15 +187,20 @@ class CombatRotation:
                     elapsed = now-self.last_sent[latest]
                     self.learned_min_interval[latest] = max(self.learned_min_interval.get(latest, 0), elapsed+retry)
                     self.ready[latest] = max(self.ready.get(latest, 0), now+retry)
+                    self.server_ready[latest] = max(self.server_ready.get(latest, 0), now+retry)
                     self.pending.pop(latest)
                     self.summons.failed(latest, now, True)
                     self.log.append({'kind': 'rotation_cooldown_notice', 'skill_id': latest, 'retry_seconds': retry})
                 continue
             skill_id = event.get('skill_id')
+            if (kind=='skill_no_damage' and skill_id in self.BUFF_COOLDOWNS and event.get('source_id')==player_id
+                and event.get('target_id')==player_id and event.get('success')):
+                self.confirm_cooldown(skill_id,now)
             if not self.ignore_animation and kind in ('skill_damage', 'normal_attack') and event.get('source_id') == player_id:
                 self.next_send = max(self.next_send, now+min(max(event.get('source_motion_ms', 0), 0), 30000)/1000)
             if kind == 'skill_cooldown':
                 self.ready[skill_id] = max(self.ready.get(skill_id, 0), now+event['duration_ms']/1000)
+                self.server_ready[skill_id] = max(self.server_ready.get(skill_id, 0), now+event['duration_ms']/1000)
             if kind == 'remove':
                 for identity, pending in list(self.pending.items()):
                     if pending['target_id'] == event['entity_id']:
@@ -182,6 +208,7 @@ class CombatRotation:
             if kind == 'status_effect' and event['entity_id'] == player_id and event['active']:
                 for identity, pending in list(self.pending.items()):
                     if pending['role'] == 'buff' and pending['effect_id'] == event['effect_id']:
+                        self.confirm_cooldown(identity,now)
                         self.pending.pop(identity)
                         self.failures[identity] = 0
                         self.buff_confirmed += 1
@@ -200,11 +227,32 @@ class CombatRotation:
                 for profile in self.profiles:
                     if profile['role'] == 'buff' and profile['effect_id'] == event['effect_id']:
                         self.blocked_buffs.pop(profile['skill_id'], None)
+            if kind == 'option_change':
+                for identity, pending in list(self.pending.items()):
+                    control = pending.get('control_status')
+                    confirmed = (control == 'stun' and event.get('body_state') == 3
+                                 or control == 'sleep' and event.get('body_state') == 4
+                                 or control == 'silence' and bool(event.get('health_state',0)&4))
+                    if confirmed and pending['target_id'] == event['entity_id']:
+                        self.pending.pop(identity)
+                        self.failures[identity] = 0
+                        self.log.append({'kind':'rotation_control_confirmed','skill_id':identity,
+                                         'target_id':event['entity_id'],'status':control})
             if skill_id not in self.pending:
                 continue
             pending = self.pending[skill_id]
             if kind == 'skill_cast' and event['source_id'] == player_id:
                 pending['deadline'] = max(pending['deadline'], now+min(event['duration_ms']/1000, 30)+self.response_timeout)
+            if (kind == 'skill_no_damage' and pending.get('control_status')
+                and event['source_id'] == player_id and event['target_id'] == pending['target_id']):
+                if event['success']:
+                    self.pending.pop(skill_id)
+                    self.failures[skill_id] = 0
+                    self.next_send = max(self.next_send,now+self.after_skill_delay)
+                    # Execution is acknowledged; effect success is checked from body/health packets.
+                else:
+                    self._fail(skill_id,now,'servidor recusou')
+                continue
             if kind == 'skill_failed':
                 self._fail(skill_id, now, 'servidor recusou', event.get('cause_raw'))
             elif (kind == 'skill_damage' and pending['role'] == 'offensive'
@@ -239,8 +287,17 @@ class CombatRotation:
                 if not event['success']:
                     self._fail(skill_id, now, 'buff recusado')
                 else:
-                    # Execution acknowledgement does not prove the linked effect is active.
-                    pending['deadline'] = max(pending['deadline'], now+2)
+                    # Execution is acknowledged; a linked effect, when configured, is still
+                    # tracked separately. Server cooldown packets can extend this fallback.
+                    self.confirm_cooldown(skill_id,now)
+                    self.pending.pop(skill_id, None)
+                    self.failures[skill_id] = 0
+                    self.buff_refusals[skill_id] = 0
+                    # Use a known buff duration when the profile supplies one. The server's
+                    # explicit cooldown packet, handled above, remains the final gate.
+                    self.blocked_buffs[skill_id] = now+max(5.0, pending.get('effect_duration',0))
+                    self.log.append({'kind':'rotation_buff_execution_confirmed','skill_id':skill_id,
+                                     'effect_id':pending.get('effect_id',0)})
 
     def engagement_range(self, state):
         """Keep ranged spacing during cooldown; range availability is not readiness."""
@@ -276,6 +333,7 @@ class CombatRotation:
         self.summons.update(state, self.profiles, now)
         known = {s['skill_id']:s for s in state.get('learned_skills', [])}
         configured = [p for p in self.profiles if p['enabled'] and p['role'] == 'summon'
+                      and p['skill_id'] != state.get('idle_summon_skill_id')
                       and p['skill_id'] in known and known[p['skill_id']]['level'] >= p['level']
                       and known[p['skill_id']].get('target_flags') in (2,4,16)]
         if not configured:
@@ -311,14 +369,15 @@ class CombatRotation:
 
         for identity, pending in list(self.pending.items()):
             if now >= pending['deadline']:
-                if self.burst and pending['role'] == 'offensive':
+                if (pending.get('burst_sent',False) or self.burst) and pending['role'] == 'offensive' and not pending.get('control_status'):
                     self.pending.pop(identity)  # an unanswered burst packet is expected, not a failure
                 else:
                     self._fail(identity, now, 'sem confirmação')
-        if now < max(self.next_send, state.get('own_cast_until', 0)):
+        pending_delay = max((self.last_sent.get(i,0)+self.after_skill_delay for i,p in self.pending.items() if p['role']=='offensive'),default=0) if self.control_priority else 0
+        if now < max(self.next_send, state.get('own_cast_until', 0), pending_delay):
             self.reason = 'aguardando intervalo global ou conjuração'
             return None
-        offensive_pending = not self.burst and any(p['role'] == 'offensive' for p in self.pending.values())
+        offensive_pending = not self.burst and not self.control_priority and any(p['role'] == 'offensive' for p in self.pending.values())
         if state.get('state') != 'tracking' or not state.get('player_position_recent'):
             self.reason = 'personagem/conexão indisponível'
             return None
@@ -367,10 +426,16 @@ class CombatRotation:
             cooldown = state.get('skill_cooldowns', {}).get(identity, state.get('skill_cooldowns', {}).get(str(identity), 0))
             waiting = identity in self.pending and not (self.burst and profile['role'] == 'offensive')
             if (not profile['enabled'] or meta is None or meta['level'] < profile['level']
-                or waiting or now < max(self.ready.get(identity, 0), cooldown)):
+                or waiting):
+                continue
+            ready_at=max(self.ready.get(identity, 0), cooldown, self.cooldown_floor.get(identity,0))
+            if now < ready_at:
+                server_ready=max(self.server_ready.get(identity,0),cooldown)
+                if profile['role']=='buff' and server_ready>now:
+                    self.reason=f'Buff {identity}: recarga do servidor, {server_ready-now:.1f} s restantes'
                 continue
             if now < self.blocked_buffs.get(identity, 0):
-                self.reason = f'Buff {identity}: sem efeito confirmado; nova tentativa em {self.blocked_buffs[identity]-now:.0f} s'
+                self.reason = f'Buff {identity}: aguardando renovacao/recarga; nova tentativa em {self.blocked_buffs[identity]-now:.0f} s'
                 continue
             if identity in self.THROWS and turn is not None and identity != turn:
                 continue
@@ -380,20 +445,27 @@ class CombatRotation:
             flags = meta.get('target_flags')
             if profile['role'] == 'buff':
                 effect = profile.get('effect_id', 0)
-                if flags not in (4, 16) or not effect:
-                    self.reason = f'Buff {identity}: tipo ou efeito ainda não vinculado'
+                if flags not in (4, 16):
+                    self.reason = f'Buff {identity}: habilidade nao e de uso em si'
                     continue
-                active = state.get('own_effects', {}).get(effect, state.get('own_effects', {}).get(str(effect), False))
-                length, since = self.effect_length.get(effect), self.effect_since.get(effect)
-                if active and not (length and since is not None and now >= since+length-self.RENEW_BEFORE):
-                    continue  # still on and not about to end
+                if not effect and not profile.get('effect_duration'):
+                    self.reason = f'Buff {identity}: vincule o efeito ou informe a duracao'
+                    continue
+                if effect:
+                    active = state.get('own_effects', {}).get(effect, state.get('own_effects', {}).get(str(effect), False))
+                    length, since = self.effect_length.get(effect), self.effect_since.get(effect)
+                    if active and not (length and since is not None and now >= since+length-self.RENEW_BEFORE):
+                        continue  # still on and not about to end
                 target = state.get('player_id')
                 if target is None:
                     continue
             elif profile['role'] == 'summon':
                 # Only with a monster to fight within 10 cells: none is cast while patrolling.
-                nearby = self.summon_monster(state, target_id)
-                if nearby is None:
+                idle_summon = identity == state.get('idle_summon_skill_id')
+                if idle_summon and not state.get('idle_summon_clear'):
+                    continue
+                nearby = None if idle_summon else self.summon_monster(state, target_id)
+                if nearby is None and not idle_summon:
                     self.reason = 'invocacao aguardando monstro a ate 10 celulas'
                     continue
                 if not self.summons.may_invoke(profile, now):
@@ -429,6 +501,7 @@ class CombatRotation:
                 action['cast_mode'] = 'self'
             elif profile['role'] == 'summon':
                 action['combat_target_id'] = nearby['entity_id'] if nearby else None
+                if idle_summon:action['idle_summon'] = True
                 action['cast_mode'] = 'ground' if flags == 2 else 'self'
                 # Aim beside the current position, never at an unvalidated distant cell.
                 own = (state.get('combat_player_positions') or [state['player_position']])[0]
@@ -520,11 +593,12 @@ class CombatRotation:
             self.cursor = self.order.get(action['skill_id'], len(self.order)+1)
         # A summon is proved by its creature, which can take 1.5 s to appear.
         wait = max(self.response_timeout, self.SUMMON_PROOF_WAIT) if action['role'] == 'summon' else self.response_timeout
-        self.pending[action['skill_id']] = {**action, 'deadline': now+wait}
         offensive = action['role'] == 'offensive'
+        burst_offensive = self.burst and offensive and not action.get('control_status')
+        self.pending[action['skill_id']] = {**action, 'deadline': now+wait, 'burst_sent': burst_offensive}
         interval = 0 if (self.fast or self.burst) and offensive else action['interval']
         self.ready[action['skill_id']] = now+max(interval, self.learned_min_interval.get(action['skill_id'], 0))
-        self.next_send = now+(self.burst_interval if self.burst else self.global_delay)
+        self.next_send = now+(self.burst_interval if burst_offensive else self.global_delay)
         self.log.append({'kind': 'rotation_skill_sent', 'skill_id': action['skill_id'],
                          'target_id': action['target_id'], 'role': action['role']})
 

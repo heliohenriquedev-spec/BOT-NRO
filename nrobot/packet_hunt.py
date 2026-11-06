@@ -624,6 +624,8 @@ class PacketHunt:
                     # Where @showmobs found most quest monsters: the patrol's next waypoint. As a
                     # plain search goal a far spot in gl_sew02 had no route and the patrol stood still.
                     focus = (state.get('showmobs_goal') or {}).get('position')
+                    # @showmobs failed here: sweep the whole map in one planned walk (like the mazes).
+                    self.patrol.linear = bool(state.get('showmobs_failed'))
                     self.patrol.focus = focus if focus and tuple(focus) != self.patrol.focus_reached else None
                     self.patrol.search_destination = search_goal['position'] if search_goal else None
                     self.reason = ('buscando ultima localizacao recebida de monstro' if search_goal else 'patrulhando setores sem alvo')

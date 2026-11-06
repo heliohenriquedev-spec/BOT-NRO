@@ -288,6 +288,7 @@ def decode(message: bytes) -> dict:
                      species_id=u16(21 if op == 0x7c else 17 if op == 0x22c else 15))
         event['option'] = u32(13) if op == 0x22c else u16(13)
         event['body_state'] = u16(9)
+        event['health_state'] = u16(11)
         event['speed_raw'] = u16(7)  # unfiltered: a GM's @speed goes below the normal range
         if 50 <= u16(7) <= 2000:
             event['walk_speed_ms'] = u16(7)
@@ -303,7 +304,7 @@ def decode(message: bytes) -> dict:
     elif op in (0x22a, 0x22b):
         # Characters standing still (022A) or spawning/warping in (022B): unlike 022C these
         # carry no object-type byte, so a player is known on sight, before it walks.
-        event.update(kind='appearance', entity_id=u32(2), species_id=u16(16), option=u32(12), body_state=u16(8),
+        event.update(kind='appearance', entity_id=u32(2), species_id=u16(16), option=u32(12), body_state=u16(8), health_state=u16(10),
                      position=position(message[50:53]), speed_raw=u16(6))
         if op == 0x22b:
             event['spawned'] = True  # warped/teleported in (or logged in) right there
@@ -421,7 +422,7 @@ def decode(message: bytes) -> dict:
     elif op in (0x119, 0x229):
         # Body/health state then option bits (hide, cloak, GM invisibility, ...).
         event.update(kind='option_change', entity_id=u32(2), option=u16(10) if op == 0x119 else u32(10),
-                     body_state=u16(6))  # 4 = asleep (rAthena OPT1_SLEEP), 1 stone, 2 frozen, 3 stunned
+                     body_state=u16(6), health_state=u16(8))  # 4 = asleep (rAthena OPT1_SLEEP), 1 stone, 2 frozen, 3 stunned
     elif op == 0x196:
         event.update(kind='status_effect', effect_id=u16(2), entity_id=u32(4), active=bool(message[8]))
     elif op == 0x11f:

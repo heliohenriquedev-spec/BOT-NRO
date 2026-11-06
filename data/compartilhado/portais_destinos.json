@@ -57,6 +57,14 @@
     22
    ],
    "confirmed": true
+  },
+  "219,244": {
+   "map": "payon_in03",
+   "arrival": [
+    20,
+    63
+   ],
+   "confirmed": true
   }
  },
  "prt_sewb2": {
@@ -147,6 +155,14 @@
    "arrival": [
     170,
     380
+   ],
+   "confirmed": true
+  },
+  "44,250": {
+   "map": "ra_fild03",
+   "arrival": [
+    370,
+    171
    ],
    "confirmed": true
   }
@@ -423,6 +439,60 @@
    "arrival": [
     96,
     231
+   ],
+   "confirmed": true
+  }
+ },
+ "ra_fild03": {
+  "373,171": {
+   "map": "ve_fild04",
+   "arrival": [
+    47,
+    250
+   ],
+   "confirmed": true
+  }
+ },
+ "payon_in03": {
+  "20,60": {
+   "map": "areia",
+   "arrival": [
+    219,
+    241
+   ],
+   "confirmed": true
+  },
+  "99,133": {
+   "map": "yuno_in03",
+   "arrival": [
+    64,
+    187
+   ],
+   "confirmed": true
+  },
+  "21,19": {
+   "map": "yuno_in03",
+   "arrival": [
+    35,
+    188
+   ],
+   "confirmed": true
+  }
+ },
+ "yuno_in03": {
+  "67,187": {
+   "map": "payon_in03",
+   "arrival": [
+    99,
+    130
+   ],
+   "confirmed": true
+  },
+  "32,188": {
+   "map": "payon_in03",
+   "arrival": [
+    19,
+    19
    ],
    "confirmed": true
   }

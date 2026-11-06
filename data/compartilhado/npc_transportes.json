@@ -35,6 +35,58 @@
     209,
     90
    ]
+  },
+  "161,25>ve_fild04>Mamutes da Suna": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "areia.gat",
+     "position": [
+      161,
+      25
+     ],
+     "name": "Viajante Ninja#h2-4"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "select",
+     "map": "areia.gat",
+     "option": "Mamutes da Suna"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "ve_fild04.gat"
+    }
+   ],
+   "to": "ve_fild04",
+   "name": "Viajante Ninja#h2-4",
+   "arrival": [
+    69,
+    272
+   ]
   }
  },
  "ra_in01": {
@@ -138,8 +190,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    226,
-    254
+    71,
+    153
    ]
   },
   "217,86>anthell01>Esconderijo do Clã Kamizuru Nível 2": {
@@ -296,6 +348,94 @@
    "arrival": [
     170,
     176
+   ]
+  },
+  "213,80>hospital2>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ra_in01.gat",
+     "position": [
+      213,
+      80
+     ],
+     "name": "Retorno#D"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "select",
+     "map": "ra_in01.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "hospital2.gat"
+    }
+   ],
+   "to": "hospital2",
+   "name": "Retorno#D",
+   "arrival": [
+    25,
+    92
+   ]
+  },
+  "217,86>mjolnir_08>Mamutes de Konoha": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ra_in01.gat",
+     "position": [
+      217,
+      86
+     ],
+     "name": "Viajante Ninja#h2-8"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "select",
+     "map": "ra_in01.gat",
+     "option": "Mamutes de Konoha"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "mjolnir_08.gat"
+    }
+   ],
+   "to": "mjolnir_08",
+   "name": "Viajante Ninja#h2-8",
+   "arrival": [
+    89,
+    204
    ]
   }
  },
@@ -483,6 +623,29 @@
     102,
     143
    ]
+  },
+  "25,70>areia>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "hospital2.gat",
+     "position": [
+      25,
+      70
+     ],
+     "name": "Médica#h1-2"
+    },
+    {
+     "kind": "wait_map",
+     "map": "areia.gat"
+    }
+   ],
+   "to": "areia",
+   "name": "Médica#h1-2",
+   "arrival": [
+    179,
+    162
+   ]
   }
  },
  "kakashi": {
@@ -520,6 +683,62 @@
    "arrival": [
     25,
     92
+   ]
+  }
+ },
+ "payon_in03": {
+  "7,29>yuno_in03>- Avançado|Yubi|Sim, quero aprender o jutsu Yubi": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "payon_in03.gat",
+     "position": [
+      7,
+      29
+     ],
+     "name": "Genjutsu"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Avançado"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "Yubi"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "Sim, quero aprender o jutsu Yubi"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "yuno_in03.gat"
+    }
+   ],
+   "to": "yuno_in03",
+   "name": "Genjutsu",
+   "arrival": [
+    35,
+    188
    ]
   }
  }

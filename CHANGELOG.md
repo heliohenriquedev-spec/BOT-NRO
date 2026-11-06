@@ -4,6 +4,34 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.06.3 (06/11/2026)
+
+- Combate: buffs de uso em si respeitam recargas informadas pelo servidor; recusas consecutivas aumentam a espera entre novas tentativas para evitar reenvios continuos.
+- Navegação: a área prevista da Venom Dust agora usa a cruz de cinco células em vez de um quadrado maior.
+- Comportamento por mapa: o motor permite aproximar de alvos elegíveis dentro de um raio limitado, sem perseguir além dele.
+
+- Navegacao: duas opcoes independentes controlam evitar celulas de efeitos de terreno ja ativos e prever areas hostis quando a conjuracao comeca; ambos os bloqueios sao revalidados antes de enviar movimento.
+
+
+
+- Rota de quests: configuracao para limitar de 1 a 20 tentativas de retorno ao ponto de salvamento enquanto o personagem permanece morto (padrao 4).
+
+
+- Corrigida parada ao ver monstro inelegivel: a validacao de patrulha agora usa os mesmos alvos elegiveis do combate. Em area livre, adquire e aproxima de um alvo visivel; nao o descarta ao entrar no raio proximo. Atacantes a distancia continuam sendo defendidos. Regras de excecao do perfil nao bloqueiam a patrulha.
+- Primeira ofensiva em alcance ganha o turno antes de renovacoes opcionais de buff, reduzindo o atraso para iniciar combate sem ignorar SP, recarga ou alcance. Adicionadas verificacoes de regressao para a selecao e a aproximacao de alvos.
+
+
+
+- Perfis de combate agora aceitam prioridades de monstros, controle de stun/sono/silencio confirmado pelos pacotes, buffs persistentes e ofensivas intercaladas com ataques basicos, sem modificar a patrulha.
+
+- Nova aba Comportamento por mapa: importa e exporta perfis JSON validados, aplica regras de combate por mapa, mantendo a patrulha normal e restaura as gerais ao sair. Perfis podem ser desativados e ficam suspensos durante quests.
+
+- Morte na caça: nova opção (aba Rota de quests) para, ao morrer, voltar ao ponto de retorno, curar no NPC de cura e voltar ao mapa onde estava pelas rotas, na caça comum, na caça pela database e na fila de quests; a caça comum é retomada com as mesmas configurações. A conversa com o NPC de cura é gravada uma vez ("Gravar cura") e pode ser conferida com "Testar cura".
+- BG e cura: estando já no mapa do NPC, o bot faz a conversa gravada (antes considerava a viagem concluída e não falava com ele).
+- Combate: desligar o "Intercalar ataque básico" não liga mais o kite sozinho em configurações antigas; o kite só funciona com a opção de kite marcada.
+- Caça pela database: opção "Usar @showmobs" por monstro (na janela de loot do monstro e na coluna @showmobs da janela "Caçar"); só os monstros marcados são procurados com @showmobs, e a escolha fica salva.
+- @showmobs (caça pela database e quests): se não houver resposta ou nenhum grupo alcançável, o bot para de repetir o @showmobs naquele mapa e percorre o mapa inteiro em uma caminhada linear, como nos mapas de corredor. O @showmobs volta quando a caça ou a fila é iniciada de novo.
+
 ## 2026.11.06.2 (06/11/2026)
 
 - Conexão: um NRO.exe de outra versão (por exemplo, atualizado pelo atualizador do jogo) é aceito quando a tabela de pacotes dele é idêntica à conhecida, conferida byte a byte; se a tabela mudou, o bot avisa e mostra o código da versão. A mensagem também diferencia "NRO.exe não encontrado na pasta escolhida".
@@ -22,6 +50,7 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 - Minimapa: monstros encontrados pelo @showmobs aparecem como X rosa, com o nome ao passar o mouse.
 - Minimapa: portais mostram o mapa de destino ao passar o mouse; jogadores escondidos ficam só com o marcador, sem texto.
 - Caça: corrigido o travamento ao andar com o @showmobs (o nome de cada marca era lido do disco a cada atualização).
+- Caça com @showmobs: o destino soma os monstros de todas as espécies consultadas e pesa o tamanho do grupo pela distância a pé até ele; um grupo distante só vence se for bem maior, e o destino só muda quando o novo é claramente melhor. Antes ia sempre para o maior grupo do mapa, atravessando o mapa de um lado para o outro.
 - Caça pela database: metas por mortes, por minutos caçando no mapa ou por quantidade de um item juntado; termina na primeira atingida. Sem metas, caça até você parar.
 - Caça pela database: sprite de cada monstro na janela "Caçar"; clicando, aparecem os loots com "Pegar este" (@alootid), "Pegar todos" e ligar/desligar @autoloot.
 - BG: nova aba para entrar na BG 3x3, 4x4 ou 5x5. Grave o NPC de cada BG uma vez (andar, NPC e opções). As mensagens de erro e de sucesso são gravadas uma vez, em qualquer NPC, e valem para todas. Os botões "Entrar na 3x3", "4x4" e "5x5" falam com o NPC daquela BG e tentam de novo até a inscrição dar certo; aí param sozinhos.

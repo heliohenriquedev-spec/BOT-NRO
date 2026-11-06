@@ -33,6 +33,8 @@ def isolated_monster_data(tmp_path, monkeypatch):
     from nrobot import npc_map, map_routes, bg_entry
     from nrobot import auto_routes
     from nrobot import npc_transports
+    from nrobot import database_hunt
+    monkeypatch.setattr(database_hunt, "SHOWMOBS_FILE", tmp_path/"rede"/"showmobs_monstros.json")
     monkeypatch.setattr(npc_transports, "FILE", tmp_path/"mapas"/"npc_transportes.json")
     monkeypatch.setattr(auto_routes, "FILE", tmp_path/"mapas"/"portais_destinos.json")
     monkeypatch.setattr(bg_entry, "FILE", tmp_path/"rede"/"bg_entradas.json")

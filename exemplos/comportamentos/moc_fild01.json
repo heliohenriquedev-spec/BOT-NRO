@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "Combate a distancia",
+  "map": "moc_fild01",
+  "description": "Usa as habilidades configuradas sem ataque basico, com kite. Patrulha normal.",
+  "enabled": true,
+  "settings": {
+    "skills": true,
+    "auto_attacks": false,
+    "melee_approach": false,
+    "kite": true
+  }
+}

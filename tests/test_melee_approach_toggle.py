@@ -54,10 +54,10 @@ def test_basic_attack_interleaves_only_with_the_target_in_reach():
     assert hunt.plan(state([11,10]),1,collision=collision) is None
 
 
-def test_old_settings_keep_their_behaviour_and_both_movements_cannot_be_on():
+def test_old_settings_never_turn_kite_on_and_both_movements_cannot_be_on():
     from nrobot.packet_settings import validate
-    old_kite=validate({'auto_attacks':False})
-    assert (old_kite['melee_approach'],old_kite['kite'])==(False,True)
+    old=validate({'auto_attacks':False})  # basic attacks off no longer means kite: only the box does
+    assert (old['melee_approach'],old['kite'])==(False,False)
     old_melee=validate({'auto_attacks':True})
     assert (old_melee['melee_approach'],old_melee['kite'])==(True,False)
     assert validate({'auto_attacks':True,'melee_approach':False,'kite':False})['kite'] is False

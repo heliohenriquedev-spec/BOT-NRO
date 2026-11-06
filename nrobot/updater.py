@@ -25,7 +25,7 @@ CONFIG = ROOT/'atualizacao.json'
 VERSION_FILE = ROOT/'versao.json'
 # Never replaced or removed by an update: belongs to the person using the bot.
 PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/monstros', 'data/database', 'data/jogadores',
-             'data/rede/rcx_config.json', 'data/rede/invocacoes_aprendidas.json', 'data/rede/painel_config.json', 'data/rede/buffs_aprendidos.json',
+             'data/rede/comportamentos_mapas.json', 'data/rede/rcx_config.json', 'data/rede/invocacoes_aprendidas.json', 'data/rede/painel_config.json', 'data/rede/buffs_aprendidos.json',
              'data/rede/rotas_quests.json', 'data/rede/quadros_missoes.json',
              'data/rede/rotas_mapas.json', 'data/rede/missoes_concluidas.json',
              'data/rede/slots_missoes.json', 'data/rede/quest_extras.json',

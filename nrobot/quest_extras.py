@@ -3,6 +3,8 @@
 - @voltar: the chat frame the client sent when the player typed it is replayed as is.
   It only works out of combat and its casting is broken by physical damage: monsters
   around are killed first, the character waits calm, casts, and starts over when hit.
+- Revive: on death during the hunt or a trip, "return to the save point", the recorded talk with
+  the healer (Curandeira) and back to the hunting map by the routes.
 - Mount: the item the player equipped and the equipment the server took off for it.
   Mounting also needs to be out of combat. The taken equipment is put back when the
   hunt starts; the mount goes back on for the next trip.
@@ -16,7 +18,8 @@ from pathlib import Path
 FILE = Path(__file__).resolve().parents[1]/'data/rede/quest_extras.json'
 DEFAULTS = dict(voltar_enabled=False, voltar_frame='', voltar_name='', calm_seconds=10, clear_radius=8,
                 cast_timeout=15, attempts=6, mount_enabled=False, mount=None,
-                characters={})  # name -> {'mount_item': id, 'combat_items': [ids]} chosen in the panel
+                characters={},  # name -> {'mount_item': id, 'combat_items': [ids]} chosen in the panel
+                revive_enabled=False, revive_attempts=4, heal_steps=[], heal_map='')
 AMMO = 0x8000
 
 
@@ -51,6 +54,9 @@ def load(path=None):
             time.sleep(.05)
     result = copy.deepcopy(DEFAULTS)
     result.update({k: v for k, v in (data if isinstance(data, dict) else {}).items() if k in DEFAULTS})
+    if type(result['revive_attempts']) is not int:
+        result['revive_attempts'] = DEFAULTS['revive_attempts']
+    result['revive_attempts'] = max(1, min(20, result['revive_attempts']))
     return result
 
 
@@ -62,6 +68,9 @@ def save(config, path=None):
     """Written to a temporary file and swapped in; Windows refuses the swap while the other process
     reads the file, so it is retried for up to 3 s and then reported (never silently lost)."""
     data = {k: config.get(k, v) for k, v in DEFAULTS.items()}
+    if type(data['revive_attempts']) is not int:
+        data['revive_attempts'] = DEFAULTS['revive_attempts']
+    data['revive_attempts'] = max(1, min(20, data['revive_attempts']))
     path = Path(path or FILE)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp')

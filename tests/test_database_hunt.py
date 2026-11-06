@@ -51,9 +51,10 @@ def test_hunt_dialog_lists_the_map_monsters_and_sends_the_choice():
     dialog.table.cellWidget(0, 3).setValue(3)
     dialog.minutes.setValue(30)
     dialog.item.setCurrentIndex(1); dialog.amount.setValue(50)
+    dialog.table.item(1, 4).setCheckState(Qt.Checked)  # @showmobs only for Deca
     dialog.start()
     assert sent == [('quest_hunt_database', dict(target_map='0045@tower', map_route_id='r1', species=[1447, 1031],
-                                                 priority={'1447': 3, '1031': 1}, kills=0, goal_minutes=30,
+                                                 priority={'1447': 3, '1031': 1}, showmobs=[1031], kills=0, goal_minutes=30,
                                                  goal_item_id=7070, goal_item_amount=50, goal_item_name='Casca Quebrada'))]
     loot = LootDialog(dialog, ROWS[0], drops([1031]))
     loot.send_all(); loot.send('@autoloot 100')
@@ -112,3 +113,61 @@ def test_loot_commands_are_queued_by_the_relay_and_bad_ones_refused(tmp_path):
         r.process_control(lambda: True)
     assert r.loot_commands == ['@alootid +7070']
     assert not r.control_result['ok'] and 'loot' in r.control_result['message']
+
+
+def test_showmobs_choice_is_kept_per_monster_and_only_marked_ones_are_asked(tmp_path):
+    from nrobot.database_hunt import mark_showmobs, showmobs_marked
+    mark_showmobs(1031, True); mark_showmobs(1447, True); mark_showmobs(1447, False)
+    assert showmobs_marked() == {1031}
+    route = database_hunt_route(dict(target_map='0045@tower', species=[1031, 1447], showmobs=[1031, 9999]), ENTRIES)
+    assert route['showmobs_species'] == [1031]
+    from PySide6.QtWidgets import QApplication, QWidget
+    from nrobot.hunt_dialog import LootDialog
+    app = QApplication.instance() or QApplication([])
+    owner = QWidget()
+    loot = LootDialog(owner, ROWS[1], [])
+    assert not loot.showmobs.isChecked()
+    loot.showmobs.setChecked(True)
+    assert showmobs_marked() == {1031, 1447}
+    owner.close()
+
+
+def test_failed_showmobs_stops_on_that_map_and_the_patrol_sweeps_until_restarted():
+    from nrobot.mob_scan import MobScan
+    scan = MobScan()
+    assert scan.start('field', [1031], 0.0, idle=True)
+    scan.sent(1031, 0.0)
+    assert scan.finish([5, 5], 5.0) is None and scan.map_failed('field.gat')  # no answer at all
+    assert not scan.start('field', [1031], 100.0, idle=True)  # not asked again on this map
+    assert scan.start('other', [1031], 100.0, idle=True)  # other maps still try
+    scan.reset_failures()
+    scan.queue.clear(); scan.round_open = False
+    assert scan.start('field', [1031], 300.0, idle=True)  # hunt started again: tries again
+    # The patrol then sweeps an open map in one planned walk through every point, like the mazes.
+    import random
+    from nrobot.map_navigation import CollisionMap
+    from nrobot.packet_patrol import PacketPatrol
+    patrol = PacketPatrol(8, random.Random(1), spacing=8)
+    patrol.plan((5, 5), 0, 150, CollisionMap(80, 80, [1]*6400))
+    assert not patrol.tour.corridor_mode
+    patrol.linear = True
+    first = patrol.next_block((5, 5))
+    assert patrol.corridor_plan and patrol.corridor_plan[0] == first
+    assert set(patrol.corridor_plan) == patrol.remaining-set(patrol.deferred)  # every pending point, once
+
+
+def test_relay_asks_showmobs_only_for_marked_monsters_and_reports_the_sweep(tmp_path):
+    import time
+    from nrobot import map_routes
+    from nrobot.packet_hunt import PacketHunt
+    from nrobot.session_relay import SessionRelay
+    map_routes.save([dict(id='r1', name='Torre', target_map='ra_in01', steps=[dict(kind='walk', map='ra_in01', position=[219, 95])])])
+    r = SessionRelay('127.0.0.1', folder=tmp_path, allow_commands=True); r.hunt = PacketHunt(); r.apply_settings({})
+    o = r.tracker.observer; o.player_id = 1; o.player = [219, 95]; o.player_at = time.monotonic(); o.map_name = 'ra_in01'
+    r.upstream = object()
+    r.quest_control('quest_hunt_database', dict(target_map='ra_in01', species=[1031, 1447], showmobs=[1447]), lambda: True)
+    assert r.quest_missing_species() == [1447]
+    r.mob_scan.map = 'ra_in01'; r.mob_scan.fail()
+    r.quest_control('quest_stop', {}, lambda: True)
+    r.quest_control('quest_hunt_database', dict(target_map='ra_in01', species=[1031], showmobs=[]), lambda: True)
+    assert not r.mob_scan.map_failed('ra_in01') and r.quest_missing_species() == []  # restarted; none marked

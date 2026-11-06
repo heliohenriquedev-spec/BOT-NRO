@@ -670,11 +670,14 @@ class QuestRoutes:
                 return min(choices,key=len)+copy.deepcopy(original)
             return self.connection(origin,key(original[0]['map']))+copy.deepcopy(original)
         target=key(self.route['target_map'])
-        if origin==target:return []
         original=self.route['steps']
+        talks_there=any(s['kind'] not in ('walk','portal','wait_map','wait_transfer') and key(s['map'])==target for s in original)
+        if origin==target:
+            # Already on the map: a trip whose point is talking to an NPC there (healer, BG) still talks.
+            return copy.deepcopy([s for s in original if key(s['map'])==target]) if talks_there else []
         starts=[i for i,s in enumerate(original) if s['kind']!='wait_map' and key(s['map'])==origin]
         if starts:return copy.deepcopy(original[starts[0]:])
-        if any(s['kind'] not in ('walk','portal','wait_map','wait_transfer') and key(s['map'])==target for s in original):
+        if talks_there:
             # The point of the trip is talking to an NPC there (BG entry): reach the recording's start
             # and run it whole, instead of only reaching the map.
             try:return self.connection(origin,key(original[0]['map']))+copy.deepcopy(original)
@@ -1022,7 +1025,7 @@ class QuestRoutes:
         if step['kind']=='portal':
             allowed=frozenset((p[0]+x,p[1]+y) for p,m in portals.portals(map_name) if chebyshev(p,step['position'])<=m
                               for x in range(-m,m+1) for y in range(-m,m+1))
-        forbidden=frozenset(portals.cells(map_name))-allowed
+        forbidden=(frozenset(portals.cells(map_name))-allowed)|frozenset(getattr(collision,'hazard_cells',()))
         key=(PortalGuard.key(map_name),id(collision),forbidden)
         c=self.nav_cache.get(key)
         if c is None:

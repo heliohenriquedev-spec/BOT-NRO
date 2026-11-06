@@ -145,6 +145,12 @@ class PacketPanel(QMainWindow):
         form.addRow(self.patrol)
         self.skills = QCheckBox('Ativar habilidades configuradas')
         form.addRow(self.skills)
+        self.avoid_ground_effects = QCheckBox('Evitar células de habilidades de terreno já ativas')
+        self.avoid_ground_effects.setToolTip('Bloqueia no caminho as células de efeitos hostis que já foram observados no chão. Independente da previsão de conjuração.')
+        form.addRow(self.avoid_ground_effects)
+        self.predict_ground_effects = QCheckBox('Prever área perigosa quando começar uma conjuração')
+        self.predict_ground_effects.setToolTip('Usa o modelo de área conhecido da habilidade assim que o servidor anuncia a conjuração. Independente do bloqueio de efeitos já ativos.')
+        form.addRow(self.predict_ground_effects)
         explanation = QLabel('Sem colisão legível, os obstáculos são descobertos pelas respostas de movimento.')
         explanation.setWordWrap(True)
         form.addRow(explanation)
@@ -218,6 +224,9 @@ class PacketPanel(QMainWindow):
         from .monster_panel import MonsterPanel
         self.monster_panel = MonsterPanel()
         tabs.addTab(self.monster_panel, 'Monstros')
+        from .map_behavior_panel import MapBehaviorPanel
+        self.map_behavior_panel = MapBehaviorPanel()
+        tabs.addTab(self.map_behavior_panel, 'Comportamento por mapa')
         from .rcx_panel import RcxPanel
         self.rcx_panel = RcxPanel()
         tabs.addTab(self.rcx_panel, 'RCX')
@@ -425,6 +434,8 @@ class PacketPanel(QMainWindow):
         self.pvp_first.setChecked(settings['pvp_first'])
         self.pvp_panel.set_targets(settings['pvp_targets'])
         self.skills.setChecked(settings['skills'])
+        self.avoid_ground_effects.setChecked(settings['avoid_ground_effects'])
+        self.predict_ground_effects.setChecked(settings['predict_ground_effects'])
         self.strict_map.setChecked(settings['require_collision'])
         self.advanced.setChecked(settings['advanced_combat'])
         self.auto_attacks.setChecked(settings['auto_attacks'])
@@ -498,6 +509,8 @@ class PacketPanel(QMainWindow):
                 'patrol_give_up': self.patrol_give_up.value(), 'ignore_attackers': self.ignore_attackers.value(),
                 'patrol': self.patrol.isChecked(), 'skills': self.skills.isChecked(), 'auto_map_targets': self.auto_map_targets.isChecked(),
                 'require_collision': self.strict_map.isChecked(), 'auto_movement': self.auto_movement.isChecked(),
+                'avoid_ground_effects': self.avoid_ground_effects.isChecked(),
+                'predict_ground_effects': self.predict_ground_effects.isChecked(),
                 'manual_movement': self.manual_movement.isChecked(),
                 'pvp_enabled': self.pvp_enabled.isChecked(), 'pvp_all': self.pvp_all.isChecked(),
                 'pvp_first': self.pvp_first.isChecked(), 'pvp_targets': sorted(self.pvp_panel.targets), 'advanced_combat': self.advanced.isChecked(),
@@ -916,7 +929,7 @@ class PacketPanel(QMainWindow):
             combo.currentTextChanged.connect(lambda text: self.update_key_notice())
         for field in (self.resume_delay, self.burst_interval, self.homun_hunger):
             field.valueChanged.connect(self.schedule_save)
-        for box in (self.pvp_enabled, self.pvp_all, self.pvp_first, self.auto_map_targets, self.auto_movement, self.manual_movement, self.patrol, self.patrol_avoid_walls, self.skills, self.strict_map, self.fast_offensives,
+        for box in (self.pvp_enabled, self.pvp_all, self.pvp_first, self.auto_map_targets, self.auto_movement, self.manual_movement, self.patrol, self.patrol_avoid_walls, self.skills, self.avoid_ground_effects, self.predict_ground_effects, self.strict_map, self.fast_offensives,
                     self.sit_on_players, self.limit_failures, self.defer_failed, self.skill_burst,
                     self.advanced, self.auto_attacks, self.melee_approach, self.kite, self.pause_players, self.pause_disguised, self.pause_hidden, self.gm_detection,
                     self.homun_feed):

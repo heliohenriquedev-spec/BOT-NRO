@@ -1,6 +1,6 @@
 {
- "version": "2026.11.06.2",
- "published_at": "2026-11-06T00:33:02",
+ "version": "2026.11.06.3",
+ "published_at": "2026-11-06T10:22:05",
  "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
@@ -1430,10 +1430,12 @@
   "data/rede/habilidades_chao_validacao.json",
   "data/rede/identidades_cliente.json",
   "data/rede/registro_pacotes.json",
+  "data/rede/showmobs_monstros.json",
   "data/rede/tamanhos_cliente.json",
   "docs/ATUALIZACOES.md",
   "docs/AUDITORIA_GRF_QUESTS.md",
   "docs/CLIENTE_CAMERA_CONEXAO.md",
+  "docs/COMPORTAMENTO_MAPAS.md",
   "docs/DATABASE_COMPARTILHADO.md",
   "docs/DATABASE_ITENS_DROPS.md",
   "docs/HOMUNCULO.md",
@@ -1444,6 +1446,8 @@
   "docs/ROTAS_QUESTS.md",
   "docs/X1.md",
   "docs/exemplo_x1.json",
+  "exemplos/comportamentos/moc_fild01.json",
+  "exemplos/comportamentos/ra_fild03.json",
   "instalar.bat",
   "nrobot/__init__.py",
   "nrobot/ammo.py",
@@ -1476,6 +1480,10 @@
   "nrobot/kuchiyose_dialog.py",
   "nrobot/lua_tables.py",
   "nrobot/manual_skill_diagnostic.py",
+  "nrobot/map_behavior.py",
+  "nrobot/map_behavior_panel.py",
+  "nrobot/map_combat.py",
+  "nrobot/map_emergency.py",
   "nrobot/map_monsters.py",
   "nrobot/map_navigation.py",
   "nrobot/map_routes.py",
@@ -1542,6 +1550,7 @@
   "nrobot/skill_panel.py",
   "nrobot/sprite_reader.py",
   "nrobot/summon_queue.py",
+  "nrobot/toxic_ground.py",
   "nrobot/update_panel.py",
   "nrobot/updater.py",
   "nrobot/watch_alert.py",
@@ -2138,5 +2147,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "c2ae3de9c3b8"
+ "files_digest": "06c5a1fac00d"
 }

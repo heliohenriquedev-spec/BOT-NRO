@@ -71,6 +71,7 @@ class PacketPatrol:
         self.search_destination = None
         self.focus = None  # a spot to go to first (@showmobs); reached through the normal waypoints
         self.focus_reached = None  # the last such spot reached: not gone to again
+        self.linear = False  # @showmobs failed on this map: one planned walk through every point
         self.goal_at = 0
         self.goal_distance = None
         self.last_plan_position = None
@@ -205,7 +206,7 @@ class PacketPatrol:
             distances = self.tour.distances(position)
             reachable = [block for block in candidates if block in distances]
             return min(reachable, key=lambda block: (distances[block], block)) if reachable else None
-        if self.tour.corridor_mode:
+        if self.tour.corridor_mode or self.linear:
             # Mazes (sewers, ant hills): one planned walk through every pending waypoint, kept after
             # fights. Taking the nearest one each time left points behind and went back and forth
             # for them; the old fixed circuit ignored walking distances.

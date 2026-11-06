@@ -43,7 +43,7 @@ def test_standing_player_who_hides_leaves_a_shadow_at_its_cell():
 def test_option_bits_are_decoded_from_appearance_and_option_change():
     assert decode(appearance_22c(2003137, 1037, 0x40))['option'] == 0x40
     event = decode(struct.pack('<HIHHIB', 0x229, 2003137, 0, 0, 0x2, 0))
-    assert event == {'opcode': '0229', 'kind': 'option_change', 'entity_id': 2003137, 'option': 2, 'body_state': 0}
+    assert event == {'opcode': '0229', 'kind': 'option_change', 'entity_id': 2003137, 'option': 2, 'body_state': 0, 'health_state': 0}
 
 
 def test_disguised_character_holds_until_it_leaves_view():

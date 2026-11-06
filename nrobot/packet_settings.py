@@ -38,6 +38,8 @@ DEFAULTS.update(melee_approach=True, kite=False)
 # Homunculus: fed by the bot when its hunger (0-100, from the server) drops to this number.
 DEFAULTS.update(homun_feed=False, homun_hunger=25)
 DEFAULTS.update(group_enabled=False, group_role='follower', group_leader='', group_members=[], group_follow_only=False, group_distance=3)
+# Avoid skill areas already present on the floor and predict new casts independently.
+DEFAULTS.update(avoid_ground_effects=True, predict_ground_effects=True)
 THROWS_TOKEN = 'throws'
 
 
@@ -56,8 +58,9 @@ def validate(data, *, links_path=None):
         raise ValueError('Configuração deve ser um objeto')
     data = dict(data)
     if 'melee_approach' not in data and 'kite' not in data and 'auto_attacks' in data:
-        # Before: basic attacks on meant walking up to the target, off meant keeping the distance.
-        data['melee_approach'], data['kite'] = bool(data['auto_attacks']), not data['auto_attacks']
+        # Before: basic attacks on meant walking up to the target. Kite is never switched on by
+        # itself: turning basic attacks off made old setups kite without the box being ticked.
+        data['melee_approach'], data['kite'] = bool(data['auto_attacks']), False
     result = {**DEFAULTS, **data}
     if result['summon_queue_mode'] not in ('cycle', 'priority'):
         raise ValueError('Modo da fila Kuchiyose invalido')
@@ -104,7 +107,8 @@ def validate(data, *, links_path=None):
         raise ValueError('Espera por resposta deve ser maior ou igual ao intervalo da habilidade')
     for key in ('pvp_enabled', 'pvp_all', 'pvp_first', 'patrol', 'skills', 'require_collision', 'auto_movement', 'manual_movement', 'patrol_avoid_walls', 'auto_attacks', 'advanced_combat', 'auto_map_targets',
                 'pause_on_players', 'pause_on_disguised', 'pause_on_hidden', 'gm_detection', 'fast_offensives', 'sit_on_players',
-                'limit_target_failures', 'defer_failed_targets', 'skill_burst', 'melee_approach', 'kite', 'homun_feed'):
+                'limit_target_failures', 'defer_failed_targets', 'skill_burst', 'melee_approach', 'kite', 'homun_feed',
+                'avoid_ground_effects', 'predict_ground_effects'):
         if type(result[key]) is not bool:
             raise ValueError(f'{key}: valor deve ser booleano')
     if result['melee_approach'] and result['kite']:

@@ -84,8 +84,8 @@ class HuntDialog(QDialog):
             self.map_box.addItem(name+label, name)
         row.addWidget(self.map_box, 1)
         layout.addLayout(row)
-        self.table = QTableWidget(0, 4)
-        self.table.setHorizontalHeaderLabels(['Loot', 'Cacar / Monstro', 'ID', 'Prioridade'])
+        self.table = QTableWidget(0, 5)
+        self.table.setHorizontalHeaderLabels(['Loot', 'Cacar / Monstro', 'ID', 'Prioridade', '@showmobs'])
         self.table.verticalHeader().setVisible(False)
         self.table.verticalHeader().setDefaultSectionSize(46)
         self.table.setColumnWidth(0, 54)
@@ -145,6 +145,12 @@ class HuntDialog(QDialog):
             priority.setRange(1, 99)
             priority.setValue(1 if chosen else 5)
             self.table.setCellWidget(index, 3, priority)
+            from .database_hunt import showmobs_marked
+            showmobs = QTableWidgetItem('usar')
+            showmobs.setFlags(showmobs.flags() | Qt.ItemIsUserCheckable)
+            showmobs.setCheckState(Qt.Checked if row['species_id'] in showmobs_marked() else Qt.Unchecked)
+            showmobs.setToolTip('Procura este monstro com @showmobs na caça. Se não achar, o bot percorre o mapa inteiro.')
+            self.table.setItem(index, 4, showmobs)
         self.fill_items(rows)
         if name and not self.known(name):
             self.status.setText(f'Ainda nao ha caminho conhecido ate {name}. Entre uma vez nos portais ate la (o bot '
@@ -182,9 +188,16 @@ class HuntDialog(QDialog):
 
     def open_loot(self, row):
         LootDialog(self, row, self.drops([row['species_id']])).exec()
+        from .database_hunt import showmobs_marked
+        marked = showmobs_marked()
+        for index in range(self.table.rowCount()):  # the loot window may have changed "@showmobs"
+            if int(self.table.item(index, 1).data(Qt.UserRole)) == row['species_id']:
+                self.table.item(index, 4).setCheckState(Qt.Checked if row['species_id'] in marked else Qt.Unchecked)
 
     def request(self):
         """The relay command's values for the current choice."""
+        from .database_hunt import showmobs_marked
+        self.marked = showmobs_marked()
         species, priority = [], {}
         for index in range(self.table.rowCount()):
             item = self.table.item(index, 1)
@@ -192,10 +205,18 @@ class HuntDialog(QDialog):
                 identity = int(item.data(Qt.UserRole))
                 species.append(identity)
                 priority[str(identity)] = self.table.cellWidget(index, 3).value()
+            mark = self.table.item(index, 4)
+            if mark is not None:
+                from .database_hunt import mark_showmobs
+                identity = int(item.data(Qt.UserRole))
+                on = mark.checkState() == Qt.Checked
+                if on != (identity in self.marked):
+                    self.marked = mark_showmobs(identity, on)
         name = self.map_box.currentData()
         route = self.routes.get(name) or {}
         item_id = self.item.currentData() or 0
         return dict(target_map=name or '', map_route_id=route.get('id', ''), species=species, priority=priority,
+                    showmobs=[s for s in species if s in self.marked],
                     kills=self.kills.value(), goal_minutes=self.minutes.value(),
                     goal_item_id=item_id, goal_item_amount=self.amount.value() if item_id else 0,
                     goal_item_name=self.item.currentText().rsplit(' (', 1)[0] if item_id else '')
@@ -245,6 +266,14 @@ class LootDialog(QDialog):
                 button.clicked.connect(lambda checked=False, i=drop['item_id']: self.send(f'@alootid +{i}'))
                 self.table.setCellWidget(index, 3, button)
         layout.addWidget(self.table, 1)
+        from PySide6.QtWidgets import QCheckBox
+        from .database_hunt import mark_showmobs, showmobs_marked
+        self.showmobs = QCheckBox('Usar @showmobs para encontrar este monstro na caça')
+        self.showmobs.setToolTip('Na caça pela database, o bot pergunta ao servidor onde estão os monstros marcados. '
+                                 'Se não achar nada, percorre o mapa inteiro em linha.')
+        self.showmobs.setChecked(row['species_id'] in showmobs_marked())
+        self.showmobs.toggled.connect(lambda on: mark_showmobs(row['species_id'], on))
+        layout.addWidget(self.showmobs)
         everything = QPushButton('Pegar todos desta lista (@alootid em cada um)')
         everything.clicked.connect(self.send_all)
         everything.setEnabled(bool(self.drops_list))

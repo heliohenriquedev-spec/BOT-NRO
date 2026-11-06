@@ -675,6 +675,9 @@
    ],
    "prt_fild00": [
     "Planta Medicinal "
+   ],
+   "ra_fild03": [
+    "Planta Medicinal "
    ]
   }
  },
@@ -909,7 +912,7 @@
    "bat_c03": 0
   },
   "walk_speed_ms": 150,
-  "name": "Hisoka",
+  "name": "Doki",
   "max_hp": 2000000,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -1962,7 +1965,7 @@
    "prt_fild05": 0,
    "prt_fild00": 0
   },
-  "walk_speed_ms": 680,
+  "walk_speed_ms": 170,
   "name": "Jounin",
   "max_hp": 30000000,
   "sprite_source": "Jounin.spr (Naruto Ultimate)",

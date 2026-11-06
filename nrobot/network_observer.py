@@ -220,6 +220,7 @@ class Observer:
         self.walk_speed_ms = 400
         self.map_name = None
         self.sp = None
+        self.hp = self.max_hp = None
         self.skills = {}
         self.skills_received = False
         self.hotkeys = {}
@@ -230,7 +231,7 @@ class Observer:
 
     # REDE-83: the server sends the skill list (and SP, hotkeys, buffs) only when the character
     # logs in, not on every map change: a warp must not forget them.
-    CHARACTER_FIELDS = ('skills', 'skills_received', 'hotkeys', 'sp', 'effects', 'walk_speed_ms')
+    CHARACTER_FIELDS = ('skills', 'skills_received', 'hotkeys', 'sp', 'hp', 'max_hp', 'effects', 'walk_speed_ms')
 
     def keep_character(self):
         return {field: getattr(self, field) for field in self.CHARACTER_FIELDS}
@@ -245,6 +246,7 @@ class Observer:
         self.player_id = None
         self.map_name = None
         self.sp = None
+        self.hp = self.max_hp = None
         self.skills = {}
         self.skills_received = False
         self.hotkeys = {}
@@ -383,7 +385,10 @@ class Observer:
         elif kind == 'player_stat' and event['stat_type'] == 0:
             if 50 <= event['value'] <= 2000:
                 self.walk_speed_ms = event['value']
+        elif kind == 'player_stat' and event['stat_type'] == 6:
+            self.max_hp = event['value']
         elif kind == 'player_stat' and event['stat_type'] == 5:
+            self.hp = event['value']
             self.player_alive = event['value'] > 0
             if not self.player_alive:
                 self.player = None

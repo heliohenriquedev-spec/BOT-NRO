@@ -124,6 +124,7 @@ class ContinuousTracker:
                 'player_position': self.observer.player,
                 'combat_player_positions': self.observer.combat_positions(now),
                 'player_position_age_seconds': max(0, now-self.observer.player_at) if self.observer.player is not None else None,
+                'player_hp': self.observer.hp, 'player_max_hp': self.observer.max_hp,
                 'player_sp': self.observer.sp, 'learned_skills': list(self.observer.skills.values()),
                 'player_id': self.observer.player_id,
                 'f2_binding': self.observer.hotkeys.get(1),

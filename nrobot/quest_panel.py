@@ -527,6 +527,13 @@ class ExtrasBox(QGroupBox):
                                      '(fora de combate; se a conjuracao for cancelada por dano, mata os monstros e tenta de novo)')
         self.mount=WrappingCheckBox('Usar a montaria para se locomover entre os destinos (equipa fora de combate; ao comecar a '
                                     'caca, recoloca os equipamentos que ela tirou)')
+        self.revive=WrappingCheckBox('Ao morrer: voltar ao ponto de retorno, curar na Curandeira (conversa gravada) e voltar ao '
+                                     'mapa onde estava pelas rotas (caca comum, caca pela database e fila de quests)')
+        heal=FlowLayout()
+        for label,command in (('Gravar cura (Curandeira)','quest_heal_record'),('Salvar cura','quest_heal_save'),
+                              ('Testar cura','quest_heal_test'),
+                              ('Descartar gravacao da cura','quest_heal_cancel')):
+            button=QPushButton(label);button.clicked.connect(lambda checked=False,c=command:self.request(c));heal.addWidget(button)
         learn=FlowLayout()
         self.learn_voltar=QPushButton('Aprender @voltar');self.learn_voltar.clicked.connect(lambda:self.request('quest_extras_learn',what='voltar'))
         self.learn_mount=QPushButton('Aprender montaria');self.learn_mount.clicked.connect(lambda:self.request('quest_extras_learn',what='mount'))
@@ -546,30 +553,39 @@ class ExtrasBox(QGroupBox):
         self.calm=QSpinBox();self.calm.setRange(1,60);self.calm.setSuffix(' s')
         self.radius=QSpinBox();self.radius.setRange(2,20);self.radius.setSuffix(' celulas')
         self.timeout=QSpinBox();self.timeout.setRange(3,60);self.timeout.setSuffix(' s')
+        self.revive_attempts=QSpinBox();self.revive_attempts.setRange(1,20);self.revive_attempts.setSuffix(' tentativas')
+        self.revive_attempts.setToolTip('Quantas vezes o bot reenviara o retorno ao ponto de salvamento enquanto o personagem continuar morto.')
         form.addRow('Tempo sem combate antes de usar',self.calm);form.addRow('Monstros ao redor (raio)',self.radius)
         form.addRow('Espera maxima do teletransporte',self.timeout)
+        revive_form=QFormLayout();revive_form.addRow('Tentativas de retorno apos morrer',self.revive_attempts)
         self.status=QLabel();self.status.setWordWrap(True)
         for widget in (self.voltar,self.mount):layout.addWidget(widget)
-        layout.addLayout(learn);layout.addLayout(form);layout.addWidget(self.status)
+        layout.addLayout(learn);layout.addLayout(form)
+        layout.addWidget(self.revive);layout.addLayout(revive_form);layout.addLayout(heal)
+        layout.addWidget(self.status)
         self.show_config()
-        for widget in (self.voltar,self.mount):widget.toggled.connect(self.store)
-        for widget in (self.calm,self.radius,self.timeout):widget.valueChanged.connect(self.store)
+        for widget in (self.voltar,self.mount,self.revive):widget.toggled.connect(self.store)
+        for widget in (self.calm,self.radius,self.timeout,self.revive_attempts):widget.valueChanged.connect(self.store)
 
     def request(self,command,**values):self.command_requested.emit(command,values)
 
     def show_config(self):
         c=self.config
-        for widget,value in ((self.voltar,c['voltar_enabled']),(self.mount,c['mount_enabled'])):
+        for widget,value in ((self.voltar,c['voltar_enabled']),(self.mount,c['mount_enabled']),(self.revive,c.get('revive_enabled'))):
             widget.blockSignals(True);widget.setChecked(bool(value));widget.blockSignals(False)
-        for widget,value in ((self.calm,c['calm_seconds']),(self.radius,c['clear_radius']),(self.timeout,c['cast_timeout'])):
+        for widget,value in ((self.calm,c['calm_seconds']),(self.radius,c['clear_radius']),(self.timeout,c['cast_timeout']),
+                             (self.revive_attempts,c.get('revive_attempts',4))):
             widget.blockSignals(True);widget.setValue(int(value));widget.blockSignals(False)
+        self.revive_attempts.setEnabled(bool(c.get('revive_enabled')))
         mount=c.get('mount')
         name=((self.state.get('own_look') or {}).get('name') if hasattr(self,'state') else None) or ''
         chosen=(c.get('characters') or {}).get(name)
         if chosen and (chosen.get('mount_item') or chosen.get('combat_items')):
             mount=dict(item_id=chosen.get('mount_item'),displaced=chosen.get('combat_items',[]))
         self.learned=('@voltar: '+('aprendido'+(' ('+c['voltar_name']+')' if c.get('voltar_name') else '') if c.get('voltar_frame') else 'nao aprendido')+
-                      ' • Montaria: '+(f"item {mount['item_id']}, tira {len(mount.get('displaced',[]))} equipamento(s)" if mount else 'nao aprendida'))
+                      ' • Montaria: '+(f"item {mount['item_id']}, tira {len(mount.get('displaced',[]))} equipamento(s)" if mount else 'nao aprendida')+
+                      ' • Cura: '+(f"gravada em {c.get('heal_map')} (NPC: "+', '.join(s.get('name') or 'NPC' for s in c['heal_steps'] if s['kind']=='npc')+')'
+                                    if c.get('heal_steps') else 'nao gravada (ao morrer, so volta ao mapa)'))
         self.status.setText(self.learned)
 
     def choose_items(self):
@@ -608,8 +624,9 @@ class ExtrasBox(QGroupBox):
         from . import quest_extras
         try:
             self.config=quest_extras.load()
-            self.config.update(voltar_enabled=self.voltar.isChecked(),mount_enabled=self.mount.isChecked(),
-                               calm_seconds=self.calm.value(),clear_radius=self.radius.value(),cast_timeout=self.timeout.value())
+            self.config.update(voltar_enabled=self.voltar.isChecked(),mount_enabled=self.mount.isChecked(),revive_enabled=self.revive.isChecked(),
+                               calm_seconds=self.calm.value(),clear_radius=self.radius.value(),cast_timeout=self.timeout.value(),
+                               revive_attempts=self.revive_attempts.value())
             quest_extras.save(self.config)
         except OSError as exc:QMessageBox.warning(self,'Opcoes nao salvas',str(exc));return
         self.show_config()
@@ -633,6 +650,8 @@ class ExtrasBox(QGroupBox):
         for b in (self.learn_voltar,self.learn_mount,self.switch):b.setEnabled(not busy)
         self.cancel.setEnabled(bool(learning))
         if learning:self.status.setText('Aprendendo: '+q.get('reason',''))
+        elif q.get('recording_scope')=='heal' or 'Revivido' in (q.get('reason') or '') or 'morreu' in (q.get('reason') or ''):
+            self.status.setText(self.learned+' • Agora: '+q.get('reason',''))
         elif q.get('errand'):self.status.setText(self.learned+' • Agora: '+q.get('reason',''))
         else:self.status.setText(self.learned)
 

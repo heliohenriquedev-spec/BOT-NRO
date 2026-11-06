@@ -1,0 +1,150 @@
+{
+  "schema": 2,
+  "name": "ra_fild03 - controle e combate",
+  "map": "ra_fild03",
+  "description": "Exemplo importavel para ra_fild03: prioriza combate proximo; adquire e aproxima de Ninkame, Jounin e Salamandra visiveis dentro de 9 celulas, sem perseguir Salamandras distantes nem usar ataque basico nelas. Preve a cruz de Venom Dust e evita a area. Namekuji abaixo de 60% HP e sem monstro a 4 celulas. Jounin controlados a 9 celulas; com 4 ou mais, Coelho x3 + Fukai Kemuri e fuga como prioridade maxima.",
+  "enabled": true,
+  "settings": {
+    "skills": true,
+    "auto_attacks": true,
+    "melee_approach": true,
+    "kite": false
+  },
+  "combat": {
+    "kill_priority": [
+      {
+        "species_id": 1315,
+        "name": "Ninkame"
+      },
+      {
+        "species_id": 1634,
+        "name": "Jounin"
+      },
+      {
+        "species_id": 1831,
+        "name": "Salamandra"
+      },
+      {
+        "species_id": 1177,
+        "name": "Doki"
+      }
+    ],
+    "control_species": [
+      {
+        "species_id": 1634,
+        "name": "Jounin"
+      }
+    ],
+    "passive_species": [
+      {
+        "species_id": 1177,
+        "name": "Doki"
+      }
+    ],
+    "control_radius": 9,
+    "skills": {
+      "stun": {
+        "skill_id": 179,
+        "name": "Shikumi no Jutsu"
+      },
+      "sleep": {
+        "skill_id": 182,
+        "name": "Fukai Yasumi"
+      },
+      "silence": {
+        "skill_id": 76,
+        "name": "Jigyaku no Chakra"
+      },
+      "offensives": [
+        {
+          "skill_id": 524,
+          "name": "Arremessar Kunai"
+        },
+        {
+          "skill_id": 523,
+          "name": "Arremessar Shuriken"
+        },
+        {
+          "skill_id": 62,
+          "name": "TsuutenKyaku"
+        },
+        {
+          "skill_id": 370,
+          "name": "Rasengan"
+        }
+      ],
+      "buffs": [
+        {
+          "skill_id": 29,
+          "name": "Concentrar Chakra nos Pes",
+          "effect_id": 12
+        },
+        {
+          "skill_id": 532,
+          "name": "Shinkirou no Genjutsu",
+          "effect_id": 207
+        },
+        {
+          "skill_id": 357,
+          "name": "Dai Senkou",
+          "effect_id": 105
+        },
+        {
+          "skill_id": 775,
+          "name": "Sogu: Baku Ryusei",
+          "effect_id": 0,
+          "duration": 15
+        }
+      ]
+    },
+    "emergency": {
+      "species_id": 1634,
+      "minimum_count": 4,
+      "radius": 9,
+      "prepare_skill": {
+        "skill_id": 500,
+        "name": "Selo de Mao: Coelho"
+      },
+      "prepare_casts": 3,
+      "area_skill": {
+        "skill_id": 668,
+        "name": "Fukai Kemuri"
+      }
+    },
+    "engagement": {
+      "radius": 9,
+      "only_targeting_player": true,
+      "target_memory_seconds": 10,
+      "no_basic_attack_species": [
+        1831
+      ],
+      "no_chase_species": [
+        1831
+      ],
+      "seek_when_clear": true,
+      "proactive_species": [
+        1177
+      ],
+      "approach_species": [
+        1831
+      ]
+    },
+    "idle_summon": {
+      "skill_id": 729,
+      "name": "Kuchiyose: Namekuji!",
+      "clear_radius": 4,
+      "cooldown": 30,
+      "hp_below_percent": 60
+    },
+    "offensive_species": {
+      "370": [
+        1315,
+        1831
+      ]
+    },
+    "burst": {
+      "enabled": true,
+      "interval": 0.05
+    }
+  }
+}
