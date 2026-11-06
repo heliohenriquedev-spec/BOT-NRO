@@ -34,13 +34,18 @@ FILES = {'database.json':'data/database/observacoes.sqlite3',
          'npcs.json': 'data/mapas/npcs.json',
          'npc_transportes.json': 'data/mapas/npc_transportes.json',
          'quest_extras.json': 'data/rede/quest_extras.json',
-         'gm_sinais.json': 'data/jogadores/gm_sinais.json'}
+         'gm_sinais.json': 'data/jogadores/gm_sinais.json',
+         'showmobs_monstros.json': 'data/rede/showmobs_monstros.json',
+         'caca_patrulha.json': 'data/rede/caca_patrulha.json'}
 PERSONAL_LIBRARY = ('checked_missions',)
 # @voltar learned once by the developer works for everybody (the speaker's name is swapped when
 # sent); the Switch (mount and items of each character) and the learned mount stay personal.
 SHARED_EXTRAS = ('voltar_frame', 'voltar_enabled')  # what the routes need; the numbers are each PC's own
 # Never published: skill setups (buffs aprendidos), the Monstros tab targets and every other
 # hunt/combat/PvP setting. Each PC keeps its own, per character (data/rede/personagens).
+# Except how the hunt walks: the developer's patrol (caca_patrulha.json, from the panel settings)
+# and the monsters marked "usar @showmobs" go to everybody, so the patrol works the same on every
+# PC (common hunt, quests, database hunt). See hunt_share.
 
 
 def _read(path, default):
@@ -95,6 +100,12 @@ def export(log=print, root=ROOT):
             data=snapshot(root)
             if data is not None:payload[name]=data
             continue
+        if name == 'caca_patrulha.json':
+            from .hunt_share import snapshot as patrol_snapshot
+            data = patrol_snapshot(root)
+            if data is not None:
+                payload[name] = data
+            continue
         data = json.loads(path.read_text(encoding='utf-8')) if path.is_file() else None
         if data is None:
             continue
@@ -115,7 +126,7 @@ def export(log=print, root=ROOT):
     (root/SHARED/'alvos_monstros.json').unlink(missing_ok=True)  # published before: personal now
     if 'database.json' in payload:
         log('Database preparado: '+', '.join(str(len(rows))+' '+table for table,rows in payload['database.json']['tables'].items()))
-    log(f'Quests, quadros, rotas de mapa, portais, @voltar e sinais de GM preparados para os usuarios ({len(payload)} arquivos).')
+    log(f'Quests, quadros, rotas de mapa, portais, @voltar, sinais de GM e patrulha da caca preparados para os usuarios ({len(payload)} arquivos).')
 
 
 def validate_references(payload):
@@ -351,6 +362,12 @@ def merge(root=ROOT, log=print, force=False):
         result['quest_extras.json'] = merge_extras(own['quest_extras.json'], shared['quest_extras.json'])
     if shared['gm_sinais.json'] is not None:
         result['gm_sinais.json'] = merge_lists(own['gm_sinais.json'], shared['gm_sinais.json'])
+    if isinstance(shared.get('showmobs_monstros.json'), list):
+        # Monsters searched with @showmobs: the published ones plus the ones marked on this PC.
+        mine = own.get('showmobs_monstros.json') if isinstance(own.get('showmobs_monstros.json'), list) else []
+        result['showmobs_monstros.json'] = sorted({int(s) for s in mine+shared['showmobs_monstros.json'] if type(s) is int})
+    if isinstance(shared.get('caca_patrulha.json'), dict):
+        result['caca_patrulha.json'] = copy.deepcopy(shared['caca_patrulha.json'])  # the same patrol for everybody
     try:  # everything checked before anything is written: a bad publication changes nothing
         from . import map_routes, quest_library, quest_routes
         if 'quadros_missoes.json' in result:
@@ -373,5 +390,5 @@ def merge(root=ROOT, log=print, force=False):
     for name, data in result.items():
         _write(root/FILES[name], data)
     _write(root/MARKER, {'digest': current, 'imported_at': datetime.now().isoformat(timespec='seconds')})
-    log('Quests, quadros, rotas de mapa, portais, @voltar e sinais de GM publicados foram recebidos.')
+    log('Quests, quadros, rotas de mapa, portais, @voltar, sinais de GM e patrulha da caca publicados foram recebidos.')
     return True

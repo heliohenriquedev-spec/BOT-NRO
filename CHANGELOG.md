@@ -4,6 +4,11 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.06.6 (06/11/2026)
+
+- Caça: corrigido o lag que atrasava as habilidades, fazia o personagem parar de bater e morrer mais. Nas caças da fila de quests e pela database, o bot reaplicava as configurações a cada meio segundo e reiniciava a caça; agora aplica uma vez só.
+- Patrulha igual para todos: a forma de patrulhar do desenvolvedor passa a valer em todas as caças (comum, quests e database). Isso inclui espaçamento, cobertura, distância das paredes, raio, tempo para desistir e atacantes ignorados. Os monstros marcados para "usar @showmobs" também chegam a todos. Habilidades, alvos e o resto do combate continuam sendo de cada personagem.
+
 ## 2026.11.06.5 (06/11/2026)
 
 - Caça com @showmobs: corrigido o personagem parado ("destravando" a cada 2 s) quando o ponto do @showmobs não tinha caminho; o ponto é deixado de lado por 45 s e a patrulha continua. Um monstro sozinho a mais de 60 células não vira mais destino.

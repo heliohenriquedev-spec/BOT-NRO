@@ -1,7 +1,7 @@
 {
- "version": "2026.11.06.5",
- "published_at": "2026-11-06T15:36:24",
- "notes": "a",
+ "version": "2026.11.06.6",
+ "published_at": "2026-11-06T15:55:07",
+ "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
   "CHANGELOG.md",
@@ -12,6 +12,7 @@
   "RESTAURAR_CONEXAO_ORIGINAL.bat",
   "atualizacao.json",
   "data/catalogo/catalogo.json",
+  "data/compartilhado/caca_patrulha.json",
   "data/compartilhado/database.json",
   "data/compartilhado/gm_sinais.json",
   "data/compartilhado/manifesto.json",
@@ -24,6 +25,7 @@
   "data/compartilhado/quest_extras.json",
   "data/compartilhado/rotas_mapas.json",
   "data/compartilhado/rotas_quests.json",
+  "data/compartilhado/showmobs_monstros.json",
   "data/monstros_base/monstros.json",
   "data/monstros_base/sprites/1010.png",
   "data/monstros_base/sprites/1031.png",
@@ -1475,6 +1477,7 @@
   "nrobot/ground_cells.py",
   "nrobot/group_hunt.py",
   "nrobot/hunt_dialog.py",
+  "nrobot/hunt_share.py",
   "nrobot/immediate_monster_removal.py",
   "nrobot/item_names.py",
   "nrobot/kuchiyose_dialog.py",
@@ -2147,5 +2150,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "06c5a1fac00d"
+ "files_digest": "08718a27fa96"
 }

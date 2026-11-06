@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "files": {
-  "database.json": "3f0ec0e2e97c3fcacf22feeef6dc9f0b9ebbf69a6651330b155da0d1195e32c0",
+  "database.json": "6e1ce8927b0657e3d7fbe52333af10fc1d0a1c58e61d05bcac1f3b3238ecec77",
   "rotas_quests.json": "01f5cbdf7707baa16c433a50ba4b17f8891b45a3ce68e0063aae495eeae6668d",
   "quadros_missoes.json": "22234d95e2a661c3f6eba2e37280f0fea1522c79611e549b431d73f8d846feb2",
   "rotas_mapas.json": "3fcd0b13b78e6c83cb5326c8eccdd5baa20402c60fd20048c5da08eab6190cc6",
@@ -11,6 +11,8 @@
   "npcs.json": "9384f7ca858257cbe03c073762e2c1b4eaaa34acf2c9cfde6462a4136e925990",
   "npc_transportes.json": "bb6f951883f286d1f2af3bb35db3d7c3cde2006e0c038cab131352e708f00201",
   "quest_extras.json": "7ccaad376442658c4f6ab04c59f019665124ccffe34c022b0c290cbb166dc077",
-  "gm_sinais.json": "9f30ad9781cab6977ab2a677ab2da0904fc5952d80ad0c46a39884f039c1864b"
+  "gm_sinais.json": "9f30ad9781cab6977ab2a677ab2da0904fc5952d80ad0c46a39884f039c1864b",
+  "showmobs_monstros.json": "4dd4c0add45e0bf89b5f787f83a5ba105a17a59a5743757266f445b268ffc41d",
+  "caca_patrulha.json": "921bec7a3edeaa27aefa875b8d5472f1d2e002506ade4cf89afc51f082ad4f6d"
  }
 }

@@ -1,0 +1,17 @@
+{
+ "schema": 1,
+ "settings": {
+  "patrol": true,
+  "radius": 28,
+  "patrol_step": 8,
+  "patrol_spacing": 14,
+  "patrol_coverage": 80,
+  "patrol_wall_margin": 3,
+  "patrol_avoid_walls": true,
+  "patrol_give_up": 10,
+  "ignore_attackers": 3,
+  "target_defer": 2,
+  "auto_movement": true,
+  "require_collision": true
+ }
+}

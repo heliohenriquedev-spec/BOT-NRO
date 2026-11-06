@@ -82,3 +82,23 @@ def test_database_hunt_keeps_map_combat_profile_only_during_hunt(monkeypatch):
     SessionRelay.sync_map_behavior(relay)
     assert relay.map_combat is None and calls[-1]==DEFAULTS
 
+
+
+def test_quest_hunt_apply_is_not_reapplied_by_map_behavior(monkeypatch):
+    """Quest hunt applies its settings; the map behavior (no profile) must not re-apply them and reset
+    the quest hunt, which applied again every 0.5 s (lag, skills delayed)."""
+    from types import SimpleNamespace
+    from nrobot.session_relay import SessionRelay
+    monkeypatch.setattr(m,'load',lambda:[])
+    calls=[]
+    relay=SimpleNamespace(hunt=SimpleNamespace(priority_target=None,target_priority={}),quest_hunt_id=('q',),
+        group_follower=lambda:False,player_focus=lambda:False,
+        tracker=SimpleNamespace(observer=SimpleNamespace(map_name='ra_fild03.gat',skills={})),
+        quests=SimpleNamespace(active=True,phase='hunt',route={'id':'quest'}),
+        apply_settings=lambda settings,**kw:calls.append(settings))
+    settings=copy.deepcopy(DEFAULTS);settings['kite']=not settings['kite']
+    # what SessionRelay.apply_settings leaves behind for a normal (non overlay) apply
+    relay.map_behavior_base=copy.deepcopy(settings);relay.map_behavior_signature=None
+    relay.map_behavior_effective=copy.deepcopy(settings);relay.map_behavior_poll=0
+    SessionRelay.sync_map_behavior(relay)
+    assert calls==[] and relay.quest_hunt_id==('q',)

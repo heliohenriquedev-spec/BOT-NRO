@@ -338,12 +338,20 @@ class SessionRelay(QuestRelay):
         from .packet_settings import validate
         from .packet_patrol import PacketPatrol
         from .network_targets import Entity
-        settings = validate(settings)
+        from .hunt_share import apply as published_patrol
+        try:
+            settings = validate(published_patrol(settings))  # the developer's patrol, the same on every PC
+        except ValueError:
+            settings = validate(settings)
         if not map_overlay:
             from copy import deepcopy
             self.map_behavior_base = deepcopy(settings)
             self.map_behavior_signature = None
-            self.map_behavior_effective = None
+            # These settings are the ones in use now: the map behavior only re-applies when a map
+            # profile changes them. With None here, every quest hunt apply was re-applied by the map
+            # behavior, which reset the quest hunt, which applied again... every 0.5 s (skills
+            # delayed, attacks stopping; 2026-11-06).
+            self.map_behavior_effective = deepcopy(settings)
             self.map_behavior_poll = 0
         if self.settings is not None and any(self.settings[k] != settings[k] for k in ('group_enabled','group_role','group_leader')):
             self.group.target_id = None
