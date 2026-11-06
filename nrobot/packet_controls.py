@@ -3,6 +3,7 @@ import ctypes as C
 from pathlib import PureWindowsPath
 import socket
 import struct
+import time
 
 
 def connection_pid(peer, local):
@@ -26,7 +27,15 @@ def connection_pid(peer, local):
 
 
 class GameControls:
+    # The relay asks "is the game still connected?" before every packet, many times per tick.
+    # Reading the whole TCP table and opening the process each time took ~20% of the relay's
+    # time in combat, and that loop also forwards the server's packets to the game (2026-11-06).
+    PID_TTL = 1.0  # s a found connection owner is reused
+    MISS_TTL = .25  # s a missing one is reused
+
     def __init__(self):
+        self.owner_cache = {}  # (peer, local) -> (pid or None, checked at)
+        self.exe_cache = {}  # pid -> is NRO.exe
         self.ui = C.WinDLL('user32')
         self.ui.GetForegroundWindow.restype = C.c_void_p
         self.ui.GetWindowThreadProcessId.argtypes = [C.c_void_p, C.POINTER(C.c_uint32)]
@@ -54,11 +63,30 @@ class GameControls:
     def _check_connection(self, peer, local, require_focus):
         if self.panic() or peer is None or local is None:
             return False
-        expected = connection_pid(peer, local)
+        expected = self.owner(peer, local)
         current = C.c_uint32()
         self.ui.GetWindowThreadProcessId(self.ui.GetForegroundWindow(), C.byref(current))
         if expected is None or (require_focus and current.value != expected):
             return False
+        if expected not in self.exe_cache:
+            if len(self.exe_cache) > 64:
+                self.exe_cache.clear()
+            self.exe_cache[expected] = self.is_game(expected)
+        return self.exe_cache[expected]
+
+    def owner(self, peer, local):
+        key, now = (tuple(peer), tuple(local)), time.monotonic()
+        cached = self.owner_cache.get(key)
+        if cached is not None and now-cached[1] < (self.PID_TTL if cached[0] is not None else self.MISS_TTL):
+            return cached[0]
+        pid = connection_pid(peer, local)
+        if len(self.owner_cache) > 16:
+            self.owner_cache.clear()
+        self.owner_cache[key] = (pid, now)
+        return pid
+
+    @staticmethod
+    def is_game(expected):
         kernel = C.WinDLL('kernel32', use_last_error=True)
         kernel.OpenProcess.argtypes = [C.c_uint32, C.c_int, C.c_uint32]
         kernel.OpenProcess.restype = C.c_void_p

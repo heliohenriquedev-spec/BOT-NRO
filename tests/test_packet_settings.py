@@ -56,15 +56,15 @@ def test_old_config_migrates_and_new_combat_values_reach_running_planner(tmp_pat
     relay.hunt = PacketHunt()
     relay.hunt.start()
     config = {**DEFAULTS, 'skill_interval': .3, 'skill_timeout': 2, 'skill_attempts': 2,
-              'target_defer': 4, 'switch_distance': 10, 'switch_saving': 2, 'switch_ratio_percent': 50}
+              'target_defer': 4, 'switch_distance': 10}  # an obsolete key from older versions is ignored
     relay.apply_settings(config)
     assert relay.hunt.enabled
     assert relay.hunt.SKILL_INTERVAL == .3 and relay.hunt.SKILL_RESPONSE_TIMEOUT == 2
     assert relay.hunt.SKILL_ATTEMPTS == 2 and relay.hunt.TARGET_DEFER == 4
-    assert relay.hunt.SWITCH_DISTANCE == 10 and relay.hunt.SWITCH_SAVING == 2 and relay.hunt.SWITCH_RATIO == .5
+    assert 'switch_distance' not in relay.settings
     for invalid in ({'skill_interval': float('nan')}, {'skill_timeout': float('inf')},
                     {'skill_interval': True}, {'skill_attempts': 0}, {'target_defer': 100},
-                    {'switch_ratio_percent': 100}, {'skill_interval': 3, 'skill_timeout': 1}):
+                    {'skill_interval': 3, 'skill_timeout': 1}):
         with pytest.raises(ValueError): validate(invalid)
 
 

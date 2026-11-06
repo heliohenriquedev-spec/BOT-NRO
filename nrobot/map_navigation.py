@@ -188,12 +188,16 @@ class CollisionMap:
         """A* path. greed > 1 weights the heuristic (much faster, slightly longer paths);
         partial returns the path to the expanded cell closest to target when the budget runs out."""
         start, target = tuple(start), tuple(target)
-        if not self.start_ok(start) or not self.walkable(target):
+        # A monster standing in a forbidden cell (enemy skill area on the floor) is still fought
+        # from the cell next to it: only exact routes need to step on the target cell itself.
+        inside = not self.walkable(target)
+        if not self.start_ok(start) or (inside and (exact or not self.ground(target))):
             return None
+        plain = self.plain() if inside else self
         # Adjacent ground avoids attacking through thin walls or across a gap.
         def goal(p):
             return p == target or (not exact and max(abs(p[i]-target[i]) for i in (0, 1)) == 1
-                                   and self.edge(p, target))
+                                   and self.walkable(p) and plain.edge(p, target))
         def heuristic(p):
             dx, dy = abs(p[0]-target[0]), abs(p[1]-target[1])
             return max(0, max(dx, dy)+(math.sqrt(2)-1)*min(dx, dy)-math.sqrt(2))

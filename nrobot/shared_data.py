@@ -284,14 +284,6 @@ def merge_extras(mine, theirs):
     return result
 
 
-def merge_flat(mine, theirs):
-    """{key: value} learned tables (buffs): what this PC lacks is added."""
-    result = copy.deepcopy(mine) if isinstance(mine, dict) else {}
-    for key, value in (theirs or {}).items():
-        result.setdefault(key, copy.deepcopy(value))
-    return result
-
-
 def merge_lists(mine, theirs):
     """{name: [values]} (GM signs): union, the user's order first."""
     result = copy.deepcopy(mine) if isinstance(mine, dict) else {}

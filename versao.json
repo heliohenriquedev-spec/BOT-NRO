@@ -1,6 +1,6 @@
 {
- "version": "2026.11.06.7",
- "published_at": "2026-11-06T16:23:27",
+ "version": "2026.11.06.8",
+ "published_at": "2026-11-06T17:50:57",
  "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
@@ -1490,7 +1490,6 @@
   "nrobot/map_monsters.py",
   "nrobot/map_navigation.py",
   "nrobot/map_routes.py",
-  "nrobot/map_search.py",
   "nrobot/minimap_overlay.py",
   "nrobot/mission_details.py",
   "nrobot/mob_info.py",
@@ -2150,5 +2149,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "08718a27fa96"
+ "files_digest": "04f9429e9487"
 }

@@ -291,13 +291,6 @@ class PatrolTour:
                 self._plan_matrix.append(array('f', (walked.get(other, math.inf) for other in nodes)))
         return self._plan_index, self._plan_matrix
 
-    def walk_length(self, initial, order):
-        """Walking length of order from the position initial was measured at."""
-        if not order:
-            return 0.0
-        index, matrix = self.walking_matrix()
-        return initial[order[0]]+sum(matrix[index[a]][index[b]] for a, b in zip(order, order[1:]))
-
     def plan_order(self, position, nodes):
         """One continuous walk through nodes from position: the nearest pending point each time,
         then crossings and doubling back removed (2-opt), so the character sweeps the maze in one

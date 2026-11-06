@@ -7,8 +7,7 @@ import re
 import tempfile
 
 FILE = Path(__file__).resolve().parents[1]/'data/rede/comportamentos_mapas.json'
-FIELDS = frozenset(('auto_attacks', 'melee_approach', 'kite', 'skills', 'ignore_attackers',
-    'switch_distance', 'switch_saving', 'switch_ratio_percent'))
+FIELDS = frozenset(('auto_attacks', 'melee_approach', 'kite', 'skills', 'ignore_attackers'))
 
 def map_key(value):
     if not isinstance(value, str):
@@ -31,6 +30,9 @@ def validate(data):
     if not isinstance(description, str) or len(description) > 4000:
         raise ValueError('Descricao invalida')
     settings = data.get('settings')
+    from .packet_settings import OBSOLETE
+    if isinstance(settings, dict):  # older profiles: rules that never had an effect are dropped
+        settings = {k: v for k, v in settings.items() if k not in OBSOLETE}
     if not isinstance(settings, dict) or not settings or set(settings)-FIELDS:
         raise ValueError('Regras vazias ou nao suportadas: '+', '.join(sorted(set(settings or {})-FIELDS)))
     if type(data.get('enabled', True)) is not bool:

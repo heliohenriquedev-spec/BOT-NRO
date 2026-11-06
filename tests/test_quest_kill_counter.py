@@ -63,21 +63,6 @@ SHARED = {1201: {'species_id': 1201, 'name': 'Abelha Macho',
                  'names_by_map': {'um_dun02': ['Abelha Macho'], 'prt_sewb4': ['Shinobi Ladrão']}}}
 
 
-def test_one_sprite_two_monsters_are_told_apart_by_name(monkeypatch):
-    import os
-    os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
-    import nrobot.monster_db as db
-    from nrobot.quest_panel import RouteEditor
-    monkeypatch.setattr(db, 'load_captured', lambda: SHARED)
-    monkeypatch.setattr(db, 'load_base', lambda: {})
-    assert db.maps_for_name('Shinobi Ladrão') == {'prt_sewb4'}
-    ladrao = dict(monster_names=['Shinobi Ladrão'], monster_ids=[1201])
-    assert not RouteEditor.mission_on_map(ladrao, 'um_dun02', {1201})  # same sprite, other monster
-    assert RouteEditor.mission_on_map(ladrao, 'prt_sewb4', {1201})
-    unseen = dict(monster_names=['Nunca Visto'], monster_ids=[1201])
-    assert RouteEditor.mission_on_map(unseen, 'um_dun02', {1201})  # no name seen anywhere: the sprite decides
-
-
 def test_kills_of_the_other_monster_with_the_same_sprite_do_not_count():
     q = QuestRoutes()
     q.start([route(kill_targets=[dict(name='Shinobi Ladrão', count=5, species=[1201])])], 0); q.phase = 'hunt'

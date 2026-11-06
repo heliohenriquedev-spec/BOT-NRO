@@ -8,8 +8,9 @@ CONFIG = ROOT/'data/rede/painel_config.json'
 SPECIES = {1212: 'Akino', 1051: 'Bikouchuu', 1783: 'Filhote de Katsuyu',
            1037: 'Filhote de Cobra', 1034: 'Girino', 1214: 'Onbba', 1836: 'Boneco de Treino'}
 DEFAULTS = {'species': [1037], 'radius': 28, 'patrol': True, 'patrol_step': 8, 'skills': True,
-            'skill_interval': .5, 'skill_timeout': 1.5, 'skill_attempts': 3, 'target_defer': 8,
-            'switch_distance': 6, 'switch_saving': 3, 'switch_ratio_percent': 65}
+            'skill_interval': .5, 'skill_timeout': 1.5, 'skill_attempts': 3, 'target_defer': 8}
+# Saved by older versions; the target is kept until it is gone, so they never had an effect.
+OBSOLETE = ('switch_distance', 'switch_saving', 'switch_ratio_percent')
 DEFAULTS.update(monster_name_choices={})
 DEFAULTS.update(pvp_enabled=False, pvp_all=False, pvp_first=False, pvp_targets=[])
 DEFAULTS.update(auto_map_targets=True, skill_global_delay=.12, require_collision=True, auto_movement=True, skill_profiles=[], auto_attacks=True, advanced_combat=True,
@@ -61,7 +62,7 @@ def validate(data, *, links_path=None):
         # Before: basic attacks on meant walking up to the target. Kite is never switched on by
         # itself: turning basic attacks off made old setups kite without the box being ticked.
         data['melee_approach'], data['kite'] = bool(data['auto_attacks']), False
-    result = {**DEFAULTS, **data}
+    result = {**DEFAULTS, **{k: v for k, v in data.items() if k not in OBSOLETE}}
     if result['summon_queue_mode'] not in ('cycle', 'priority'):
         raise ValueError('Modo da fila Kuchiyose invalido')
     if type(result['group_enabled']) is not bool or type(result['group_follow_only']) is not bool:
@@ -96,8 +97,7 @@ def validate(data, *, links_path=None):
         raise ValueError('Selecione ao menos um monstro conhecido')
     for key, minimum, maximum in (('radius', 8, 60), ('patrol_step', 1, 8), ('patrol_spacing', 6, 40),
                                   ('patrol_coverage', 30, 100), ('patrol_wall_margin', 1, 8), ('patrol_give_up', 3, 60), ('ignore_attackers', 0, 20), ('skill_attempts', 1, 5),
-                                  ('target_defer', 2, 30), ('switch_distance', 4, 28),
-                                  ('switch_saving', 1, 10), ('switch_ratio_percent', 25, 90), ('homun_hunger', 1, 99)):
+                                  ('target_defer', 2, 30), ('homun_hunger', 1, 99)):
         if type(result[key]) is not int or not minimum <= result[key] <= maximum:
             raise ValueError(f'{key}: valor deve estar entre {minimum} e {maximum}')
     for key, minimum, maximum in (('skill_interval', .25, 3), ('skill_timeout', .75, 8), ('skill_global_delay', .1, 10)):

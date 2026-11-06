@@ -45,6 +45,7 @@ def test_reenabling_restores_stops_without_reentering_names(tmp_path):
     r.check_emergency()
     assert r.hunt.enabled
     watchlist.set_enabled(True)
+    r.watch_checked_until = 0  # the relay looks at the files once a second
     r.check_emergency()
     assert not r.hunt.enabled and r.commands_blocked and r.emergency
 

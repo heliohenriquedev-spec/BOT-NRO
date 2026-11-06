@@ -44,3 +44,22 @@ def test_a_lone_monster_far_away_is_not_a_destination():
     scan.start('field', [1], 0, True); scan.sent(1, 0)
     scan.observe([dict(kind='viewpoint', mark_type=1, npc_id=1, position=[150, 150])], .1)
     assert scan.finish([5, 5], 4, collision=CollisionMap(200, 200, [1]*40000)) is None and scan.goal is None
+
+
+def test_every_showmobs_mark_counts_even_with_the_same_npc_id():
+    """rAthena @showmobs sends every mark with npc_id 1 and a mark number: all of them count."""
+    from nrobot.map_navigation import CollisionMap
+    from nrobot.mob_scan import MobScan
+    collision = CollisionMap(120, 120, [1]*14400)
+    scan = MobScan()
+    assert scan.start('m', [1634], 0, idle=True)
+    scan.sent(1634, 0)
+    group = [(80+i, 80+i % 3) for i in range(6)]
+    lone = [(20, 20)]
+    events = [dict(kind='viewpoint', mark_type=1, npc_id=1, mark_id=n+1, position=list(p))
+              for n, p in enumerate(lone+group)]
+    scan.observe(events, 1)
+    assert len(scan.marks) == 7
+    found = scan.finish((60, 60), 5, collision.walkable, collision=collision)
+    assert found['monsters'] == 6 and found['total'] == 7
+    assert tuple(found['position']) in group

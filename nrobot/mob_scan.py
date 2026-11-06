@@ -22,6 +22,13 @@ from collections import Counter, defaultdict
 from .portals import chebyshev
 
 
+def mark_key(npc_id, mark_id, serial=0):
+    """The same key for the relay's minimap marks and the scan's: (npc id, mark number)."""
+    if npc_id is None and mark_id is None:
+        return ('anonymous', serial)
+    return ('mark', npc_id, mark_id)
+
+
 class MobScan:
     INTERVAL = 60.0  # s between two searches of the same hunt
     GAP = 4.0  # s between two @showmobs
@@ -118,8 +125,9 @@ class MobScan:
             if event['kind'] == 'viewpoint' and event.get('mark_type') == 1 and event.get('position'):
                 position=tuple(event['position'])
                 if len(position)!=2 or any(type(v) is not int or not 0<=v<1024 for v in position):continue
-                identity=event.get('npc_id')
-                key=('actor',identity) if identity else ('anonymous',len(self.mark_records))
+                # One mark per monster: the server numbers them (mark_id) under the same npc_id (1 for
+                # @showmobs). Keyed by npc_id alone, 40 monsters became 1 mark and a lone one won.
+                key=mark_key(event.get('npc_id'),event.get('mark_id'),len(self.mark_records))
                 self.mark_records[key]=(position,self.current_species)
         self.marks=[record[0] for record in self.mark_records.values()]
 
@@ -135,7 +143,7 @@ class MobScan:
             if species is not None and allowed and species not in allowed:
                 continue
             npc_id,mark_id=identity
-            key=('actor',npc_id) if npc_id else ('mark',mark_id)
+            key=mark_key(npc_id,mark_id,len(self.mark_records))
             position=tuple(record.get('position') or ())
             if len(position)==2 and all(type(v) is int and 0<=v<1024 for v in position):
                 self.mark_records[key]=(position,species)

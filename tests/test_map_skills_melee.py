@@ -104,18 +104,6 @@ def test_basic_attacks_on_approach_for_melee_off_preserves_ranged_kiting():
     assert retreat['purpose'] == 'keep_distance'
 
 
-def test_basic_attack_waits_while_a_skill_in_reach_is_about_to_be_ready():
-    rotation = CombatRotation([profile(179), profile(523)], priority=[179, 'throws'])
-    snapshot = state()
-    snapshot['ammo'] = None
-    assert rotation.soonest_offensive(snapshot, 10, 20) == 10  # a skill is ready now: no basic attack
-    rotation.ready.update({179: 13, 523: 12})
-    assert rotation.soonest_offensive(snapshot, 10, 20) == 12  # both waiting: a basic attack fits
-    snapshot['recent_entities'][0]['position'] = [30, 10]  # beyond every skill's reach
-    import math
-    assert rotation.soonest_offensive(snapshot, 10, 20) == math.inf
-
-
 def test_basic_attacks_fill_skill_gaps_but_never_preempt_a_ready_skill(tmp_path):
     from nrobot.packet_settings import DEFAULTS
     from nrobot.session_relay import SessionRelay

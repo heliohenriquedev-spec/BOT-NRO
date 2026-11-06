@@ -327,6 +327,9 @@ class Observer:
                 self.player = self.combat_positions(now)[0]
                 self.player_motion = None
             self.cast_until = now+min(event['duration_ms']/1000, 30)
+            # Cast time of each own skill, as the server announced it (TsuutenKyaku ~1.2 s...).
+            self.cast_times = getattr(self, 'cast_times', {})
+            self.cast_times[event.get('skill_id')] = min(event['duration_ms']/1000, 30)
         elif kind in ('skill_damage', 'skill_no_damage') and event['source_id'] == self.player_id:
             self.cast_until = 0
         elif kind == 'skill_failed':

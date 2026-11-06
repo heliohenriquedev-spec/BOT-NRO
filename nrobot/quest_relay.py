@@ -329,9 +329,8 @@ class QuestRelay(SharedQuestRelay):
     async def revive_after_death(self,now,game_gate):
         """Dead during the hunt or a trip with "Ao morrer" on: return to the save point (B2 00 00,
         the button of the death window). Returns False when the queue must stop instead."""
-        from . import quest_extras
         q=self.quests
-        try:config=quest_extras.load()
+        try:config=self.extras_config()
         except OSError:return False
         if not config.get('revive_enabled') or q.validation or q.phase not in ('hunt','travel'):return False
         revive=getattr(self,'revive',None)
@@ -363,13 +362,25 @@ class QuestRelay(SharedQuestRelay):
             await self.upstream.drain()
         return True
 
+    def extras_config(self):
+        """quest_extras.json, read again only when the file changes: the death watch asks every tick."""
+        from . import quest_extras
+        try:
+            info=quest_extras.FILE.stat();stamp=(str(quest_extras.FILE),info.st_mtime_ns,info.st_size)
+        except OSError:
+            stamp=None
+        cached=getattr(self,'extras_cache',None)
+        if cached is None or stamp is None or cached[0]!=stamp:
+            cached=self.extras_cache=(stamp,quest_extras.load())
+        return cached[1]
+
     async def hunt_death_watch(self,now,game_gate):
         """Hunting without the queue (Iniciar): on death, back to the save point, the healer and the map
         where it died, then the same hunt again. True while this owns the character."""
         from . import quest_extras, map_routes
         q=self.quests;o=self.tracker.observer
         pending=getattr(self,'hunt_revive',None)
-        try:config=quest_extras.load()
+        try:config=self.extras_config()
         except OSError:return False
         if pending is None:
             if q.active or q.recording or not (self.hunt and self.hunt.enabled) or o.player_alive or not o.map_name:return False
@@ -753,7 +764,10 @@ class QuestRelay(SharedQuestRelay):
                 self.hunt.target_priority={int(k):v for k,v in priorities.items()}
             elif not self.hunt.enabled:
                 self.quest_stop('Caca interrompida: '+self.hunt.reason);return True
-            goal=goal_reached(q.route,q.body.items(),now) if q.route['id']==DATABASE_HUNT else None
+            goal=None
+            if q.route['id']==DATABASE_HUNT and now-getattr(self,'goal_checked_at',-1e9)>=.5:
+                self.goal_checked_at=now  # the inventory scan twice a second is plenty for a goal
+                goal=goal_reached(q.route,q.body.items(),now)
             if goal:print('[ROTA] Meta da caca concluida: '+goal)
             if goal or q.hunt_complete():
                 self.hunt.pause('Meta da caca concluida: '+goal if goal else 'Objetivo da quest concluido');q.finish_hunt(now);self.quest_hunt_id=None

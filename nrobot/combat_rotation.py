@@ -548,27 +548,6 @@ class CombatRotation:
             return action
         return None
 
-    def soonest_offensive(self, state, now, target_id=None):
-        """When the next enabled offensive skill could be used on the target (inf when none)."""
-        known = {s['skill_id']: s for s in state.get('learned_skills', [])}
-        entities = {e['entity_id']: e for e in state.get('recent_entities', [])}
-        entity = entities.get(target_id)
-        cooldowns = state.get('skill_cooldowns', {})
-        own = state.get('combat_player_positions') or ([state['player_position']] if state.get('player_position') else [])
-        soonest = math.inf
-        for profile in self.profiles:
-            identity, meta = profile['skill_id'], known.get(profile['skill_id'])
-            if (not profile['enabled'] or profile['role'] != 'offensive' or meta is None
-                    or meta['level'] < profile['level'] or (state.get('player_sp') or 0) < meta['sp_cost']):
-                continue
-            if entity is not None and own:
-                position = entity.get('effective_position', entity['position'])
-                if min(math.dist(p, position) for p in own) > configured_range(profile, meta):
-                    continue  # out of this skill's reach: it will not interrupt an attack
-            cooldown = cooldowns.get(identity, cooldowns.get(str(identity), 0))
-            soonest = min(soonest, max(self.ready.get(identity, 0), cooldown, now))
-        return soonest
-
     def last_throw_unconfirmed(self):
         sent = [t for t in self.THROWS if t in self.last_sent]
         if not sent:

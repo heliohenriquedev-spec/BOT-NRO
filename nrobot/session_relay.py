@@ -261,8 +261,6 @@ class SessionRelay(QuestRelay):
         self.map_validation = None
         self.buff_candidates = {}
         self.buff_learning_result = None
-        from .map_search import MapSearch
-        self.map_search = MapSearch()
         self.discovered_monsters = {}
         self.recent_map_sends = deque(maxlen=32)
         from .client_frame_guard import ClientFrameGuard
@@ -367,10 +365,8 @@ class SessionRelay(QuestRelay):
         self.hunt.approach_cache = None
         self.hunt.SEARCH_RADIUS = settings['radius']
         for attribute, key in (('SKILL_INTERVAL', 'skill_interval'), ('SKILL_RESPONSE_TIMEOUT', 'skill_timeout'),
-                               ('SKILL_ATTEMPTS', 'skill_attempts'), ('TARGET_DEFER', 'target_defer'),
-                               ('SWITCH_DISTANCE', 'switch_distance'), ('SWITCH_SAVING', 'switch_saving')):
+                               ('SKILL_ATTEMPTS', 'skill_attempts'), ('TARGET_DEFER', 'target_defer')):
             setattr(self.hunt, attribute, settings[key])
-        self.hunt.SWITCH_RATIO = settings['switch_ratio_percent']/100
         # REDE-82: failure rules can be switched off.
         if not settings['limit_target_failures']:
             self.hunt.SKILL_ATTEMPTS = 10**9
@@ -937,6 +933,15 @@ class SessionRelay(QuestRelay):
         finally:
             self.hunt.patrol=old_patrol
 
+    def map_monster_names_cached(self, player_id):
+        """Monster names of the map for the panel: rebuilt once a second, not on every tick."""
+        now = time.monotonic()
+        cached = getattr(self, 'monster_names_cache', None)
+        if cached is None or now-cached[0] >= 1 or cached[1] != player_id:
+            from .map_monsters import confirmed_types
+            cached = self.monster_names_cache = (now, player_id, list(confirmed_types(self.inventory, player_id, by_name=True).values()))
+        return cached[2]
+
     def sync_presence_names(self):
         self.load_watchlist()
         from .network_targets import is_player_id
@@ -1458,8 +1463,60 @@ class SessionRelay(QuestRelay):
         return best[1]
 
     def record_hunt(self, event):
-        with (self.folder/'caca_eventos.jsonl').open('a', encoding='utf-8') as log:
-            log.write(json.dumps({'time': datetime.now().isoformat(), **event}, ensure_ascii=False)+'\n')
+        self.note_skill_result(event)
+        # Kept open: opening the file for each of the ~20 events a second cost ~5% of the relay.
+        log, path = getattr(self, 'hunt_log_file', None), self.folder/'caca_eventos.jsonl'
+        if log is None or log.closed or getattr(self, 'hunt_log_path', None) != path:
+            if log is not None and not log.closed:
+                log.close()
+            log = self.hunt_log_file = path.open('a', encoding='utf-8')
+            self.hunt_log_path = path
+        log.write(json.dumps({'time': datetime.now().isoformat(), **event}, ensure_ascii=False)+'\n')
+        log.flush()
+
+    SKILL_FAIL_WINDOW = 1.5  # s of offensive skills on one target without any confirmed hit
+    SKILL_FAIL_SENDS = 3
+    SKILL_FAIL_RETURN = 1.0  # s before that target is taken again
+
+    def note_skill_result(self, event):
+        """Offensive skills sent and hits confirmed per target, for skill_failure_switch."""
+        kind = event.get('kind')
+        if kind == 'rotation_skill_sent' and event.get('role') == 'offensive':
+            now, target = time.monotonic(), event.get('target_id')
+            track = getattr(self, 'skill_fail_track', None)
+            if track is None or track[0] != target:
+                track = [target, now, 0]
+            track[2] += 1
+            self.skill_fail_track = track
+        elif kind in ('rotation_skill_confirmed', 'attack_confirmed', 'rotation_control_confirmed'):
+            track = getattr(self, 'skill_fail_track', None)
+            if track is not None and track[0] == event.get('target_id'):
+                self.skill_fail_track = [track[0], time.monotonic(), 0]
+
+    def skill_failure_switch(self, state, now):
+        """Many offensive skills on one target and none taking: go for the next monster close by now,
+        and back to this one a second later."""
+        track = getattr(self, 'skill_fail_track', None)
+        hunt = self.hunt
+        if (track is None or hunt is None or track[0] != hunt.target or track[2] < self.SKILL_FAIL_SENDS
+                or now-track[1] < self.SKILL_FAIL_WINDOW):
+            return False
+        target = track[0]
+        own = state.get('player_position')
+        others = [e for e in state.get('recent_entities', []) if e['entity_id'] != target
+                  and hunt.excluded_until.get(e['entity_id'], 0) <= now and not hunt.walled(e['entity_id'], now)
+                  and own is not None and math.dist(own, e.get('effective_position', e['position'])) <= hunt.SEARCH_RADIUS]
+        self.skill_fail_track = None
+        if not others:
+            return False  # alone: keep at it (the approach moves closer when out of reach)
+        hunt.excluded_until[target] = now+self.SKILL_FAIL_RETURN
+        if hunt.engaged == target:
+            hunt.engaged = None
+        hunt.target = hunt.pending = None
+        hunt.approach_cache = None
+        self.record_hunt({'kind': 'target_switched_skill_failures', 'target_id': target,
+                          'seconds': round(now-track[1], 2), 'skills_sent': track[2]})
+        return True
 
     def flush_hunt_diagnostics(self):
         if self.hunt is not None:
@@ -1886,7 +1943,7 @@ class SessionRelay(QuestRelay):
                                  if self.own_option & 0x4046 else None),
                      native_frame_error=self.native_frames.error,
                      map_monsters=list(self.discovered_monsters.values()),
-                     map_monster_names=list(confirmed_types(self.inventory, observer.player_id, by_name=True).values()),
+                     map_monster_names=self.map_monster_names_cached(observer.player_id),
                      buff_candidates=dict(self.buff_candidates), buff_learning_result=self.buff_learning_result,
                      map_validation=self.map_validation,
                      control_result=self.control_result, settings=self.settings,
@@ -1896,13 +1953,9 @@ class SessionRelay(QuestRelay):
                      upstream_connected=self.upstream is not None,
                      updated_at=datetime.now().isoformat())
         if self.hunt is not None:
-            goal = self.map_search.plan(self.inventory, state.get('player_position'), self.tracker.observer.species,
-                                        time.monotonic(), self.collision_map()) if self.hunt.patrol is not None else None
-            state['search_goal'] = goal
             scan = self.mob_scan.current_goal(observer.player, time.monotonic()) if self.quests.active else None
             state['showmobs_goal'] = {'position': scan} if scan else None
             state['showmobs_failed'] = bool(self.quests.active and self.mob_scan.map_failed(observer.map_name))
-            state['map_search'] = self.map_search.summary
             state['hunt'] = self.hunt.snapshot()
             if self.rotation is not None:
                 state['rotation'] = self.rotation.snapshot()
@@ -1928,7 +1981,7 @@ class SessionRelay(QuestRelay):
         if time.monotonic()-self.last_status_written >= .1 or self.stage == 'stopped':
             try:
                 temp = self.folder/'estado.tmp'
-                temp.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
+                temp.write_text(json.dumps(state, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
                 temp.replace(self.folder/'estado.json')
                 # The overlay needs fast status updates; the complete historical
                 # inventory does not need to serialize and rewrite ten times/sec.
@@ -2702,6 +2755,19 @@ class SessionRelay(QuestRelay):
 
     def load_watchlist(self):
         from . import watchlist
+        now = time.monotonic()
+        if now < getattr(self, 'watch_checked_until', 0) and self.watch_stamp is not None:
+            stamp = self.watch_stamp  # the files are looked at once a second, not on every tick
+        else:
+            self.watch_checked_until = now+1
+            stamp = self.watch_files_stamp(watchlist)
+        if stamp != self.watch_stamp:
+            self.watch_stamp, self.watch_entries = stamp, watchlist.load()
+            self.watch_enabled = watchlist.enabled()
+        return self.watch_entries_effective()
+
+    @staticmethod
+    def watch_files_stamp(watchlist):
         stamp = []
         for path in (watchlist.FILE, watchlist.FILE.with_name('observacao_opcoes.json')):
             try:
@@ -2709,10 +2775,9 @@ class SessionRelay(QuestRelay):
                 stamp.append((info.st_mtime_ns, info.st_size))
             except OSError:
                 stamp.append(None)
-        stamp = tuple(stamp)
-        if stamp != self.watch_stamp:
-            self.watch_stamp, self.watch_entries = stamp, watchlist.load()
-            self.watch_enabled = watchlist.enabled()
+        return tuple(stamp)
+
+    def watch_entries_effective(self):
         from .presence_guard import normalize_player_name
         on = getattr(self, 'watch_enabled', True)
         self.presence.observation_ignored = {int(e) for e in self.watch_entries if e.isdigit()} if not on else set()
@@ -2774,8 +2839,8 @@ class SessionRelay(QuestRelay):
                 key = (event.get('npc_id'), event.get('mark_id'))
                 if event.get('mark_type') == 2:
                     self.viewpoint_marks.pop(key, None)
-                    if event.get('npc_id'):
-                        self.mob_scan.mark_records.pop(('actor', event['npc_id']), None)
+                    from .mob_scan import mark_key
+                    self.mob_scan.mark_records.pop(mark_key(event.get('npc_id'), event.get('mark_id')), None)
                 elif event.get('mark_type') == 1:
                     species = self.mob_scan.current_species if now-self.mob_scan.sent_at <= self.mob_scan.LISTEN else None
                     self.viewpoint_marks[key] = {'position': list(event['position']), 'species': species, 'at': now}
@@ -2826,6 +2891,8 @@ class SessionRelay(QuestRelay):
             pass  # a display problem must never disconnect the game
 
     def observation_suspended_for_route(self):
+        """Trips between maps (quests, database hunt, return after death, BG, heal test), NPC talks and
+        mount/equipment/@voltar: watched players neither stop the bot nor alert; only the hunt does."""
         q = self.quests
         return q.active and (q.phase != "hunt" or bool(q.errands))
 
@@ -2834,16 +2901,9 @@ class SessionRelay(QuestRelay):
         from . import watchlist
         from .presence_guard import OPTION_INVISIBLE
         now = time.monotonic()
-        entries = self.load_watchlist()
         if self.observation_suspended_for_route():
-            # Quest trips and errands: players around do not stop it, but a character on the
-            # observation list always does while "Ativar observacao" is ticked.
-            if not entries:
-                return []
-            self.sync_presence_names()
-            state = {'presence': self.presence.snapshot(self.tracker.observer.player, now),
-                     'players_nearby': self.players_nearby()}
-            return [{**d, 'watched': True} for d in watchlist.detections(entries, state, self.registry.players)]
+            return []  # trips between maps and errands go on; the hunt (patrol) stops
+        entries = self.load_watchlist()
         hidden_gm = self.gm_detection_on() and any(h['option'] & OPTION_INVISIBLE for h in self.presence.hidden.values())
         self.sync_presence_names()
         signs = self.gm_signs_found(now)
@@ -2976,6 +3036,21 @@ class SessionRelay(QuestRelay):
         if not attack_turn and now < max(self.rotation.next_send, self.tracker.observer.cast_until):
             return None
         return action
+
+    SLOW_CAST = .3  # s: an offensive skill casting this long gives way to basic attacks
+
+    def prefer_basic_attack(self, rotation_action, action, state, now):
+        """Map behavior: with the monster right next to the character and basic attacks possible, a
+        skill with a cast time waits. TsuutenKyaku cast for ~1.3 s (~90k) while ~8 basic attacks of
+        65535 each would have landed (Lider Jounin, ra_fild03 2026-11-06)."""
+        if (rotation_action is None or rotation_action.get('role') != 'offensive' or action is None
+                or action['kind'] != 'attack' or self.active_map_combat() is None
+                or not (self.settings and self.settings['auto_attacks'])):
+            return rotation_action
+        cast = getattr(self.tracker.observer, 'cast_times', {}).get(rotation_action.get('skill_id'), 0)
+        if cast < self.SLOW_CAST or not self.map_damage_allowed(action['target_id'], state, now, basic=True):
+            return rotation_action
+        return None
 
     def attack_turn(self, action, rotation_action=None):
         """Use a basic attack only when no rotation skill is ready to send."""
@@ -3536,6 +3611,7 @@ async def run(args):
                                     summon_maintenance = (not state.get('player_focus')
                                                           and relay.rotation.summon_maintenance_required(state, now, relay.hunt.target))
                                     rotation_action = relay.plan_map_rotation(state, now, relay.hunt.target)
+                                    rotation_action = relay.prefer_basic_attack(rotation_action, action, state, now)
                                     attack_turn = (relay.map_damage_allowed(relay.hunt.target,state,now,basic=True) and not summon_maintenance
                                                    and relay.last_combat_packet == 'skill' and now >= relay.tracker.observer.cast_until
                                                    and relay.attack_turn(action, rotation_action))
@@ -3552,6 +3628,8 @@ async def run(args):
                                         hold_movement=not skill_sent and rotation_action is not None and rotation_action.get('cast_mode') == 'ground'
                                             and rotation_action.get('role') == 'summon' and rotation_action.get('cast_range', 1) == 0)
                                     relay.flush_rotation_diagnostics()
+                                    if relay.skill_failure_switch(state, time.monotonic()):
+                                        action = None  # the next tick picks the other monster
                                 if action is not None and action['kind'] in ('attack','skill') and not relay.map_damage_allowed(action['target_id'],state,time.monotonic(),basic=action['kind']=='attack'):
                                     action = None
                                 if action is not None and action['kind'] == 'attack' and relay.settings and not relay.settings['auto_attacks']:

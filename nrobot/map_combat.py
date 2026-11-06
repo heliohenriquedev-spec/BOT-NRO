@@ -215,7 +215,10 @@ class MapCombat:
             targeting_other=recent and target not in (None,state.get('player_id'))
             proactive=entity['species_id'] in rule.get('proactive_species',[]) and not targeting_other
             committed=entity['entity_id']==self.pull_id and not targeting_other
-            if distance<=rule['radius'] and (not rule['only_targeting_player'] or targeting_us or proactive or committed
+            # Put to sleep, stunned or silenced by us, or already hit: still ours to kill. A controlled
+            # monster stops targeting the player, so it fell out of the candidates and was never hit.
+            engaged=entity['entity_id'] in self.history or entity['entity_id'] in self.attacked
+            if distance<=rule['radius'] and (not rule['only_targeting_player'] or targeting_us or proactive or committed or engaged
                                               or entity['species_id'] in rule.get('approach_species',[])):
                 result.append(entity)
             elif rule.get('seek_when_clear') and not self.no_chase(entity['species_id']) and not targeting_other:
@@ -318,10 +321,6 @@ class MapCombat:
             return intent or dict(target_id=kill['entity_id'],mode='control',skill_id=None,reason='Doki aguardando silencio disponivel')
         reason='aproximando alvo visivel em area livre' if kill['entity_id']==self.pull_id and rule and self.distance(state,kill)>rule['radius'] else 'prioridade de morte'
         return dict(target_id=kill['entity_id'],mode='kill',skill_id=None,reason=reason)
-
-    def damage_allowed(self,identity,state,rotation,now):
-        intent=self.decide(state,rotation,now,current=identity)
-        return bool(intent and intent['mode']=='kill' and intent['target_id']==identity)
 
     def plan(self,state,rotation,now,current=None,*,intent=None):
         intent=intent or self.decide(state,rotation,now,current=current)

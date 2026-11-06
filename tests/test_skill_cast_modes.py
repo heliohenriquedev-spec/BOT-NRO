@@ -50,9 +50,8 @@ def test_self_offensive_success_ack_is_execution_not_fake_damage():
 def test_override_controls_planning_navigation_and_basic_attack_priority():
     p=profile(distance=5);r=CombatRotation([p]);s=snapshot(flags=1,distance=5,reach=2)
     assert r.engagement_range(s)==5 and r.plan(s,0,20)
-    assert r.soonest_offensive(s,0,20)==0
     s['recent_entities'][0]['position']=[16,10]
-    assert r.plan(s,0,20) is None and math.isinf(r.soonest_offensive(s,0,20))
+    assert r.plan(s,0,20) is None
     p['range_override']=None
     assert r.engagement_range(s)==2
 

@@ -61,7 +61,6 @@ def test_server_clock_uses_round_trip_of_time_requests():
     assert abs(clock.to_local(10_000, 100.5)-100.5) < 1e-9
     clock.request_sent(200.0)
     clock.time_reply(109_000, 200.008)
-    assert abs(clock.round_trip-.008) < 1e-9
     assert abs(clock.to_local(109_500, 201) - 200.504) < 1e-6
     assert clock.to_local(200_000, 201) == 201  # never in the future of arrival
 

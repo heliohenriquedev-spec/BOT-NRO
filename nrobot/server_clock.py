@@ -30,10 +30,6 @@ class ServerClock:
             return min(self.samples)[1]
         return self.fallback
 
-    @property
-    def round_trip(self):
-        return min(self.samples)[0] if self.samples else None
-
     def to_local(self, tick, now):
         """Local time of a server tick, never in the future of the packet's arrival."""
         if self.offset is None:

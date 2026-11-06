@@ -167,10 +167,7 @@ class PacketPanel(QMainWindow):
         fields = [('skill_global_delay', 'Delay global local (nao confirma delay do servidor)', .1, 10, ' s'),
                   ('skill_timeout', 'Espera máxima pela resposta', .75, 8, ' s'),
                   ('skill_attempts', 'Falhas permitidas por alvo', 1, 5, ''),
-                  ('target_defer', 'Adiar alvo após falhas', 2, 30, ' s'),
-                  ('switch_distance', 'Permitir troca quando alvo atual estiver além de', 4, 28, ' células'),
-                  ('switch_saving', 'Economia mínima de distância para trocar', 1, 10, ' células'),
-                  ('switch_ratio_percent', 'Distância do novo alvo: no máximo esta % da atual', 25, 90, ' %')]
+                  ('target_defer', 'Adiar alvo após falhas', 2, 30, ' s')]
         for key, label, minimum, maximum, suffix in fields:
             box = QDoubleSpinBox() if key in ('skill_interval', 'skill_timeout', 'skill_global_delay') else QSpinBox()
             box.setRange(minimum, maximum)
@@ -188,7 +185,7 @@ class PacketPanel(QMainWindow):
                 row.addWidget(toggle)
                 row.addWidget(box, 1)
                 combat_form.addRow(label, row)
-            elif not key.startswith('switch_'):
+            else:
                 combat_form.addRow(label, box)
         explanation = QLabel('O alvo atual é mantido enquanto estiver presente e válido. Cooldown informado pelo servidor, '
                              'alcance e SP continuam obrigatórios. As alterações são salvas e aplicadas sozinhas.')
@@ -714,7 +711,9 @@ class PacketPanel(QMainWindow):
             name = (state.get('own_look') or {}).get('name')
             if name and name != self.character:
                 self.switch_character(name)
-            transit = state.get('observation_suspended_for_route', False)  # chat alerts only
+            transit = state.get('observation_suspended_for_route', False)
+            if transit:
+                self.watch_alert.hide()
             chat_alert = state.get('chat_alert')
             if chat_alert and chat_alert['id'] != getattr(self, 'chat_alert_seen', None):
                 self.chat_alert_seen = chat_alert['id']
@@ -731,7 +730,7 @@ class PacketPanel(QMainWindow):
                 self.emergency_seen = emergency['id']
                 detections = [d for d in emergency['detections']
                               if self.player_panel.observe_enabled.isChecked() or not d.get('watched')]
-                if not emergency.get('released') and detections:  # watched players stop quest trips too
+                if not transit and not emergency.get('released') and detections:
                     self.watch_alert.show_alert(detections, stopped=emergency['reason'])
                     self.log.appendPlainText(f"[PARADA] {emergency['at']}: {emergency['reason']}")
             if self.monster_panel.isVisible():
@@ -797,7 +796,6 @@ class PacketPanel(QMainWindow):
                 'Rotação: '+str((state.get('rotation') or {}).get('reason', 'modo simples'))+
                 f" • Buffs confirmados: {(state.get('rotation') or {}).get('confirmed_buffs', 0)}",
                 'Habilidades: '+hunt.get('skill_reason', 'desativadas'),
-                'Memoria do mapa: '+str((state.get('map_search') or {}).get('received_species_entities', 0))+' monstros recebidos; destino de busca: '+str((state.get('map_search') or {}).get('goal') or 'explorando areas sem dados'),
                 'Municao: '+str((state.get('ammo') or {}).get('reason', 'aguardando'))+' | '+', '.join(str(v.get('name'))+': '+str(v.get('amount'))+(' (equipada)' if v.get('ready') else '') for v in (state.get('ammo') or {}).get('options', {}).values()),
                 'F2 recebido do servidor: '+f2_description,
                 'Erro da conexão: '+str(state.get('relay_error') or state.get('native_frame_error') or state.get('reason') or 'nenhum'),

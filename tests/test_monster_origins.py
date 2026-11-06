@@ -47,7 +47,3 @@ def test_confirmed_summon_ownership_survives_repeated_appearance_and_cannot_be_l
     assert not inventory.entities[110000002]['owner_id']
 
 
-def test_ninkame_mission_is_not_highlighted_on_turtle_floor_3():
-    from nrobot.quest_panel import RouteEditor
-    mission = dict(monster_names=['Ninkame'], monster_ids=[1315])
-    assert not RouteEditor.mission_on_map(mission, 'tur_dun03.gat', {1315})

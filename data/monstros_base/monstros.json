@@ -1966,7 +1966,7 @@
    "prt_fild00": 0
   },
   "walk_speed_ms": 170,
-  "name": "Líder Jounin",
+  "name": "Jounin",
   "max_hp": 30000000,
   "sprite_source": "Jounin.spr (Naruto Ultimate)",
   "captured_sprite": true,

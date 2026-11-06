@@ -89,7 +89,7 @@ def test_emergency_threshold_three_confirmations_then_unlock_and_escape(config):
     ack=dict(kind='skill_no_damage',skill_id=668,source_id=1,target_id=1,success=True)
     c.observe([ack],1,103.1);r.observe([ack],1,103.1)
     assert c.emergency.phase=='retreat'
-    assert not c.damage_allowed(10,s,r,104)
+    assert not kill_intent(c,10,s,r,104)
     # Distance alone does not mean off-screen; wait for disappearance from received visibility.
     for e in s['recent_entities']:e['position']=[40,40]
     assert c.decide(s,r,104)['phase']=='retreat'
@@ -101,12 +101,25 @@ def test_two_jounin_or_third_beyond_five_does_not_trigger(config):
         c=MapCombat(config);r=rotation(config)
         assert c.decide(state(rows),r,100)['mode']=='control'
 
-def test_failed_seal_does_not_count_and_sequence_timeout_retreats(config):
+def test_unconfirmed_seals_drop_the_sequence_and_the_fight_goes_on(config):
     c=MapCombat(config);r=rotation(config);s=emergency_state()
     a=c.plan(s,r,100);c.sent(a,100);r.sent(a,100)
     c.observe([dict(kind='skill_no_damage',skill_id=500,source_id=1,target_id=1,success=False)],1,100.1)
     assert c.emergency.confirmed==0
-    assert c.decide(s,r,113)['phase']=='retreat'
+    intent=c.decide(s,r,113)  # 12 s without the seals: no escape, normal combat
+    assert c.emergency.phase is None and (intent is None or intent['mode']!='emergency')
+    later=c.decide(s,r,120)  # and no new emergency for a while
+    assert later is None or later['mode']!='emergency'
+
+
+def test_two_seals_without_answer_drop_the_sequence_early(config):
+    c=MapCombat(config);r=rotation(config);s=emergency_state()
+    assert c.decide(s,r,100)['mode']=='emergency'
+    c.emergency.waiting=dict(skill_id=500,stage='prepare',deadline=101)
+    c.decide(s,r,101.5)
+    c.emergency.waiting=dict(skill_id=500,stage='prepare',deadline=103)
+    intent=c.decide(s,r,103.5)
+    assert c.emergency.phase is None and (intent is None or intent['mode']!='emergency')
 
 def test_retreat_walks_valid_route_away_and_does_not_touch_patrol(config):
     from nrobot.map_navigation import CollisionMap
@@ -157,3 +170,19 @@ def test_emergency_retreat_can_be_sent_without_patrol_interrupt(tmp_path,config)
     relay.upstream=Writer()
     asyncio.run(relay.send_hunt_action(action,game_gate=lambda:True))
     assert len(relay.upstream.packets)==1
+
+
+def kill_intent(combat, identity, state, rotation, now):
+    """The map behavior plans a kill on this monster (what the relay's map_damage_allowed asks)."""
+    intent = combat.decide(state, rotation, now, current=identity)
+    return bool(intent and intent['mode'] == 'kill' and intent['target_id'] == identity)
+
+
+def test_jounin_put_to_sleep_and_silenced_is_attacked_normally(config):
+    c=MapCombat(config);r=rotation(config)
+    jounin=entity(10,1634);jounin['body_state']=4  # asleep
+    s=state([jounin])
+    c.history[10]={'sleep':50,'silence':51}  # controlled by us long ago: no longer targeting the player
+    c.statuses=lambda e:dict(stun=False,sleep=True,silence=True)
+    intent=c.decide(s,r,100)
+    assert intent and intent['mode']=='kill' and intent['target_id']==10

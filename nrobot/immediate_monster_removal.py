@@ -5,6 +5,7 @@ from .packet_reader import message_length
 
 
 class ImmediateMonsterRemoval:
+    MULTI_HIT = 8  # rAthena DMG_MULTI_HIT: the client draws one hit per div
     def __init__(self, account, is_monster):
         self.account = account
         self.is_monster = is_monster
@@ -55,6 +56,14 @@ class ImmediateMonsterRemoval:
                     motion = struct.unpack_from('<i', packet, 20)[0]
                     if motion > 60:
                         struct.pack_into('<i', packet, 20, 60)
+            elif size == 29 and packet[:2] == b'\x8a\x00' and packet[26] == self.MULTI_HIT:
+                # Basic attack hitting twice (Jyuuken Ryuu / Double Attack): drawn as one hit with
+                # the same damage, like the multi-hit skills above. The server is not affected.
+                if struct.unpack_from('<h', packet, 24)[0] > 1:
+                    struct.pack_into('<h', packet, 24, 1)
+                    packet[26] = 0
+                    if struct.unpack_from('<i', packet, 18)[0] > 60:
+                        struct.pack_into('<i', packet, 18, 60)
             output.extend(packet)
             offset += size
         del self.pending[:offset]

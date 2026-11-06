@@ -4,6 +4,22 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.06.8 (06/11/2026)
+
+- Desempenho: o bot ficou mais leve durante a caça, o que reduz o lag no combate. Ele deixou de repetir a cada instante a checagem da conexão do jogo e as leituras dos arquivos da lista de observação e das opções da fila, e parou de calcular uma busca de monstros que não era usada. Também não reabre mais o arquivo de registro da caça a cada evento. Como os pacotes do servidor passam pelo bot antes de chegar ao jogo, isso deixa as respostas mais rápidas.
+- Combate: se o bot manda habilidades ofensivas em um monstro por 1,5 s e nenhuma acerta, ele passa para outro monstro próximo e volta ao primeiro depois de 1 s. Se não houver outro monstro, continua no mesmo.
+- Áreas de habilidade no chão (veneno e outras):
+  - Um monstro em cima da área agora é atacado da célula ao lado, sem o bot pisar nela. Antes, o bot desistia do monstro por 8 s.
+  - Se a área bloqueia o caminho até o alvo, o bot troca para outro monstro próximo que ele consiga alcançar e volta ao primeiro depois de 1 s. Faz no máximo uma troca a cada 3 s, para não ficar pulando entre monstros sem atacar. Se não houver outro alcançável, chega o mais perto que a área permite.
+- Monstros dormindo, atordoados ou silenciados pelo bot voltam a ser atacados normalmente. Antes, como deixavam de mirar no personagem, saíam da lista de alvos do comportamento do mapa.
+- Emergência dos Jounin (Selo de Mão: Coelho ×3 e Fukai Kemuri): se o servidor não confirma os Selos, o bot desiste da sequência e continua lutando, sem nova emergência por 30 s. Antes ele sempre acabava fugindo sem atacar. A fuga só acontece depois da Fukai Kemuri confirmada e dura no máximo 8 s.
+- Limpeza: removidas três opções antigas de troca de alvo por distância, que ficavam escondidas no painel e não tinham efeito. Também saiu a busca de "último monstro visto", substituída pela patrulha e pelo @showmobs, e a linha "Memória do mapa" do painel.
+- Comportamento do mapa: com o monstro colado e o ataque básico disponível, habilidades ofensivas com tempo de conjuração esperam, e o bot bate. Exemplo: TsuutenKyaku, ~1,3 s de conjuração. As habilidades instantâneas continuam na rajada.
+- Jyuuken Ryuu (Ataque Duplo): o ataque básico que acerta duas vezes agora aparece na tela como um único golpe, com o mesmo dano, como já acontecia com as habilidades de vários acertos. Só muda o que o jogo desenha.
+
+- @showmobs: agora todos os monstros encontrados contam. Antes só um era contado, e o bot ia atrás de um monstro sozinho ou desistia e passava a varrer o mapa em linha. Agora vai para onde há mais monstros juntos.
+- Lista de observação: voltou a valer só na caça (patrulhando ou lutando). Nos percursos entre mapas, o bot não para nem alerta por jogadores da lista. Isso inclui fila de quests, caça pela database, volta depois de morrer, BG e teste de cura, além das tarefas da fila (montaria, equipamentos, @voltar).
+
 ## 2026.11.06.7 (06/11/2026)
 
 - Caça: corrigido o personagem parado sem bater quando estava em cima de uma área de habilidade inimiga no chão. Os monstros ao redor eram tratados como se estivessem atrás de uma parede, e nenhum era atacado. Agora ele ataca normalmente, e as rotas continuam evitando a área.

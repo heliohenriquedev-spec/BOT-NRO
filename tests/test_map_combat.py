@@ -66,9 +66,9 @@ def test_radius_boundary(config):
 def test_doki_passive_and_resilence(config):
     c=MapCombat(config);r=rotation(config);s=state([entity(10,1177)])
     assert c.decide(s,r,100)['skill_id']==76
-    assert not c.damage_allowed(10,s,r,100)
+    assert not kill_intent(c,10,s,r,100)
     s['recent_entities'][0]['health_state']=4
-    assert c.damage_allowed(10,s,r,100)
+    assert kill_intent(c,10,s,r,100)
     c.observe([dict(kind='normal_attack',source_id=1,target_id=10)],1,101)
     s['recent_entities'][0]['health_state']=0
     assert c.decide(s,r,102)['skill_id']==179
@@ -198,3 +198,9 @@ def test_sleeping_target_kept_for_silence_and_doki_damage_gated(tmp_path,config)
     assert len(relay.upstream.packets)==1 and relay.map_combat.history[identity]['silence']>0
     relay.inventory.observe([dict(kind='option_change',entity_id=identity,body_state=4,health_state=4)],now+.1)
     assert relay.map_damage_allowed(identity,relay.status(),now+.1)
+
+
+def kill_intent(combat, identity, state, rotation, now):
+    """The map behavior plans a kill on this monster (what the relay's map_damage_allowed asks)."""
+    intent = combat.decide(state, rotation, now, current=identity)
+    return bool(intent and intent['mode'] == 'kill' and intent['target_id'] == identity)

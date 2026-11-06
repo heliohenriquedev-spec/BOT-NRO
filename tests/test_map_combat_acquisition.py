@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 import copy
 import json
 from pathlib import Path
@@ -23,10 +23,10 @@ def test_doki_passive_selected_without_targeting_but_silenced_before_damage(conf
     c,r,s=setup(config,[entity(10,1177,24)])
     intent=c.decide(s,r,100)
     assert intent['target_id']==10 and intent['skill_id']==76
-    assert not c.damage_allowed(10,s,r,100)
+    assert not kill_intent(c,10,s,r,100)
     s['recent_entities'][0]['health_state']=4
     assert c.decide(s,r,101)['mode']=='kill'
-    assert c.damage_allowed(10,s,r,101)
+    assert kill_intent(c,10,s,r,101)
 
 def test_nearby_threat_preempts_distant_acquisition(config):
     c,r,s=setup(config,[entity(10,1315,33),entity(11,1634,24)])
@@ -93,3 +93,9 @@ def test_log_ninkame_coordinates_now_produce_approach(tmp_path,config):
     assert action.get('purpose')!='patrol'
     asyncio.run(relay.send_hunt_action(action,game_gate=lambda:True))
     assert len(relay.upstream.packets)==1
+
+
+def kill_intent(combat, identity, state, rotation, now):
+    """The map behavior plans a kill on this monster (what the relay's map_damage_allowed asks)."""
+    intent = combat.decide(state, rotation, now, current=identity)
+    return bool(intent and intent['mode'] == 'kill' and intent['target_id'] == identity)

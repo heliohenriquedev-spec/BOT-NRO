@@ -54,11 +54,6 @@ class GmSigns:
                     times = [t for t in self.teleports.get(identity, []) if now-t <= TELEPORT_WINDOW]+[now]
                     self.teleports[identity] = times
 
-    def teleported_often(self, identity, now):
-        """Teleported in next to us again and again. Only a note: town portals do the same, so this
-        never stops the bot on its own."""
-        return len([t for t in self.teleports.get(identity, []) if now-t <= TELEPORT_WINDOW]) >= TELEPORTS
-
     def reasons(self, row, entry, speed_ms, now):
         """Why this visible character looks like staff ([] when nothing points to it)."""
         found = []

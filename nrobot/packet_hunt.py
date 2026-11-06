@@ -13,9 +13,6 @@ class PacketHunt:
     SKILL_RESPONSE_TIMEOUT = 1.5
     SKILL_ATTEMPTS = 3
     TARGET_DEFER = 8
-    SWITCH_DISTANCE = 6
-    SWITCH_SAVING = 3
-    SWITCH_RATIO = .65
     # REDE-62: a monster we hit (or that hits us) is kept until it dies or leaves the
     # client view; only this long without any confirmed damage releases it.
     ENGAGED_GIVE_UP = 15
@@ -466,8 +463,11 @@ class PacketHunt:
         self.ready_at = now+.15
 
     UNREACHABLE_DEFER = 8.0  # s: no way to it / across a wall, even with failed-target deferral off
+    HAZARD_RETURN = 1.0  # s: a monster cut off by a skill area on the floor is taken again this soon
+    HAZARD_SWITCH_GAP = 3.0  # s between two switches caused by skill areas on the floor
+    hazard_switch_at = -1e9
 
-    def abandon(self, now, reason, defer=None, *, force=False):
+    def abandon(self, now, reason, defer=None, *, force=False, exact=False):
         if not force and self.target is not None and self.target == self.engaged:
             if now < self.engaged_until:
                 # Transient failures (cell changed, line blocked, retries) never drop the fight.
@@ -485,7 +485,7 @@ class PacketHunt:
         if self.target is not None:
             # With deferral off (TARGET_DEFER 0) an unreachable monster was picked again on the next
             # tick, 2600 times in 30 minutes, the character standing still (2026-11-05).
-            self.excluded_until[self.target] = now+max(self.TARGET_DEFER, defer or 0)
+            self.excluded_until[self.target] = now+(defer if exact and defer is not None else max(self.TARGET_DEFER, defer or 0))
             self.record('target_ignored', target_id=self.target, reason=reason)
         self.reason = reason
         self.target = self.pending = None
@@ -625,9 +625,6 @@ class PacketHunt:
                 # put aside): the relay must not stop this patrol step for one of them.
                 self.passed_over = {e['entity_id'] for e in state['recent_entities']}
                 if self.auto_movement and self.patrol is not None:
-                    search_goal = state.get('search_goal')
-                    if collision is not None:
-                        search_goal = None  # coverage cycle owns exploration; old sightings cannot reorder it
                     # @showmobs supplies a real monster coordinate; walk to that cell through the
                     # collision map, then resume the persistent coverage circuit.
                     focus = (state.get('showmobs_goal') or {}).get('position')
@@ -635,8 +632,8 @@ class PacketHunt:
                     self.patrol.linear = bool(state.get('showmobs_failed'))
                     if focus:
                         self.patrol.update_focus(focus, now)
-                    self.patrol.search_destination = search_goal['position'] if search_goal else None
-                    self.reason = ('buscando ultima localizacao recebida de monstro' if search_goal else 'patrulhando setores sem alvo')
+                    self.patrol.search_destination = None  # the coverage cycle owns exploration
+                    self.reason = 'patrulhando setores sem alvo'
                     return self.patrol.plan(player, now, walk_speed_ms, collision)
                 if not self.excluded_until:
                     self.reason = f'aguardando monstro recente dentro de {self.SEARCH_RADIUS} células'
@@ -719,6 +716,28 @@ class PacketHunt:
             self.reason = 'rota temporariamente bloqueada; mantendo alvo'
             self.ready_at = now+.5
             return None
+        if (collision and not path and getattr(collision, 'hazard_cells', None)
+                and collision.plain().route(player, chase_position, blocked, max_nodes=8000)):
+            # Enemy skill areas on the floor (poison...) are what close the way: another monster
+            # really reachable is taken now and this one again a second later; otherwise get as close
+            # as the area allows. One switch every few seconds at most: monsters all beyond the
+            # area made it hop between them without hitting anything (ra_fild03 2026-11-06).
+            if now-self.hazard_switch_at >= self.HAZARD_SWITCH_GAP:
+                others = sorted((e for e in state['recent_entities'] if e['entity_id'] != self.target
+                                 and self.excluded_until.get(e['entity_id'], 0) <= now and not self.walled(e['entity_id'], now)
+                                 and math.dist(player, e.get('effective_position', e['position'])) <= self.SEARCH_RADIUS),
+                                key=lambda e: math.dist(player, e.get('effective_position', e['position'])))[:3]
+                if any(collision.route(player, e.get('effective_position', e['position']), blocked, max_nodes=4000)
+                       for e in others):
+                    self.hazard_switch_at = now
+                    self.abandon(now, 'alvo atras de area de habilidade no chao; trocando de alvo',
+                                 defer=self.HAZARD_RETURN, force=True, exact=True)
+                    return None
+            path = collision.route(player, chase_position, blocked, max_nodes=8000, partial=True)
+            if not path or len(path) < 2:
+                self.reason = 'alvo cercado por area de habilidade no chao; aguardando'
+                self.ready_at = now+.3
+                return None
         if collision and not path:
             # The engaged-target hold is useful for transient packet/path failures, but
             # an impossible route is terminal for this attempt: clear the lock so the

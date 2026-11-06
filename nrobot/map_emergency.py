@@ -19,8 +19,16 @@ def validate(config):
 
 
 class Emergency:
+    # The seal was never confirmed when sent by the bot (ra_fild03, every session of 2026-11-06):
+    # the sequence ran out and the character fled without hitting anything, and died. Now an
+    # unconfirmed sequence is dropped and the fight goes on; the escape only follows the area skill.
+    UNCONFIRMED_LIMIT = 2  # seals sent without an answer before the sequence is dropped
+    PAUSE = 30.0  # s without a new emergency after a dropped one
+    RETREAT_MAX = 8.0  # s of escape at most
+
     def __init__(self,config):
         self.config=validate(config)
+        self.paused_until=0
         self.reset()
 
     def reset(self):
@@ -30,6 +38,14 @@ class Emergency:
         self.targets=set()
         self.started=0
         self.reason=''
+        self.unconfirmed=0
+        self.retreat_since=None
+
+    def drop(self,now,reason):
+        """Give the sequence up: normal combat until PAUSE is over."""
+        self.reset()
+        self.paused_until=now+self.PAUSE
+        self.reason=reason
 
     def observe(self,events,player_id,now):
         for e in events:
@@ -44,11 +60,13 @@ class Emergency:
                             self.confirmed+=1
                             if self.confirmed>=self.config['prepare_casts']:self.phase='area'
                         else:self.phase='retreat'
+                    self.unconfirmed=0
                     self.waiting=None
 
     def intent(self,state,now,distance):
         visible=[e for e in state.get('recent_entities',[]) if e.get('kind','monster')=='monster' and e.get('species_id')==self.config['species_id']]
         nearby=[e for e in visible if distance(state,e)<=self.config['radius']]
+        if self.phase is None and now<self.paused_until:return None
         if self.phase is None and len(nearby)>=self.config['minimum_count']:
             self.phase='prepare';self.started=now
             self.targets={e['entity_id'] for e in visible}
@@ -57,10 +75,17 @@ class Emergency:
         if not remaining:
             self.reset()
             return None
-        if now-self.started>12 and self.phase!='retreat':
-            self.phase='retreat'
-            self.reason='sequencia nao confirmada a tempo; retirando por seguranca'
-        if self.waiting and now>self.waiting['deadline']:self.waiting=None
+        if self.waiting and now>self.waiting['deadline']:
+            self.waiting=None
+            self.unconfirmed+=1
+        if self.phase!='retreat' and (now-self.started>12 or self.unconfirmed>=self.UNCONFIRMED_LIMIT):
+            self.drop(now,'sequencia de emergencia nao confirmada pelo servidor; lutando normalmente')
+            return None
+        if self.phase=='retreat':
+            self.retreat_since=self.retreat_since or now
+            if now-self.retreat_since>self.RETREAT_MAX:
+                self.drop(now,'fuga encerrada; lutando normalmente')
+                return None
         target=min(remaining,key=lambda e:distance(state,e))
         return dict(mode='emergency',target_id=target['entity_id'],skill_id=None,phase=self.phase,
                     reason=self.reason or f'emergencia: {self.phase} ({self.confirmed}/{self.config["prepare_casts"]} Coelho confirmados)')

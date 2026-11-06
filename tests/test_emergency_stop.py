@@ -95,7 +95,7 @@ def test_gm_signs_speed_guild_teleports_and_listed_visuals(tmp_path):
     assert signs.reasons(row, {'look': {'head_top': 5038}}, 150, 0) == ['visual marcado como de GM (5038)']
     for t in (1, 10):
         signs.observe([{'kind': 'appearance', 'entity_id': 2000444, 'position': [12, 10], 'spawned': True}], [10, 10], t)
-    assert signs.teleported_often(2000444, 11) and signs.reasons(row, {}, 150, 11) == []  # portals: a note, never a stop
+    assert signs.reasons(row, {}, 150, 11) == []  # portals: a note, never a stop
 
 
 def test_gm_identification_can_be_switched_off(tmp_path, monkeypatch):
