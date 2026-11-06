@@ -178,7 +178,6 @@ def test_sleeping_target_kept_for_silence_and_doki_damage_gated(tmp_path,config)
     relay.inventory.observe([dict(kind='appearance',entity_id=identity,species_id=1177,position=[21,20],body_state=4,health_state=0,object_type=5)],now)
     observer.registry.update(Entity(identity,1177,21,20,now,'monster'))
     relay.collision_map=lambda:None
-    assert not relay.asleep(identity)
     snapshot=relay.status()
     assert snapshot['recent_entities'][0]['body_state']==4
     assert not relay.map_damage_allowed(identity,snapshot,now)
@@ -191,7 +190,7 @@ def test_sleeping_target_kept_for_silence_and_doki_damage_gated(tmp_path,config)
     with pytest.raises(HuntTargetChanged,match='controle de status'):
         asyncio.run(relay.send_hunt_action(dict(kind='attack',target_id=identity),game_gate=lambda:True))
     assert not relay.upstream.packets
-    # A sleeping monster may receive silence, even though normal hunts skip sleeping targets.
+    # This profile's passive-target rule still requests silence before damage.
     action=relay.plan_map_rotation(snapshot,now,identity)
     assert action['skill_id']==76 and action['control_status']=='silence'
     relay.settings['require_collision']=False  # fake session has no map file; no real socket is used

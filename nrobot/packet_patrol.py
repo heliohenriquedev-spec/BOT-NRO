@@ -14,13 +14,15 @@ from .patrol_tour import SPACING, PatrolTour
 class PacketPatrol:
     DIRECTIONS = ((1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1))
     GOAL_TIMEOUT = 25  # seconds without getting closer before a waypoint is put aside
+    FOCUS_RETRY_DELAY = 45
+    FOCUS_ROUTE_NODES = 12000  # same search size as the @showmobs scan that chose the spot
+    FOCUS_CLUSTER_RADIUS = 12  # suppress tiny @showmobs marker shifts around the same group
     ROUTE_NODES = 4000  # cell search budget per plan (~0.1 s); longer trips go by stepping stones
     ROUTE_GREED = 1.5
     MAP_FIELDS = ('tour', 'remaining', 'done', 'walked', 'cycle_number', 'sweep_order', 'corridor_plan')
     # Mazes where the planned walk measured worse than the nearest pending waypoint
     # (tools/validar_patrulha.py, 6 starts each, 2026-11-05: gl_sew02 +16% steps).
     NEAREST_FIRST_MAPS = frozenset({'gl_sew02.gat', 'gl_sew02'})
-    REPLAN_SLACK = .75  # spacings: this far off the planned walk, a new plan is weighed against it
 
     def __init__(self, max_step=8, rng=None, *, spacing=SPACING, coverage=1.0, wall_margin=2, avoid_walls=False):
         if not 1 <= max_step <= 8:
@@ -49,7 +51,7 @@ class PacketPatrol:
 
     def wall_cost(self):
         """Walking next to a wall costs more, much more when walls are to be avoided."""
-        return 6 if self.layout.get('avoid_walls') else 3
+        return 18 if self.layout.get('avoid_walls') else 3
 
     def configure(self, *, spacing, coverage, wall_margin, avoid_walls):
         """New spacing/margins redo each map's waypoints; what was walked (visits) is kept."""
@@ -71,6 +73,10 @@ class PacketPatrol:
         self.search_destination = None
         self.focus = None  # a spot to go to first (@showmobs); reached through the normal waypoints
         self.focus_reached = None  # the last such spot reached: not gone to again
+        self.focus_suppressed = None
+        self.focus_suppressed_until = 0
+        self.focus_key = None
+        self.focus_block = None
         self.linear = False  # @showmobs failed on this map: one planned walk through every point
         self.goal_at = 0
         self.goal_distance = None
@@ -145,6 +151,50 @@ class PacketPatrol:
                 self.remaining.discard(block)
                 self.done.add(block)
 
+    def recover_stall(self, position, now):
+        """Resume the existing coverage cycle from a reachable sector after repeated no-action ticks."""
+        if self.tour is None or position is None:
+            return False
+        distances = self.tour.distances(position)
+        pending = self.remaining-set(self.deferred)
+        reachable = [block for block in self.sweep_order if block in pending and block in distances]
+        unreachable = [block for block in self.sweep_order if block in pending and block not in distances]
+        if self.linear or self.tour.corridor_mode:
+            self.corridor_plan = self.tour.plan_order(position, reachable) if reachable else []
+        else:
+            # Preserve the cycle order, but move sectors inaccessible from the current component
+            # behind reachable ones. Rebuilding the whole tour here used to send the player back.
+            self.sweep_order = reachable+unreachable+[b for b in self.sweep_order if b not in pending]
+        self.deferred.clear()
+        self.failed_edges.clear()
+        self.goal = self.goal_block = None
+        self.route_cache_key = self.route_cache = None
+        self.retry_at = 0
+        if self.focus is not None:
+            self.goal = tuple(self.focus)
+            self.goal_at = now
+            self.goal_distance = math.dist(position, self.focus)
+        return bool(reachable)
+
+    def update_focus(self, point, now):
+        """Keep a live scan target stable while the marker jitters inside one monster group."""
+        if not point:
+            return
+        candidate = tuple(point)
+        if self.focus is not None and math.dist(candidate, self.focus) <= self.FOCUS_CLUSTER_RADIUS:
+            return
+        if self.focus_reached is not None and math.dist(candidate, self.focus_reached) <= self.FOCUS_CLUSTER_RADIUS:
+            return
+        if (self.focus_suppressed is not None and now < self.focus_suppressed_until
+                and math.dist(candidate, self.focus_suppressed) <= self.FOCUS_CLUSTER_RADIUS):
+            return
+        if candidate != self.focus:
+            self.focus = list(candidate)
+            self.goal = self.goal_block = None
+            self.route_cache_key = self.route_cache = None
+            self.goal_at = now
+            self.goal_distance = None
+
     CYCLE_KEEP = 1800  # s on one map before its coverage starts over (and on every new visit)
 
     def switch_map(self, collision, position):
@@ -156,6 +206,7 @@ class PacketPatrol:
         if same_map:
             self.map_memory[id(collision)] = {f: getattr(self, f) for f in self.MAP_FIELDS}
         self.goal = self.goal_block = self.search_destination = None
+        self.focus_key = self.focus_block = None
         self.route_cache_key = self.route_cache = None
         self.deferred = {}
         self.failed_edges = {}
@@ -187,18 +238,13 @@ class PacketPatrol:
         self.deferred.clear()
         self.partial_ends = {}
         self.goal = self.goal_block = None
+        self.focus_key = self.focus_block = None
         self.mark_seen(position)
         if not self.remaining:  # tiny map: everything is in view from here
             self.remaining = set(self.tour.points)-set(self.tour.seen_from(position)) or set(self.tour.points)
 
     def next_block(self, position):
         """Next pending point of the stable circuit; blocked points wait without resetting it."""
-        if self.focus is not None and self.tour is not None and self.tour.points:
-            distances = self.tour.distances(position)
-            near = [b for b in self.tour.points if b in distances and b not in self.deferred]
-            if near:
-                self.focus_block = min(near, key=lambda b: (math.dist(self.tour.points[b], self.focus), b))
-                return self.focus_block
         candidates = self.remaining-set(self.deferred)
         if not candidates:
             return None
@@ -218,11 +264,6 @@ class PacketPatrol:
             plan = [block for block in getattr(self, 'corridor_plan', []) if block in candidates and block in distances]
             if not plan:
                 plan = self.tour.plan_order(position, reachable)
-            elif distances[plan[0]] > nearest+self.REPLAN_SLACK*self.tour.spacing:
-                # Pulled off the walk (a fight): keep it or start a new one, whichever is shorter.
-                fresh = self.tour.plan_order(position, reachable)
-                if self.tour.walk_length(distances, fresh) < self.tour.walk_length(distances, plan):
-                    plan = fresh
             self.corridor_plan = plan
             return plan[0] if plan else None
         ordered = next((block for block in self.sweep_order if block in candidates), None)
@@ -287,6 +328,8 @@ class PacketPatrol:
             return None
         if collision is not None and (self.tour is None or collision is not self.tour.collision):
             self.switch_map(collision, position)
+            self.focus_suppressed = None
+            self.focus_suppressed_until = 0
         if self.tour is not None:
             if getattr(self, 'cycle_started_at', None) is None:
                 self.cycle_started_at = now
@@ -294,16 +337,41 @@ class PacketPatrol:
                 self.new_cycle(position)  # 30 minutes on this map: its coverage starts over
                 self.cycle_started_at = now
         self.reached(position)
+        if self.focus is not None and max(abs(position[i]-self.focus[i]) for i in (0, 1)) <= 5:
+            self.focus_reached = tuple(self.focus)
+            self.focus_suppressed = None
+            self.focus_suppressed_until = 0
+            self.focus = None
+            self.focus_key = self.focus_block = None
+            self.goal = self.goal_block = None
+            self.route_cache_key = self.route_cache = None
+            # Resume the existing cycle order. Rebuilding the sweep at the scan point
+            # often selected the just-walked approach corridor and visibly reversed the route.
+            self.retry_at=now+.05
+            return None
         self.failed_edges = {edge: until for edge, until in self.failed_edges.items() if until > now}
         route = None
         if (self.last_plan_position is not None and now-self.last_plan_at > 2
             and math.dist(position, self.last_plan_position) > 12):
-            self.goal = None  # combat displaced us: do not retrace to the old waypoint
+            # Combat or a portal displaced us. Mark the interrupted point covered for this cycle,
+            # otherwise the ordered tour walks back to it and creates a visible U-turn.
+            if self.goal_block is not None:
+                self.remaining.discard(self.goal_block)
+                self.done.add(self.goal_block)
+            if self.tour is not None:
+                self.mark_seen(position)
+            self.goal = self.goal_block = None
         self.last_plan_position, self.last_plan_at = tuple(position), now
         if self.goal is not None:
             distance = math.dist(position, self.goal)
             if self.goal_distance is None or distance < self.goal_distance-1:
                 self.goal_at, self.goal_distance = now, distance
+            elif self.focus is not None and now-self.goal_at > self.GOAL_TIMEOUT:
+                self.focus_suppressed, self.focus_suppressed_until = tuple(self.focus), now+self.FOCUS_RETRY_DELAY
+                self.focus = None
+                self.focus_key = self.focus_block = None
+                self.goal = self.goal_block = None
+                self.route_cache_key = self.route_cache = None
         if collision is not None:
             self.deferred = {block: until for block, until in self.deferred.items() if until > now}
             if self.tour.points and self.remaining and not (self.remaining-set(self.deferred)) and not self.retried:
@@ -313,7 +381,18 @@ class PacketPatrol:
                                      or self.coverage_target < 1 and self.tour.coverage(self.done) >= self.coverage_target):
                 self.new_cycle(position)
                 self.retried = False
-            if self.search_destination is not None:
+            if self.focus is not None:
+                destination=tuple(self.focus)
+                if self.goal != destination or self.goal_block is not None:
+                    if self.goal_block is not None:
+                        self.remaining.discard(self.goal_block)
+                        self.done.add(self.goal_block)
+                    self.goal=destination
+                    self.goal_block=None
+                    self.goal_at=now
+                    self.goal_distance=math.dist(position,destination)
+                    self.route_cache_key=self.route_cache=None
+            elif self.search_destination is not None:
                 self.goal, self.goal_at = tuple(self.search_destination), now
             elif self.tour.points:
                 stale = self.goal is not None and now-self.goal_at > self.GOAL_TIMEOUT
@@ -321,6 +400,7 @@ class PacketPatrol:
                     self.deferred[self.goal_block] = now+60
                     if self.focus is not None:
                         self.focus_reached, self.focus = tuple(self.focus), None
+                        self.focus_key = self.focus_block = None
                 focused = self.focus is not None and self.goal_block is not None and self.goal_block == getattr(self, 'focus_block', None)
                 if (self.goal is None or (self.goal_block not in self.remaining and not focused) or stale
                         or self.focus is not None and not focused):
@@ -348,6 +428,11 @@ class PacketPatrol:
                 else:
                     route = self.route(collision, position, self.goal, exact=self.search_destination is None,
                                             max_nodes=self.ROUTE_NODES, greed=self.ROUTE_GREED, wall_cost=self.wall_cost())
+                    if route is None and self.focus is not None and self.goal == tuple(self.focus):
+                        # The @showmobs spot can be far across the map: search as wide as the scan did
+                        # (12000 nodes) before giving it up.
+                        route = self.route(collision, position, self.goal, exact=True, max_nodes=self.FOCUS_ROUTE_NODES,
+                                                greed=self.ROUTE_GREED, wall_cost=self.wall_cost())
                     if route is None and self.search_destination is None:
                         # Narrow corridors cost more next to walls and spread the search: one bigger
                         # search (~0.1 s, kept in the route cache) finds the real way around. The
@@ -373,16 +458,27 @@ class PacketPatrol:
                                 route = None
                             else:
                                 ends.add(tuple(route[-1]))
+                if (route is not None and len(route) < 2 and self.focus is not None and self.goal == tuple(self.focus)
+                        and tuple(position) != tuple(self.goal)):
+                    route = None  # already at the closest reachable cell to the @showmobs spot: no way there
                 self.route_cache_key, self.route_cache = cache_key, route
                 if route and len(route) > 1:
                     self.heading = tuple(route[1][i]-position[i] for i in (0, 1))
                 elif route is None:
                     if self.goal_block is not None:
                         self.deferred[self.goal_block] = now+60
+                    elif self.focus is not None and self.goal == tuple(self.focus):
+                        # No way to the @showmobs spot: put it aside and go on patrolling. Re-taking it on
+                        # every plan restarted its timeout and left the character standing still
+                        # (stall breaker every ~2 s, ra_fild03 2026-11-06).
+                        self.focus_suppressed, self.focus_suppressed_until = tuple(self.focus), now+self.FOCUS_RETRY_DELAY
+                        self.focus = None
+                        self.focus_key = self.focus_block = None
                     self.goal = self.goal_block = None
                 elif self.goal_block is not None:  # standing on the waypoint
                     if self.focus is not None and self.goal_block == getattr(self, 'focus_block', None):
                         self.focus_reached, self.focus = tuple(self.focus), None
+                        self.focus_key = self.focus_block = None
                     self.remaining.discard(self.goal_block)
                     self.done.add(self.goal_block)
                     self.goal = self.goal_block = None

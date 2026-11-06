@@ -137,7 +137,7 @@ def test_empty_showmobs_round_retries_on_schedule_instead_of_disabling_the_map()
     scan = MobScan()
     assert scan.start('field', [1031], 0.0, idle=True)
     scan.sent(1031, 0.0)
-    assert scan.finish([5, 5], 5.0) is None and not scan.map_failed('field.gat')  # no answer is transient
+    assert scan.finish([5, 5], 5.0) is None and scan.map_failed('field.gat')  # linear fallback while periodic retry remains enabled
     assert scan.start('field', [1031], 60.0, idle=True)  # retry at the normal 60 s interval
     scan.queue.clear(); scan.round_open = False
     assert scan.start('other', [1031], 100.0, idle=True)  # map changes keep working too
@@ -152,6 +152,12 @@ def test_empty_showmobs_round_retries_on_schedule_instead_of_disabling_the_map()
     first = patrol.next_block((5, 5))
     assert patrol.corridor_plan and patrol.corridor_plan[0] == first
     assert set(patrol.corridor_plan) == patrol.remaining-set(patrol.deferred)  # every pending point, once
+    original = list(patrol.corridor_plan)
+    assert patrol.next_block((14, 14)) == first  # a combat detour does not reorder the circuit
+    assert patrol.corridor_plan == original
+    patrol.focus = [65, 65]
+    focused = patrol.next_block((14, 14))
+    assert patrol.next_block((16, 16)) == focused  # minor movement does not flip the focus waypoint
 
 
 def test_relay_asks_showmobs_only_for_marked_monsters_and_reports_the_sweep(tmp_path):

@@ -278,7 +278,9 @@ class MapCombat:
                 return dict(target_id=entity['entity_id'],mode='control',skill_id=self.config['skills'][effect]['skill_id'],
                             status=effect,reason='aplicar '+effect)
         if status['stun'] or status['sleep']:
-            return dict(target_id=entity['entity_id'],mode='control',skill_id=None,reason='aguardando silencio sem quebrar o controle')
+            silence_id=self.config['skills']['silence']['skill_id']
+            return dict(target_id=entity['entity_id'],mode='control',skill_id=silence_id,status='silence',
+                        reason='aguardando alcance/recarga do silencio sem quebrar o controle')
         return None
 
     def decide(self,state,rotation,now,*,current=None,reachable=None):
@@ -288,7 +290,6 @@ class MapCombat:
         entities=self.candidates(state,rotation,now)
         entities.sort(key=lambda e:(self.ranks[e['species_id']],self.distance(state,e),e['entity_id']))
         if reachable is not None:entities=reachable(entities)
-        if not entities:return None
         # Every unsilenced Jounin within the trigger radius outranks damage.
         # Control every visible Jounin in range before damage, even if it has not
         # targeted the player yet. Candidate eligibility still governs who we kill.
@@ -302,6 +303,7 @@ class MapCombat:
             if intent and intent.get('skill_id') is not None:return intent
             if intent:waiting=waiting or intent
         if waiting:return waiting
+        if not entities:return None
         kill=entities[0]
         rule=self.config.get('engagement',{})
         if rule.get('seek_when_clear') and self.distance(state,kill)>rule['radius']:

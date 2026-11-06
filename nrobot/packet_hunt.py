@@ -154,6 +154,10 @@ class PacketHunt:
         self.record('action_replanned', target_id=self.target, reason=reason)
 
     def engage(self, target_id, now):
+        # A failed route puts the entity aside briefly. Repeated incoming attack packets
+        # must not clear that deferral and reacquire the same unreachable target each tick.
+        if now < self.excluded_until.get(target_id, 0):
+            return
         if self.engaged != target_id:
             self.record('target_engaged', target_id=target_id)
         self.engaged = target_id
@@ -462,8 +466,8 @@ class PacketHunt:
 
     UNREACHABLE_DEFER = 8.0  # s: no way to it / across a wall, even with failed-target deferral off
 
-    def abandon(self, now, reason, defer=None):
-        if self.target is not None and self.target == self.engaged:
+    def abandon(self, now, reason, defer=None, *, force=False):
+        if not force and self.target is not None and self.target == self.engaged:
             if now < self.engaged_until:
                 # Transient failures (cell changed, line blocked, retries) never drop the fight.
                 self.record('engaged_target_kept', target_id=self.target, reason=reason)
@@ -474,6 +478,9 @@ class PacketHunt:
                 self.ready_at = now+.2
                 return
             self.engaged = None
+        elif force and self.target is not None and self.target == self.engaged:
+            self.engaged = None
+            self.aggressors.pop(self.target, None)
         if self.target is not None:
             # With deferral off (TARGET_DEFER 0) an unreachable monster was picked again on the next
             # tick, 2600 times in 30 minutes, the character standing still (2026-11-05).
@@ -514,10 +521,9 @@ class PacketHunt:
             self.record('stall_breaker', seconds=round(now-self.last_action_at, 1))
             self.blocked_until.clear()
             if self.patrol is not None:
-                self.patrol.failed_edges.clear()  # waypoints put aside (unreachable) stay aside
-                self.patrol.goal = self.patrol.goal_block = None
-                self.patrol.route_cache_key = self.patrol.route_cache = None
-                self.patrol.retry_at = 0
+                recovered = self.patrol.recover_stall(state.get('player_position'), now)
+                self.record('patrol_stall_recovered', reachable=bool(recovered),
+                            position=state.get('player_position'))
             self.last_action_at = now
         if (state['state'] != 'tracking' or not state['player_position_recent']
             or state.get('player_position') is None):
@@ -621,12 +627,13 @@ class PacketHunt:
                     search_goal = state.get('search_goal')
                     if collision is not None:
                         search_goal = None  # coverage cycle owns exploration; old sightings cannot reorder it
-                    # Where @showmobs found most quest monsters: the patrol's next waypoint. As a
-                    # plain search goal a far spot in gl_sew02 had no route and the patrol stood still.
+                    # @showmobs supplies a real monster coordinate; walk to that cell through the
+                    # collision map, then resume the persistent coverage circuit.
                     focus = (state.get('showmobs_goal') or {}).get('position')
                     # @showmobs failed here: sweep the whole map in one planned walk (like the mazes).
                     self.patrol.linear = bool(state.get('showmobs_failed'))
-                    self.patrol.focus = focus if focus and tuple(focus) != self.patrol.focus_reached else None
+                    if focus:
+                        self.patrol.update_focus(focus, now)
                     self.patrol.search_destination = search_goal['position'] if search_goal else None
                     self.reason = ('buscando ultima localizacao recebida de monstro' if search_goal else 'patrulhando setores sem alvo')
                     return self.patrol.plan(player, now, walk_speed_ms, collision)
@@ -712,13 +719,18 @@ class PacketHunt:
             self.ready_at = now+.5
             return None
         if collision and not path:
-            self.abandon(now, 'sem rota livre até o alvo; procurando outro', defer=self.UNREACHABLE_DEFER)
+            # The engaged-target hold is useful for transient packet/path failures, but
+            # an impossible route is terminal for this attempt: clear the lock so the
+            # hunt can choose a reachable target or resume patrol immediately.
+            self.abandon(now, 'sem rota livre até o alvo; procurando outro',
+                         defer=self.UNREACHABLE_DEFER, force=True)
             return None
         if (collision and self.target not in self.aggressors and not collision.line_clear(player, chase_position)
                 and not self.reachable_targets([entity], collision, player, now)):
             # Unless it is fighting us, a monster across a wall is left for when the patrol gets there.
             # Measured without the cells blocked by failed steps (a detour around them is no wall).
-            self.abandon(now, 'monstro do outro lado da parede; procurando outro', defer=self.UNREACHABLE_DEFER)
+            self.abandon(now, 'monstro do outro lado da parede; procurando outro',
+                         defer=self.UNREACHABLE_DEFER, force=True)
             return None
         # REDE-46: route may contain only the origin when the predicted target
         # is adjacent but its observed position still lies outside combat range.

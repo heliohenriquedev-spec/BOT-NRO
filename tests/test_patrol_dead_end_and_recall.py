@@ -70,10 +70,27 @@ def test_relay_stops_everything_when_recalled_while_hunting(tmp_path):
     relay.hunt = PacketHunt(); relay.hunt.start()
     relay.portals = portals(tmp_path)
     relay.portals.map_name, relay.portals.last_own = 'tur_dun01.gat', (100, 100)
+    relay.tracker.observer.map_name = 'prontera.gat'
     recall = [{'kind': 'map_change', 'map': 'prontera.gat', 'position': [150, 180]}]
     relay.manual_until = 0
-    assert relay.check_recall(recall, time.monotonic())
+    started = time.monotonic()
+    assert not relay.check_recall(recall, started)  # allow death/respawn packets to arrive first
+    assert not relay.check_recall([], started+1.9)
+    assert relay.check_recall([], started+2.1)
     assert not relay.hunt.enabled and relay.commands_blocked and 'recall' in relay.hunt.reason
+
+
+def test_death_transfer_is_not_misclassified_as_recall(tmp_path):
+    from nrobot.packet_hunt import PacketHunt
+    from nrobot.session_relay import SessionRelay
+    relay = SessionRelay('127.0.0.1', folder=tmp_path, allow_commands=True)
+    relay.hunt = PacketHunt(); relay.hunt.start()
+    relay.portals = portals(tmp_path)
+    relay.portals.map_name, relay.portals.last_own = 'tur_dun01.gat', (100, 100)
+    recall = [{'kind': 'map_change', 'map': 'hospital2.gat', 'position': [25, 92]}]
+    relay.tracker.observer.player_alive = False
+    assert not relay.check_recall(recall, time.monotonic())
+    assert relay.hunt.enabled and not relay.commands_blocked
 
 
 def test_relay_ignores_map_changes_it_expects(tmp_path):

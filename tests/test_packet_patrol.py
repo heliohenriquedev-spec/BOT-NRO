@@ -162,5 +162,54 @@ def test_timed_out_showmobs_focus_yields_to_map_coverage():
     assert patrol.plan([10, 10], 0, 100, collision) is not None
     assert patrol.focus is not None
     patrol.plan([10, 10], patrol.GOAL_TIMEOUT+1, 100, collision)
-    assert patrol.focus is None and patrol.focus_reached == (65, 65)
+    assert patrol.focus is None and patrol.focus_reached is None
+    assert patrol.focus_suppressed == (65, 65) and patrol.focus_suppressed_until > patrol.GOAL_TIMEOUT+1
     assert patrol.remaining
+
+
+def test_showmobs_focus_keeps_the_existing_cycle_order_when_reached():
+    collision = CollisionMap(80, 80, [1]*6400)
+    patrol = PacketPatrol()
+    patrol.plan([10, 10], 0, 100, collision)
+    original_order = list(patrol.sweep_order)
+    patrol.update_focus([40, 40], 1)
+    patrol.plan([30, 30], 2, 100, collision)
+    assert patrol.focus == [40, 40]
+    patrol.plan([40, 40], 3, 100, collision)
+    assert patrol.focus is None and patrol.focus_reached == (40, 40)
+    assert patrol.sweep_order == original_order
+
+
+def test_showmobs_marker_jitter_does_not_reverse_or_reset_focus():
+    patrol = PacketPatrol()
+    patrol.update_focus([193, 168], 1)
+    patrol.goal = (193, 168)
+    patrol.update_focus([195, 162], 2)
+    assert patrol.focus == [193, 168] and patrol.goal == (193, 168)
+    patrol.focus_reached = (193, 168)
+    patrol.focus = None
+    patrol.update_focus([195, 162], 3)
+    assert patrol.focus is None
+
+
+def test_stall_recovery_keeps_cycle_order_and_promotes_reachable_waypoints():
+    collision = CollisionMap(80, 80, [1]*6400)
+    patrol = PacketPatrol()
+    patrol.plan([10, 10], 0, 100, collision)
+    original = list(patrol.sweep_order)
+    first, second = original[:2]
+    patrol.remaining = {first, second}
+    patrol.deferred = {first: 100}
+    patrol.tour.distances = lambda position: {second: 3}
+    assert patrol.recover_stall([20, 20], 4)
+    assert patrol.sweep_order[:2] == [second, first]
+    assert not patrol.deferred and patrol.goal is None and patrol.retry_at == 0
+
+
+def test_avoid_walls_keeps_the_route_interior_even_when_edge_route_is_shorter():
+    cells=[int(0<x<29 and 0<y<29) for y in range(30) for x in range(30)]
+    collision = CollisionMap(30, 30, cells)
+    patrol = PacketPatrol(8, avoid_walls=True)
+    route = patrol.route(collision, [2, 2], [20, 2], exact=True, max_nodes=4000,
+                         greed=1.0, wall_cost=patrol.wall_cost())
+    assert route and max(point[1] for point in route) >= 3

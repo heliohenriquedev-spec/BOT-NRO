@@ -242,6 +242,21 @@ def test_walled_monster_is_not_dropped_and_repicked_every_tick_with_deferral_off
     assert len(ignored) <= 1 and hunt.walled(101, .3)
 
 
+def test_unreachable_attacker_releases_engagement_instead_of_locking_combat():
+    collision = walled_map()
+    collision.route = lambda *args, **kwargs: None  # no valid approach even with partial search
+    hunt = PacketHunt(); hunt.TARGET_DEFER = 0; hunt.start()
+    hunt.observe([{'kind': 'normal_attack', 'source_id': 101, 'target_id': 1}], 1, 0)
+    hunt.target = hunt.engaged = 101
+    hunt.engaged_until = 100
+    seen = state([15, 5], [(101, [25, 5])])
+    assert hunt.plan(seen, .1, collision=collision) is None
+    assert hunt.engaged is None and hunt.target is None and hunt.excluded_until[101] > .1
+    # More incoming hits during the short deferral do not reacquire the same impossible path.
+    hunt.observe([{'kind': 'normal_attack', 'source_id': 101, 'target_id': 1}], 1, .2)
+    assert hunt.engaged is None
+
+
 def test_detour_around_blocked_cells_is_not_a_wall():
     from nrobot.map_navigation import CollisionMap
     collision = CollisionMap(40, 40, [1]*1600)

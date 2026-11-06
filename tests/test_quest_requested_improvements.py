@@ -82,6 +82,19 @@ def test_showmobs_chooses_largest_combined_group_across_three_species():
     found=scan.finish([35,35],12)  # about as far from both groups: the larger, summed over 3 kinds, wins
     assert found['monsters']==6 and found['species_counts']=={1:2,2:2,3:2}
     assert found['position'][0]>50
+    assert found['field_size']==50
+    assert found['field'][0] <= found['position'][0] < found['field'][0]+50
+    assert found['field'][1] <= found['position'][1] < found['field'][1]+50
+
+
+def test_showmobs_includes_live_cached_marks_from_prior_query_rounds():
+    scan=MobScan();scan.start('field',[1],0,True);scan.sent(1,0)
+    scan.observe([dict(kind='viewpoint',mark_type=1,npc_id=1,position=[48,48])],.5)
+    cache={(2,0):dict(position=[49,48],species=1,at=1),
+           (3,0):dict(position=[50,49],species=1,at=1)}
+    scan.include_cached(cache,2,90,[1])
+    found=scan.finish([20,20],4)
+    assert found['monsters']==3 and found['position'][0]>=48
 
 
 def scan_with(points,own,now=4,scan=None):
@@ -90,26 +103,26 @@ def scan_with(points,own,now=4,scan=None):
     return scan,scan.finish(own,now)
 
 
-def test_showmobs_prefers_monsters_nearby_unless_a_far_group_is_much_larger():
+def test_showmobs_selects_the_most_populated_fixed_50_cell_field():
     near=[[10,10],[11,10],[12,10],[13,10]]
     far=[[60,60],[61,60],[60,61],[61,61],[62,60],[60,62]]
     _,found=scan_with(near+far,[5,5])
-    assert found['position'][0]<20 and found['monsters']==4  # 4 close beat 6 across the map
+    assert found['position'][0]>50 and found['monsters']==6
     huge=far+[[62,61],[61,62],[62,62],[63,60],[60,63],[63,61]]
     _,found=scan_with(near+huge,[5,5])
-    assert found['position'][0]>50 and found['monsters']==12  # 12 far away are worth the walk
+    assert found['position'][0]>50 and found['monsters']==12
 
 
 def test_showmobs_keeps_its_spot_unless_the_new_one_is_clearly_better():
     a=[[10,10],[11,10],[12,10],[13,10]]
-    b=[[30,10],[31,10],[32,10],[33,10],[34,10]]
+    b=[[60,10],[61,10],[62,10],[63,10]]
     scan,found=scan_with(a,[5,5],now=4)
     assert found['position'][0]<20
     scan.round_at=-1e9
-    scan,found=scan_with(a+b,[20,10],now=40,scan=scan)  # b only a little better from here: keep going to a
+    scan,found=scan_with(a+b,[20,10],now=40,scan=scan)  # equal population: retain current field
     assert found['position'][0]<20
     scan.round_at=-1e9
-    scan,found=scan_with(a+b+[[35,11],[36,11],[35,12],[36,12]],[20,10],now=50,scan=scan)  # b now clearly better
+    scan,found=scan_with(a+b+[[64,10],[65,10],[66,10],[67,10]],[20,10],now=50,scan=scan)
     assert found['position'][0]>25
 
 

@@ -8,11 +8,10 @@ Timing: right on arrival on the hunting map, then every 60 s, fighting or not; t
 walked to when the patrol has no target. Monsters respawn and wander: a snapshot older than a
 minute no longer says where they are, and one query per monster kind every 4 s keeps the chat calm.
 
-Choice: marks of every kind asked are summed; each group (marks within RADIUS) is worth
-monsters / (1 + walking cells / DISTANCE_SCALE), with the walking distance along the map, so a far
-group wins only when it is much larger (the densest spot of the whole map made the character cross
-the map back and forth). A new scan replaces the current spot only when clearly better
-(KEEP_MARGIN).
+Choice: marks of all requested kinds are summed into sliding 50x50-cell fields. The most populated
+reachable field wins; walking distance only breaks ties. The selected field is sticky between
+scans, avoiding oscillation when counts are close. The character heads to a reachable monster mark
+near that field's center.
 
 No answer or no useful group does not disable scanning: the patrol continues normally and the next
 scheduled (or no-target) round retries. Three fully silent rounds raise a diagnostic warning only;
@@ -27,14 +26,12 @@ class MobScan:
     INTERVAL = 60.0  # s between two searches of the same hunt
     GAP = 4.0  # s between two @showmobs
     LISTEN = 3.0  # s in which marks are taken as the answer to the last @showmobs
-    RADIUS = 10  # cells: marks this close together form one group
-    MIN_GROUP = 3  # two monsters apart from the rest are not worth crossing the map for
-    ARRIVED = 5  # cells from the spot: there
-    GOAL_TIME = 60.0  # s to get there before the spot is dropped
+    FIELD_SIZE = 50
+    ARRIVED = 0  # patrol confirms arrival itself; retain the exact destination until then
+    GOAL_TIME = 180.0  # s: far fields can require more than one 60 s scan interval to reach
     SILENT_ROUNDS = 3  # rounds with no mark at all: show a warning, then keep retrying
-    DISTANCE_SCALE = 40.0  # walking cells that halve a group's worth
-    CANDIDATES = 6  # groups measured along the map (path search) per scan
-    KEEP_MARGIN = 1.25  # a new spot must be worth this much more than the current one
+    KEEP_MARGIN = 1.25  # switch fields only if the new field is clearly denser
+    FAR_SINGLE = 60  # walking cells: a lone monster farther than this is not a destination
 
     def __init__(self):
         self.reset()
@@ -83,7 +80,7 @@ class MobScan:
         """A new round when due: on arrival, then every INTERVAL while patrolling. With early, also
         after a 10 s no-target window as long as the scheduled scan is >15 s away. Early rounds are
         throttled so a long no-target period does not immediately restart after each reply."""
-        if not species or self.map_failed(map_name):
+        if not species:
             return False
         if map_name != self.map:
             self.reset()
@@ -126,6 +123,24 @@ class MobScan:
                 self.mark_records[key]=(position,self.current_species)
         self.marks=[record[0] for record in self.mark_records.values()]
 
+    def include_cached(self, marks, now, ttl, species_filter=()):
+        """Include still-live minimap marks retained across scan rounds by the relay."""
+        if not self.round_open:
+            return
+        allowed=set(species_filter)
+        for identity,record in marks.items():
+            if now-record.get('at',0)>ttl:
+                continue
+            species=record.get('species')
+            if species is not None and allowed and species not in allowed:
+                continue
+            npc_id,mark_id=identity
+            key=('actor',npc_id) if npc_id else ('mark',mark_id)
+            position=tuple(record.get('position') or ())
+            if len(position)==2 and all(type(v) is int and 0<=v<1024 for v in position):
+                self.mark_records[key]=(position,species)
+        self.marks=[record[0] for record in self.mark_records.values()]
+
     def finish(self, own, now, walkable=None, collision=None):
         """After the last answer: the group worth the most (size against walking distance) becomes
         the goal. Returns it (or None)."""
@@ -143,50 +158,72 @@ class MobScan:
         if own is None:
             return None
         if not marks:
-            self.goal = None  # empty response is not a permanent failure; retry on the next interval
+            self.fail()  # use the linear patrol, but retry on the next scheduled/early round
             return None
-        bins=defaultdict(list)
-        for mark in marks:bins[(mark[0]//self.RADIUS,mark[1]//self.RADIUS)].append(mark)
-        def group(mark):
-            x,y=mark[0]//self.RADIUS,mark[1]//self.RADIUS
-            return [m for dx in (-1,0,1) for dy in (-1,0,1) for m in bins.get((x+dx,y+dy),()) if math.dist(m,mark)<=self.RADIUS]
-        groups={}
-        for mark in marks:
-            members=group(mark)
-            if len(members)<self.MIN_GROUP:continue
-            centre=(sum(m[0] for m in members)/len(members),sum(m[1] for m in members)/len(members))
-            spot=tuple(min(members,key=lambda m:math.dist(m,centre)))  # a real monster cell: walkable
-            groups.setdefault(spot,members)
-        if not groups:
-            self.goal = None  # scattered marks are not a reason to disable future scans
+        # Find the densest sliding window, rather than fixed map-aligned tiles which split one
+        # crowd across an arbitrary x/y boundary. Marks are already restricted to reachable cells.
+        candidates=[]
+        for x0 in sorted({p[0] for p in marks}):
+            in_x=sorted((p for p in marks if x0<=p[0]<x0+self.FIELD_SIZE),key=lambda p:(p[1],p[0]))
+            left=0
+            best_count=0
+            best_window=None
+            for right in range(len(in_x)):
+                while in_x[right][1]-in_x[left][1]>=self.FIELD_SIZE:
+                    left+=1
+                count=right-left+1
+                if count<best_count:
+                    continue
+                y0=in_x[left][1]
+                members=in_x[left:right+1]
+                field=(x0,y0)
+                center=(x0+(self.FIELD_SIZE-1)/2,y0+(self.FIELD_SIZE-1)/2)
+                selected=min(members,key=lambda p:(math.dist(p,center),math.dist(p,own),p))
+                candidate=(field,members,tuple(selected),center)
+                if count>best_count or best_window is None or math.dist(selected,own)<math.dist(best_window[2],own):
+                    best_count=count
+                    best_window=candidate
+            if best_window is not None:
+                candidates.append(best_window)
+        if not candidates:
+            self.fail()
             return None
-        def worth(count,cells):
-            return count/(1+cells/self.DISTANCE_SCALE)
-        # Straight-line estimate first, then the walking distance for the best few.
-        ranked=sorted(groups.items(),key=lambda item:-worth(len(item[1]),math.dist(item[0],own)))[:self.CANDIDATES]
-        paths={}
-        scored=[]
-        for spot,members in ranked:
-            path=collision.route(own,list(spot),exact=True,max_nodes=12000) if collision is not None else None
-            cells=len(path)-1 if path else math.dist(spot,own)*(1.4 if collision is not None else 1)
-            paths[spot]=path
-            scored.append((worth(len(members),cells),spot,members,cells))
-        value,spot,members,cells=max(scored,key=lambda s:(s[0],-s[3]))
-        if self.goal is not None and now<=self.goal_until and tuple(self.goal)!=spot:
-            # Keep heading where we were going unless the new spot is clearly better.
-            kept=[m for m in marks if math.dist(m,self.goal)<=self.RADIUS]
-            if kept:
-                old_path=collision.route(own,self.goal,exact=True,max_nodes=12000) if collision is not None else None
-                old_cells=len(old_path)-1 if old_path else math.dist(self.goal,own)
-                if value<worth(len(kept),old_cells)*self.KEEP_MARGIN:
-                    spot,members,cells,paths[tuple(self.goal)]=tuple(self.goal),kept,old_cells,old_path
+        # Collapse different window origins that describe the same group.
+        unique={}
+        for item in candidates:
+            key=frozenset(item[1])
+            old=unique.get(key)
+            if old is None or math.dist(item[2],own)<math.dist(old[2],own):
+                unique[key]=item
+        candidates=list(unique.values())
+        candidates.sort(key=lambda c:(-len(c[1]),math.dist(c[2],own),c[0]))
+        best=candidates[0]
+        kept=next((c for c in candidates if self.goal is not None
+                   and c[3][0]-self.FIELD_SIZE/2 <= self.goal[0] < c[3][0]+self.FIELD_SIZE/2
+                   and c[3][1]-self.FIELD_SIZE/2 <= self.goal[1] < c[3][1]+self.FIELD_SIZE/2),None)
+        if kept and len(best[1]) <= len(kept[1])*self.KEEP_MARGIN:
+            best=kept
+        field,members,spot,center=best
+        if kept is best and self.goal is not None:
+            spot=tuple(min(members,key=lambda p:(math.dist(p,self.goal),math.dist(p,own),p)))
+        path=collision.route(own,list(spot),exact=True,max_nodes=12000) if collision is not None else None
+        if collision is not None and not path:
+            self.fail()
+            return None
+        cells=len(path)-1 if path else math.dist(spot,own)
+        if len(members)<2 and cells>self.FAR_SINGLE:
+            # One monster on the other side of the map is not worth the walk: keep patrolling.
+            self.goal=None
+            return None
+        from .portals import PortalGuard
+        self.failed_maps.discard(PortalGuard.key(self.map))
         self.goal = list(spot)
         self.goal_until = now+self.GOAL_TIME
         member_set=set(members)
-        counts=Counter(species for position,species in records if position in member_set)
-        path=paths.get(spot)
+        counts=Counter(species for position,species in records if position in member_set and species is not None)
         return {'position': self.goal, 'monsters': len(members), 'total': len(marks),
                 'species_counts':dict(counts),'queried_species':list(self.queried_species),
+                'field':list(field),'field_size':self.FIELD_SIZE,
                 'route_cells':len(path)-1 if path else None,'walk_cells':round(cells)}
 
     def current_goal(self, own, now):

@@ -1,4 +1,4 @@
-"""Sleeping targets are never hit; with manual movement the bot never walks up to a target."""
+"""Sleep status is observed without suppressing attacks; manual movement never walks to targets."""
 import struct
 import time
 
@@ -31,21 +31,18 @@ def relay_with_monster(tmp_path, body_state=0):
     return relay
 
 
-def test_sleeping_target_is_left_alone_until_it_wakes(tmp_path):
+def test_sleeping_target_remains_in_combat_candidates(tmp_path):
     relay = relay_with_monster(tmp_path)
     assert [e['entity_id'] for e in relay.status()['recent_entities']] == [110000001]
     relay.inventory.observe([{'kind': 'option_change', 'entity_id': 110000001, 'option': 0, 'body_state': 4}],
                             time.monotonic())  # someone (or you) put it to sleep
-    assert relay.asleep(110000001) and relay.status()['recent_entities'] == []
+    assert [e['entity_id'] for e in relay.status()['recent_entities']] == [110000001]
     relay.inventory.observe([{'kind': 'option_change', 'entity_id': 110000001, 'option': 0, 'body_state': 0}],
                             time.monotonic())
-    assert not relay.asleep(110000001)
 
 
-def test_sleeping_target_is_never_sent_an_attack(tmp_path):
+def test_sleeping_target_can_be_sent_an_attack(tmp_path):
     import asyncio
-    import pytest
-    from nrobot.session_relay import HuntTargetChanged
     relay = relay_with_monster(tmp_path, body_state=4)
     relay.hunt.start()
 
@@ -54,9 +51,8 @@ def test_sleeping_target_is_never_sent_an_attack(tmp_path):
         def write(self, data): self.packets.append(data)
         async def drain(self): pass
     relay.upstream = Writer()
-    with pytest.raises(HuntTargetChanged, match='dormindo'):
-        asyncio.run(relay.send_hunt_action({'kind': 'attack', 'target_id': 110000001}, game_gate=lambda: True))
-    assert relay.upstream.packets == []
+    asyncio.run(relay.send_hunt_action({'kind': 'attack', 'target_id': 110000001}, game_gate=lambda: True))
+    assert relay.upstream.packets
 
 
 def state(*monsters):

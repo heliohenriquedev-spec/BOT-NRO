@@ -4,6 +4,21 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.06.5 (06/11/2026)
+
+- Caça com @showmobs: corrigido o personagem parado ("destravando" a cada 2 s) quando o ponto do @showmobs não tinha caminho; o ponto é deixado de lado por 45 s e a patrulha continua. Um monstro sozinho a mais de 60 células não vira mais destino.
+- Patrulha: consultas de @showmobs agrupam alvos em janelas deslizantes de 50x50 celulas e priorizam o campo com maior concentracao; distancia desempata campos igualmente povoados.
+- Patrulha: campos e waypoints permanecem estaveis durante a exploracao; sem dados de @showmobs, segue uma varredura linear e as consultas continuam em intervalos regulares.
+- @showmobs: marcas ainda validas das consultas recentes sao agregadas; o foco persiste por mais tempo para alcancar alvos distantes.
+- Navegacao: a patrulha percorre a coordenada marcada e reorienta o circuito ao chegar; evitar paredes tem prioridade sobre encurtar o trajeto.
+- @showmobs: pequenas variacoes da marca dentro do mesmo grupo nao reiniciam o foco; ao chegar (ou desistir de um ponto sem progresso), a cobertura continua pela ordem do ciclo existente, sem inverter o trecho percorrido.
+- Combate: alvos sem rota valida sao liberados e temporariamente adiados, mesmo quando atacam o personagem; isso evita travar a rotacao no mesmo alvo inalcançavel.
+- Retorno apos morte: transferencias entre mapas aguardam a confirmacao de morte antes de acionar a protecao contra recall, permitindo que o fluxo de retorno e retomada da caca assuma.
+- Patrulha: o recuperador de inatividade reordena somente os setores pendentes para priorizar os alcancaveis a partir da posicao atual, preservando o ciclo e limpando bloqueios temporarios que impediam novos movimentos.
+
+- Combate: apos stun ou sono, o personagem se aproxima do Jounin ate o alcance da habilidade de silencio, mesmo enquanto ela aguarda recarga.
+- Caca: monstros sob efeito de sono continuam como alvos elegiveis; regras de combate configuradas ainda podem exigir controle antes do dano.
+
 ## 2026.11.06.4 (06/11/2026)
 
 - Caca pela database: consultas @showmobs repetem a cada 60 s e podem antecipar a busca apos 10 s sem alvo. Uma rodada sem resposta nao desativa novas consultas; tentativas antecipadas respeitam um intervalo minimo.

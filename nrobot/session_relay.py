@@ -854,7 +854,15 @@ class SessionRelay(QuestRelay):
                     self.hunt.plan({**state,'recent_entities':[]},now,speed,collision=collision)
                 finally:self.hunt.patrol=old_patrol
                 return combat.emergency.retreat(state,self.hunt,collision,now,speed)
-            state={**state,'recent_entities':combat.candidates(state,self.rotation,now)}
+            recent=state['recent_entities']
+            candidates=combat.candidates(state,self.rotation,now)
+            if intent and intent['mode']=='control':
+                control_target=next((e for e in recent if e['entity_id']==intent['target_id']),None)
+                if control_target is not None and all(e['entity_id']!=intent['target_id'] for e in candidates):
+                    # A stunned/asleep Jounin can stop targeting us and leave the kill-candidate
+                    # filter, but still needs to be followed into silence range.
+                    candidates.append(control_target)
+            state={**state,'recent_entities':candidates}
             if intent is None:
                 state={**state,'recent_entities':[]}
                 self.hunt.target=self.hunt.engaged=None
@@ -1155,16 +1163,6 @@ class SessionRelay(QuestRelay):
             if enabled and map_id == current_map and species.isascii() and species.isdecimal() and name:
                 selected.add(int(species))
         return selected
-
-    SLEEP = 4  # body state (rAthena OPT1_SLEEP) sent to everyone around when a unit falls asleep
-
-    def asleep(self, identity):
-        """Sleeping targets are left alone: any hit wakes them up (yours or the bot's sleep)."""
-        entity = self.inventory.entities.get(identity)
-        combat = self.active_map_combat()
-        if combat and entity and entity.get('species_id') in combat.ranks:
-            return False  # damage is independently gated; silence may target sleeping monsters
-        return bool(entity and entity.get('present_last_observation', True) and entity.get('body_state') == self.SLEEP)
 
     def dead(self, identity):
         """Killed (the server's death notice) or lying dead when it came into view: never a target
@@ -1646,6 +1644,8 @@ class SessionRelay(QuestRelay):
         early = (getattr(self, 'scan_no_target_since', None) is not None
                  and now-self.scan_no_target_since >= 10)
         self.mob_scan.start(observer.map_name, self.quest_missing_species(), now, idle=True, early=early)
+        self.mob_scan.include_cached(self.viewpoint_marks, now, self.VIEWPOINT_TTL,
+                                     self.quest_missing_species())
         collision = self.collision_map()
         found = self.mob_scan.finish(observer.player, now, collision.walkable if collision is not None else None,collision=collision)
         if found:
@@ -1656,7 +1656,7 @@ class SessionRelay(QuestRelay):
             self.mob_scan_failed_note = observer.map_name
             self.record_hunt({'kind': 'showmobs_failed', 'map': observer.map_name})
             print(f'[ROTA] @showmobs sem resultado em {observer.map_name}: percorrendo o mapa inteiro em linha; '
-                  'o @showmobs volta quando a caca ou a fila for iniciada de novo.')
+                  'continuarei consultando periodicamente para localizar a maior concentracao.')
         elif self.mob_scan.suspended and not getattr(self, 'mob_scan_warned', False):
             self.mob_scan_warned = True
             print('[ROTA] @showmobs ainda sem resposta apos 3 rodadas; continuarei tentando no intervalo normal e quando ficar sem alvo.')
@@ -1741,7 +1741,7 @@ class SessionRelay(QuestRelay):
                     or (entity.kind == 'player' and not self.player_target_allowed(entity.entity_id))
                     or (entity.kind == 'monster' and (entity.species_id not in observer.species
                     or not self.monster_name_allowed(entity.entity_id, entity.species_id)))
-                    or self.asleep(entity.entity_id) or self.dead(entity.entity_id)):
+                    or self.dead(entity.entity_id)):
                     return False
                 if action['role'] == 'summon' and (entity.kind != 'monster' or max(math.dist(own, p) for own in observer.combat_positions(now) for p in entity.combat_bounds(now)[0]) > 12):
                     return False
@@ -1826,7 +1826,7 @@ class SessionRelay(QuestRelay):
         state['recent_entities'] = [entity for entity in state['recent_entities']
                                    if (entity.get('kind') == 'player' or self.monster_name_allowed(
                                        entity['entity_id'], entity.get('species_id')))
-                                   and not self.asleep(entity['entity_id']) and not self.dead(entity['entity_id'])]
+                                   and not self.dead(entity['entity_id'])]
         for row in state['recent_entities']:
             received = self.inventory.entities.get(row['entity_id'], {})
             row['body_state'] = received.get('body_state',0)
@@ -2262,21 +2262,51 @@ class SessionRelay(QuestRelay):
 
     def check_recall(self, events, now):
         """Stop everything when the server moves the character while the bot acts (GM @recall)."""
-        if not any(e['kind'] in ('map_change', 'map_transfer') for e in events):
+        from .portals import PortalGuard
+        map_event = any(e['kind'] in ('map_change', 'map_transfer') for e in events)
+        pending = getattr(self, 'recall_candidate', None)
+        if not map_event and pending is None:
             return False
         q = self.quests
+        # The death workflow takes ownership of map changes immediately after it observes
+        # the death. Clear any provisional recall while it plans the return route.
+        if (self.tracker.observer.player_alive is False
+                or getattr(self, 'revive', None) is not None
+                or getattr(self, 'hunt_revive', None) is not None):
+            self.recall_candidate = None
+            return False
+        if pending is not None:
+            if not self.tracker.observer.player_alive:
+                self.recall_candidate = None
+                return False  # delayed death signal: let the revive workflow take over
+            if now-pending['at'] < 2.0:
+                return False
+            current_map = self.tracker.observer.map_name
+            if current_map and PortalGuard.key(current_map) != PortalGuard.key(pending['info']['to_map']):
+                self.recall_candidate = None
+                return False  # another expected transition superseded this candidate
         hunting = self.hunt is not None and self.hunt.enabled
         if not (hunting or q.active):
             return False
+        # A death return (B2) is a server-side map transfer without a portal. The death
+        # watcher owns the subsequent trip back to the hunt; don't classify it as @recall.
         if q.active and (q.phase != 'hunt' or q.errands or now-q.voltar_sent_at < 20):
             return False  # route travel, NPC warps and @voltar change maps on purpose
         if q.recording or self.manual_active or now < self.manual_until+5:
             return False  # the player is moving the character
         from .recall_guard import unexpected_teleport
-        info = unexpected_teleport(events, self.portals.map_name, self.portals.last_own, self.portals)
+        info = pending['info'] if pending is not None else unexpected_teleport(
+            events, self.portals.map_name, self.portals.last_own, self.portals)
         if info is None:
             return False
         if self.walked_into_portal(info):
+            self.recall_candidate = None
+            return False
+        if pending is None and PortalGuard.key(info['from_map']) != PortalGuard.key(info['to_map']):
+            # Death returns and legitimate server transfers can arrive before the HP/death
+            # packet. Give the observer two seconds to confirm a death; same-map recalls
+            # remain immediate, and unexplained live transfers still stop safely afterward.
+            self.recall_candidate = {'info': info, 'at': now}
             return False
         reason = (f"teletransporte sem portal ({info['from_map']} {info['origin']} -> "
                   f"{info['to_map']} {info['position']}): possivel recall de GM")
@@ -2285,6 +2315,7 @@ class SessionRelay(QuestRelay):
         if self.hunt is not None:
             self.hunt.pause('parada por seguranca: '+reason)
         self.commands_blocked = True
+        self.recall_candidate = None
         self.record_hunt({'kind': 'recall_detected', **info})
         print('[ALERTA] Bot parado por seguranca: '+reason+'. Nenhum comando sera enviado ate voce iniciar de novo.')
         return True
@@ -2735,6 +2766,8 @@ class SessionRelay(QuestRelay):
                 key = (event.get('npc_id'), event.get('mark_id'))
                 if event.get('mark_type') == 2:
                     self.viewpoint_marks.pop(key, None)
+                    if event.get('npc_id'):
+                        self.mob_scan.mark_records.pop(('actor', event['npc_id']), None)
                 elif event.get('mark_type') == 1:
                     species = self.mob_scan.current_species if now-self.mob_scan.sent_at <= self.mob_scan.LISTEN else None
                     self.viewpoint_marks[key] = {'position': list(event['position']), 'species': species, 'at': now}
@@ -3166,8 +3199,6 @@ class SessionRelay(QuestRelay):
                 or not observer.registry.current(entity, time.monotonic())
                 or self.hunt.excluded_until.get(action['target_id'], 0) > time.monotonic()):
                 raise HuntTargetChanged('Alvo removido, antigo ou temporariamente ignorado')
-            if not is_patrol and self.asleep(action['target_id']):
-                raise HuntTargetChanged('Alvo dormindo: nao e atacado para nao acordar')
             if not is_patrol and self.dead(action['target_id']):
                 raise HuntTargetChanged('Alvo morto: nenhum ataque ou habilidade')
             player = observer.player

@@ -34,6 +34,21 @@ def test_nearby_threat_preempts_distant_acquisition(config):
     assert c.decide(s,r,100)['target_id']==11
     assert c.decide(s,r,100)['mode']=='control'
 
+@pytest.mark.parametrize('body_state',[3,4])
+def test_controlled_jounin_is_approached_to_silence_range_even_during_cooldown(tmp_path,config,body_state):
+    relay,now=relay_for(tmp_path,config)
+    identity=110000001
+    add_monster(relay,identity,1634,[26,20],now)  # visible, but no longer targeting us
+    relay.inventory.entities[identity]['body_state']=body_state
+    relay.tracker.observer.skill_cooldowns[76]=now+8
+
+    state=relay.status()
+    intent=relay.map_combat_intent(relay.active_map_combat(),state,now)
+    assert intent and intent['mode']=='control' and intent['skill_id']==76
+    action=relay.plan_group_or_hunt(state,now,150,relay.collision_map())
+    assert action and action['kind']=='move' and action['target_id']==identity
+    assert action['destination']==[21,20]  # silence range is 5 cells, Kunai range is longer
+
 def test_no_pursuit_salamandra_and_no_stealing_from_known_other_target(config):
     c,r,s=setup(config,[entity(10,1831,33)])
     assert c.decide(s,r,100) is None

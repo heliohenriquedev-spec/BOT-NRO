@@ -442,7 +442,8 @@ def test_showmobs_marks_lead_to_the_densest_group_from_time_to_time():
     assert found['monsters'] == 4 and math.dist(found['position'], (42, 49)) <= 3
     assert not scan.start('field', [1002], 30.0, idle=True)  # once a minute
     assert scan.start('field', [1002], 70.0, idle=True)  # a minute later, fighting or not
-    assert scan.current_goal([42, 50], 71.0) is None  # arrived
+    assert scan.current_goal([42, 50], 71.0) == found['position']  # patrol has not reached the exact goal yet
+    assert scan.current_goal(found['position'], 72.0) is None
 
 
 def test_showmobs_asks_only_for_the_monsters_still_missing(tmp_path):
@@ -466,13 +467,15 @@ def test_a_far_showmobs_spot_is_walked_to_and_then_the_patrol_goes_on():
     for _ in range(80):
         action = patrol.plan(position, now, 150, collision)
         now += 1
+        if patrol.focus_reached:
+            break
         if action is None:
             continue
         patrol.reached(action['destination'], position)
         position = action['destination']
         if patrol.focus_reached:
             break
-    assert patrol.focus_reached and math.dist(position, (110, 110)) <= 12  # got there, never stood still
+    assert patrol.focus_reached and max(abs(position[i]-[110, 110][i]) for i in (0, 1)) <= 5
     assert patrol.focus is None and patrol.plan(position, now+1, 150, collision) is not None  # patrols on
 
 
