@@ -4,6 +4,10 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.06.2 (06/11/2026)
+
+- Conexão: um NRO.exe de outra versão (por exemplo, atualizado pelo atualizador do jogo) é aceito quando a tabela de pacotes dele é idêntica à conhecida, conferida byte a byte; se a tabela mudou, o bot avisa e mostra o código da versão. A mensagem também diferencia "NRO.exe não encontrado na pasta escolhida".
+
 ## 2026.11.06.1 (06/11/2026)
 
 - Portais: ao atravessar um portal, o bot registra para qual mapa ele leva; o portal mais próximo de onde você aparece fica registrado como a volta para o mapa anterior. Os destinos vão para todos na atualização.

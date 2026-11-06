@@ -56126,6 +56126,843 @@
     "x": 30,
     "y": 260,
     "stamp": "2026-11-06T03:09:38.889+00:00"
+   },
+   {
+    "id": 6237,
+    "species": 1305,
+    "name": "Verme Mestre",
+    "map": "anthell01",
+    "x": 180,
+    "y": 124,
+    "stamp": "2026-11-06T03:17:11.004+00:00"
+   },
+   {
+    "id": 6238,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 20,
+    "y": 175,
+    "stamp": "2026-11-06T03:18:32.937+00:00"
+   },
+   {
+    "id": 6239,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 158,
+    "stamp": "2026-11-06T03:18:46.198+00:00"
+   },
+   {
+    "id": 6240,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 22,
+    "y": 154,
+    "stamp": "2026-11-06T03:18:48.078+00:00"
+   },
+   {
+    "id": 6241,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 18,
+    "y": 119,
+    "stamp": "2026-11-06T03:18:52.806+00:00"
+   },
+   {
+    "id": 6242,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 20,
+    "y": 88,
+    "stamp": "2026-11-06T03:18:57.084+00:00"
+   },
+   {
+    "id": 6243,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 47,
+    "y": 70,
+    "stamp": "2026-11-06T03:19:01.141+00:00"
+   },
+   {
+    "id": 6244,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 26,
+    "y": 188,
+    "stamp": "2026-11-06T03:19:18.773+00:00"
+   },
+   {
+    "id": 6245,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 208,
+    "stamp": "2026-11-06T03:19:21.464+00:00"
+   },
+   {
+    "id": 6246,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 43,
+    "y": 214,
+    "stamp": "2026-11-06T03:19:24.805+00:00"
+   },
+   {
+    "id": 6247,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 99,
+    "y": 157,
+    "stamp": "2026-11-06T03:20:11.222+00:00"
+   },
+   {
+    "id": 6248,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 95,
+    "y": 154,
+    "stamp": "2026-11-06T03:20:12.588+00:00"
+   },
+   {
+    "id": 6249,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 96,
+    "y": 140,
+    "stamp": "2026-11-06T03:20:13.749+00:00"
+   },
+   {
+    "id": 6250,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 91,
+    "y": 138,
+    "stamp": "2026-11-06T03:20:15.265+00:00"
+   },
+   {
+    "id": 6251,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 86,
+    "y": 121,
+    "stamp": "2026-11-06T03:20:33.043+00:00"
+   },
+   {
+    "id": 6252,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 94,
+    "y": 116,
+    "stamp": "2026-11-06T03:20:34.575+00:00"
+   },
+   {
+    "id": 6253,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 116,
+    "y": 135,
+    "stamp": "2026-11-06T03:20:39.143+00:00"
+   },
+   {
+    "id": 6254,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 149,
+    "y": 149,
+    "stamp": "2026-11-06T03:20:46.152+00:00"
+   },
+   {
+    "id": 6255,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 144,
+    "y": 146,
+    "stamp": "2026-11-06T03:20:46.651+00:00"
+   },
+   {
+    "id": 6256,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 159,
+    "y": 142,
+    "stamp": "2026-11-06T03:20:48.393+00:00"
+   },
+   {
+    "id": 6257,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 171,
+    "y": 160,
+    "stamp": "2026-11-06T03:20:57.019+00:00"
+   },
+   {
+    "id": 6258,
+    "species": 1656,
+    "name": "Genin",
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 170,
+    "stamp": "2026-11-06T03:21:00.517+00:00"
+   },
+   {
+    "id": 6259,
+    "species": 1517,
+    "name": "Sanjuu Kyodaireo",
+    "map": "ve_fild04",
+    "x": 219,
+    "y": 240,
+    "stamp": "2026-11-06T03:23:26.669+00:00"
+   },
+   {
+    "id": 6260,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 254,
+    "y": 238,
+    "stamp": "2026-11-06T03:24:26.854+00:00"
+   },
+   {
+    "id": 6261,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 251,
+    "y": 233,
+    "stamp": "2026-11-06T03:24:30.956+00:00"
+   },
+   {
+    "id": 6262,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 255,
+    "y": 235,
+    "stamp": "2026-11-06T03:24:33.386+00:00"
+   },
+   {
+    "id": 6263,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 254,
+    "y": 261,
+    "stamp": "2026-11-06T03:26:15.155+00:00"
+   },
+   {
+    "id": 6264,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 200,
+    "y": 279,
+    "stamp": "2026-11-06T03:26:22.429+00:00"
+   },
+   {
+    "id": 6265,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 281,
+    "y": 252,
+    "stamp": "2026-11-06T03:26:40.009+00:00"
+   },
+   {
+    "id": 6266,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 257,
+    "y": 306,
+    "stamp": "2026-11-06T03:26:48.132+00:00"
+   },
+   {
+    "id": 6267,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 226,
+    "y": 289,
+    "stamp": "2026-11-06T03:26:58.691+00:00"
+   },
+   {
+    "id": 6268,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 163,
+    "y": 316,
+    "stamp": "2026-11-06T03:27:11.844+00:00"
+   },
+   {
+    "id": 6269,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 150,
+    "y": 321,
+    "stamp": "2026-11-06T03:27:13.905+00:00"
+   },
+   {
+    "id": 6270,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 142,
+    "y": 322,
+    "stamp": "2026-11-06T03:27:15.702+00:00"
+   },
+   {
+    "id": 6271,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 138,
+    "y": 298,
+    "stamp": "2026-11-06T03:27:29.134+00:00"
+   },
+   {
+    "id": 6272,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 107,
+    "y": 310,
+    "stamp": "2026-11-06T03:27:35.065+00:00"
+   },
+   {
+    "id": 6273,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 91,
+    "y": 244,
+    "stamp": "2026-11-06T03:27:49.779+00:00"
+   },
+   {
+    "id": 6274,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 84,
+    "y": 239,
+    "stamp": "2026-11-06T03:27:52.296+00:00"
+   },
+   {
+    "id": 6275,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 86,
+    "y": 242,
+    "stamp": "2026-11-06T03:27:53.228+00:00"
+   },
+   {
+    "id": 6276,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 87,
+    "y": 233,
+    "stamp": "2026-11-06T03:27:54.261+00:00"
+   },
+   {
+    "id": 6277,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 63,
+    "y": 232,
+    "stamp": "2026-11-06T03:27:58.353+00:00"
+   },
+   {
+    "id": 6278,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 70,
+    "y": 246,
+    "stamp": "2026-11-06T03:28:00.520+00:00"
+   },
+   {
+    "id": 6279,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 51,
+    "y": 255,
+    "stamp": "2026-11-06T03:28:06.395+00:00"
+   },
+   {
+    "id": 6280,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 97,
+    "y": 210,
+    "stamp": "2026-11-06T03:28:16.276+00:00"
+   },
+   {
+    "id": 6281,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 100,
+    "y": 219,
+    "stamp": "2026-11-06T03:28:17.280+00:00"
+   },
+   {
+    "id": 6282,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 91,
+    "y": 199,
+    "stamp": "2026-11-06T03:28:20.951+00:00"
+   },
+   {
+    "id": 6283,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 105,
+    "y": 172,
+    "stamp": "2026-11-06T03:28:37.946+00:00"
+   },
+   {
+    "id": 6284,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 117,
+    "y": 174,
+    "stamp": "2026-11-06T03:28:40.046+00:00"
+   },
+   {
+    "id": 6285,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 81,
+    "y": 184,
+    "stamp": "2026-11-06T03:28:45.689+00:00"
+   },
+   {
+    "id": 6286,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 92,
+    "y": 147,
+    "stamp": "2026-11-06T03:28:50.356+00:00"
+   },
+   {
+    "id": 6287,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 95,
+    "y": 147,
+    "stamp": "2026-11-06T03:28:51.649+00:00"
+   },
+   {
+    "id": 6288,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 102,
+    "y": 151,
+    "stamp": "2026-11-06T03:28:52.546+00:00"
+   },
+   {
+    "id": 6289,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 137,
+    "y": 165,
+    "stamp": "2026-11-06T03:28:58.669+00:00"
+   },
+   {
+    "id": 6290,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 133,
+    "y": 145,
+    "stamp": "2026-11-06T03:29:02.097+00:00"
+   },
+   {
+    "id": 6291,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 147,
+    "y": 148,
+    "stamp": "2026-11-06T03:29:07.022+00:00"
+   },
+   {
+    "id": 6292,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 171,
+    "y": 140,
+    "stamp": "2026-11-06T03:29:10.290+00:00"
+   },
+   {
+    "id": 6293,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 184,
+    "y": 158,
+    "stamp": "2026-11-06T03:29:13.277+00:00"
+   },
+   {
+    "id": 6294,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 185,
+    "y": 161,
+    "stamp": "2026-11-06T03:29:14.827+00:00"
+   },
+   {
+    "id": 6295,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 194,
+    "y": 169,
+    "stamp": "2026-11-06T03:29:16.159+00:00"
+   },
+   {
+    "id": 6296,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 162,
+    "y": 164,
+    "stamp": "2026-11-06T03:29:20.591+00:00"
+   },
+   {
+    "id": 6297,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 158,
+    "y": 162,
+    "stamp": "2026-11-06T03:29:22.252+00:00"
+   },
+   {
+    "id": 6298,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 141,
+    "y": 159,
+    "stamp": "2026-11-06T03:29:24.372+00:00"
+   },
+   {
+    "id": 6299,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 245,
+    "y": 242,
+    "stamp": "2026-11-06T03:29:50.803+00:00"
+   },
+   {
+    "id": 6300,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 243,
+    "y": 218,
+    "stamp": "2026-11-06T03:29:54.719+00:00"
+   },
+   {
+    "id": 6301,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 245,
+    "y": 209,
+    "stamp": "2026-11-06T03:29:57.643+00:00"
+   },
+   {
+    "id": 6302,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 242,
+    "y": 203,
+    "stamp": "2026-11-06T03:29:58.934+00:00"
+   },
+   {
+    "id": 6303,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 240,
+    "y": 191,
+    "stamp": "2026-11-06T03:30:00.973+00:00"
+   },
+   {
+    "id": 6304,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 269,
+    "y": 199,
+    "stamp": "2026-11-06T03:30:06.373+00:00"
+   },
+   {
+    "id": 6305,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 280,
+    "y": 183,
+    "stamp": "2026-11-06T03:30:08.857+00:00"
+   },
+   {
+    "id": 6306,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 256,
+    "y": 190,
+    "stamp": "2026-11-06T03:30:13.067+00:00"
+   },
+   {
+    "id": 6307,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 236,
+    "y": 175,
+    "stamp": "2026-11-06T03:30:21.175+00:00"
+   },
+   {
+    "id": 6308,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 267,
+    "y": 157,
+    "stamp": "2026-11-06T03:30:31.744+00:00"
+   },
+   {
+    "id": 6309,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 278,
+    "y": 147,
+    "stamp": "2026-11-06T03:30:33.893+00:00"
+   },
+   {
+    "id": 6310,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 296,
+    "y": 158,
+    "stamp": "2026-11-06T03:30:38.389+00:00"
+   },
+   {
+    "id": 6311,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 298,
+    "y": 148,
+    "stamp": "2026-11-06T03:30:40.319+00:00"
+   },
+   {
+    "id": 6312,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 279,
+    "y": 123,
+    "stamp": "2026-11-06T03:30:45.436+00:00"
+   },
+   {
+    "id": 6313,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 263,
+    "y": 132,
+    "stamp": "2026-11-06T03:30:47.694+00:00"
+   },
+   {
+    "id": 6314,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 268,
+    "y": 111,
+    "stamp": "2026-11-06T03:30:56.016+00:00"
+   },
+   {
+    "id": 6315,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 247,
+    "y": 100,
+    "stamp": "2026-11-06T03:31:00.911+00:00"
+   },
+   {
+    "id": 6316,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 252,
+    "y": 99,
+    "stamp": "2026-11-06T03:31:04.022+00:00"
+   },
+   {
+    "id": 6317,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 241,
+    "y": 105,
+    "stamp": "2026-11-06T03:31:05.478+00:00"
+   },
+   {
+    "id": 6318,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 207,
+    "y": 87,
+    "stamp": "2026-11-06T03:31:18.959+00:00"
+   },
+   {
+    "id": 6319,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 181,
+    "y": 74,
+    "stamp": "2026-11-06T03:31:31.648+00:00"
+   },
+   {
+    "id": 6320,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 154,
+    "y": 71,
+    "stamp": "2026-11-06T03:31:38.052+00:00"
+   },
+   {
+    "id": 6321,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 150,
+    "y": 79,
+    "stamp": "2026-11-06T03:31:39.046+00:00"
+   },
+   {
+    "id": 6322,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 143,
+    "y": 86,
+    "stamp": "2026-11-06T03:31:41.082+00:00"
+   },
+   {
+    "id": 6323,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 149,
+    "y": 79,
+    "stamp": "2026-11-06T03:31:44.427+00:00"
+   },
+   {
+    "id": 6324,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 179,
+    "y": 89,
+    "stamp": "2026-11-06T03:31:52.050+00:00"
+   },
+   {
+    "id": 6325,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 125,
+    "y": 99,
+    "stamp": "2026-11-06T03:32:00.169+00:00"
+   },
+   {
+    "id": 6326,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 116,
+    "y": 90,
+    "stamp": "2026-11-06T03:32:01.436+00:00"
+   },
+   {
+    "id": 6327,
+    "species": 1405,
+    "name": "Chamu",
+    "map": "ve_fild04",
+    "x": 116,
+    "y": 81,
+    "stamp": "2026-11-06T03:32:02.724+00:00"
+   },
+   {
+    "id": 6328,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 112,
+    "y": 82,
+    "stamp": "2026-11-06T03:32:03.367+00:00"
+   },
+   {
+    "id": 6329,
+    "species": 1040,
+    "name": "Manmosukas",
+    "map": "ve_fild04",
+    "x": 116,
+    "y": 92,
+    "stamp": "2026-11-06T03:32:04.917+00:00"
    }
   ],
   "floor": [
@@ -225396,6 +226233,4274 @@
     "fresh": 1,
     "stamp": "2026-11-06T03:09:38.890+00:00",
     "source": "floor"
+   },
+   {
+    "id": 15389,
+    "item": 716,
+    "amount": 1,
+    "map": "anthell01",
+    "x": 181,
+    "y": 123,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:17:11.033+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15390,
+    "item": 1096,
+    "amount": 1,
+    "map": "anthell01",
+    "x": 181,
+    "y": 123,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:17:11.033+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15391,
+    "item": 912,
+    "amount": 1,
+    "map": "anthell01",
+    "x": 180,
+    "y": 125,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:17:11.033+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15392,
+    "item": 1042,
+    "amount": 1,
+    "map": "anthell01",
+    "x": 179,
+    "y": 125,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:17:11.033+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15393,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 175,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:32.937+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15394,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 20,
+    "y": 176,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:32.937+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15395,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 175,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:32.937+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15396,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 158,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:46.199+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15397,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 159,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:46.199+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15398,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 20,
+    "y": 159,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:46.199+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15399,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 22,
+    "y": 153,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:48.081+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15400,
+    "item": 2480,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 22,
+    "y": 153,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:48.081+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15401,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 153,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:48.081+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15402,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 21,
+    "y": 154,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:48.081+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15403,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 21,
+    "y": 154,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:48.081+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15404,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 17,
+    "y": 120,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:52.807+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15405,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 18,
+    "y": 120,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:52.807+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15406,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 17,
+    "y": 120,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:52.807+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15407,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 89,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:57.084+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15408,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 20,
+    "y": 88,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:57.084+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15409,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 20,
+    "y": 89,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:57.084+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15410,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 21,
+    "y": 88,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:18:57.084+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15411,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 46,
+    "y": 69,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:01.149+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15412,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 48,
+    "y": 69,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:01.149+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15413,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 48,
+    "y": 70,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:01.149+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15414,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 21,
+    "y": 88,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:02.249+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15415,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 20,
+    "y": 89,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:02.349+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15416,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 20,
+    "y": 88,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:02.349+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15417,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 89,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:02.469+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15418,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 17,
+    "y": 120,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:07.324+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15419,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 18,
+    "y": 120,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:07.324+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15420,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 17,
+    "y": 120,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:07.324+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15421,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 18,
+    "y": 120,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:09.559+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15422,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 17,
+    "y": 120,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:09.718+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15423,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 17,
+    "y": 120,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:09.718+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15424,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 153,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:13.034+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15425,
+    "item": 2480,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 22,
+    "y": 153,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:13.034+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15426,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 22,
+    "y": 153,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:13.035+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15427,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 21,
+    "y": 154,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:13.113+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15428,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 21,
+    "y": 154,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:13.113+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15429,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 158,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:13.587+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15430,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 20,
+    "y": 159,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:13.672+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15431,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 159,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:13.672+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15432,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 175,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:15.678+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15433,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 19,
+    "y": 175,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:15.678+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15434,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 20,
+    "y": 176,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:15.849+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15435,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 26,
+    "y": 187,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:18.773+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15436,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 24,
+    "y": 188,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:18.773+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15437,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 24,
+    "y": 187,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:18.773+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15438,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 26,
+    "y": 188,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:18.773+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15439,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 24,
+    "y": 208,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:21.465+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15440,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 209,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:21.465+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15441,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 207,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:21.465+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15442,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 207,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:21.465+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15443,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 42,
+    "y": 215,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:24.805+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15444,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 43,
+    "y": 215,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:24.805+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15445,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 43,
+    "y": 215,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:24.805+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15446,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 44,
+    "y": 213,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:19:24.805+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15447,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 24,
+    "y": 208,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:25.808+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15448,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 207,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:25.941+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15449,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 207,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:25.941+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15450,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 209,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:25.941+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15451,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 209,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:55.357+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15452,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 24,
+    "y": 208,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:55.532+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15453,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 207,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:55.675+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15454,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 23,
+    "y": 207,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:55.675+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15455,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 26,
+    "y": 188,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:57.909+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15456,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 24,
+    "y": 188,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:57.909+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15457,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 24,
+    "y": 187,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:58.061+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15458,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 26,
+    "y": 187,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:19:58.061+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15459,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 99,
+    "y": 156,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:11.222+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15460,
+    "item": 2480,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 98,
+    "y": 158,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:11.222+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15461,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 98,
+    "y": 156,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:11.222+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15462,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 98,
+    "y": 158,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:11.222+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15463,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 98,
+    "y": 157,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:11.222+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15464,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 95,
+    "y": 155,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:12.589+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15465,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 96,
+    "y": 155,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:12.589+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15466,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 96,
+    "y": 153,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:12.589+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15467,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 97,
+    "y": 139,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:13.749+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15468,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 96,
+    "y": 140,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:13.749+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15469,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 95,
+    "y": 139,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:13.749+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15470,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 92,
+    "y": 138,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:15.265+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15471,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 91,
+    "y": 138,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:15.265+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15472,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 90,
+    "y": 138,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:15.265+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15473,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 91,
+    "y": 138,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:15.265+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15474,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 95,
+    "y": 155,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:15.870+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15475,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 96,
+    "y": 155,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:15.870+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15476,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 98,
+    "y": 156,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:15.990+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15477,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 99,
+    "y": 156,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:15.990+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15478,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 86,
+    "y": 120,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:33.043+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15479,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 87,
+    "y": 120,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:33.043+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15480,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 86,
+    "y": 120,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:33.043+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15481,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 93,
+    "y": 115,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:34.575+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15482,
+    "item": 7072,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 95,
+    "y": 116,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:34.575+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15483,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 95,
+    "y": 117,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:34.575+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15484,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 93,
+    "y": 117,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:34.575+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15485,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 95,
+    "y": 116,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:34.575+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15486,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 95,
+    "y": 139,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:38.063+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15487,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 97,
+    "y": 139,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:38.063+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15488,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 96,
+    "y": 140,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:38.180+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15489,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 116,
+    "y": 136,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:39.143+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15490,
+    "item": 7072,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 117,
+    "y": 135,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:39.143+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15491,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 117,
+    "y": 134,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:39.143+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15492,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 115,
+    "y": 135,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:39.143+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15493,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 115,
+    "y": 135,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:39.143+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15494,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 148,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:46.152+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15495,
+    "item": 2480,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 148,
+    "y": 147,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:46.152+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15496,
+    "item": 7072,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 149,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:46.152+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15497,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 148,
+    "y": 148,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:46.152+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15498,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 149,
+    "y": 149,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:46.152+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15499,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 145,
+    "y": 145,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:46.655+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15500,
+    "item": 2480,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 143,
+    "y": 145,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:46.655+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15501,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 143,
+    "y": 146,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:46.655+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15502,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 145,
+    "y": 147,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:46.655+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15503,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 144,
+    "y": 146,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:46.655+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15504,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 160,
+    "y": 143,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:48.393+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15505,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 159,
+    "y": 141,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:48.393+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15506,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 159,
+    "y": 141,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:48.393+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15507,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 143,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:49.311+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15508,
+    "item": 2480,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 143,
+    "y": 145,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:49.311+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15509,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 159,
+    "y": 141,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.156+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15510,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 159,
+    "y": 141,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.156+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15511,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 160,
+    "y": 143,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.382+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15512,
+    "item": 2480,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 143,
+    "y": 145,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.589+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15513,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 145,
+    "y": 145,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.590+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15514,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 143,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.710+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15515,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 144,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.710+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15516,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 145,
+    "y": 147,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.810+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15517,
+    "item": 2480,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 148,
+    "y": 147,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.810+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15518,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 148,
+    "y": 148,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.953+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15519,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 148,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:53.953+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15520,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 149,
+    "y": 149,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:54.077+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15521,
+    "item": 7072,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 149,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:54.077+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15522,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 170,
+    "y": 160,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:57.028+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15523,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 172,
+    "y": 159,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:57.028+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15524,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 172,
+    "y": 160,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:20:57.028+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15525,
+    "item": 7072,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 149,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:58.512+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15526,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 148,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:58.513+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15527,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 149,
+    "y": 149,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:58.612+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15528,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 148,
+    "y": 148,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:58.716+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15529,
+    "item": 2480,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 148,
+    "y": 147,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:58.716+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15530,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 145,
+    "y": 147,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:59.075+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15531,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 144,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:59.224+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15532,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 143,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:20:59.342+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15533,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 149,
+    "y": 171,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:21:00.517+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15534,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 151,
+    "y": 169,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:21:00.517+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15535,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 170,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:21:00.517+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15536,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 170,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:21:00.517+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15537,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 149,
+    "y": 149,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:21:02.215+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15538,
+    "item": 7072,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 149,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:21:02.215+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15539,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 148,
+    "y": 148,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:21:02.389+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15540,
+    "item": 7498,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 150,
+    "y": 148,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:21:02.389+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15541,
+    "item": 7005,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 145,
+    "y": 147,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:21:02.523+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15542,
+    "item": 2480,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 148,
+    "y": 147,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:21:02.524+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15543,
+    "item": 7014,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 143,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:21:02.692+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15544,
+    "item": 7069,
+    "amount": 1,
+    "map": "cmd_fild09",
+    "x": 144,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:21:02.692+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15545,
+    "item": 7267,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 223,
+    "y": 243,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:23:26.669+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15546,
+    "item": 581,
+    "amount": 6,
+    "map": "hospital2",
+    "x": 19,
+    "y": 85,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:23:45.378+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15547,
+    "item": 552,
+    "amount": 6,
+    "map": "hospital2",
+    "x": 19,
+    "y": 84,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:23:45.378+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15548,
+    "item": 13256,
+    "amount": 5000,
+    "map": "ama_in01",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:24:09.152+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15549,
+    "item": 13254,
+    "amount": 5000,
+    "map": "ama_in01",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:24:09.153+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15550,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 257,
+    "y": 241,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:24:26.854+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15551,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 251,
+    "y": 233,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:24:30.956+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15552,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 252,
+    "y": 232,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:24:30.956+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15553,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 255,
+    "y": 235,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:24:33.386+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15554,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 256,
+    "y": 236,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:24:33.386+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15555,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 253,
+    "y": 262,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:15.155+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15556,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 255,
+    "y": 261,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:15.155+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15557,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 254,
+    "y": 260,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:15.155+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15558,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 201,
+    "y": 278,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:22.452+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15559,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 200,
+    "y": 279,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:22.452+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15560,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 201,
+    "y": 279,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:22.452+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15561,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 253,
+    "y": 262,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:26:35.282+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15562,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 255,
+    "y": 261,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:26:35.452+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15563,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 254,
+    "y": 260,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:26:35.630+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15564,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 282,
+    "y": 252,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:40.009+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15565,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 282,
+    "y": 251,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:40.009+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15566,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 255,
+    "y": 261,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:26:44.122+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15567,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 254,
+    "y": 260,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:26:44.290+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15568,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 253,
+    "y": 262,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:26:44.466+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15569,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 257,
+    "y": 307,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:48.132+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15570,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 258,
+    "y": 308,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:48.132+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15571,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 258,
+    "y": 309,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:48.132+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15572,
+    "item": 999,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 258,
+    "y": 307,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:48.132+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15573,
+    "item": 999,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 258,
+    "y": 307,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:26:52.268+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15574,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 258,
+    "y": 309,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:26:52.268+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15575,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 258,
+    "y": 308,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:26:52.268+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15576,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 257,
+    "y": 307,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:26:52.369+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15577,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 225,
+    "y": 288,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:58.691+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15578,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 226,
+    "y": 288,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:26:58.692+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15579,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 201,
+    "y": 279,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:01.294+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15580,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 201,
+    "y": 278,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:01.294+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15581,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 200,
+    "y": 279,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:01.429+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15582,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 200,
+    "y": 279,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:07.297+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15583,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 164,
+    "y": 316,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:11.844+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15584,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 162,
+    "y": 316,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:11.844+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15585,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 162,
+    "y": 315,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:11.844+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15586,
+    "item": 999,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 163,
+    "y": 317,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:11.844+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15587,
+    "item": 2483,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 151,
+    "y": 322,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:13.913+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15588,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 149,
+    "y": 323,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:13.913+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15589,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 143,
+    "y": 322,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:15.744+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15590,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 143,
+    "y": 323,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:15.744+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15591,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 142,
+    "y": 323,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:15.744+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15592,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 162,
+    "y": 315,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:16.891+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15593,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 162,
+    "y": 316,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:16.891+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15594,
+    "item": 999,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 163,
+    "y": 317,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:16.963+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15595,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 164,
+    "y": 316,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:17.111+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15596,
+    "item": 2483,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 151,
+    "y": 322,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:22.866+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15597,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 149,
+    "y": 323,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:23.043+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15598,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 143,
+    "y": 323,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:23.822+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15599,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 143,
+    "y": 322,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:23.822+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15600,
+    "item": 999,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 163,
+    "y": 317,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:24.029+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15601,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 142,
+    "y": 323,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:24.029+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15602,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 162,
+    "y": 316,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:24.326+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15603,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 164,
+    "y": 316,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:24.326+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15604,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 162,
+    "y": 315,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:24.448+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15605,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 139,
+    "y": 297,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:29.135+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15606,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 106,
+    "y": 311,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:35.065+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15607,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 107,
+    "y": 311,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:35.065+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15608,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 107,
+    "y": 311,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:38.244+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15609,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 106,
+    "y": 311,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:38.244+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15610,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 90,
+    "y": 244,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:49.779+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15611,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 83,
+    "y": 238,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:52.296+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15612,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 85,
+    "y": 240,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:52.296+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15613,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 84,
+    "y": 238,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:52.296+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15614,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 87,
+    "y": 241,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:53.231+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15615,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 85,
+    "y": 243,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:53.231+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15616,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 87,
+    "y": 233,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:54.261+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15617,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 63,
+    "y": 232,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:58.353+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15618,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 63,
+    "y": 233,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:58.353+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15619,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 63,
+    "y": 232,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:27:58.353+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15620,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 83,
+    "y": 238,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:58.809+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15621,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 84,
+    "y": 238,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:58.925+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15622,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 85,
+    "y": 243,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:59.033+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15623,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 85,
+    "y": 240,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:59.033+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15624,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 87,
+    "y": 233,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:59.390+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15625,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 87,
+    "y": 241,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:27:59.390+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15626,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 70,
+    "y": 245,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:00.520+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15627,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 87,
+    "y": 233,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:01.551+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15628,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 87,
+    "y": 241,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:01.551+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15629,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 90,
+    "y": 244,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:02.021+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15630,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 51,
+    "y": 256,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:06.395+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15631,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 70,
+    "y": 245,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:06.883+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15632,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 85,
+    "y": 243,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:08.754+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15633,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 85,
+    "y": 240,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:08.754+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15634,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 84,
+    "y": 238,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:09.073+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15635,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 83,
+    "y": 238,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:09.073+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15636,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 87,
+    "y": 241,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:09.073+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15637,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 90,
+    "y": 244,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:09.544+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15638,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 87,
+    "y": 233,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:11.297+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15639,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 97,
+    "y": 209,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:16.276+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15640,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 101,
+    "y": 220,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:17.280+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15641,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 90,
+    "y": 199,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:20.951+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15642,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 63,
+    "y": 232,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:24.302+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15643,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 63,
+    "y": 232,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:24.303+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15644,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 63,
+    "y": 233,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:24.435+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15645,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 70,
+    "y": 245,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:26.230+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15646,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 83,
+    "y": 238,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:29.917+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15647,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 87,
+    "y": 233,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:30.541+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15648,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 90,
+    "y": 199,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:31.621+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15649,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 97,
+    "y": 209,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:32.132+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15650,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 101,
+    "y": 220,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:32.734+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15651,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 104,
+    "y": 173,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:37.946+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15652,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 118,
+    "y": 174,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:40.046+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15653,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 90,
+    "y": 199,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:44.856+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15654,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 80,
+    "y": 183,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:45.689+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15655,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 104,
+    "y": 173,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:48.349+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15656,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 93,
+    "y": 147,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:50.356+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15657,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 93,
+    "y": 147,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:51.649+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15658,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 101,
+    "y": 151,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:52.546+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15659,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 104,
+    "y": 173,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:54.552+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15660,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 118,
+    "y": 174,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:28:54.726+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15661,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 136,
+    "y": 164,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:28:58.669+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15662,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 132,
+    "y": 146,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:02.109+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15663,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 132,
+    "y": 146,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:02.109+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15664,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 134,
+    "y": 144,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:02.109+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15665,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 148,
+    "y": 148,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:07.022+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15666,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 147,
+    "y": 147,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:07.022+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15667,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 172,
+    "y": 141,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:10.291+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15668,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 172,
+    "y": 142,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:10.291+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15669,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 173,
+    "y": 140,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:10.291+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15670,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 184,
+    "y": 159,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:13.277+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15671,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 184,
+    "y": 159,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:13.277+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15672,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 185,
+    "y": 162,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:14.827+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15673,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 185,
+    "y": 161,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:14.827+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15674,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 184,
+    "y": 163,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:14.827+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15675,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 194,
+    "y": 170,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:16.160+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15676,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 163,
+    "y": 163,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:20.591+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15677,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 148,
+    "y": 148,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:21.211+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15678,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 147,
+    "y": 147,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:22.072+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15679,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 159,
+    "y": 163,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:22.252+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15680,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 158,
+    "y": 162,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:22.252+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15681,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 136,
+    "y": 164,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:23.784+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15682,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 132,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:24.233+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15683,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 132,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:24.233+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15684,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 142,
+    "y": 160,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:24.372+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15685,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 158,
+    "y": 162,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:25.451+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15686,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 159,
+    "y": 163,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:25.598+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15687,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 163,
+    "y": 163,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:26.099+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15688,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 184,
+    "y": 159,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:29.441+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15689,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 184,
+    "y": 159,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:29.441+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15690,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 184,
+    "y": 163,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:29.441+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15691,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 185,
+    "y": 161,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:29.617+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15692,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 185,
+    "y": 162,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:29.617+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15693,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 194,
+    "y": 170,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:30.965+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15694,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 184,
+    "y": 163,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:34.325+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15695,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 185,
+    "y": 162,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:34.469+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15696,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 185,
+    "y": 161,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:29:34.622+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15697,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 245,
+    "y": 242,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:50.803+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15698,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 243,
+    "y": 219,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:54.719+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15699,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 244,
+    "y": 208,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:57.643+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15700,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 245,
+    "y": 209,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:57.643+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15701,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 243,
+    "y": 203,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:29:58.934+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15702,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 239,
+    "y": 190,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:00.973+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15703,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 240,
+    "y": 190,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:00.973+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15704,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 243,
+    "y": 219,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:03.137+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15705,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 269,
+    "y": 200,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:06.373+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15706,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 270,
+    "y": 199,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:06.373+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15707,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 279,
+    "y": 184,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:08.857+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15708,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 270,
+    "y": 199,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:09.774+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15709,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 269,
+    "y": 200,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:09.924+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15710,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 243,
+    "y": 203,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:12.690+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15711,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 257,
+    "y": 190,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:13.067+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15712,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 255,
+    "y": 191,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:13.067+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15713,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 240,
+    "y": 190,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:13.539+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15714,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 239,
+    "y": 190,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:13.700+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15715,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 244,
+    "y": 208,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:13.847+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15716,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 245,
+    "y": 209,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:14.014+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15717,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 243,
+    "y": 219,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:15.616+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15718,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 239,
+    "y": 190,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:16.912+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15719,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 240,
+    "y": 190,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:16.912+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15720,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 255,
+    "y": 191,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:18.164+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15721,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 257,
+    "y": 190,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:18.484+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15722,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 237,
+    "y": 176,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:21.176+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15723,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 236,
+    "y": 175,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:21.176+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15724,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 255,
+    "y": 191,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:21.841+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15725,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 257,
+    "y": 190,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:22.167+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15726,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 279,
+    "y": 184,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:25.064+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15727,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 267,
+    "y": 158,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:31.744+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15728,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 277,
+    "y": 148,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:33.893+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15729,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 279,
+    "y": 146,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:33.893+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15730,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 277,
+    "y": 148,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:37.568+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15731,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 279,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:38.286+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15732,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 297,
+    "y": 158,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:38.389+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15733,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 297,
+    "y": 148,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:40.319+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15734,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 279,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:41.407+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15735,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 277,
+    "y": 148,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:42.301+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15736,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 278,
+    "y": 123,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:45.436+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15737,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 279,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:47.273+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15738,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 264,
+    "y": 133,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:47.694+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15739,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 279,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:48.323+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15740,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 277,
+    "y": 148,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:48.551+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15741,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 278,
+    "y": 123,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:30:54.435+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15742,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 268,
+    "y": 110,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:56.016+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15743,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 268,
+    "y": 112,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:56.016+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15744,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 267,
+    "y": 110,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:30:56.016+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15745,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 247,
+    "y": 100,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:00.911+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15746,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 245,
+    "y": 99,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:04.022+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15747,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 240,
+    "y": 104,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:05.478+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15748,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 267,
+    "y": 110,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:31:07.889+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15749,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 268,
+    "y": 110,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:31:08.018+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15750,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 207,
+    "y": 86,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:18.959+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15751,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 207,
+    "y": 86,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:31:29.205+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15752,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 181,
+    "y": 73,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:31.649+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15753,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 181,
+    "y": 73,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:31.649+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15754,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 181,
+    "y": 75,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:31.649+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15755,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 155,
+    "y": 72,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:38.052+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15756,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 153,
+    "y": 79,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:39.046+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15757,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 152,
+    "y": 78,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:39.046+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15758,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 144,
+    "y": 82,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:41.082+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15759,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 147,
+    "y": 78,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:44.427+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15760,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 179,
+    "y": 89,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:31:52.050+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15761,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 153,
+    "y": 79,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:31:53.971+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15762,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 152,
+    "y": 78,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:31:54.108+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15763,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 147,
+    "y": 78,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:31:54.903+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15764,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 155,
+    "y": 72,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:31:55.208+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15765,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 144,
+    "y": 82,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:31:55.304+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15766,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 124,
+    "y": 100,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:32:00.169+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15767,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 116,
+    "y": 90,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:32:01.437+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15768,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 114,
+    "y": 89,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:32:01.437+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15769,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 115,
+    "y": 91,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:32:01.437+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15770,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 115,
+    "y": 81,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:32:02.724+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15771,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 112,
+    "y": 82,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:32:03.367+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15772,
+    "item": 912,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 114,
+    "y": 80,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:32:03.367+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15773,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 114,
+    "y": 81,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:32:03.367+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15774,
+    "item": 7008,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 124,
+    "y": 100,
+    "fresh": 0,
+    "stamp": "2026-11-06T03:32:04.554+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15775,
+    "item": 757,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 117,
+    "y": 91,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:32:04.918+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15776,
+    "item": 953,
+    "amount": 1,
+    "map": "ve_fild04",
+    "x": 116,
+    "y": 93,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:32:04.918+00:00",
+    "source": "floor"
    }
   ],
   "links": [
@@ -267377,6 +272482,1026 @@
    {
     "floor_id": 15388,
     "death_id": 6236,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15389,
+    "death_id": 6237,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15390,
+    "death_id": 6237,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15391,
+    "death_id": 6237,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15392,
+    "death_id": 6237,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15393,
+    "death_id": 6238,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15394,
+    "death_id": 6238,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15395,
+    "death_id": 6238,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15396,
+    "death_id": 6239,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15397,
+    "death_id": 6239,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15398,
+    "death_id": 6239,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15399,
+    "death_id": 6240,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15400,
+    "death_id": 6240,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15401,
+    "death_id": 6240,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15402,
+    "death_id": 6240,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15403,
+    "death_id": 6240,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15404,
+    "death_id": 6241,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15405,
+    "death_id": 6241,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15406,
+    "death_id": 6241,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15407,
+    "death_id": 6242,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15408,
+    "death_id": 6242,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15409,
+    "death_id": 6242,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15410,
+    "death_id": 6242,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15411,
+    "death_id": 6243,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15412,
+    "death_id": 6243,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15413,
+    "death_id": 6243,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15435,
+    "death_id": 6244,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15436,
+    "death_id": 6244,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15437,
+    "death_id": 6244,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15438,
+    "death_id": 6244,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15439,
+    "death_id": 6245,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15440,
+    "death_id": 6245,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15441,
+    "death_id": 6245,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15442,
+    "death_id": 6245,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15443,
+    "death_id": 6246,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15444,
+    "death_id": 6246,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15445,
+    "death_id": 6246,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15446,
+    "death_id": 6246,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15459,
+    "death_id": 6247,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15460,
+    "death_id": 6247,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15461,
+    "death_id": 6247,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15462,
+    "death_id": 6247,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15463,
+    "death_id": 6247,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15464,
+    "death_id": 6248,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15465,
+    "death_id": 6248,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15466,
+    "death_id": 6248,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15467,
+    "death_id": 6249,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15468,
+    "death_id": 6249,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15469,
+    "death_id": 6249,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15470,
+    "death_id": 6250,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15471,
+    "death_id": 6250,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15472,
+    "death_id": 6250,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15473,
+    "death_id": 6250,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15478,
+    "death_id": 6251,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15479,
+    "death_id": 6251,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15480,
+    "death_id": 6251,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15481,
+    "death_id": 6252,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15482,
+    "death_id": 6252,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15483,
+    "death_id": 6252,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15484,
+    "death_id": 6252,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15485,
+    "death_id": 6252,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15489,
+    "death_id": 6253,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15490,
+    "death_id": 6253,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15491,
+    "death_id": 6253,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15492,
+    "death_id": 6253,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15493,
+    "death_id": 6253,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15494,
+    "death_id": 6254,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15495,
+    "death_id": 6254,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15496,
+    "death_id": 6254,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15497,
+    "death_id": 6254,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15498,
+    "death_id": 6254,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15499,
+    "death_id": 6255,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15500,
+    "death_id": 6255,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15501,
+    "death_id": 6255,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15502,
+    "death_id": 6255,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15503,
+    "death_id": 6255,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15504,
+    "death_id": 6256,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15505,
+    "death_id": 6256,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15506,
+    "death_id": 6256,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15522,
+    "death_id": 6257,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15523,
+    "death_id": 6257,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15524,
+    "death_id": 6257,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15533,
+    "death_id": 6258,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15534,
+    "death_id": 6258,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15535,
+    "death_id": 6258,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15536,
+    "death_id": 6258,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15551,
+    "death_id": 6261,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15552,
+    "death_id": 6261,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15553,
+    "death_id": 6262,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15554,
+    "death_id": 6262,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15555,
+    "death_id": 6263,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15556,
+    "death_id": 6263,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15557,
+    "death_id": 6263,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15558,
+    "death_id": 6264,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15559,
+    "death_id": 6264,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15560,
+    "death_id": 6264,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15564,
+    "death_id": 6265,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15565,
+    "death_id": 6265,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15569,
+    "death_id": 6266,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15570,
+    "death_id": 6266,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15572,
+    "death_id": 6266,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15577,
+    "death_id": 6267,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15578,
+    "death_id": 6267,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15583,
+    "death_id": 6268,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15584,
+    "death_id": 6268,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15585,
+    "death_id": 6268,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15586,
+    "death_id": 6268,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15587,
+    "death_id": 6269,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15588,
+    "death_id": 6269,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15589,
+    "death_id": 6270,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15590,
+    "death_id": 6270,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15591,
+    "death_id": 6270,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15605,
+    "death_id": 6271,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15606,
+    "death_id": 6272,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15607,
+    "death_id": 6272,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15610,
+    "death_id": 6273,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15611,
+    "death_id": 6274,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15612,
+    "death_id": 6274,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15613,
+    "death_id": 6274,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15612,
+    "death_id": 6275,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15614,
+    "death_id": 6275,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15615,
+    "death_id": 6275,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15616,
+    "death_id": 6276,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15617,
+    "death_id": 6277,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15618,
+    "death_id": 6277,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15619,
+    "death_id": 6277,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15626,
+    "death_id": 6278,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15630,
+    "death_id": 6279,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15639,
+    "death_id": 6280,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15640,
+    "death_id": 6281,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15641,
+    "death_id": 6282,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15651,
+    "death_id": 6283,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15652,
+    "death_id": 6284,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15654,
+    "death_id": 6285,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15656,
+    "death_id": 6286,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15656,
+    "death_id": 6287,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15657,
+    "death_id": 6286,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15657,
+    "death_id": 6287,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15658,
+    "death_id": 6288,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15661,
+    "death_id": 6289,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15662,
+    "death_id": 6290,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15663,
+    "death_id": 6290,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15664,
+    "death_id": 6290,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15665,
+    "death_id": 6291,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15666,
+    "death_id": 6291,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15667,
+    "death_id": 6292,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15668,
+    "death_id": 6292,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15669,
+    "death_id": 6292,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15670,
+    "death_id": 6293,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15671,
+    "death_id": 6293,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15672,
+    "death_id": 6294,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15673,
+    "death_id": 6294,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15674,
+    "death_id": 6294,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15675,
+    "death_id": 6295,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15676,
+    "death_id": 6296,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15679,
+    "death_id": 6297,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15680,
+    "death_id": 6297,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15684,
+    "death_id": 6298,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15697,
+    "death_id": 6299,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15698,
+    "death_id": 6300,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15699,
+    "death_id": 6301,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15700,
+    "death_id": 6301,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15701,
+    "death_id": 6302,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15702,
+    "death_id": 6303,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15703,
+    "death_id": 6303,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15705,
+    "death_id": 6304,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15706,
+    "death_id": 6304,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15707,
+    "death_id": 6305,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15711,
+    "death_id": 6306,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15712,
+    "death_id": 6306,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15722,
+    "death_id": 6307,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15723,
+    "death_id": 6307,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15727,
+    "death_id": 6308,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15728,
+    "death_id": 6309,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15729,
+    "death_id": 6309,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15732,
+    "death_id": 6310,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15733,
+    "death_id": 6311,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15736,
+    "death_id": 6312,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15738,
+    "death_id": 6313,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15742,
+    "death_id": 6314,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15743,
+    "death_id": 6314,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15744,
+    "death_id": 6314,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15745,
+    "death_id": 6315,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15747,
+    "death_id": 6317,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15750,
+    "death_id": 6318,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15752,
+    "death_id": 6319,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15753,
+    "death_id": 6319,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15754,
+    "death_id": 6319,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15755,
+    "death_id": 6320,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15756,
+    "death_id": 6321,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15757,
+    "death_id": 6321,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15759,
+    "death_id": 6323,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15760,
+    "death_id": 6324,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15766,
+    "death_id": 6325,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15767,
+    "death_id": 6326,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15768,
+    "death_id": 6326,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15769,
+    "death_id": 6326,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15770,
+    "death_id": 6327,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15771,
+    "death_id": 6328,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15772,
+    "death_id": 6327,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15772,
+    "death_id": 6328,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15773,
+    "death_id": 6327,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15773,
+    "death_id": 6328,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15775,
+    "death_id": 6329,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15776,
+    "death_id": 6329,
     "status": "candidate"
    }
   ],

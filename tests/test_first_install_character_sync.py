@@ -52,7 +52,7 @@ def test_packet_table_uses_users_selected_folder_not_authors_path(portable_clien
 def test_client_hash_validation_is_still_required(portable_client):
     folder,_=portable_client
     (folder/'NRO.exe').write_bytes(b'incompatible executable')
-    with pytest.raises(ValueError,match='incompativel'):
+    with pytest.raises(ValueError,match='tabela de pacotes diferente'):
         packet_reader.client_lengths()
 
 
@@ -67,7 +67,7 @@ def test_explicitly_verified_visual_variant_is_accepted_but_unknown_change_is_no
     assert packet_reader.client_lengths()[0x10f] == -1
     packet_reader.client_lengths.cache_clear()
     (folder/'NRO.exe').write_bytes(variant+b'unknown modification')
-    with pytest.raises(ValueError, match='incompativel'):
+    with pytest.raises(ValueError, match='tabela de pacotes diferente'):
         packet_reader.client_lengths()
 
 
@@ -78,7 +78,7 @@ def test_installer_preflight_checks_actual_game_folder(portable_client,monkeypat
     (portable_client[0]/'NRO.exe').write_bytes(b'wrong version')
     packet_reader.client_lengths.cache_clear()
     assert runtime_check.main(['--game'])==1
-    assert 'incompativel' in capsys.readouterr().err
+    assert 'tabela de pacotes diferente' in capsys.readouterr().err
 
 
 def test_valid_initial_data_is_not_discarded_due_to_unknown_message_after_it(portable_client):

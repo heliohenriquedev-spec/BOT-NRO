@@ -97,6 +97,10 @@
   "199,91": {
    "name": "",
    "sprite": 99
+  },
+  "226,95": {
+   "name": "",
+   "sprite": 47
   }
  },
  "kakashi": {
@@ -665,7 +669,7 @@
    "sprite": 826
   },
   "103,23": {
-   "name": "",
+   "name": "Criador de Molhos",
    "sprite": 85
   }
  },

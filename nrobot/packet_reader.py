@@ -192,8 +192,18 @@ def client_lengths():
     accepted.update(row['sha256'] for row in data.get('compatible_executables', [])
                     if isinstance(row, dict) and isinstance(row.get('sha256'), str)
                     and re.fullmatch('[0-9a-f]{64}', row['sha256']))
-    if not executable.exists() or hashlib.sha256(executable.read_bytes()).hexdigest() not in accepted:
-        raise ValueError(f'Tabela de pacotes incompativel ou NRO.exe ausente em {executable}. Confira a pasta do jogo; nao e possivel validar os dados iniciais.')
+    if not executable.exists():
+        raise ValueError(f'NRO.exe nao encontrado em {executable}. Em Configuracao, escolha a pasta onde o jogo esta '
+                         'instalado (a que tem o NRO.exe).')
+    if hashlib.sha256(executable.read_bytes()).hexdigest() not in accepted:
+        # Another build (e.g. updated by the game's own updater): accepted when its packet table is
+        # the same one, byte for byte (client_table); a changed table still refuses it.
+        from .client_table import check
+        info = executable.stat()
+        digest, same = check(str(executable), info.st_size, info.st_mtime_ns)
+        if not same:
+            raise ValueError(f'Este NRO.exe ({digest[:12]}) tem uma tabela de pacotes diferente da que o bot conhece; '
+                             'o bot precisa ser atualizado para esta versao do jogo. Envie esse codigo ao desenvolvedor.')
     return {int(key, 16): value['length'] for key, value in data['entries'].items()
             if value['length'] == -1 or 2 <= value['length'] <= 32768}
 

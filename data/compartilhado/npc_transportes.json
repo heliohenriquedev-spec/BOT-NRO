@@ -376,6 +376,29 @@
     195,
     9
    ]
+  },
+  "98,20>areia>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ama_in01.gat",
+     "position": [
+      98,
+      20
+     ],
+     "name": "Suplementos Suna"
+    },
+    {
+     "kind": "wait_map",
+     "map": "areia.gat"
+    }
+   ],
+   "to": "areia",
+   "name": "Suplementos Suna",
+   "arrival": [
+    96,
+    231
+   ]
   }
  },
  "0022@cata": {

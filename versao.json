@@ -1,6 +1,6 @@
 {
- "version": "2026.11.06.1",
- "published_at": "2026-11-06T00:15:20",
+ "version": "2026.11.06.2",
+ "published_at": "2026-11-06T00:33:02",
  "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
@@ -1429,6 +1429,7 @@
   "data/rede/especies_nro.json",
   "data/rede/habilidades_chao_validacao.json",
   "data/rede/identidades_cliente.json",
+  "data/rede/registro_pacotes.json",
   "data/rede/tamanhos_cliente.json",
   "docs/ATUALIZACOES.md",
   "docs/AUDITORIA_GRF_QUESTS.md",
@@ -1453,6 +1454,7 @@
   "nrobot/changelog.py",
   "nrobot/character_sprite.py",
   "nrobot/client_frame_guard.py",
+  "nrobot/client_table.py",
   "nrobot/combat_rotation.py",
   "nrobot/continuous_observer.py",
   "nrobot/database_hunt.py",
@@ -2136,5 +2138,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "1268727f3530"
+ "files_digest": "c2ae3de9c3b8"
 }

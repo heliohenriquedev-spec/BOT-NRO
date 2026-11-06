@@ -49,6 +49,14 @@
     33
    ],
    "confirmed": true
+  },
+  "96,234": {
+   "map": "ama_in01",
+   "arrival": [
+    90,
+    22
+   ],
+   "confirmed": true
   }
  },
  "prt_sewb2": {
@@ -235,10 +243,10 @@
   "379,162": {
    "map": "cmd_fild09",
    "arrival": [
-    12,
+    15,
     175
    ],
-   "confirmed": false
+   "confirmed": true
   },
   "235,382": {
    "map": "areia",
@@ -407,6 +415,16 @@
     205
    ],
    "confirmed": false
+  }
+ },
+ "ama_in01": {
+  "87,22": {
+   "map": "areia",
+   "arrival": [
+    96,
+    231
+   ],
+   "confirmed": true
   }
  }
 }
