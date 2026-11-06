@@ -1026,7 +1026,9 @@ class QuestRoutes:
             allowed=frozenset((p[0]+x,p[1]+y) for p,m in portals.portals(map_name) if chebyshev(p,step['position'])<=m
                               for x in range(-m,m+1) for y in range(-m,m+1))
         forbidden=(frozenset(portals.cells(map_name))-allowed)|frozenset(getattr(collision,'hazard_cells',()))
-        key=(PortalGuard.key(map_name),id(collision),forbidden)
+        # Keep the CollisionMap object itself in the key: Python may reuse id() after a temporary
+        # map is collected, which could make a new collision layout reuse stale navigation data.
+        key=(PortalGuard.key(map_name),collision,forbidden)
         c=self.nav_cache.get(key)
         if c is None:
             if len(self.nav_cache)>=4:self.nav_cache.clear()

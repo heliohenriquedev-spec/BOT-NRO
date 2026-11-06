@@ -601,3 +601,6 @@ def test_showmobs_runs_early_without_a_target_but_not_near_the_scheduled_scan():
     assert not scan.start('field', [1002], 10.0, idle=True)  # 10 s later: the regular scan is not due
     assert not scan.start('field', [1002], 46.0, idle=True, early=True)  # 14 s before the 60 s scan: wait for it
     assert scan.start('field', [1002], 44.0, idle=True, early=True)  # 16 s before it: early scan runs now
+    scan.queue.clear(); scan.round_open = False
+    assert not scan.start('field', [1002], 49.0, idle=True, early=True)  # throttle repeated no-target scans
+    assert scan.start('field', [1002], 54.0, idle=True, early=True)  # retry after 10 s without a target

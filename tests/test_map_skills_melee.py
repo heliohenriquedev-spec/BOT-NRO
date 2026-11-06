@@ -116,7 +116,7 @@ def test_basic_attack_waits_while_a_skill_in_reach_is_about_to_be_ready():
     assert rotation.soonest_offensive(snapshot, 10, 20) == math.inf
 
 
-def test_basic_attacks_take_a_turn_after_each_skill_only_when_enabled(tmp_path):
+def test_basic_attacks_fill_skill_gaps_but_never_preempt_a_ready_skill(tmp_path):
     from nrobot.packet_settings import DEFAULTS
     from nrobot.session_relay import SessionRelay
     relay = SessionRelay('127.0.0.1', folder=tmp_path, allow_commands=True)
@@ -124,6 +124,7 @@ def test_basic_attacks_take_a_turn_after_each_skill_only_when_enabled(tmp_path):
     attack = {'kind': 'attack', 'target_id': 20}
     relay.apply_settings({**DEFAULTS, 'species': [1037]})
     assert relay.attack_turn(attack) and not relay.attack_turn({'kind': 'move'})
+    assert not relay.attack_turn(attack, {'kind': 'skill', 'skill_id': 523})
     relay.apply_settings({**DEFAULTS, 'species': [1037], 'auto_attacks': False})
     assert not relay.attack_turn(attack) and not relay.hunt.auto_attacks
 

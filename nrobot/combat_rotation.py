@@ -136,10 +136,14 @@ class CombatRotation:
         if pending and pending['role'] == 'buff':
             if not pending.get('effect_id') and pending.get('effect_duration'):
                 # Effectless profile buffs cannot be renewed from a status packet. Respect any
-                # explicit cooldown and back off if the server only refuses the cast.
-                count = self.buff_refusals.get(skill_id, 0)+1
-                self.buff_refusals[skill_id] = count
-                self.blocked_buffs[skill_id] = now+min(120.0, 5.0*(2**min(count-1,5)))
+                # explicit cooldown. If the server reported one, its timer replaces the
+                # generic retry backoff instead of extending the wait a second time.
+                if self.server_ready.get(skill_id,0)>now:
+                    self.blocked_buffs.pop(skill_id,None)
+                else:
+                    count = self.buff_refusals.get(skill_id, 0)+1
+                    self.buff_refusals[skill_id] = count
+                    self.blocked_buffs[skill_id] = now+min(120.0, 5.0*(2**min(count-1,5)))
             else:
                 # Linked buffs retain their effect-driven short retry after an unconfirmed cast.
                 self.blocked_buffs[skill_id] = now+1.5
@@ -188,6 +192,8 @@ class CombatRotation:
                     self.learned_min_interval[latest] = max(self.learned_min_interval.get(latest, 0), elapsed+retry)
                     self.ready[latest] = max(self.ready.get(latest, 0), now+retry)
                     self.server_ready[latest] = max(self.server_ready.get(latest, 0), now+retry)
+                    self.blocked_buffs.pop(latest,None)
+                    self.buff_refusals.pop(latest,None)
                     self.pending.pop(latest)
                     self.summons.failed(latest, now, True)
                     self.log.append({'kind': 'rotation_cooldown_notice', 'skill_id': latest, 'retry_seconds': retry})
@@ -201,6 +207,9 @@ class CombatRotation:
             if kind == 'skill_cooldown':
                 self.ready[skill_id] = max(self.ready.get(skill_id, 0), now+event['duration_ms']/1000)
                 self.server_ready[skill_id] = max(self.server_ready.get(skill_id, 0), now+event['duration_ms']/1000)
+                # The server's explicit cooldown is authoritative over a timeout fallback.
+                self.blocked_buffs.pop(skill_id,None)
+                self.buff_refusals.pop(skill_id,None)
             if kind == 'remove':
                 for identity, pending in list(self.pending.items()):
                     if pending['target_id'] == event['entity_id']:

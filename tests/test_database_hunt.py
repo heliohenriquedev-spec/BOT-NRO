@@ -132,17 +132,15 @@ def test_showmobs_choice_is_kept_per_monster_and_only_marked_ones_are_asked(tmp_
     owner.close()
 
 
-def test_failed_showmobs_stops_on_that_map_and_the_patrol_sweeps_until_restarted():
+def test_empty_showmobs_round_retries_on_schedule_instead_of_disabling_the_map():
     from nrobot.mob_scan import MobScan
     scan = MobScan()
     assert scan.start('field', [1031], 0.0, idle=True)
     scan.sent(1031, 0.0)
-    assert scan.finish([5, 5], 5.0) is None and scan.map_failed('field.gat')  # no answer at all
-    assert not scan.start('field', [1031], 100.0, idle=True)  # not asked again on this map
-    assert scan.start('other', [1031], 100.0, idle=True)  # other maps still try
-    scan.reset_failures()
+    assert scan.finish([5, 5], 5.0) is None and not scan.map_failed('field.gat')  # no answer is transient
+    assert scan.start('field', [1031], 60.0, idle=True)  # retry at the normal 60 s interval
     scan.queue.clear(); scan.round_open = False
-    assert scan.start('field', [1031], 300.0, idle=True)  # hunt started again: tries again
+    assert scan.start('other', [1031], 100.0, idle=True)  # map changes keep working too
     # The patrol then sweeps an open map in one planned walk through every point, like the mazes.
     import random
     from nrobot.map_navigation import CollisionMap

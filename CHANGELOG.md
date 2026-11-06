@@ -4,6 +4,16 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.06.4 (06/11/2026)
+
+- Caca pela database: consultas @showmobs repetem a cada 60 s e podem antecipar a busca apos 10 s sem alvo. Uma rodada sem resposta nao desativa novas consultas; tentativas antecipadas respeitam um intervalo minimo.
+- Combate: confirmacoes de stun, sono e silencio nao contam como dano concluido. O controlador avalia os alvos visiveis dentro do raio antes de iniciar dano, e buffs com condicao de proximidade respeitam essa regra.
+- Habilidades: recargas informadas pelo servidor prevalecem sobre atrasos temporarios de nova tentativa de buff.
+- Rotas: caches de navegacao ficam associados ao mapa de colisao correto, evitando reaproveitar caminhos calculados para outro mapa.
+
+- Caca pela database: ao chegar ao mapa de destino, as configuracoes de combate por mapa controlam alvos, prioridades e habilidades; a database continua controlando viagem e @showmobs. Se a montaria configurada nao estiver disponivel para o personagem, a rota segue a pe.
+- Combate: uma habilidade pronta tem prioridade sobre o ataque basico; ataques basicos continuam intercalados nos intervalos entre habilidades.
+
 ## 2026.11.06.3 (06/11/2026)
 
 - Combate: buffs de uso em si respeitam recargas informadas pelo servidor; recusas consecutivas aumentam a espera entre novas tentativas para evitar reenvios continuos.

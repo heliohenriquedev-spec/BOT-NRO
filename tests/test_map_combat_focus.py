@@ -17,6 +17,7 @@ def setup(config,entities):
     s.update(player_hp=500,player_max_hp=1000)
     s['learned_skills'] += [dict(skill_id=729,level=4,sp_cost=150,range=4,target_flags=2),
         dict(skill_id=357,level=3,sp_cost=22,range=0,target_flags=4),dict(skill_id=775,level=1,sp_cost=100,range=9,target_flags=4),dict(skill_id=370,level=10,sp_cost=350,range=2,target_flags=1)]
+    s['learned_skills'].append(dict(skill_id=532,level=10,sp_cost=100,range=0,target_flags=4))
     s['own_effects'][105]=True
     c=MapCombat(config)
     settings=settings_for(config,DEFAULTS,s['learned_skills'])
@@ -110,6 +111,70 @@ def test_dai_senkou_renews_on_missing_effect_and_sogu_is_self_buff(config):
     assert a['effect_id']==0 and a['effect_duration']==15 and 'combat_target_id' not in a
     s['skill_cooldowns']={775:200}
     assert c.plan(s,r,100) is None
+
+
+def test_image_falsa_is_skipped_while_any_monster_is_nearby(config):
+    c,r,s=setup(config,[])
+    image_false=next(p for p in r.profiles if p['skill_id']==532)
+    r.profiles=[image_false]
+    s['own_effects'][207]=False
+    s['visible_monsters']=[entity(80,1831,28)]
+    assert c.plan(s,r,100) is None
+    s['visible_monsters'][0]['position']=[35,20]
+    action=c.plan(s,r,100)
+    assert action and action['skill_id']==532
+
+
+def test_server_buff_cooldown_replaces_temporary_retry_backoff():
+    r=CombatRotation([dict(skill_id=775,enabled=True,role='buff',level=1,interval=.5,effect_id=0,effect_duration=15)])
+    r.pending[775]=dict(role='buff',effect_id=0,effect_duration=15)
+    r._fail(775,10,'servidor recusou')
+    assert r.blocked_buffs[775]>10
+    r.observe([dict(kind='skill_cooldown',skill_id=775,duration_ms=30000)],1,11)
+    assert 775 not in r.blocked_buffs and r.ready[775]==41
+    s=dict(state='tracking',player_id=1,player_position=[20,20],player_position_recent=True,
+           player_sp=1000,recent_entities=[],learned_skills=[dict(skill_id=775,level=1,sp_cost=100,range=9,target_flags=4)])
+    assert r.plan(s,20) is None
+    action=r.plan(s,42)
+    assert action and action['skill_id']==775 and action['target_id']==1
+
+
+def test_all_visible_jounin_are_controlled_before_any_damage(config):
+    c,r,s=setup(config,[entity(10,1315),entity(11,1634),entity(12,1634,22)])
+    targeting(c,10)  # the Ninkame is attacking; neither Jounin needs to target us first
+    intent=c.decide(s,r,100)
+    assert intent['mode']=='control' and intent['target_id'] in (11,12)
+    action=c.plan(s,r,100,intent=intent)
+    assert action and action['control_status']=='stun'
+    c.observe([dict(kind='skill_damage',source_id=1,target_id=11,skill_id=179,level=6,damage_raw=1)],1,100.1)
+    assert 11 not in c.attacked  # status damage is not a real hit for combat priority
+    s['recent_entities'][1]['health_state']=4
+    next_intent=c.decide(s,r,100.2)
+    assert next_intent['mode']=='control' and next_intent['target_id']==12
+    s['recent_entities'][2]['health_state']=4
+    final=c.decide(s,r,100.3)
+    assert final['mode']=='kill' and final['target_id']==10
+
+
+def test_database_hunt_uses_map_profile_combat_and_target_priority(config):
+    from types import SimpleNamespace
+    from nrobot.session_relay import SessionRelay
+    from nrobot.quest_relay import QuestRelay
+    c,r,s=setup(config,[entity(10,1315)])
+    targeting(c,10)
+    route=dict(id='database_hunt',species=[1037],always_attack=[1037],showmobs_species=[1037])
+    relay=SimpleNamespace(quests=SimpleNamespace(active=True,phase='hunt',route=route),
+        map_combat=c,map_combat_map='ra_fild03',
+        tracker=SimpleNamespace(observer=SimpleNamespace(map_name='ra_fild03.gat')),
+        group_follower=lambda:False,player_focus=lambda:False,
+        active_map_combat=lambda: c)
+    assert SessionRelay.active_map_combat(relay) is c
+    assert QuestRelay.quest_species(relay,relay.quests)==sorted(c.ranks)
+    assert set(c.ranks)<=set(route['species'])
+    assert route['showmobs_species']==[1037]  # navigation/showmobs selection remains database-owned
+    assert r.burst and r.burst_interval==.05
+    relay.quests.phase='travel'
+    assert SessionRelay.active_map_combat(relay) is None
 
 def relay_for(tmp_path,config):
     from nrobot.session_relay import SessionRelay

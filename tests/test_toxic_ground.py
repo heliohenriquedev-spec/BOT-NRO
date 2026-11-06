@@ -70,13 +70,13 @@ def test_namekuji_strict_hp_and_four_cell_radius(config):
     s['visible_monsters'][0]['position']=[25,20]
     assert c.idle_clear(s)
 
-def test_control_nine_and_four_jounin_take_absolute_combat_priority(config):
+def test_control_nine_and_three_jounin_take_absolute_combat_priority(config):
     c,r,s=setup(config,[entity(10,1634,29)])
     targeting(c,10)
     assert c.decide(s,r,100)['skill_id']==179
     s['recent_entities'][0]['position']=[30,20]
     assert c.decide(s,r,100)['mode']=='kill'  # approach, then control on entering 9
-    for count,trigger in [(3,False),(4,True)]:
+    for count,trigger in [(2,False),(3,True),(4,True)]:
         c,r,s=setup(config,[entity(10+i,1634,26+i) for i in range(count)])
         s['learned_skills'].append(dict(skill_id=500,level=1,sp_cost=1,range=0,target_flags=4))
         intent=c.decide(s,r,100)

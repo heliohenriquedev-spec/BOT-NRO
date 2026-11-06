@@ -40,6 +40,24 @@
       "preview_outline": null,
       "preview_symbol": null,
       "preview_opacity": null
+    },
+    "146": {
+      "enabled": true,
+      "fill": "#4c2894",
+      "outline": "#303030",
+      "opacity": 70,
+      "symbol": "solid",
+      "radius": 0,
+      "shape": "point",
+      "skill_id": 0,
+      "area_override": false,
+      "preview_appearance": true,
+      "selection_preview": true,
+      "cast_preview": true,
+      "preview_fill": null,
+      "preview_outline": null,
+      "preview_symbol": null,
+      "preview_opacity": null
     }
   },
   "skill_styles": {

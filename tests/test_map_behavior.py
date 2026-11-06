@@ -59,3 +59,26 @@ def test_relay_applies_once_restores_and_suspends_for_quest(monkeypatch):
     SessionRelay.sync_map_behavior(relay)
     assert calls[-1]==DEFAULTS
 
+
+def test_database_hunt_keeps_map_combat_profile_only_during_hunt(monkeypatch):
+    import json
+    from pathlib import Path
+    from types import SimpleNamespace
+    from nrobot.session_relay import SessionRelay
+    example=Path('exemplos/comportamentos/ra_fild03.json')
+    rows=[m.validate(json.loads(example.read_text(encoding='utf-8')))]
+    monkeypatch.setattr(m,'load',lambda:rows)
+    calls=[]
+    relay=SimpleNamespace(hunt=SimpleNamespace(priority_target=1,target_priority={}),
+        map_behavior_base=copy.deepcopy(DEFAULTS),map_behavior_poll=0,map_behavior_signature=None,
+        map_behavior_effective=None,quest_hunt_id=1,group_follower=lambda:False,player_focus=lambda:False,
+        tracker=SimpleNamespace(observer=SimpleNamespace(map_name='ra_fild03.gat',skills={})),
+        quests=SimpleNamespace(active=True,phase='hunt',route={'id':'database_hunt'}),
+        apply_settings=lambda settings,**kw:calls.append(settings))
+    SessionRelay.sync_map_behavior(relay)
+    assert relay.map_combat is not None and relay.map_combat_map=='ra_fild03'
+    assert calls[-1]['skill_burst'] and calls[-1]['skill_burst_interval']==.05
+    relay.quests.phase='travel';relay.map_behavior_poll=0
+    SessionRelay.sync_map_behavior(relay)
+    assert relay.map_combat is None and calls[-1]==DEFAULTS
+

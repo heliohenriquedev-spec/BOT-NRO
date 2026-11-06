@@ -3,7 +3,7 @@
     "schema": 2,
     "name": "ra_fild03 - controle e combate",
     "map": "ra_fild03",
-    "description": "Namekuji abaixo de 60% HP e sem monstro a 4 celulas. Jounin controlados a 9 celulas; com 4 ou mais, Coelho x3 + Fukai Kemuri e fuga como prioridade maxima. Salamandra sem autoataque; se estiver a ate 9 celulas, aproxima ao alcance das ofensivas, sem perseguir mais longe; evita a cruz de Venom Dust.",
+    "description": "Namekuji abaixo de 60% HP e sem monstro a 4 celulas. Jounin controlados a 9 celulas; com 3 ou mais, Coelho x3 + Fukai Kemuri e fuga como prioridade maxima. Salamandra sem autoataque; se estiver a ate 9 celulas, aproxima ao alcance das ofensivas, sem perseguir mais longe; evita a cruz de Venom Dust.",
     "enabled": true,
     "settings": {
       "skills": true,
@@ -83,7 +83,8 @@
           {
             "skill_id": 532,
             "name": "Shinkirou no Genjutsu",
-            "effect_id": 207
+            "effect_id": 207,
+            "only_when_clear_radius": 9
           },
           {
             "skill_id": 357,
@@ -100,7 +101,7 @@
       },
       "emergency": {
         "species_id": 1634,
-        "minimum_count": 4,
+        "minimum_count": 3,
         "radius": 9,
         "prepare_skill": {
           "skill_id": 500,

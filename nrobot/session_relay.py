@@ -295,8 +295,11 @@ class SessionRelay(QuestRelay):
         self.map_behavior_poll = now + .5
         try:
             profiles = map_behavior.load()
+            route = getattr(self.quests, 'route', None)
+            database_combat = bool(self.quests.active and getattr(self.quests,'phase',None) == 'hunt'
+                                   and route and route.get('id') == 'database_hunt')
             effective, profile = map_behavior.effective(self.map_behavior_base, profiles,
-                self.tracker.observer.map_name, self.quests.active)
+                self.tracker.observer.map_name, self.quests.active and not database_combat)
             config = profile.get('combat') if profile else None
             if config and (self.group_follower() or self.player_focus()):
                 config, profile, effective = None, None, deepcopy(self.map_behavior_base)
@@ -792,7 +795,10 @@ class SessionRelay(QuestRelay):
 
     def active_map_combat(self):
         combat = getattr(self, 'map_combat', None)
-        if combat is None or self.quests.active or self.group_follower():
+        route = getattr(self.quests, 'route', None)
+        database_combat = bool(self.quests.active and getattr(self.quests,'phase',None) == 'hunt'
+                                and route and route.get('id') == 'database_hunt')
+        if combat is None or self.quests.active and not database_combat or self.group_follower():
             return None
         from .map_behavior import map_key
         if (not self.tracker.observer.map_name or self.tracker.observer.map_name.lower().removesuffix('.gat') != self.map_combat_map
@@ -1653,7 +1659,7 @@ class SessionRelay(QuestRelay):
                   'o @showmobs volta quando a caca ou a fila for iniciada de novo.')
         elif self.mob_scan.suspended and not getattr(self, 'mob_scan_warned', False):
             self.mob_scan_warned = True
-            print('[ROTA] @showmobs nao respondeu neste servidor/mapa; busca por @showmobs desligada nesta conexao.')
+            print('[ROTA] @showmobs ainda sem resposta apos 3 rodadas; continuarei tentando no intervalo normal e quando ficar sem alvo.')
         species = self.mob_scan.next_command(now)
         name = (self.own_look or {}).get('name')
         if (species is None or not name or not self.allow_commands or self.commands_blocked
@@ -2923,9 +2929,9 @@ class SessionRelay(QuestRelay):
             return None
         return action
 
-    def attack_turn(self, action):
-        """A basic attack may take the next packet (basic attacks on, target in reach)."""
-        return (action is not None and action['kind'] == 'attack' and self.rotation is not None
+    def attack_turn(self, action, rotation_action=None):
+        """Use a basic attack only when no rotation skill is ready to send."""
+        return (rotation_action is None and action is not None and action['kind'] == 'attack' and self.rotation is not None
                 and bool(self.settings and self.settings['auto_attacks']))
 
     def walking_now(self):
@@ -3478,15 +3484,16 @@ async def run(args):
                                                                                    math.dist(own, e.get('effective_position', e['position']))))
                                         if math.dist(own, candidate.get('effective_position', candidate['position'])) <= relay.hunt.SEARCH_RADIUS:
                                             relay.hunt.target = candidate['entity_id']
-                                    # REDE-84: with basic attacks on, a basic attack follows every skill
-                                    # (skill, attack, skill...); with no skill ready it keeps attacking.
-                                    # Focused on a player: keeping the own summon up never holds the attacks back.
+                                    # Keep basic attacks interleaved during skill cooldowns, but let any
+                                    # ready map-profile skill take priority over another basic packet.
+                                    # Focused on a player: keeping the own summon up never holds attacks back.
                                     summon_maintenance = (not state.get('player_focus')
                                                           and relay.rotation.summon_maintenance_required(state, now, relay.hunt.target))
-                                    attack_turn = (relay.map_damage_allowed(relay.hunt.target,state,now,basic=True) and not summon_maintenance and relay.attack_turn(action) and relay.last_combat_packet == 'skill'
-                                                   and now >= relay.tracker.observer.cast_until)
+                                    rotation_action = relay.plan_map_rotation(state, now, relay.hunt.target)
+                                    attack_turn = (relay.map_damage_allowed(relay.hunt.target,state,now,basic=True) and not summon_maintenance
+                                                   and relay.last_combat_packet == 'skill' and now >= relay.tracker.observer.cast_until
+                                                   and relay.attack_turn(action, rotation_action))
                                     skill_sent = False
-                                    rotation_action = None if attack_turn else relay.plan_map_rotation(state, now, relay.hunt.target)
                                     if rotation_action is not None and relay.native_frames.ready:
                                         try:
                                             if await relay.send_rotation_action(rotation_action, game_gate=lambda: controls.connected(relay.game_peer, relay.game_local)):

@@ -15,6 +15,7 @@ class QuestRelay(SharedQuestRelay):
         self.quests=QuestRoutes();self.quest_base_settings=None;self.quest_hunt_id=None
 
     def quest_stop(self,reason):
+        was_database_hunt = bool(self.quests.route and self.quests.route.get('id') == DATABASE_HUNT)
         if self.quests.active:print('[ROTA] Parada: '+reason)
         if self.quests.active or self.quests.phase=='done':self.save_progress(time.monotonic(),force=True)
         if reason!=self.quests.reason:self.quests.resume=None  # paused by the player: stays paused
@@ -22,7 +23,9 @@ class QuestRelay(SharedQuestRelay):
         if self.hunt:self.hunt.pause(reason)
         if self.quest_base_settings is not None:
             settings=self.quest_base_settings;self.quest_base_settings=None
-            self.apply_settings(settings)
+            self.apply_settings(settings,map_overlay=was_database_hunt and bool(getattr(self,'map_behavior_base',None)))
+            if was_database_hunt and getattr(self,'map_behavior_base',None):
+                self.map_behavior_signature=None;self.map_behavior_effective=None;self.map_behavior_poll=0
         self.quest_hunt_id=None
 
     def quest_control(self,command,request,game_gate):
@@ -168,7 +171,7 @@ class QuestRelay(SharedQuestRelay):
             self.know_quest_character()
             self.quests.start(map_routes.apply([route],entries),time.monotonic(),map_routes=entries)
             self.quests.slot_owner=quest_daily.load_slots()
-            self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
+            self.quest_base_settings=copy.deepcopy(getattr(self,'map_behavior_base',None) or self.settings);self.commands_blocked=False
             print(f"[ROTA] Caca pela database: {route['target_map']} ({len(route['species'])} monstros)")
         elif command=='quest_stop':self.bg_attempt=None;self.quest_stop('Fila pausada pelo usuario')
         else:raise ValueError('Comando de rota desconhecido')
@@ -623,7 +626,15 @@ class QuestRelay(SharedQuestRelay):
 
         Normal: every counted monster (finished ones too) and whoever attacks. With "ignorar":
         only monsters still missing kills, plus the ones marked to always attack."""
-        route=q.route;hunted=set(route.get('always_attack',[]))|set(route['species']);always=set(route.get('always_attack',[]))|self.attacker_species(time.monotonic(),hunted)
+        route=q.route
+        if route.get('id')==DATABASE_HUNT and q.phase=='hunt':
+            combat=self.active_map_combat()
+            if combat:
+                species=sorted(combat.ranks)
+                # The database still owns route/showmobs settings; this map profile owns combat.
+                route['species']=sorted(set(route['species'])|set(species))
+                return species
+        hunted=set(route.get('always_attack',[]))|set(route['species']);always=set(route.get('always_attack',[]))|self.attacker_species(time.monotonic(),hunted)
         if route.get('ignore_finished') and route['kill_targets']:
             missing=set()
             for target,progress in zip(route['kill_targets'],q.progress()):
@@ -736,8 +747,10 @@ class QuestRelay(SharedQuestRelay):
                     print('[ROTA] Monstros atacados agora: '+', '.join(map(str,species)))
                 settings=copy.deepcopy(self.settings)
                 settings.update(species=species,auto_map_targets=False,monster_name_choices=self.quest_name_choices(q),pvp_enabled=False,patrol=True)
-                self.apply_settings(settings);self.hunt.start();self.quest_hunt_id=key
-                self.hunt.target_priority={int(k):v for k,v in (q.route.get('attack_priority') or {}).items()}
+                map_combat=self.active_map_combat() if q.route['id']==DATABASE_HUNT else None
+                self.apply_settings(settings,map_overlay=map_combat is not None);self.hunt.start();self.quest_hunt_id=key
+                priorities=map_combat.ranks if map_combat else (q.route.get('attack_priority') or {})
+                self.hunt.target_priority={int(k):v for k,v in priorities.items()}
             elif not self.hunt.enabled:
                 self.quest_stop('Caca interrompida: '+self.hunt.reason);return True
             goal=goal_reached(q.route,q.body.items(),now) if q.route['id']==DATABASE_HUNT else None

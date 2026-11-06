@@ -14,9 +14,9 @@ group wins only when it is much larger (the densest spot of the whole map made t
 the map back and forth). A new scan replaces the current spot only when clearly better
 (KEEP_MARGIN).
 
-Failure: a round with no answer, or no group that can be walked to, marks the map as failed: no
-more @showmobs there (the patrol sweeps the whole map instead, linear walk) until the hunt or the
-queue is started again (reset_failures)."""
+No answer or no useful group does not disable scanning: the patrol continues normally and the next
+scheduled (or no-target) round retries. Three fully silent rounds raise a diagnostic warning only;
+they do not permanently disable the command because a later response may still arrive."""
 import math
 from collections import Counter, defaultdict
 
@@ -31,7 +31,7 @@ class MobScan:
     MIN_GROUP = 3  # two monsters apart from the rest are not worth crossing the map for
     ARRIVED = 5  # cells from the spot: there
     GOAL_TIME = 60.0  # s to get there before the spot is dropped
-    SILENT_ROUNDS = 3  # rounds with no mark at all: the command is not available here
+    SILENT_ROUNDS = 3  # rounds with no mark at all: show a warning, then keep retrying
     DISTANCE_SCALE = 40.0  # walking cells that halve a group's worth
     CANDIDATES = 6  # groups measured along the map (path search) per scan
     KEEP_MARGIN = 1.25  # a new spot must be worth this much more than the current one
@@ -67,11 +67,13 @@ class MobScan:
         self.queried_species = []
         self.sent_at = -1e9
         self.round_at = -1e9
+        self.last_early_at = -1e9
         self.goal = None
         self.goal_until = 0.0
         self.round_open = False
 
     EARLY_GUARD = 15  # s: an early scan only when the scheduled one is at least this far off
+    EARLY_INTERVAL = 10.0  # s: minimum time between scans started by the no-target trigger
 
     def seconds_to_next(self, now):
         """How long until the regular INTERVAL scan would run."""
@@ -79,18 +81,25 @@ class MobScan:
 
     def start(self, map_name, species, now, idle, early=False):
         """A new round when due: on arrival, then every INTERVAL while patrolling. With early, also
-        at once (e.g. 10 s with no quest target) as long as the scheduled scan is >15 s away."""
-        if self.suspended or not species or self.map_failed(map_name):
+        after a 10 s no-target window as long as the scheduled scan is >15 s away. Early rounds are
+        throttled so a long no-target period does not immediately restart after each reply."""
+        if not species or self.map_failed(map_name):
             return False
         if map_name != self.map:
             self.reset()
             self.map = map_name
+            self.silent = 0
+            self.suspended = False
         if self.queue or self.round_open:
             return False
         due = idle and now-self.round_at >= self.INTERVAL
-        if not due and not (early and self.seconds_to_next(now) > self.EARLY_GUARD):
+        early_due = (early and self.seconds_to_next(now) > self.EARLY_GUARD
+                     and now-self.last_early_at >= self.EARLY_INTERVAL)
+        if not due and not early_due:
             return False
         self.queue, self.marks, self.round_at, self.round_open = list(dict.fromkeys(species)), [], now, True
+        if early_due:
+            self.last_early_at = now
         self.mark_records={};self.queried_species=[]
         return True
 
@@ -127,12 +136,14 @@ class MobScan:
         records=[r for r in self.mark_records.values() if (walkable is None or walkable(r[0])) and (reachable is None or r[0] in reachable)]
         marks=[r[0] for r in records]
         self.silent = 0 if self.marks else self.silent+1
-        if self.silent >= self.SILENT_ROUNDS:
+        if self.marks:
+            self.suspended = False
+        elif self.silent >= self.SILENT_ROUNDS:
             self.suspended = True
         if own is None:
             return None
         if not marks:
-            self.fail()  # no answer or nothing reachable: sweep the map instead
+            self.goal = None  # empty response is not a permanent failure; retry on the next interval
             return None
         bins=defaultdict(list)
         for mark in marks:bins[(mark[0]//self.RADIUS,mark[1]//self.RADIUS)].append(mark)
@@ -147,7 +158,7 @@ class MobScan:
             spot=tuple(min(members,key=lambda m:math.dist(m,centre)))  # a real monster cell: walkable
             groups.setdefault(spot,members)
         if not groups:
-            self.fail()  # only scattered monsters: not worth walking to, sweep the map instead
+            self.goal = None  # scattered marks are not a reason to disable future scans
             return None
         def worth(count,cells):
             return count/(1+cells/self.DISTANCE_SCALE)

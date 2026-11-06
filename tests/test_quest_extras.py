@@ -75,6 +75,23 @@ def test_mount_refused_in_combat_tries_again():
     assert errand.step(body, [], 11.4) == ('equip', (5, 0x100))
 
 
+def test_missing_character_mount_is_skipped_and_route_continues_on_foot():
+    config=dict(CONFIG,characters={'Outro':dict(mount_item=9001)})
+    current=quest_extras.for_character(config,'Novo personagem')
+    assert current['mount'] is None and not current['mount_enabled']
+    q=QuestRoutes();q.extras=current
+    q.start([dict(id='R',name='R',target_map='field',species=[1139],kills=1,
+                  steps=[dict(kind='walk',map='field',position=[1,1])])],0)
+    assert q.errands==[]
+
+
+def test_mount_item_absent_from_confirmed_inventory_finishes_errand_on_foot():
+    body=Body();body.observe([dict(kind='inventory_list',stackable=False,items=[] )],OWN,1)
+    errand=Errand('mount',CONFIG,0)
+    assert errand.step(body,[],1.1)==('done',None)
+    assert 'seguindo a pe' in errand.reason
+
+
 def test_combat_equipment_goes_back_on_before_the_hunt():
     body = gear_body(); body.gear[6]['worn'] = 0; body.gear[5]['worn'] = 0x100
     errand = Errand('gear', dict(CONFIG, displaced=CONFIG['mount']['displaced']), 0)

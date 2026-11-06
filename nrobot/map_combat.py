@@ -28,7 +28,7 @@ def validate(data):
             raise ValueError('Lista de habilidades invalida')
         for row in rows:
             expected={'skill_id','name','effect_id'} if key=='buffs' else {'skill_id','name'}
-            allowed=expected|({'duration'} if key=='buffs' else set())
+            allowed=expected|({'duration','only_when_clear_radius'} if key=='buffs' else set())
             if (not isinstance(row,dict) or not expected<=set(row) or set(row)-allowed or type(row['skill_id']) is not int
                 or not 1<=row['skill_id']<=65535 or not isinstance(row['name'],str) or not 1<=len(row['name'])<=100):
                 raise ValueError('Habilidade invalida: '+key)
@@ -36,6 +36,8 @@ def validate(data):
                 raise ValueError('Efeito de buff invalido')
             if key=='buffs' and 'duration' in row and (type(row['duration']) not in (int,float) or not math.isfinite(row['duration']) or not 1<=row['duration']<=86400):
                 raise ValueError('Duracao de buff invalida')
+            if key=='buffs' and 'only_when_clear_radius' in row and (type(row['only_when_clear_radius']) is not int or not 1<=row['only_when_clear_radius']<=30):
+                raise ValueError('Raio livre do buff invalido')
             all_ids.append(row['skill_id'])
     if len(set(all_ids))!=len(all_ids):
         raise ValueError('Habilidade duplicada no comportamento')
@@ -92,6 +94,7 @@ def settings_for(config, base, learned):
             p=dict(skill_id=identity,enabled=True,role=role,level=known[identity]['level'],
                    interval=.5,effect_id=row.get('effect_id',0))
             if key=='buffs' and 'duration' in row:p['effect_duration']=row['duration']
+            if key=='buffs' and 'only_when_clear_radius' in row:p['only_when_clear_radius']=row['only_when_clear_radius']
             # Respect the character's explicit range customizations.
             if 'range_override' in old:p['range_override']=old['range_override']
             profiles.append(p)
@@ -122,6 +125,7 @@ class MapCombat:
         self.history={}
         self.attacked=set()
         self.targeting={}
+        self.control_skill_ids={self.config['skills'][key]['skill_id'] for key in ('stun','sleep','silence')}
         self.pull_id=None
         self.reason='aguardando combate'
         from .map_emergency import Emergency
@@ -140,7 +144,8 @@ class MapCombat:
                 if (source is not None and player_id is not None and source!=player_id
                     and e.get('target_id') not in (None,0,source)):
                     self.targeting[source]=(e.get('target_id'),now)
-                if e['kind']!='skill_cast' and source==player_id:
+                if (e['kind']!='skill_cast' and source==player_id
+                    and not (e['kind']=='skill_damage' and e.get('skill_id') in self.control_skill_ids)):
                     self.attacked.add(e.get('target_id'))
                     if e.get('target_id') not in (None,0,player_id):self.pull_id=e['target_id']
 
@@ -285,7 +290,11 @@ class MapCombat:
         if reachable is not None:entities=reachable(entities)
         if not entities:return None
         # Every unsilenced Jounin within the trigger radius outranks damage.
-        threats=sorted((e for e in entities if e['species_id'] in self.controllers and self.distance(state,e)<=self.config['control_radius']),
+        # Control every visible Jounin in range before damage, even if it has not
+        # targeted the player yet. Candidate eligibility still governs who we kill.
+        threats=sorted((e for e in state.get('recent_entities',[])
+                        if e.get('kind','monster')=='monster' and e.get('species_id') in self.controllers
+                        and self.distance(state,e)<=self.config['control_radius']),
                        key=lambda e:self.distance(state,e))
         waiting=None
         for e in threats:
@@ -314,10 +323,20 @@ class MapCombat:
 
     def plan(self,state,rotation,now,current=None,*,intent=None):
         intent=intent or self.decide(state,rotation,now,current=current)
+        clear_buffs=set()
+        visible={e.get('entity_id'):e for e in (state.get('visible_monsters') or [])+state.get('recent_entities',[])
+                 if isinstance(e,dict) and e.get('entity_id') is not None}
+        for profile in rotation.profiles:
+            radius=profile.get('only_when_clear_radius') if profile.get('role')=='buff' else None
+            nearby=bool(state.get('player_position')) and any(
+                e.get('kind','monster')=='monster' and self.distance(state,e)<=radius for e in visible.values()) if radius is not None else False
+            if radius is None or not nearby:
+                clear_buffs.add(profile['skill_id'])
         if intent is None:
             self.reason='sem alvo proximo mirando o personagem; buffs e invocacao em area livre'
             original=rotation.profiles
-            rotation.profiles=[p for p in original if p['role']=='buff' or p['role']=='summon' and p['skill_id']==self.config.get('idle_summon',{}).get('skill_id')]
+            rotation.profiles=[p for p in original if p['role']=='buff' and p['skill_id'] in clear_buffs
+                               or p['role']=='summon' and p['skill_id']==self.config.get('idle_summon',{}).get('skill_id')]
             try:return rotation.plan(self.idle_state(state),now,None)
             finally:rotation.profiles=original
         if intent['mode']=='emergency':
@@ -326,7 +345,8 @@ class MapCombat:
         original=rotation.profiles
         species=next((e.get('species_id') for e in state.get('recent_entities',[]) if e['entity_id']==intent['target_id']),None)
         allowed={r['skill_id'] for r in self.config['skills']['offensives'] if self.offensive_allowed(r['skill_id'],species)} if intent['mode']=='kill' else {intent['skill_id']}
-        rotation.profiles=[p for p in original if (p['role']=='buff' and (intent['mode']!='control' or intent['skill_id'] is None)) or p['skill_id'] in allowed]
+        rotation.profiles=[p for p in original if (p['role']=='buff' and p['skill_id'] in clear_buffs
+                              and (intent['mode']!='control' or intent['skill_id'] is None)) or p['skill_id'] in allowed]
         old_priority=getattr(rotation,'control_priority',False)
         old_burst=rotation.burst
         if intent['mode']=='control':rotation.burst=False

@@ -26,12 +26,17 @@ AMMO = 0x8000
 def for_character(config, name):
     """The mount and combat items chosen for the character playing (each one uses different items)."""
     config = copy.deepcopy(config)
-    chosen = (config.get('characters') or {}).get(name or '') or {}
+    characters = config.get('characters') or {}
+    chosen = characters.get(name or '') or {}
     if chosen.get('mount_item'):
         learned = config.get('mount') or {}
         same = learned.get('item_id') == chosen['mount_item']
         config['mount'] = dict(item_id=chosen['mount_item'], location=learned.get('location') if same else None,
                                displaced=learned.get('displaced', []) if same else [])
+    elif characters:
+        # A mount recorded for another character is not evidence this one owns/equips it.
+        config['mount'] = None
+        config['mount_enabled'] = False
     config['combat_items'] = list(chosen.get('combat_items') or [])
     return config
 
@@ -113,6 +118,7 @@ class Body:
 
     def __init__(self):
         self.gear = {}  # inventory index -> {'item_id', 'equip_location', 'worn'}
+        self.equipment_inventory_seen = False
         self.last_combat = -1e9
         self.last_physical_hit = -1e9
         self.unequipped = []  # (time, index, position) taken off by the server
@@ -137,6 +143,7 @@ class Body:
                     self.map = e['map']
             elif kind == 'inventory_list':
                 stackable = bool(e.get('stackable'))
+                if not stackable:self.equipment_inventory_seen = True
                 self.gear = {i: v for i, v in self.gear.items() if v.get('stackable') != stackable}
                 for item in e['items']:
                     self.gear[item['index']] = dict(item_id=item['item_id'], equip_location=item.get('equip_location', 0),
@@ -282,6 +289,10 @@ class Errand:
 
     def mount(self, body, near, now):
         mount = self.config.get('mount') or {}
+        item_id = mount.get('item_id')
+        if not item_id:
+            self.reason = 'sem montaria configurada; seguindo a pe'
+            return ('done', None)
         if self.pending:
             ack = next((a for a in body.acks if a[0] >= self.pending[0] and a[1] == self.pending[1] and a[4]), None)
             if ack and ack[3]:
@@ -297,7 +308,7 @@ class Errand:
             self.pending = None; self.retry_at = now+1
             self.reason = 'servidor recusou a montaria (em combate?); tentando de novo'
             return ('wait', None)
-        if body.wearing(mount.get('item_id')):
+        if body.wearing(item_id):
             self.reason = 'montaria equipada'
             return ('done', None)
         if now < getattr(self, 'retry_at', 0):
@@ -305,9 +316,13 @@ class Errand:
         busy = self.calm(body, near, now)
         if busy:
             return busy
-        index = body.index_of(mount.get('item_id'))
+        index = body.index_of(item_id)
         if index is None:
-            return ('fail', 'Montaria (item '+str(mount.get('item_id'))+') nao esta no inventario')
+            if not body.equipment_inventory_seen and now-self.started < 5:
+                self.reason = 'aguardando inventario para verificar montaria'
+                return ('wait', None)
+            self.reason = 'montaria nao encontrada no inventario; seguindo a pe'
+            return ('done', None)
         self.attempts += 1
         if self.attempts > self.config['attempts']:
             return ('fail', 'O servidor nao equipou a montaria apos '+str(self.config['attempts'])+' tentativas')
