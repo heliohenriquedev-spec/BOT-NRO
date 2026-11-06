@@ -151,7 +151,7 @@
    "arenaflo": 0
   },
   "walk_speed_ms": 150,
-  "name": "blade",
+  "name": "Konan Uchiha",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -173,6 +173,7 @@
    "chunin": [
     "Aegon",
     "Apollo",
+    "Konan Uchiha",
     "Kuka Beludo",
     "Macaco Mico Meu",
     "Musashi",
@@ -397,7 +398,7 @@
    "prt_fild01": 0
   },
   "walk_speed_ms": 150,
-  "name": "Bikouchuu",
+  "name": "Bikouhuu",
   "max_hp": 900,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -1350,7 +1351,7 @@
    "hospital2": 0
   },
   "captured_sprite": true,
-  "name": "Neji Hyuuga",
+  "name": "Macro",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -1370,6 +1371,7 @@
     "Ishida"
    ],
    "hospital2": [
+    "Macro",
     "Neji Hyuuga"
    ]
   }

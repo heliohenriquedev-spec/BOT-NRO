@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "build": "be4d5efec895",
-  "dll": "nro_rcx_be4d5efec895.dll",
-  "sha256": "d1548a7412e693354a564653510745211df893be4f63c771b76ef0e582b04afc",
-  "source_sha256": "be4d5efec895b7641c6d924db40c1f808b1b0700f89ef26a90d6e096b8c113fd",
+  "build": "0523d0bf3f4b",
+  "dll": "nro_rcx_0523d0bf3f4b.dll",
+  "sha256": "2a47bea71a3988f86ef05ce1220519a81229d7a4151899aeba6eac35767e61fc",
+  "source_sha256": "0523d0bf3f4b6d1685610f7c916efa2cc958b66dfd84f9e42e2544ac9c8bf461",
   "architecture": "x86",
   "entry": "Run@16"
 }

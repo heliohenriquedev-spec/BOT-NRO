@@ -71,3 +71,29 @@ a fila de quests ficava vazia, publicação após publicação. Agora:
   compartilhados, roda os testes e só então envia.
 - Depois de atualizar, o outro usuário deve **reabrir o painel**. A fila dele deve mostrar as
   mesmas rotas; se não mostrar, o motivo está escrito no Diagnóstico.
+
+## Changelog e aviso no Discord
+
+As novidades ficam em `CHANGELOG.md`, em tópicos, na seção **Próxima atualização**. Ao publicar:
+
+1. A seção vira `## <versão> (<data>)` e vai junto na publicação (os usuários recebem o histórico).
+2. Depois do envio ao GitHub, os tópicos são postados no canal de atualizações do Discord por um
+   webhook. A URL fica só no PC do desenvolvedor, em `perfis/desenvolvedor/discord_webhook.txt`
+   (perfis/ nunca é publicado). Sem esse arquivo, ou se o Discord falhar, a publicação continua e o
+   registro do painel avisa.
+3. Com tópicos pendentes, o campo de mensagem do painel pode ficar vazio.
+
+## Confirmação antes de atualizar
+
+**Atualizar agora** abre uma confirmação com contagem mínima de cinco segundos.
+A opção de confirmar só fica disponível ao terminar a contagem; cancelar não baixa
+nem reinicia nada. Mesmo após confirmar, a conexão precisa estar fechada.
+
+As mudanças implementadas devem ser registradas em **Próxima atualização**, no
+`CHANGELOG.md`, antes de finalizar cada pedido. O registro não é uma transcrição
+automática da conversa. Ao publicar, os itens pendentes recebem a versão e seguem
+para o webhook do Discord já configurado. Apenas preparar ou editar o changelog
+não envia mensagens. O procedimento de manutenção está em `AGENTS.md`.
+
+Veja também `docs/DATABASE_COMPARTILHADO.md`: os dados de jogo do database passam
+a acompanhar as versões com importação aditiva e sem duplicar as coletas locais.

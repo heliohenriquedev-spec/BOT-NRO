@@ -580,7 +580,8 @@ def test_route_editor_saves_the_priority_column(tmp_path, monkeypatch):
     from PySide6.QtCore import Qt
     app = QApplication.instance() or QApplication([])
     import nrobot.monster_db as db
-    monkeypatch.setattr(db, 'monsters_of_map', lambda name: [1009, 1010])
+    from nrobot.quest_monster_index import QuestMonsterIndex
+    monkeypatch.setattr(QuestMonsterIndex, 'species', lambda self,name: {1009,1010})
     from nrobot.quest_panel import RouteEditor
     editor = RouteEditor(dict(name='Rota', mission_ids=[], steps=[], species=[], kills=1, always_attack=[1010],
                               attack_priority={'1010': 3}), {})

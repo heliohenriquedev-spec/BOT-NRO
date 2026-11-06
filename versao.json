@@ -1,9 +1,10 @@
 {
- "version": "2026.11.05.3",
- "published_at": "2026-11-05T18:29:23",
- "notes": "rcx",
+ "version": "2026.11.05.4",
+ "published_at": "2026-11-05T21:03:17",
+ "notes": "Discord",
  "files": [
   "ABRIR_RCX.bat",
+  "CHANGELOG.md",
   "CONFIGURAR_CONEXAO_LOCAL.bat",
   "INICIAR_BOT.bat",
   "LICENSE",
@@ -11,6 +12,7 @@
   "RESTAURAR_CONEXAO_ORIGINAL.bat",
   "atualizacao.json",
   "data/catalogo/catalogo.json",
+  "data/compartilhado/database.json",
   "data/compartilhado/gm_sinais.json",
   "data/compartilhado/manifesto.json",
   "data/compartilhado/portais.json",
@@ -251,6 +253,7 @@
   "data/recursos/itens.json",
   "data/recursos/municao.json",
   "data/recursos/prioridade.tsv",
+  "data/recursos/rcx/nro_rcx_0523d0bf3f4b.dll",
   "data/recursos/rcx/nro_rcx_be4d5efec895.dll",
   "data/recursos/rcx/renderer.json",
   "data/recursos/rcx/skills.json",
@@ -1426,6 +1429,7 @@
   "docs/ATUALIZACOES.md",
   "docs/AUDITORIA_GRF_QUESTS.md",
   "docs/CLIENTE_CAMERA_CONEXAO.md",
+  "docs/DATABASE_COMPARTILHADO.md",
   "docs/DATABASE_ITENS_DROPS.md",
   "docs/HOMUNCULO.md",
   "docs/OBSERVACAO_JOGADORES.md",
@@ -1440,10 +1444,12 @@
   "nrobot/ammo.py",
   "nrobot/capture_guard.py",
   "nrobot/catalog.py",
+  "nrobot/changelog.py",
   "nrobot/character_sprite.py",
   "nrobot/client_frame_guard.py",
   "nrobot/combat_rotation.py",
   "nrobot/continuous_observer.py",
+  "nrobot/database_share.py",
   "nrobot/drop_db.py",
   "nrobot/drop_panel.py",
   "nrobot/entity_inventory.py",
@@ -1497,6 +1503,7 @@
   "nrobot/quest_library.py",
   "nrobot/quest_library_panel.py",
   "nrobot/quest_library_relay.py",
+  "nrobot/quest_monster_index.py",
   "nrobot/quest_panel.py",
   "nrobot/quest_progress.py",
   "nrobot/quest_progress_log.py",
@@ -1509,6 +1516,7 @@
   "nrobot/rcx_panel.py",
   "nrobot/rcx_renderer.py",
   "nrobot/rcx_settings.py",
+  "nrobot/rcx_stream.py",
   "nrobot/recall_guard.py",
   "nrobot/relay_profile.py",
   "nrobot/release_assets.py",
@@ -2118,5 +2126,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "cde902acc207"
+ "files_digest": "51374e136886"
 }

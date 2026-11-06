@@ -8,6 +8,8 @@ import os
 from pathlib import Path
 import subprocess
 import time
+import threading
+from . import rcx_settings
 
 from . import rcx_client
 
@@ -30,7 +32,7 @@ class Shared(C.Structure):
         'magic', 'version', 'pid', 'enabled', 'sequence', 'count', 'last_feed',
         'attached', 'status', 'drawn', 'frames', 'error', 'mode_manager', 'renderer_global')]
     _fields_ += [('map_name', C.c_char*40), ('fill', C.c_uint32), ('outline', C.c_uint32), ('cells', Cell*CAPACITY)]
-    # IPC version 2 (rcx.c): per-cell colours/symbol and skill previews; previews stay off (count 0).
+    # IPC version 2 (rcx.c): per-cell colours/symbol and skill previews.
     _fields_ += [('preview_count', C.c_uint32), ('selection_preview', C.c_uint32), ('selected_id', C.c_uint32),
                  ('previews', Preview*256)]
 
@@ -53,10 +55,53 @@ class RcxRenderer:
         self.state_at = 0
         self.enabled = False
         self.info = None
+        self.config = rcx_settings.load()
+        self.lock = threading.RLock()
+        self.worker_stop = threading.Event()
+        self.worker = None
+        self.stream = None
+        self.stream_path = None
+        self.stream_value = None
+        self.stream_retry_at = 0
+        self.prepared_key = None
+        self.config_revision = 0
+        self.prepared_ground = None
 
     def update(self, state):
-        self.state = state
-        self.state_at = time.monotonic()
+        with self.lock:
+            self.state = state
+            self.state_at = time.monotonic()
+
+    def configure(self, value):
+        with self.lock:
+            self.config=rcx_settings.validate(value)
+            self.config_revision+=1
+            self.prepared_key=None
+        self.feed()
+
+    def pump(self):
+        while not self.worker_stop.wait(.008):
+            try:self.feed()
+            except (OSError,ValueError,BufferError):pass
+
+    def read_ground(self):
+        ground=self.state.get('ground_cells') or {}
+        path=ground.get('feed_ipc')
+        if path!=self.stream_path:
+            if self.stream is not None:self.stream.close()
+            self.stream=None;self.stream_path=path;self.stream_value=None;self.stream_retry_at=0
+        if path:
+            try:
+                if self.stream is None:
+                    if time.monotonic()<self.stream_retry_at:return self.stream_value or ground
+                    self.stream_retry_at=time.monotonic()+.25
+                    from .rcx_stream import Reader
+                    self.stream=Reader(path)
+                value=self.stream.read()
+                if value is not None:self.stream_value=value
+            except (OSError,ValueError):pass
+            if self.stream_value is not None:return self.stream_value
+        return ground
 
     def start(self, hwnd=None):
         if self.enabled:
@@ -109,32 +154,72 @@ class RcxRenderer:
             self.process = subprocess.Popen(command, executable=str(system),
                                             cwd=str(ASSETS), startupinfo=startup,
                                             creationflags=subprocess.CREATE_NO_WINDOW)
+            self.worker_stop.clear()
+            self.worker=threading.Thread(target=self.pump,name='RCX-feed',daemon=True)
+            self.worker.start()
         except Exception:
             self.close()
             raise
 
     def feed(self):
-        if self.shared is None:
-            return
-        s = self.shared
-        ground = self.state.get('ground_cells') or {}
-        recent = time.monotonic()-self.state_at < 2.5
-        points = ground.get('cells', []) if recent else []
-        valid = sorted({(p[0], p[1]) for p in points if isinstance(p, (list, tuple)) and len(p) == 2
-                        and all(type(v) is int and 0 <= v < 1024 for v in p)})[:CAPACITY]
-        name = rcx_client.map_key(ground.get('map')) if recent else ''
-        encoded = name.encode('cp1252', 'replace')
-        if len(encoded) >= 40:
-            valid, encoded = [], b''
-        s.sequence = (s.sequence+1) | 1
-        s.map_name = encoded
-        s.count = len(valid)
-        for i, (x, y) in enumerate(valid):
-            cell = s.cells[i]
-            cell.x, cell.y, cell.fill, cell.outline, cell.symbol = x, y, s.fill, s.outline, 0
-        s.last_feed = C.windll.kernel32.GetTickCount() & 0xffffffff
-        s.enabled = int(self.enabled)
-        s.sequence += 1
+        with self.lock:
+            if self.shared is None:return
+            s=self.shared
+            ground=self.read_ground()
+            recent=self.stream.fresh() if self.stream is not None else time.monotonic()-self.state_at<2.5
+            now=time.monotonic()
+            casts=[c for c in ground.get('casts',[]) if c.get('expires',0)>now] if recent else []
+            learned=self.state.get('learned_skills') or []
+            key=(id(ground),recent,self.config_revision,tuple((c['skill_id'],c['expires']) for c in casts),
+                 tuple((x.get('skill_id'),x.get('level'),x.get('target_flags')) for x in learned))
+            if key!=self.prepared_key:
+                definitions=rcx_settings.preview_definitions(self.config,learned)
+                by_id={d['skill_id']:d for d in definitions}
+                points={}
+                effects=ground.get('effects')
+                unique={r['unit_type']:r['skills'][0]['skill_id'] for r in rcx_settings.catalog() if len(r['skills'])==1}
+                activation={r['unit_type']:skill for r in rcx_settings.catalog() for skill in r['skills'] if skill.get('activation_area')}
+                if effects is None:effects=[dict(position=p,effect_type=157) for p in ground.get('cells',[])]
+                if recent:
+                    for e in effects:
+                        p=e.get('position');kind=e.get('effect_type')
+                        if not isinstance(p,(list,tuple)) or len(p)!=2 or any(type(v) is not int or not 0<=v<1024 for v in p):continue
+                        style=rcx_settings.style_for(self.config,kind,e.get('skill_id') or (activation.get(kind) or {}).get('skill_id') or unique.get(kind))
+                        if style['enabled']:
+                            area=e.get('area')
+                            covered=rcx_settings.footprint(*area,'square') if isinstance(area,list) and len(area)==3 else [p]
+                            if kind in activation:
+                                model=activation[kind]
+                                radius=style['radius'] if style['area_override'] else model['radius']
+                                shape=style['shape'] if style['area_override'] else model['shape']
+                                covered=rcx_settings.footprint(*p,radius,shape)
+                            for cell in covered:
+                                points[tuple(cell)]=(rcx_settings.argb(style['fill'],style['opacity']),rcx_settings.argb(style['outline'],style['opacity']),list(rcx_settings.SYMBOLS).index(style['symbol']))
+                    for cast in casts:
+                        definition=by_id.get(cast['skill_id'])
+                        if definition is None or not definition.get('cast_preview',True):continue
+                        for p in rcx_settings.footprint(*cast['position'],definition['radius'],definition['shape']):
+                            points.setdefault(tuple(p),rcx_settings.preview_visual(self.config,definition))
+                name=rcx_client.map_key(ground.get('map')) if recent else ''
+                encoded=name.encode('cp1252','replace')
+                if len(encoded)>=40:points,encoded={},b''
+                s.sequence=(s.sequence+1)|1
+                s.map_name=encoded
+                s.count=min(CAPACITY,len(points))
+                for i,((x,y),(fill,outline,symbol)) in enumerate(sorted(points.items())[:CAPACITY]):
+                    s.cells[i]=Cell(x,y,fill,outline,symbol)
+                s.selection_preview=int(recent)
+                aim_definitions=[d for d in definitions if not d.get("self_centered") and d.get("selection_preview",True)]
+                s.preview_count=len(aim_definitions) if recent else 0
+                for i,d in enumerate(aim_definitions):
+                    fill,outline,symbol=rcx_settings.preview_visual(self.config,d)
+                    s.previews[i]=Preview(d['skill_id'],d['radius'],list(rcx_settings.SHAPES).index(d['shape']),
+                        fill,outline,symbol,d['unit_type'])
+                s.sequence+=1
+                self.prepared_ground=ground
+                self.prepared_key=key
+            s.last_feed=C.windll.kernel32.GetTickCount()&0xffffffff
+            s.enabled=int(self.enabled)
 
     def snapshot(self):
         if self.shared is None:
@@ -142,7 +227,7 @@ class RcxRenderer:
         self.feed()
         s = self.shared
         return dict(enabled=self.enabled, attached=bool(s.attached), frames=s.frames, drawn=s.drawn,
-                    error=s.error, status=s.status, received=s.count,
+                    error=s.error, status=s.status, received=s.count, selected_skill=s.selected_id, direct_stream=self.stream is not None,
                     helper_running=self.process is not None and self.process.poll() is None)
 
     def stop(self):
@@ -153,7 +238,15 @@ class RcxRenderer:
             self.shared.drawn = 0
 
     def close(self):
+        self.worker_stop.set()
+        if self.worker is not None:
+            self.worker.join(timeout=1)
+            self.worker=None
         self.stop()
+        if self.stream is not None:
+            self.stream.close();self.stream=None
+        self.stream_path=self.stream_value=None
+        self.prepared_key=None
         if self.process is not None:
             if self.process.poll() is None:
                 self.process.terminate()

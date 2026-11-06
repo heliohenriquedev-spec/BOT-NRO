@@ -103,6 +103,8 @@ def mission_choices(library):
 class RouteEditor(QDialog):
     def __init__(self,route,state,parent=None):
         super().__init__(parent);self.route=copy.deepcopy(route);self.state=state or {}
+        from .quest_monster_index import QuestMonsterIndex
+        self.monster_index=QuestMonsterIndex()
         self.setWindowTitle('Configurar rota de quest')
         root=QVBoxLayout(self);page=QWidget();layout=QVBoxLayout(page);root.addWidget(scroll_page(page))
         form=QFormLayout();self.name=QLineEdit(route.get('name',''))
@@ -178,16 +180,16 @@ class RouteEditor(QDialog):
         if self.always.rowCount():
             self.always_chosen=set(self.always_attack());self.always_priority=self.attack_priority(all_rows=True)
         ids=set(self.always_chosen)
-        try:on_map=set(monsters_of_map(self.hunting_map()))
+        try:on_map=self.monster_index.species(self.hunting_map())
         except (OSError,ValueError,KeyError):on_map=set()
         ids|=on_map
         self.highlight_missions(on_map)
         for key in self.selected_missions():
             ids|=set((self.choices.get(key) or {}).get('mission',{}).get('monster_ids',[]))
         self.always.setRowCount(0)
-        for row,identity in enumerate(sorted(ids,key=lambda i:(self.always_priority.get(i,1000),name_of(i) or str(i)))):
+        for row,identity in enumerate(sorted(ids,key=lambda i:(self.always_priority.get(i,1000),self.monster_index.name(i) or str(i)))):
             self.always.insertRow(row)
-            item=QTableWidgetItem(f'{name_of(identity) or "Monstro"} (ID {identity})');item.setData(Qt.UserRole,identity)
+            item=QTableWidgetItem(f'{self.monster_index.name(identity) or "Monstro"} (ID {identity})');item.setData(Qt.UserRole,identity)
             item.setFlags((item.flags()|Qt.ItemIsUserCheckable)&~Qt.ItemIsEditable)
             item.setCheckState(Qt.Checked if identity in self.always_chosen else Qt.Unchecked);self.always.setItem(row,0,item)
             order=QSpinBox();order.setRange(0,99);order.setSpecialValueText('-');order.setValue(self.always_priority.get(identity,0))
@@ -203,12 +205,24 @@ class RouteEditor(QDialog):
         for index in range(self.map_route.count()):
             identity=self.map_route.itemData(index)
             entry=self.map_entries.get(identity) if identity else None
-            try:here=bool(entry and marked and any(self.mission_on_map(m,entry['target_map'],set(monsters_of_map(entry['target_map'])))
+            try:here=bool(entry and marked and any(self.mission_matches(m,entry['target_map'],self.monster_index.species(entry['target_map']))
                                                    for m in marked))
             except (OSError,ValueError,KeyError):here=False
             self.map_route.setItemData(index,QBrush(QColor(28,92,72)) if here else QBrush(),Qt.BackgroundRole)
             if here:matches.append(index)
         if len(matches)==1 and self.map_route.currentData() is None:self.map_route.setCurrentIndex(matches[0])
+
+    def mission_matches(self,m,map_name,species_on_map):
+        from .monster_origin import excluded_spawn
+        names=m.get('monster_names') or [t['name'] for t in m.get('monster_targets',[])]
+        unseen=False
+        for name in names:
+            if excluded_spawn(None,map_name,name):continue
+            where=self.monster_index.maps(name)
+            if where:
+                if map_routes_key(map_name) in where:return True
+            else:unseen=True
+        return bool((unseen or not names) and set(m.get('monster_ids',[]))&species_on_map)
 
     @staticmethod
     def mission_on_map(m,map_name,species_on_map):
@@ -234,7 +248,7 @@ class RouteEditor(QDialog):
         hunting=self.hunting_map()
         for i in range(self.mission_list.count()):
             item=self.mission_list.item(i);m=(self.choices.get(item.data(Qt.UserRole)) or {}).get('mission',{})
-            here=bool(hunting and self.mission_on_map(m,hunting,on_map))
+            here=bool(hunting and self.mission_matches(m,hunting,on_map))
             item.setBackground(QBrush(QColor(28,92,72)) if here else QBrush())
             item.setToolTip('Monstros desta missao estao no mapa de caca escolhido' if here else '')
         self.mission_list.blockSignals(False)
@@ -636,7 +650,7 @@ class QuestPanel(QWidget):
     command_requested=Signal(str,dict)
 
     def __init__(self):
-        super().__init__();self.routes=[];self.state={}
+        super().__init__();self.routes=[];self.state={};self.completed_unchecked=set()
         outer=QVBoxLayout(self);self.sections=QTabWidget();outer.addWidget(self.sections)
         queue=QWidget();self.sections.addTab(scroll_page(queue),'Fila de rotas');layout=QVBoxLayout(queue)
         intro=QLabel('Ciclo de cada rota: 1. Pegar as missoes marcadas → 2. Ir ao mapa de caca → 3. Matar ate todos os contadores '
@@ -683,10 +697,16 @@ class QuestPanel(QWidget):
         except (OSError,ValueError):library,names=[],{}
         from . import quest_daily
         daily=quest_daily.load();running,paused=self.route_marks()
+        changed=False
         self.list.blockSignals(True);self.list.clear()
         for i,r in enumerate(self.routes):
             missions=', '.join(names.get(m,'?') for m in r['mission_ids']) or 'nenhuma missao'
             done,total=route_done_today(r,library,daily)
+            import datetime
+            completion_key=(quest_daily.CHARACTER,datetime.date.today().isoformat(),r['id'])
+            if total and done==total and r['name']!=running and completion_key not in self.completed_unchecked:
+                self.completed_unchecked.add(completion_key)
+                if r['enabled']:r['enabled']=False;changed=True
             mark=('▶ em andamento  ' if r['name']==running else '⏸ fila pausada aqui  ' if r['id']==paused else
                   '✔ concluida hoje  ' if total and done==total else f'◐ {done}/{total} hoje  ' if done else '')
             item=QListWidgetItem(f"{mark}{i+1}. {r['name']}  |  {r['target_map'] or 'escolha o mapa de caca'}  |  {missions}"
@@ -698,6 +718,9 @@ class QuestPanel(QWidget):
             item.setSelected(r['id'] in selected_ids)
             if r['id']==identity:self.list.setCurrentRow(i,QItemSelectionModel.NoUpdate)
         self.list.blockSignals(False)
+        if changed:
+            try:self.routes=save(self.routes)
+            except (OSError,ValueError) as exc:self.notice.setText(str(exc))
 
     def route_marks(self):
         """(name of the route the queue is running, id of the route a paused queue would resume)."""

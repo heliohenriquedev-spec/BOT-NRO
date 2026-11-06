@@ -2,7 +2,7 @@
 import json
 import sys
 
-from PySide6.QtCore import QProcess, QProcessEnvironment, Signal
+from PySide6.QtCore import QProcess, QProcessEnvironment, Signal, QTimer, QElapsedTimer
 from PySide6.QtWidgets import (QGroupBox, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QPushButton,
                                QVBoxLayout, QWidget)
 
@@ -15,6 +15,7 @@ class UpdatePanel(QWidget):
     def __init__(self, relay_running=lambda: False):
         super().__init__()
         self.relay_running = relay_running
+        self.confirm_dialog = None
         self.action = None
         self.output = ''
         layout = QVBoxLayout(self)
@@ -93,7 +94,25 @@ class UpdatePanel(QWidget):
         if self.relay_running():
             self.status.setText('Feche a conexão (botão Fechar conexão) antes de atualizar.')
             return
-        self.run('apply')
+        if self.confirm_dialog is not None:return
+        from PySide6.QtWidgets import QMessageBox
+        dialog=QMessageBox(self);dialog.setWindowTitle('Confirmar atualizacao')
+        dialog.setText('O bot sera atualizado e o painel reiniciado. Suas configuracoes e progresso serao preservados. Deseja continuar?')
+        dialog.setStandardButtons(QMessageBox.Yes|QMessageBox.No);dialog.setDefaultButton(QMessageBox.No)
+        yes=dialog.button(QMessageBox.Yes);yes.setEnabled(False)
+        clock=QElapsedTimer();clock.start();timer=QTimer(dialog);timer.setInterval(100)
+        def tick():
+            remaining=max(0,5-clock.elapsed()//1000)
+            yes.setText('Atualizar ('+str(remaining)+' s)' if remaining else 'Confirmar atualizacao')
+            yes.setEnabled(remaining==0)
+        timer.timeout.connect(tick);tick();timer.start();self.confirm_dialog=dialog
+        def confirmed(result):
+            timer.stop();self.confirm_dialog=None
+            if result==QMessageBox.Yes and clock.elapsed()>=5000:
+                if self.relay_running():self.status.setText('Feche a conexao antes de atualizar.');return
+                self.run('apply')
+            dialog.deleteLater()
+        dialog.finished.connect(confirmed);dialog.open()
 
     def restart(self):
         if self.relay_running():
@@ -105,8 +124,9 @@ class UpdatePanel(QWidget):
         self.restart_requested.emit()
 
     def publish(self):
-        if not self.message.text().strip():
-            self.status.setText('Escreva o que mudou antes de publicar.')
+        from . import changelog
+        if not self.message.text().strip() and not changelog.pending_items():
+            self.status.setText('Escreva o que mudou ou preencha a Próxima atualização do CHANGELOG.md antes de publicar.')
             return
         self.run('publish', '--message', self.message.text().strip())
 

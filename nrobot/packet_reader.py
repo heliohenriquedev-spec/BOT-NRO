@@ -397,6 +397,8 @@ def decode(message: bytes) -> dict:
                      source_id=u32(10), success=bool(message[14]))
     elif op == 0x43d and len(message) == 8:
         event.update(kind='skill_cooldown', skill_id=u16(2), duration_ms=u32(4))
+    elif op == 0x1b9 and len(message) == 6:
+        event.update(kind='skill_cast_cancel',source_id=u32(2))
     elif op == 0x13e and len(message) == 24:
         event.update(kind='skill_cast', source_id=u32(2), target_id=u32(6), skill_id=u16(14), duration_ms=u32(20), position=[u16(10),u16(12)])
     elif op == 0x8a:

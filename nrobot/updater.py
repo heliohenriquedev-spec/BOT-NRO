@@ -33,7 +33,7 @@ PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/m
              'data/rede/compartilhado_importado.json',
              'data/rede/alvos_importados.json', 'data/rede/personagens')
 # Kept in the repository for development, not needed to run the bot.
-NOT_DISTRIBUTED = ('tests', 'tools', 'Arquivos_grf', '.gitignore', '.gitattributes')
+NOT_DISTRIBUTED = ('AGENTS.md', 'tests', 'tools', 'Arquivos_grf', '.gitignore', '.gitattributes')
 TIMEOUT = 30
 
 
@@ -241,9 +241,12 @@ def tracked_files():
 
 def publish(message, log=print, run_tests=True):
     """Test, bump the version, commit everything and push; returns the new version."""
+    from . import changelog
     message = (message or '').strip()
+    if not message and changelog.pending_items():
+        message = 'changelog'
     if not message:
-        raise UpdateError('escreva o que mudou nesta atualização')
+        raise UpdateError('escreva o que mudou nesta atualização (ou preencha a Próxima atualização do CHANGELOG.md)')
     if not can_publish():
         raise UpdateError('esta cópia não é a do desenvolvedor (sem git ou sem repositório de origem)')
     if git('ls-files', '--', 'Arquivos_grf'):
@@ -281,10 +284,18 @@ def publish(message, log=print, run_tests=True):
     VERSION_FILE.write_text(json.dumps({'version': version, 'published_at': datetime.now().isoformat(timespec='seconds'),
                                         'notes': message, 'files': files, 'files_digest': digest},
                                        ensure_ascii=False, indent=1)+'\n', encoding='utf-8')
-    git('add', '-A')
-    git('commit', '-m', f'{version}: {message}')
+    previous_changelog = changelog.CHANGELOG.read_bytes() if changelog.CHANGELOG.is_file() else None
+    notes = changelog.stamp(version)
+    try:
+        git('add', '-A')
+        git('commit', '-m', f'{version}: {message}')
+    except UpdateError:
+        if previous_changelog is not None:
+            changelog.CHANGELOG.write_bytes(previous_changelog)  # retry keeps the pending topics
+        raise
     log('Enviando para o GitHub...')
     git('push', 'origin', 'HEAD')
+    changelog.send(version, notes, log)
     return version
 
 

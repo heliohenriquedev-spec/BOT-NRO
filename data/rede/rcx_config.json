@@ -1,0 +1,28 @@
+{
+  "selection_preview": true,
+  "cast_preview": true,
+  "preview_opacity": 35,
+  "preview_color": "#808080",
+  "preview_symbol": "outline",
+  "effects": {
+    "126": {
+      "enabled": true,
+      "fill": "#808080",
+      "outline": "#303030",
+      "opacity": 70,
+      "symbol": "solid",
+      "radius": 5,
+      "shape": "square",
+      "skill_id": 0,
+      "area_override": true,
+      "preview_appearance": false,
+      "selection_preview": true,
+      "cast_preview": true,
+      "preview_fill": null,
+      "preview_outline": null,
+      "preview_symbol": null,
+      "preview_opacity": null
+    }
+  },
+  "skill_styles": {}
+}

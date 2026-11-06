@@ -25,7 +25,11 @@ def isolated_monster_data(tmp_path, monkeypatch):
     from nrobot import monster_db
     from nrobot import drop_db
     from nrobot import quest_progress
+    from nrobot import quest_routes
+    monkeypatch.setattr(quest_routes, "FILE", tmp_path/"rede"/"rotas_quests.json")
     from nrobot import watchlist
+    from nrobot import rcx_settings
+    monkeypatch.setattr(rcx_settings, "FILE", tmp_path/"rede"/"rcx_config.json")
     monkeypatch.setattr(watchlist, 'FILE', tmp_path/'jogadores'/'observacao.json')
     monkeypatch.setattr(quest_progress, 'FILE', tmp_path/'rede'/'progresso_quests.json')
     monkeypatch.setattr(drop_db, 'FILE', tmp_path/'database'/'observacoes.sqlite3')

@@ -208,6 +208,7 @@ class SessionRelay(QuestRelay):
         self.chat_alert = None
         from .ground_cells import GroundCells
         self.ground_cells = GroundCells()
+        self.ground_stream = None
         self.char_list = b''
         self.manual_until = 0  # REDE-76: the bot yields while the player walks by hand
         self.manual_active = False
@@ -417,8 +418,11 @@ class SessionRelay(QuestRelay):
             self.map_loaded_at = time.monotonic()  # the client finished loading the map
         for opcode, frame in self.native_frames.frames:
             self.quests.native(opcode,frame,self.tracker.observer.map_name)
+            if opcode == 0x72 and len(frame) == 25:
+                if self.preview_rcx_self_skill(struct.unpack_from('<H',frame,10)[0],struct.unpack_from('<I',frame,21)[0],time.monotonic()):
+                    self.publish_ground_cells()
             if opcode == 0x113 and len(frame) == 22:
-                self.ground_cells.preview_cast(struct.unpack_from('<H',frame,9)[0],
+                self.ground_cells.request_cast(struct.unpack_from('<H',frame,9)[0],
                     [struct.unpack_from('<H',frame,12)[0],struct.unpack_from('<H',frame,20)[0]],time.monotonic())
                 self.publish_ground_cells()
             if opcode == 0x22d and self.own_summons.learn_feed(frame):
@@ -1349,11 +1353,11 @@ class SessionRelay(QuestRelay):
                  and now-self.scan_no_target_since >= 10)
         self.mob_scan.start(observer.map_name, self.quest_missing_species(), now, idle=True, early=early)
         collision = self.collision_map()
-        found = self.mob_scan.finish(observer.player, now, collision.walkable if collision is not None else None)
+        found = self.mob_scan.finish(observer.player, now, collision.walkable if collision is not None else None,collision=collision)
         if found:
             self.record_hunt({'kind': 'showmobs_goal', **found})
             print(f"[ROTA] @showmobs: indo onde ha mais monstros da quest ({found['monsters']} de {found['total']} "
-                  f"perto de {found['position']}).")
+                  f"perto de {found['position']}; soma por tipo: {found.get('species_counts',{})}).")
         elif self.mob_scan.suspended and not getattr(self, 'mob_scan_warned', False):
             self.mob_scan_warned = True
             print('[ROTA] @showmobs nao respondeu neste servidor/mapa; busca por @showmobs desligada nesta conexao.')
@@ -1468,11 +1472,13 @@ class SessionRelay(QuestRelay):
                         self.rotation.reason = 'nenhuma celula valida para invocacao proxima'
                         return False
                     payload = ground_skill(*point, action['skill_id'], action['level'])
-                    self.ground_cells.preview_cast(action['skill_id'],list(point),now)
+                    self.ground_cells.request_cast(action['skill_id'],list(point),now)
                     self.publish_ground_cells()
                     action = {**action, 'ground_position': list(point)}
                 else:
                     payload = skill(action['target_id'], action['skill_id'], action['level'])
+                    if self.preview_rcx_self_skill(action['skill_id'],action['target_id'],now):
+                        self.publish_ground_cells()
                 self.rotation.sent(action, now)
             try:
                 self.trace_map_send('bot', struct.unpack_from('<H', payload)[0], len(payload))
@@ -1532,7 +1538,7 @@ class SessionRelay(QuestRelay):
                      own_look=self.own_look or None,
                      emergency_stop=self.emergency,
                      chat_alert=self.chat_alert,
-                     ground_cells={**self.ground_cells.snapshot(), "feed_file": str(self.folder/"rcx_terreno.json")},
+                     ground_cells={**self.ground_cells.snapshot(), "feed_file": str(self.folder/"rcx_terreno.json"), "feed_ipc": str(self.folder/"rcx_terreno.ipc")},
                      portals=[{'position': list(cell), 'margin': margin} for cell, margin in self.portals.portals(self.tracker.observer.map_name)],
                      own_hidden=({'option': self.own_option & 0x4046, 'gm_invisible': bool(self.own_option & 0x40)}
                                  if self.own_option & 0x4046 else None),
@@ -1667,10 +1673,18 @@ class SessionRelay(QuestRelay):
                 data = bytes(self.mirror)
                 self.mirror.clear()
             events = self.tracker.feed(self.mirror_sequence, data, time.monotonic())
-            self.ground_cells.observe(events, self.tracker.observer.player_id)
+            rcx_changed=False
+            rcx_now=time.monotonic()
+            for event in events:
+                self.ground_cells.observe([event],self.tracker.observer.player_id,rcx_now)
+                if event['kind'] in ('skill_cast','skill_no_damage','skill_damage') and event.get('source_id')==self.tracker.observer.player_id:
+                    if event['kind']=='skill_no_damage' and not event.get('success'):continue
+                    if event['kind']=='skill_cast' and event.get('duration_ms',0)<=0:continue
+                    rcx_changed=self.preview_rcx_self_skill(event.get('skill_id'),self.tracker.observer.player_id,rcx_now,
+                        duration=event.get('duration_ms',0)/1000 if event['kind']=='skill_cast' else .2,confirmed=True) or rcx_changed
             if self.ground_cells.map is None:
                 self.ground_cells.map = self.tracker.observer.map_name
-            if any(e["kind"] in ("ground_effect", "ground_effect_removed", "map_change", "map_transfer", "skill_cast", "skill_failed") for e in events):
+            if rcx_changed or any(e["kind"] in ("ground_effect", "ground_effect_removed", "map_change", "map_transfer", "skill_cast", "skill_failed", "ground_skill", "skill_cast_cancel") for e in events):
                 self.publish_ground_cells()
             if self.ground_cells.map is None:
                 self.ground_cells.map = self.tracker.observer.map_name
@@ -2238,6 +2252,9 @@ class SessionRelay(QuestRelay):
     async def close(self):
         self.ground_cells.reset()
         self.publish_ground_cells()
+        if self.ground_stream is not None:
+            self.ground_stream.close()
+            self.ground_stream = None
         if self.quests.active:
             self.save_progress(time.monotonic(), force=True)
         self.drops.close()
@@ -2338,15 +2355,40 @@ class SessionRelay(QuestRelay):
     def gm_detection_on(self):
         return bool((self.settings or {}).get('gm_detection', True))
 
+    def preview_rcx_self_skill(self, skill_id, target_id, now, duration=1.0, confirmed=False):
+        """Self-centred terrain skills (Desperado etc.) use the caster's cell, never the mouse."""
+        observer=self.tracker.observer
+        metadata=observer.skills.get(skill_id) or {}
+        if (observer.player_id is None or target_id!=observer.player_id
+                or metadata.get('level',0)<=0 or metadata.get('target_flags')!=4):return False
+        from .rcx_settings import catalog
+        if not any(s['skill_id']==skill_id and not s.get('ground',False) for r in catalog() for s in r['skills']):return False
+        positions=observer.combat_positions(now)
+        position=positions[0] if positions else observer.player
+        if position is None:return False
+        if confirmed:self.ground_cells.preview_cast(skill_id,list(position),now,duration)
+        else:self.ground_cells.request_cast(skill_id,list(position),now)
+        if confirmed:
+            self.ground_cells.note_ground_skill(dict(skill_id=skill_id,source_id=observer.player_id,
+                position=list(position),level=metadata['level']),now)
+        return True
+
     def publish_ground_cells(self):
         """Small independent RCX feed; a terrain packet does not wait for the full UI snapshot."""
         try:
             value = self.ground_cells.snapshot()
+            from .rcx_stream import Publisher
+            if self.ground_stream is None:
+                self.ground_stream = Publisher(self.folder/'rcx_terreno.ipc')
+            self.ground_stream.publish(value)
+            now=time.monotonic()
+            if now-getattr(self,'last_rcx_json',0)<.1:return
+            self.last_rcx_json=now
             target = self.folder/'rcx_terreno.json'
             temp = target.with_suffix('.tmp')
             temp.write_text(json.dumps(value), encoding='utf-8')
             temp.replace(target)
-        except OSError:
+        except (OSError, ValueError):
             pass  # a display problem must never disconnect the game
 
     def observation_suspended_for_route(self):
@@ -2934,6 +2976,8 @@ async def run(args):
                         relay.control_result = {'id': request['id'], 'ok': False, 'message': str(exc)}
                     relay.status()
             if time.monotonic()-last_heartbeat >= .5:
+                if relay.ground_stream is not None and relay.stage=='map' and relay.upstream is not None:
+                    relay.ground_stream.pulse()
                 relay.status()
                 last_heartbeat = time.monotonic()
             if controls is not None:

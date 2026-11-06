@@ -1289,7 +1289,7 @@
  },
  {
   "name": "GT - 1",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1067,
@@ -1398,7 +1398,7 @@
  },
  {
   "name": "GT - 2",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1041,
@@ -1519,7 +1519,7 @@
  },
  {
   "name": "GT - 3",
-  "enabled": true,
+  "enabled": false,
   "kills": 1,
   "species": [
    1039,

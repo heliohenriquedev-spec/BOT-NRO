@@ -515,3 +515,32 @@ o personagem volta ao circuito de explora??o.
 Durante coleta, viagens, entrega, retorno e prepara??o de equipamentos, o observador
 de jogadores fica suspenso, sem alterar a lista ou a op??o salva. Ao entrar na etapa
 de ca?a, os jogadores presentes voltam a ser verificados antes do combate.
+
+## Reexecutar concluídas, viagem isolada e busca agregada
+
+Rotas cujas missões foram todas concluídas hoje começam desmarcadas para o
+personagem atual. Marcar uma delas novamente permite repetir a viagem e a caça,
+com novos contadores de execução, mantendo o histórico diário. Como o servidor
+pode recusar uma missão diária já entregue, essa reexecução não tenta obter ou
+entregar novamente as diárias concluídas. A retomada preserva a fila e esse modo,
+mesmo que as rotas tenham sido desmarcadas ao reabrir o painel.
+
+**Executar somente viagem** está disponível a todos os usuários conectados, sem
+requisito de personagem ou perfil de desenvolvedor. O teste monta primeiro a
+conexão entre o mapa atual e a origem do percurso, utilizando os caminhos aos
+quadros, as ligações entre mapas e as rotas compartilhadas. Por exemplo, uma rota
+que começa na Sala VIP pode usar o acesso Hospital → Areia → Sala VIP antes do
+trajeto de caça. Se não houver ligação registrada, o teste pausa e informa o
+caminho faltante; não inicia um percurso parcial com a origem errada.
+
+O editor usa um índice dos monstros carregado uma vez por abertura, preservando
+as regras de distinguir nomes que compartilham sprite e de excluir invocações.
+Num teste local comparando a implementação anterior e a nova sem profiler,
+a abertura caiu de 3,175 s para 0,298 s. O tempo varia com a base e o computador.
+
+A busca `@showmobs` reúne as respostas dos monstros ainda necessários da quest.
+A mesma entidade não é contada duas vezes; grupos são avaliados pela soma dos
+tipos consultados. Áreas inacessíveis são descartadas e o destino resultante vai
+para o planejador de caminhos. Monstros de quest encontrados no trajeto continuam
+sendo combatidos normalmente. As consultas são espaçadas; o snapshot não equivale
+a rastreamento contínuo de todos os monstros do mapa.

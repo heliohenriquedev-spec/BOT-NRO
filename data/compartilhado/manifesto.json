@@ -1,7 +1,8 @@
 {
  "schema": 1,
  "files": {
-  "rotas_quests.json": "e30d4e4b504400852599f29c94ae3edff41711b6ed9c5b1a503bc063c7761b18",
+  "database.json": "9473f8f51653730c531c5a19d989ce6b4c12c09792abc4960f444f6581dd414c",
+  "rotas_quests.json": "8e82e6c2362710f19f54be7a20f54935204b1f931f257d6af806dafb5e9a56b5",
   "quadros_missoes.json": "22234d95e2a661c3f6eba2e37280f0fea1522c79611e549b431d73f8d846feb2",
   "rotas_mapas.json": "3fcd0b13b78e6c83cb5326c8eccdd5baa20402c60fd20048c5da08eab6190cc6",
   "portais.json": "5c13a4cfda6a37cc1016f8789ebad9940ec04d3e9a83617f150ac34745274052",

@@ -14,6 +14,7 @@ import copy
 from datetime import datetime
 import hashlib
 import json
+import sqlite3
 from pathlib import Path
 import uuid
 import zipfile
@@ -22,7 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SHARED = 'data/compartilhado'
 MARKER = 'data/rede/compartilhado_importado.json'
 # shared name -> the user's file
-FILES = {'rotas_quests.json': 'data/rede/rotas_quests.json',
+FILES = {'database.json':'data/database/observacoes.sqlite3',
+         'rotas_quests.json': 'data/rede/rotas_quests.json',
          'quadros_missoes.json': 'data/rede/quadros_missoes.json',
          'rotas_mapas.json': 'data/rede/rotas_mapas.json',
          'portais.json': 'data/mapas/portais.json',
@@ -85,6 +87,11 @@ def export(log=print, root=ROOT):
     payload = {}
     for name, own in FILES.items():
         path = root/own
+        if name=='database.json':
+            from .database_share import snapshot
+            data=snapshot(root)
+            if data is not None:payload[name]=data
+            continue
         data = json.loads(path.read_text(encoding='utf-8')) if path.is_file() else None
         if data is None:
             continue
@@ -103,11 +110,16 @@ def export(log=print, root=ROOT):
     _write(root/SHARED/'manifesto.json', {'schema': 1, 'files': manifest})
     _write(root/MARKER, {'digest': digest(root)})  # the developer already has all of it
     (root/SHARED/'alvos_monstros.json').unlink(missing_ok=True)  # published before: personal now
+    if 'database.json' in payload:
+        log('Database preparado: '+', '.join(str(len(rows))+' '+table for table,rows in payload['database.json']['tables'].items()))
     log(f'Quests, quadros, rotas de mapa, portais, @voltar e sinais de GM preparados para os usuarios ({len(payload)} arquivos).')
 
 
 def validate_references(payload):
     """A quest cannot depend on a mission or map route present only on the author's PC."""
+    if payload.get('database.json') is not None:
+        from .database_share import validate
+        validate(payload['database.json'])
     library = payload.get('quadros_missoes.json') or {}
     missions = {m['id'] for m in library.get('missions', [])}
     routes = {r['id'] for r in payload.get('rotas_mapas.json') or []}
@@ -255,7 +267,7 @@ def merge_lists(mine, theirs):
 
 def backup(root, log):
     root = Path(root)
-    present = [own for own in FILES.values() if (root/own).is_file()]
+    present = [own for name,own in FILES.items() if name!='database.json' and (root/own).is_file()]
     if not present:
         return None
     target = root/'backups'/f"antes-dos-dados-compartilhados-{datetime.now().strftime('%Y%m%d-%H%M%S')}.zip"
@@ -286,7 +298,7 @@ def merge(root=ROOT, log=print, force=False):
     except (ValueError, KeyError, TypeError, OSError) as exc:
         log(f'Dados compartilhados nao aplicados: {exc}')
         return False
-    own = {name: _read(root/path, None) for name, path in FILES.items()}
+    own = {name: None if name=='database.json' else _read(root/path,None) for name,path in FILES.items()}
     result, missions_renamed, maps_renamed = {}, {}, {}
     if shared['quadros_missoes.json'] is not None:
         result['quadros_missoes.json'], missions_renamed = merge_library(own['quadros_missoes.json'], shared['quadros_missoes.json'])
@@ -316,6 +328,11 @@ def merge(root=ROOT, log=print, force=False):
     except (ValueError, KeyError, TypeError) as exc:
         log(f'Dados compartilhados nao aplicados (invalidos): {exc}')
         return False
+    if shared.get('database.json') is not None:
+        from .database_share import merge as merge_database
+        try:merge_database(shared['database.json'],root,log)
+        except (OSError,ValueError,sqlite3.Error) as exc:
+            log('Database nao aplicado; importacao sera tentada novamente: '+str(exc));return False
     saved = backup(root, log)
     if saved:
         log(f'Copia dos seus dados antes de receber os compartilhados: {saved.relative_to(root).as_posix()}')

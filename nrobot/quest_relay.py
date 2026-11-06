@@ -77,9 +77,11 @@ class QuestRelay(SharedQuestRelay):
         elif command=='quest_test_route':
             if self.quests.active or self.quests.recording:raise ValueError('Pause a fila e encerre a gravacao antes de testar')
             if not self.allow_commands or self.upstream is None or not game_gate():raise ValueError('Entre no personagem antes de testar')
+            if not self.tracker.observer.map_name:raise ValueError('Aguarde carregar o mapa do personagem antes de executar a viagem')
             route=next((r for r in map_routes.apply(load()) if r['id']==request.get('route_id')),None)
             if not route or route['needs_recording'] or not route['steps']:raise ValueError('Escolha o mapa de caca da rota antes de testar')
-            self.quests.start_validation(route['steps'],route['target_map'],time.monotonic(),mode='travel',label=route['name'],map_routes=map_routes.adopt_inner_portals(map_routes.load(),self.portals))
+            from . import quest_library
+            self.quests.start_validation(route['steps'],route['target_map'],time.monotonic(),mode='travel',label=route['name'],library=quest_library.load(),map_routes=map_routes.adopt_inner_portals(map_routes.load(),self.portals),connect_from=self.tracker.observer.map_name,known_routes=map_routes.apply(load()))
             if self.hunt:self.hunt.pause('Executando teste isolado')
             self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
         elif command=='quest_record':
@@ -118,7 +120,7 @@ class QuestRelay(SharedQuestRelay):
             self.quest_stop('Preparando fila')
             entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
             self.know_quest_character()
-            self.quests.start(map_routes.apply(load(),entries),time.monotonic(),map_routes=entries)
+            self.quests.start(map_routes.apply(load(),entries),time.monotonic(),map_routes=entries,replay_completed=True)
             from . import quest_daily
             self.quests.slot_owner=quest_daily.load_slots()
             self.quest_base_settings=copy.deepcopy(self.settings)

@@ -89,13 +89,13 @@ def validate_routes(data):
     return result
 
 
-def load(path=FILE):
-    path=Path(path)
+def load(path=None):
+    path=Path(path or FILE)
     return validate_routes(json.loads(path.read_text(encoding='utf-8'))) if path.exists() else []
 
 
-def save(routes, path=FILE):
-    routes=validate_routes(routes);path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
+def save(routes, path=None):
+    routes=validate_routes(routes);path=Path(path or FILE);path.parent.mkdir(parents=True,exist_ok=True)
     temp=path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp')
     temp.write_text(json.dumps(routes,ensure_ascii=False,indent=2),encoding='utf-8');temp.replace(path)
     return routes
@@ -147,8 +147,9 @@ class QuestRoutes:
             return confirmation(self.library,self.current_mission,self.phase)
         return (self.current_mission or self.route)[self.phase+'_confirmation']
 
-    def start(self,routes,now,library=None,map_routes=None):
+    def start(self,routes,now,library=None,map_routes=None,replay_completed=False):
         self.validation=None;self.borrow=None;self.prefetched={};self.voltar_fallback=None;self.resume=None;self.chain=None
+        self.replay_completed=replay_completed
         self.map_routes=list(map_routes or [])
         self.known_routes=validate_routes(routes)
         self.routes=[copy.deepcopy(r) for r in self.known_routes if r['enabled']]
@@ -177,21 +178,35 @@ class QuestRoutes:
                     if (not r[STAGE_FIELDS[phase]] or not text(r[phase+'_confirmation'])
                         or not any(s['kind']=='npc' for s in r[STAGE_FIELDS[phase]])):
                         raise ValueError('Configure o trecho e a confirmacao de '+STAGES[phase]+': '+r['name'])
+        if replay_completed and self.library:
+            from . import quest_daily
+            from .quest_library import mission
+            daily=quest_daily.load()
+            for r in self.routes:
+                missions=[mission(self.library,i) for i in r['mission_ids']]
+                if missions and all(quest_daily.done_today(m['board_id'],m.get('rank') or m['name'],daily) for m in missions):
+                    r['lifecycle_enabled']=False;r['chain_next']=False;r['repeat_completed']=True
+                    print('[ROTA] Reexecutando viagem e caca de '+r['name']+'; missoes diarias ja concluidas, historico preservado.')
+            for i,r in enumerate(self.routes[:-1]):
+                if self.routes[i+1].get('repeat_completed'):r['chain_next']=False
         self.index=0;self.recording=None;self.begin(now)
 
-    def start_validation(self,steps,target_map,now,*,mode,label,library=None,mission_id=None,target_position=None,return_board=None,mission_ids=None,map_routes=None):
+    def start_validation(self,steps,target_map,now,*,mode,label,library=None,mission_id=None,target_position=None,return_board=None,mission_ids=None,map_routes=None,connect_from=None,known_routes=None):
         if self.active or self.recording:raise ValueError('Pause a fila e encerre a gravacao antes de testar')
         self.map_routes=list(map_routes or []);self.borrow=None;self.prefetched={}
         if mode not in ('access','travel','pickup','delivery','return'):raise ValueError('Teste desconhecido')
         route=validate_routes([dict(name=label,id='validation',target_map=target_map,steps=steps,
                                    mission_ids=mission_ids if mission_ids is not None else [mission_id] if mission_id else [])])[0]
-        self.routes=[route];self.index=0;self.known_routes=[];self.library=copy.deepcopy(library)
+        self.routes=[route];self.index=0;self.known_routes=copy.deepcopy(known_routes or []);self.library=copy.deepcopy(library)
         self.completed_missions={'pickup':[],'delivery':[]};self.kills=0;self.deferred_check=None;self.skipped=[]
         self.enter_stage(mode if mode in ('pickup','delivery','return') else 'travel',now)
         if not route['mission_ids'] and mode!='return':self.steps=copy.deepcopy(steps)
         if mode=='return':self.return_board=return_board;self.return_context={'validation':True}
         self.validation=dict(mode=mode,label=label,completed=False,target_position=target_position)
         if mission_ids is not None:self.validation['all_missions']=True
+        if mode=='travel' and connect_from is not None:
+            try:self.steps=self.itinerary(connect_from)
+            except ValueError as exc:self.stop(str(exc));raise
         self.reason='Testando: '+label
 
     def complete_validation(self):
@@ -449,7 +464,7 @@ class QuestRoutes:
         phase,index=getattr(self,'last_stage',None) or ('pickup',0)
         if self.phase=='return' and self.return_context and not self.return_context.get('validation'):
             phase,index=self.return_context['phase'],self.return_context['next_index']
-        return dict(route_id=self.route['id'],route_name=self.route['name'],index=self.index,phase=phase,mission_index=index,
+        return dict(queue_ids=[r['id'] for r in self.routes],repeat_completed_route=bool(self.route.get('repeat_completed')),replay_completed=getattr(self,'replay_completed',False),route_id=self.route['id'],route_name=self.route['name'],index=self.index,phase=phase,mission_index=index,
                     stage=self.phase if self.phase in STAGES or self.phase=='hunt' else phase,step=self.step,map=self.map,target_map=self.route['target_map'],
                     mission_ids=list(self.route['mission_ids']),kill_targets=copy.deepcopy(self.route['kill_targets']),
                     species=list(self.route['species']),kill_counts={str(k):v for k,v in self.kill_counts.items()},name_counts=dict(self.name_counts),kills=self.kills,
@@ -461,7 +476,12 @@ class QuestRoutes:
 
     def resume_from(self,routes,saved,now,library=None,map_routes=None,map_name=None):
         """Start the queue again where it was: same route and stage, missions done kept, kills kept."""
-        self.start(routes,now,library=library,map_routes=map_routes)
+        routes=copy.deepcopy(routes)
+        queue_ids=saved.get('queue_ids')
+        for r in routes:
+            if queue_ids is not None:r['enabled']=r['id'] in queue_ids
+            elif r['id']==saved.get('route_id'):r['enabled']=True
+        self.start(routes,now,library=library,map_routes=map_routes,replay_completed=bool(saved.get('replay_completed')))
         index=next((i for i,r in enumerate(self.routes) if r['id']==saved.get('route_id')),None)
         if index is None:raise ValueError('A rota salva nao esta mais marcada na fila: '+str(saved.get('route_name')))
         self.errands=[];self.index=index;route=self.route

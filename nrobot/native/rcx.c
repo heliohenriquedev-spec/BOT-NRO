@@ -50,6 +50,17 @@ static LONG binding_count;
 static Vertex fills[DRAW_CAP*6],lines[DRAW_CAP*16];
 static Cell cells[DRAW_CAP];
 static Preview previews[256];
+static int copy_memory(uintptr_t address,void *out,SIZE_T size);
+typedef struct { DWORD key; float height[4]; } HeightEntry;
+static HeightEntry height_cache[8192];
+static DWORD height_base,height_width;
+static char height_map[40];
+static int terrain_height(DWORD base,DWORD width,int x,int y,float *out){
+    if(base!=height_base||width!=height_width){memset(height_cache,0,sizeof(height_cache));height_base=base;height_width=width;}
+    DWORD key=(DWORD)(x+y*width)+1;HeightEntry *entry=&height_cache[(key*2654435761u)%8192];
+    if(entry->key!=key){if(!copy_memory(base+20u*(key-1),entry->height,16))return 0;entry->key=key;}
+    memcpy(out,entry->height,16);return 1;
+}
 
 static int copy_memory(uintptr_t address,void *out,SIZE_T size) {
     SIZE_T got=0;
@@ -72,6 +83,10 @@ static int project(float x,float y,float z,float *m,float hpc,float vpc,float hw
     v->z=(1500.0f/1490.0f)*(c-10.0f)*v->rhw;
     return isfinite(v->x) && isfinite(v->y) && fabsf(v->x)<100000 && fabsf(v->y)<100000;
 }
+/* RCX v2: per-effect appearance and independently rendered local aim preview.
+ * Selection layout: NRO 0x578B28 / 0x57C7A3 (type+0x3B4, skill+0x3B8).
+ * Mouse globals: 0x57A851..0x57A879, passed to the original ground ray picker.
+ */
 /* Exact ray/triangle intersection against the same GAT used to draw the cells.
  * Client mouse coordinates are read only. No gameplay method or cast is called. */
 static int triangle_hit(float *o,float *d,float v[3][3],float *t) {
@@ -84,10 +99,7 @@ static int triangle_hit(float *o,float *d,float v[3][3],float *t) {
     float w=(d[0]*q[0]+d[1]*q[1]+d[2]*q[2])/det;if(w<0||u+w>1)return 0;
     *t=(e2[0]*q[0]+e2[1]*q[1]+e2[2]*q[2])/det;return *t>=10&&*t<1500;
 }
-static int pick_cell(float *m,float *projection,DWORD *dims,DWORD width,DWORD height,DWORD base,int *cx,int *cy) {
-    HWND win=GetForegroundWindow();DWORD pid=0;GetWindowThreadProcessId(win,&pid);
-    if(pid!=GetCurrentProcessId())return 0;
-    int mx=(int)word(0x717504),my=(int)word(0x717508);
+static int pick_at(int mx,int my,float *m,float *projection,DWORD *dims,DWORD width,DWORD height,DWORD base,int *cx,int *cy) {
     if(mx<0||my<0||mx>=(int)dims[0]||my>=(int)dims[1])return 0;
     float local[3]={(mx-(float)dims[2])/projection[0],(my-(float)dims[3])/projection[1],1};
     float o[3],d[3];
@@ -108,7 +120,7 @@ static int pick_cell(float *m,float *projection,DWORD *dims,DWORD width,DWORD he
         if(ix<0||iy<0||ix>=(int)width||iy>=(int)height)return 0;
         float left=(ix-(int)(width/2))*5.0f,bottom=(iy-(int)(height/2))*5.0f;
         float h[4];
-        if(copy_memory(base+20u*(ix+iy*width),h,16)){
+        if(terrain_height(base,width,ix,iy,h)){
             float quad[4][3]={{left,h[0],bottom},{left+5,h[1],bottom},{left,h[2],bottom+5},{left+5,h[3],bottom+5}};
             const int indices[2][3]={{0,1,2},{2,1,3}};
             for(int j=0;j<2;j++){float v[3][3],hit;for(int k=0;k<3;k++)memcpy(v[k],quad[indices[j][k]],12);
@@ -119,6 +131,11 @@ static int pick_cell(float *m,float *projection,DWORD *dims,DWORD width,DWORD he
         t=fminf(tx,ty)+.001f;
     }
     return 0;
+}
+static int pick_cell(float *m,float *projection,DWORD *dims,DWORD width,DWORD height,DWORD base,int *cx,int *cy){
+    HWND win=GetForegroundWindow();DWORD pid=0;GetWindowThreadProcessId(win,&pid);
+    if(pid!=GetCurrentProcessId())return 0;
+    return pick_at((int)word(0x717504),(int)word(0x717508),m,projection,dims,width,height,base,cx,cy);
 }
 static Vertex mix(Vertex a,Vertex b,float f,DWORD color){
     Vertex v={a.x+(b.x-a.x)*f,a.y+(b.y-a.y)*f,a.z+(b.z-a.z)*f,a.rhw+(b.rhw-a.rhw)*f,color};return v;
@@ -140,6 +157,7 @@ static void draw_cells(IDirect3DDevice7 *device) {
     if(!copy_memory(mgr+8,map,40)) return;
     map[39]=0; char *suffix=strrchr(map,'.'); if(suffix) *suffix=0;
     if(!expected[0] || _stricmp(expected,map)) return;
+    if(strcmp(height_map,map)){memcpy(height_map,map,40);height_base=0;}
     DWORD world=word(mode+0xb4),view=word(mode+0xb8),attr=word(world+0x40);
     if(!world || !view || !attr || word(ren+0x7c)!=(DWORD)(uintptr_t)device) return;
     DWORD width=word(attr+0x110),height=word(attr+0x114),zoom=word(attr+0x118),base=word(attr+0x120);
@@ -150,7 +168,7 @@ static void draw_cells(IDirect3DDevice7 *device) {
     if(!isfinite(projection[0]) || !isfinite(projection[1]) || projection[0]<10 || projection[0]>50000
        || projection[1]<10 || projection[1]>50000 || dims[0]<100 || dims[0]>16000 || dims[1]<100 || dims[1]>16000) return;
     s->selected_id=0;
-    if(s->selection_preview && word(mode+0x3b4)==1){
+    if(s->selection_preview && (word(mode+0x3b4)==1||word(mode+0x3b4)==6)){
         DWORD identity=word(mode+0x3b8);int px,py;
         for(DWORD i=0;i<preview_count;i++)if(previews[i].skill_id==identity&&previews[i].radius<=15){
             Preview p=previews[i];
@@ -160,7 +178,7 @@ static void draw_cells(IDirect3DDevice7 *device) {
                     if(p.shape==0&&(dx||dy))continue;
                     if(p.shape==2&&abs(dx)+abs(dy)>(int)p.radius)continue;
                     if(p.shape==3&&dx&&dy)continue;
-                    if(p.shape==4&&abs(dx)==(int)p.radius&&abs(dy)==(int)p.radius)continue;
+                    if(p.shape==4&&p.radius>0&&abs(dx)==(int)p.radius&&abs(dy)==(int)p.radius)continue;
                     if(count<DRAW_CAP)cells[count++]=(Cell){px+dx,py+dy,p.fill,p.outline,p.symbol};
                 }
             }
@@ -173,7 +191,7 @@ static void draw_cells(IDirect3DDevice7 *device) {
         int cx=cells[i].x,cy=cells[i].y;
         if(cx<0 || cy<0 || cx>=(int)width || cy>=(int)height) continue;
         float heights[4];
-        if(!copy_memory(base+20u*(cx+cy*width),heights,16)) continue;
+        if(!terrain_height(base,width,cx,cy,heights)) continue;
         float x=((float)cx-(float)(width/2))*5.0f+2.5f;
         float z=((float)cy-(float)(height/2))*5.0f+2.5f;
         Vertex quad[4]; int good=1;
@@ -191,7 +209,7 @@ static void draw_cells(IDirect3DDevice7 *device) {
             if(symbol==2){lines[line_vertices++]=mid[0];lines[line_vertices++]=mid[2];lines[line_vertices++]=mid[1];lines[line_vertices++]=mid[3];}
             if(symbol==3){for(int j=0;j<4;j++){const int k[4]={0,3,1,2};lines[line_vertices]=quad[k[j]];lines[line_vertices++].color=outline;}}
             if(symbol==4)for(int j=0;j<4;j++){lines[line_vertices++]=mid[j];lines[line_vertices++]=mid[(j+1)%4];}
-            if(symbol==5){Vertex a=mix(mid[3],mid[1],.4f,fill),b=mix(mid[3],mid[1],.6f,fill);lines[line_vertices++]=a;lines[line_vertices++]=b;}
+            if(symbol==5){Vertex centre=mix(quad[0],quad[3],.5f,fill),dot[4];for(int j=0;j<4;j++)dot[j]=mix(centre,quad[j],.18f,fill);for(int j=0;j<6;j++)fills[fill_vertices++]=dot[tri[j]];}
         }
         accepted++;
     }

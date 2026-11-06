@@ -8,6 +8,7 @@ Timing: right on arrival on the hunting map, then every 60 s, fighting or not; t
 walked to when the patrol has no target. Monsters respawn and wander: a snapshot older than a
 minute no longer says where they are, and one query per monster kind every 4 s keeps the chat calm."""
 import math
+from collections import Counter, defaultdict
 
 from .portals import chebyshev
 
@@ -31,6 +32,9 @@ class MobScan:
         self.map = None
         self.queue = []
         self.marks = []
+        self.mark_records = {}
+        self.current_species = None
+        self.queried_species = []
         self.sent_at = -1e9
         self.round_at = -1e9
         self.goal = None
@@ -56,7 +60,8 @@ class MobScan:
         due = idle and now-self.round_at >= self.INTERVAL
         if not due and not (early and self.seconds_to_next(now) > self.EARLY_GUARD):
             return False
-        self.queue, self.marks, self.round_at, self.round_open = list(species), [], now, True
+        self.queue, self.marks, self.round_at, self.round_open = list(dict.fromkeys(species)), [], now, True
+        self.mark_records={};self.queried_species=[]
         return True
 
     def next_command(self, now):
@@ -68,27 +73,38 @@ class MobScan:
         if self.queue and self.queue[0] == species:
             self.queue.pop(0)
         self.sent_at = now
+        self.current_species=species;self.queried_species.append(species)
 
     def observe(self, events, now):
-        if now-self.sent_at > self.LISTEN:
+        if not self.round_open or now-self.sent_at > self.LISTEN:
             return
         for event in events:
             if event['kind'] == 'viewpoint' and event.get('mark_type') == 1 and event.get('position'):
-                self.marks.append(tuple(event['position']))
+                position=tuple(event['position'])
+                if len(position)!=2 or any(type(v) is not int or not 0<=v<1024 for v in position):continue
+                identity=event.get('npc_id')
+                key=('actor',identity) if identity else ('anonymous',len(self.mark_records))
+                self.mark_records[key]=(position,self.current_species)
+        self.marks=[record[0] for record in self.mark_records.values()]
 
-    def finish(self, own, now, walkable=None):
+    def finish(self, own, now, walkable=None, collision=None):
         """After the last answer: the densest group becomes the goal. Returns it (or None)."""
         if not self.round_open or self.queue or now-self.sent_at <= self.LISTEN:
             return None
         self.round_open = False
-        marks = [m for m in self.marks if walkable is None or walkable(m)]
+        reachable=collision.reachable(own) if collision is not None and own is not None else None
+        records=[r for r in self.mark_records.values() if (walkable is None or walkable(r[0])) and (reachable is None or r[0] in reachable)]
+        marks=[r[0] for r in records]
         self.silent = 0 if self.marks else self.silent+1
         if self.silent >= self.SILENT_ROUNDS:
             self.suspended = True
         if not marks or own is None:
             return None
+        bins=defaultdict(list)
+        for mark in marks:bins[(mark[0]//self.RADIUS,mark[1]//self.RADIUS)].append(mark)
         def group(mark):
-            return [m for m in marks if math.dist(m, mark) <= self.RADIUS]
+            x,y=mark[0]//self.RADIUS,mark[1]//self.RADIUS
+            return [m for dx in (-1,0,1) for dy in (-1,0,1) for m in bins.get((x+dx,y+dy),()) if math.dist(m,mark)<=self.RADIUS]
         best = max(marks, key=lambda m: (len(group(m)), -math.dist(m, own)))
         members = group(best)
         if len(members) < self.MIN_GROUP:
@@ -96,7 +112,11 @@ class MobScan:
         centre = (sum(m[0] for m in members)/len(members), sum(m[1] for m in members)/len(members))
         self.goal = list(min(members, key=lambda m: math.dist(m, centre)))  # a real monster cell: walkable
         self.goal_until = now+self.GOAL_TIME
-        return {'position': self.goal, 'monsters': len(members), 'total': len(marks)}
+        member_set=set(members)
+        counts=Counter(species for position,species in records if position in member_set)
+        path=collision.route(own,self.goal,exact=True,max_nodes=12000) if collision is not None else None
+        return {'position': self.goal, 'monsters': len(members), 'total': len(marks),
+                'species_counts':dict(counts),'queried_species':list(self.queried_species),'route_cells':len(path)-1 if path else None}
 
     def current_goal(self, own, now):
         if self.goal is None:
