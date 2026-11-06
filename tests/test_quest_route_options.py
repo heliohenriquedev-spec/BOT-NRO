@@ -196,7 +196,7 @@ def test_quest_hunt_enables_exploration_even_if_normal_patrol_is_off(tmp_path):
     assert set(r.tracker.observer.species) == {1037}
 
 
-def test_route_suspends_observation_without_changing_saved_preference(tmp_path):
+def test_watched_player_stops_the_route_too_without_changing_saved_preference(tmp_path):
     from nrobot import watchlist
     watchlist.save(['Observado'])
     watchlist.set_enabled(True)
@@ -207,8 +207,6 @@ def test_route_suspends_observation_without_changing_saved_preference(tmp_path):
                            position=[6, 5], option=0)], OWN, time.monotonic(), own_position=[5, 5])
     r.check_emergency()
     r.observe_chat_alerts([dict(kind='chat_received', channel='private', name='Observado')])
-    assert not r.commands_blocked and r.chat_alert is None
+    # On the observation list with the box ticked: the trip stops too (chat alerts stay quiet on trips).
+    assert r.commands_blocked and r.chat_alert is None
     assert watchlist.enabled() and watchlist.load() == ['Observado']
-    q.phase = 'hunt'
-    r.check_emergency()
-    assert r.commands_blocked

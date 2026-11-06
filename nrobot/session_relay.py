@@ -2834,9 +2834,16 @@ class SessionRelay(QuestRelay):
         from . import watchlist
         from .presence_guard import OPTION_INVISIBLE
         now = time.monotonic()
-        if self.observation_suspended_for_route():
-            return []
         entries = self.load_watchlist()
+        if self.observation_suspended_for_route():
+            # Quest trips and errands: players around do not stop it, but a character on the
+            # observation list always does while "Ativar observacao" is ticked.
+            if not entries:
+                return []
+            self.sync_presence_names()
+            state = {'presence': self.presence.snapshot(self.tracker.observer.player, now),
+                     'players_nearby': self.players_nearby()}
+            return [{**d, 'watched': True} for d in watchlist.detections(entries, state, self.registry.players)]
         hidden_gm = self.gm_detection_on() and any(h['option'] & OPTION_INVISIBLE for h in self.presence.hidden.values())
         self.sync_presence_names()
         signs = self.gm_signs_found(now)

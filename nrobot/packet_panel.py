@@ -714,9 +714,7 @@ class PacketPanel(QMainWindow):
             name = (state.get('own_look') or {}).get('name')
             if name and name != self.character:
                 self.switch_character(name)
-            transit = state.get('observation_suspended_for_route', False)
-            if transit:
-                self.watch_alert.hide()
+            transit = state.get('observation_suspended_for_route', False)  # chat alerts only
             chat_alert = state.get('chat_alert')
             if chat_alert and chat_alert['id'] != getattr(self, 'chat_alert_seen', None):
                 self.chat_alert_seen = chat_alert['id']
@@ -733,7 +731,7 @@ class PacketPanel(QMainWindow):
                 self.emergency_seen = emergency['id']
                 detections = [d for d in emergency['detections']
                               if self.player_panel.observe_enabled.isChecked() or not d.get('watched')]
-                if not transit and not emergency.get('released') and detections:
+                if not emergency.get('released') and detections:  # watched players stop quest trips too
                     self.watch_alert.show_alert(detections, stopped=emergency['reason'])
                     self.log.appendPlainText(f"[PARADA] {emergency['at']}: {emergency['reason']}")
             if self.monster_panel.isVisible():

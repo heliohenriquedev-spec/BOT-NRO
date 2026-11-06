@@ -118,6 +118,22 @@ class CollisionMap:
         there); only stepping onto one of its cells warps, so leaving it is allowed."""
         return self.walkable(point) or self.ground(point)
 
+    def plain(self):
+        """The same ground without the forbidden cells (portal areas, enemy skill areas): for
+        "is there a wall in between?" questions. An area skill on the floor is not a wall: with
+        the character standing in one, every monster around was taken as behind a wall and none
+        was attacked (ra_fild03 2026-11-06, died standing still)."""
+        if not self.forbidden:
+            return self
+        view = getattr(self, '_plain_view', None)
+        if view is None or view.cells is not self.cells:
+            view = object.__new__(type(self))
+            view.__dict__.update({k: v for k, v in self.__dict__.items() if k != '_plain_view'})
+            view.forbidden = frozenset()
+            view.components, view.clearances = {}, {}
+            self._plain_view = view
+        return view
+
     def set_forbidden(self, cells):
         """Cells no route, step or patrol may use (portal areas); clears derived caches."""
         cells = frozenset(cells)

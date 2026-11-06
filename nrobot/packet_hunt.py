@@ -121,6 +121,7 @@ class PacketHunt:
         """Candidates in order of preference, leaving out the ones behind a wall."""
         if collision is None:
             return candidates
+        collision = collision.plain() if hasattr(collision, 'plain') else collision  # skill areas on the floor and portal cells are not walls
         result, checked = [], 0
         for e in candidates:
             point = tuple((e.get('attack_positions') or [e.get('destination') or e.get('effective_position', e['position'])])[0])

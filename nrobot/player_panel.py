@@ -194,10 +194,6 @@ class PlayerPanel(QWidget):
             self.alerted.clear()
             self.watch_status.setText('Observacao desligada: lista preservada; sem pausas ou alertas desses jogadores.')
             return []
-        if state.get("observation_suspended_for_route"):
-            self.alerted.clear()
-            self.watch_status.setText("Observacao suspensa durante percurso da quest; retorna na caca.")
-            return []
         found = watchlist.detections(self.watch, state, self.players)
         now = {d['entity_id']: d['kind'] for d in found}
         fresh = [d for d in found

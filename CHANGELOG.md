@@ -4,6 +4,11 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.06.7 (06/11/2026)
+
+- Caça: corrigido o personagem parado sem bater quando estava em cima de uma área de habilidade inimiga no chão. Os monstros ao redor eram tratados como se estivessem atrás de uma parede, e nenhum era atacado. Agora ele ataca normalmente, e as rotas continuam evitando a área.
+- Lista de observação: com "Ativar observação" marcado, o bot para ao identificar um jogador da lista também durante os percursos e tarefas da fila de quests, não só na caça. Os outros jogadores continuam sem atrapalhar o percurso.
+
 ## 2026.11.06.6 (06/11/2026)
 
 - Caça: corrigido o lag que atrasava as habilidades, fazia o personagem parar de bater e morrer mais. Nas caças da fila de quests e pela database, o bot reaplicava as configurações a cada meio segundo e reiniciava a caça; agora aplica uma vez só.
