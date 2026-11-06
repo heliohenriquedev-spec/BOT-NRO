@@ -54587,6 +54587,1545 @@
     "x": 86,
     "y": 103,
     "stamp": "2026-11-05T23:29:24.963+00:00"
+   },
+   {
+    "id": 6066,
+    "species": 1037,
+    "name": "Filhote de cobra",
+    "map": "kakashi",
+    "x": 105,
+    "y": 140,
+    "stamp": "2026-11-06T00:10:53.845+00:00"
+   },
+   {
+    "id": 6067,
+    "species": 1212,
+    "name": "Akino",
+    "map": "kakashi",
+    "x": 100,
+    "y": 126,
+    "stamp": "2026-11-06T00:21:35.498+00:00"
+   },
+   {
+    "id": 6068,
+    "species": 1212,
+    "name": "Akino",
+    "map": "kakashi",
+    "x": 94,
+    "y": 152,
+    "stamp": "2026-11-06T00:22:18.807+00:00"
+   },
+   {
+    "id": 6069,
+    "species": 1037,
+    "name": "Filhote de cobra",
+    "map": "kakashi",
+    "x": 99,
+    "y": 132,
+    "stamp": "2026-11-06T00:24:02.616+00:00"
+   },
+   {
+    "id": 6070,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 65,
+    "y": 66,
+    "stamp": "2026-11-06T00:36:13.304+00:00"
+   },
+   {
+    "id": 6071,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 85,
+    "y": 129,
+    "stamp": "2026-11-06T00:36:52.335+00:00"
+   },
+   {
+    "id": 6072,
+    "species": 1057,
+    "name": "Enma",
+    "map": "yuno_fild07",
+    "x": 224,
+    "y": 155,
+    "stamp": "2026-11-06T00:43:55.955+00:00"
+   },
+   {
+    "id": 6073,
+    "species": 1031,
+    "name": "Mula sem Cabesa",
+    "map": "yuno_fild07",
+    "x": 227,
+    "y": 158,
+    "stamp": "2026-11-06T00:44:01.845+00:00"
+   },
+   {
+    "id": 6074,
+    "species": 1916,
+    "name": "Mula sem Cabesa",
+    "map": "yuno_fild07",
+    "x": 229,
+    "y": 167,
+    "stamp": "2026-11-06T00:44:17.155+00:00"
+   },
+   {
+    "id": 6075,
+    "species": 1031,
+    "name": "Mula sem Cabesa",
+    "map": "yuno_fild07",
+    "x": 231,
+    "y": 176,
+    "stamp": "2026-11-06T00:46:29.828+00:00"
+   },
+   {
+    "id": 6076,
+    "species": 1916,
+    "name": "Mula sem Cabesa",
+    "map": "yuno_fild07",
+    "x": 232,
+    "y": 176,
+    "stamp": "2026-11-06T00:46:30.108+00:00"
+   },
+   {
+    "id": 6077,
+    "species": 1031,
+    "name": "Mula sem Cabesa",
+    "map": "yuno_fild07",
+    "x": 226,
+    "y": 159,
+    "stamp": "2026-11-06T00:47:18.894+00:00"
+   },
+   {
+    "id": 6078,
+    "species": 1031,
+    "name": "Mula sem Cabesa",
+    "map": "yuno_fild07",
+    "x": 226,
+    "y": 159,
+    "stamp": "2026-11-06T00:47:18.982+00:00"
+   },
+   {
+    "id": 6079,
+    "species": 1916,
+    "name": "Mula sem Cabesa",
+    "map": "yuno_fild07",
+    "x": 223,
+    "y": 157,
+    "stamp": "2026-11-06T00:47:19.067+00:00"
+   },
+   {
+    "id": 6080,
+    "species": 1916,
+    "name": "Mula sem Cabesa",
+    "map": "yuno_fild07",
+    "x": 225,
+    "y": 154,
+    "stamp": "2026-11-06T00:47:19.276+00:00"
+   },
+   {
+    "id": 6081,
+    "species": 1916,
+    "name": "Mula sem Cabesa",
+    "map": "yuno_fild07",
+    "x": 226,
+    "y": 153,
+    "stamp": "2026-11-06T00:47:19.570+00:00"
+   },
+   {
+    "id": 6082,
+    "species": 1916,
+    "name": "Mula sem Cabesa",
+    "map": "yuno_fild07",
+    "x": 223,
+    "y": 156,
+    "stamp": "2026-11-06T00:47:20.264+00:00"
+   },
+   {
+    "id": 6083,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 40,
+    "y": 26,
+    "stamp": "2026-11-06T00:58:08.235+00:00"
+   },
+   {
+    "id": 6084,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 62,
+    "y": 54,
+    "stamp": "2026-11-06T00:58:15.329+00:00"
+   },
+   {
+    "id": 6085,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 60,
+    "y": 54,
+    "stamp": "2026-11-06T00:58:16.527+00:00"
+   },
+   {
+    "id": 6086,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 64,
+    "y": 87,
+    "stamp": "2026-11-06T00:58:26.040+00:00"
+   },
+   {
+    "id": 6087,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 87,
+    "y": 127,
+    "stamp": "2026-11-06T00:58:42.096+00:00"
+   },
+   {
+    "id": 6088,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 97,
+    "y": 108,
+    "stamp": "2026-11-06T00:58:46.479+00:00"
+   },
+   {
+    "id": 6089,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 124,
+    "y": 99,
+    "stamp": "2026-11-06T00:58:54.706+00:00"
+   },
+   {
+    "id": 6090,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 122,
+    "y": 88,
+    "stamp": "2026-11-06T00:58:57.401+00:00"
+   },
+   {
+    "id": 6091,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 120,
+    "y": 82,
+    "stamp": "2026-11-06T00:58:59.716+00:00"
+   },
+   {
+    "id": 6092,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 114,
+    "y": 63,
+    "stamp": "2026-11-06T00:59:03.528+00:00"
+   },
+   {
+    "id": 6093,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 179,
+    "y": 60,
+    "stamp": "2026-11-06T00:59:16.689+00:00"
+   },
+   {
+    "id": 6094,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 166,
+    "y": 94,
+    "stamp": "2026-11-06T00:59:22.605+00:00"
+   },
+   {
+    "id": 6095,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 177,
+    "y": 110,
+    "stamp": "2026-11-06T00:59:26.033+00:00"
+   },
+   {
+    "id": 6096,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 174,
+    "y": 114,
+    "stamp": "2026-11-06T00:59:27.501+00:00"
+   },
+   {
+    "id": 6097,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 175,
+    "y": 124,
+    "stamp": "2026-11-06T00:59:32.160+00:00"
+   },
+   {
+    "id": 6098,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 175,
+    "y": 121,
+    "stamp": "2026-11-06T00:59:33.077+00:00"
+   },
+   {
+    "id": 6099,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 191,
+    "y": 125,
+    "stamp": "2026-11-06T00:59:41.245+00:00"
+   },
+   {
+    "id": 6100,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 166,
+    "y": 176,
+    "stamp": "2026-11-06T00:59:59.342+00:00"
+   },
+   {
+    "id": 6101,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 163,
+    "y": 171,
+    "stamp": "2026-11-06T01:00:05.291+00:00"
+   },
+   {
+    "id": 6102,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 147,
+    "y": 178,
+    "stamp": "2026-11-06T01:00:14.583+00:00"
+   },
+   {
+    "id": 6103,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 142,
+    "y": 173,
+    "stamp": "2026-11-06T01:00:17.826+00:00"
+   },
+   {
+    "id": 6104,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 120,
+    "y": 175,
+    "stamp": "2026-11-06T01:00:23.366+00:00"
+   },
+   {
+    "id": 6105,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 123,
+    "y": 174,
+    "stamp": "2026-11-06T01:00:25.658+00:00"
+   },
+   {
+    "id": 6106,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 155,
+    "y": 179,
+    "stamp": "2026-11-06T01:00:34.210+00:00"
+   },
+   {
+    "id": 6107,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 174,
+    "y": 192,
+    "stamp": "2026-11-06T01:00:39.755+00:00"
+   },
+   {
+    "id": 6108,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 147,
+    "y": 223,
+    "stamp": "2026-11-06T01:00:47.939+00:00"
+   },
+   {
+    "id": 6109,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 152,
+    "y": 221,
+    "stamp": "2026-11-06T01:00:49.978+00:00"
+   },
+   {
+    "id": 6110,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 100,
+    "y": 229,
+    "stamp": "2026-11-06T01:01:00.380+00:00"
+   },
+   {
+    "id": 6111,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 99,
+    "y": 230,
+    "stamp": "2026-11-06T01:01:05.610+00:00"
+   },
+   {
+    "id": 6112,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 101,
+    "y": 228,
+    "stamp": "2026-11-06T01:01:06.491+00:00"
+   },
+   {
+    "id": 6113,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 101,
+    "y": 228,
+    "stamp": "2026-11-06T01:01:07.477+00:00"
+   },
+   {
+    "id": 6114,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 76,
+    "y": 242,
+    "stamp": "2026-11-06T01:01:13.680+00:00"
+   },
+   {
+    "id": 6115,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 66,
+    "y": 237,
+    "stamp": "2026-11-06T01:01:16.304+00:00"
+   },
+   {
+    "id": 6116,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 62,
+    "y": 236,
+    "stamp": "2026-11-06T01:01:17.941+00:00"
+   },
+   {
+    "id": 6117,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 64,
+    "y": 223,
+    "stamp": "2026-11-06T01:01:22.841+00:00"
+   },
+   {
+    "id": 6118,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 61,
+    "y": 194,
+    "stamp": "2026-11-06T01:01:39.604+00:00"
+   },
+   {
+    "id": 6119,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 59,
+    "y": 192,
+    "stamp": "2026-11-06T01:01:44.779+00:00"
+   },
+   {
+    "id": 6120,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 58,
+    "y": 192,
+    "stamp": "2026-11-06T01:01:46.885+00:00"
+   },
+   {
+    "id": 6121,
+    "species": 1769,
+    "name": "Shinobi Sanguinário",
+    "map": "alde_dun02",
+    "x": 59,
+    "y": 193,
+    "stamp": "2026-11-06T01:01:47.049+00:00"
+   },
+   {
+    "id": 6122,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 36,
+    "y": 176,
+    "stamp": "2026-11-06T01:01:51.554+00:00"
+   },
+   {
+    "id": 6123,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 72,
+    "y": 153,
+    "stamp": "2026-11-06T01:02:02.022+00:00"
+   },
+   {
+    "id": 6124,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 113,
+    "y": 73,
+    "stamp": "2026-11-06T01:02:15.615+00:00"
+   },
+   {
+    "id": 6125,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 123,
+    "y": 56,
+    "stamp": "2026-11-06T01:02:21.931+00:00"
+   },
+   {
+    "id": 6126,
+    "species": 1401,
+    "name": "Nukenin Assassino ",
+    "map": "alde_dun02",
+    "x": 168,
+    "y": 57,
+    "stamp": "2026-11-06T01:02:38.783+00:00"
+   },
+   {
+    "id": 6127,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 205,
+    "y": 42,
+    "stamp": "2026-11-06T01:02:45.370+00:00"
+   },
+   {
+    "id": 6128,
+    "species": 1196,
+    "name": "Shinobi Prisioneiro",
+    "map": "alde_dun02",
+    "x": 216,
+    "y": 46,
+    "stamp": "2026-11-06T01:02:48.484+00:00"
+   },
+   {
+    "id": 6129,
+    "species": 1214,
+    "name": "Onbba",
+    "map": "kakashi",
+    "x": 84,
+    "y": 135,
+    "stamp": "2026-11-06T01:14:22.548+00:00"
+   },
+   {
+    "id": 6130,
+    "species": 1031,
+    "name": "Mula sem Cabesa",
+    "map": "bat_c02",
+    "x": 90,
+    "y": 65,
+    "stamp": "2026-11-06T01:22:00.690+00:00"
+   },
+   {
+    "id": 6131,
+    "species": 1031,
+    "name": "Yoriichi",
+    "map": "bat_c02",
+    "x": 85,
+    "y": 54,
+    "stamp": "2026-11-06T01:22:17.289+00:00"
+   },
+   {
+    "id": 6132,
+    "species": 1781,
+    "name": "Gangetsu Hozuki",
+    "map": "bat_c02",
+    "x": 102,
+    "y": 76,
+    "stamp": "2026-11-06T01:23:52.090+00:00"
+   },
+   {
+    "id": 6133,
+    "species": 1994,
+    "name": "Massacrento",
+    "map": "bat_c02",
+    "x": 137,
+    "y": 69,
+    "stamp": "2026-11-06T01:24:19.299+00:00"
+   },
+   {
+    "id": 6134,
+    "species": 1916,
+    "name": "Mula sem Cabesa",
+    "map": "bat_c02",
+    "x": 130,
+    "y": 66,
+    "stamp": "2026-11-06T01:24:19.693+00:00"
+   },
+   {
+    "id": 6135,
+    "species": 1772,
+    "name": "Gangetsu Hozuki",
+    "map": "bat_c02",
+    "x": 138,
+    "y": 71,
+    "stamp": "2026-11-06T01:24:43.092+00:00"
+   },
+   {
+    "id": 6136,
+    "species": 1789,
+    "name": "O Pimposo",
+    "map": "bat_c02",
+    "x": 84,
+    "y": 83,
+    "stamp": "2026-11-06T01:35:27.398+00:00"
+   },
+   {
+    "id": 6137,
+    "species": 1031,
+    "name": "Mula sem Cabesa",
+    "map": "bat_c02",
+    "x": 83,
+    "y": 81,
+    "stamp": "2026-11-06T01:35:43.899+00:00"
+   },
+   {
+    "id": 6138,
+    "species": 1031,
+    "name": "Kakashi",
+    "map": "bat_c02",
+    "x": 70,
+    "y": 110,
+    "stamp": "2026-11-06T01:36:18.103+00:00"
+   },
+   {
+    "id": 6139,
+    "species": 1993,
+    "name": "Massacrento",
+    "map": "bat_c02",
+    "x": 84,
+    "y": 84,
+    "stamp": "2026-11-06T01:38:36.496+00:00"
+   },
+   {
+    "id": 6140,
+    "species": 1031,
+    "name": "Mula sem Cabesa",
+    "map": "bat_c02",
+    "x": 71,
+    "y": 107,
+    "stamp": "2026-11-06T01:40:25.319+00:00"
+   },
+   {
+    "id": 6141,
+    "species": 1031,
+    "name": "Yoriichi",
+    "map": "bat_c02",
+    "x": 120,
+    "y": 109,
+    "stamp": "2026-11-06T01:40:52.297+00:00"
+   },
+   {
+    "id": 6142,
+    "species": 1031,
+    "name": "Yoriichi",
+    "map": "bat_c02",
+    "x": 97,
+    "y": 97,
+    "stamp": "2026-11-06T01:42:24.521+00:00"
+   },
+   {
+    "id": 6143,
+    "species": 1328,
+    "name": "Myka",
+    "map": "bat_c02",
+    "x": 106,
+    "y": 57,
+    "stamp": "2026-11-06T01:49:19.109+00:00"
+   },
+   {
+    "id": 6144,
+    "species": 1328,
+    "name": "Myka",
+    "map": "bat_c02",
+    "x": 108,
+    "y": 73,
+    "stamp": "2026-11-06T01:57:38.046+00:00"
+   },
+   {
+    "id": 6145,
+    "species": 1031,
+    "name": "Musashi",
+    "map": "bat_c02",
+    "x": 103,
+    "y": 70,
+    "stamp": "2026-11-06T01:59:41.925+00:00"
+   },
+   {
+    "id": 6146,
+    "species": 1051,
+    "name": "Bikouchuu",
+    "map": "kakashi",
+    "x": 97,
+    "y": 139,
+    "stamp": "2026-11-06T02:09:38.935+00:00"
+   },
+   {
+    "id": 6147,
+    "species": 1212,
+    "name": "Akino",
+    "map": "kakashi",
+    "x": 100,
+    "y": 145,
+    "stamp": "2026-11-06T02:09:44.642+00:00"
+   },
+   {
+    "id": 6148,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 80,
+    "y": 114,
+    "stamp": "2026-11-06T02:11:15.561+00:00"
+   },
+   {
+    "id": 6149,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 79,
+    "y": 116,
+    "stamp": "2026-11-06T02:11:20.577+00:00"
+   },
+   {
+    "id": 6150,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 80,
+    "y": 119,
+    "stamp": "2026-11-06T02:11:22.985+00:00"
+   },
+   {
+    "id": 6151,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 91,
+    "y": 97,
+    "stamp": "2026-11-06T02:11:31.378+00:00"
+   },
+   {
+    "id": 6152,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 103,
+    "y": 96,
+    "stamp": "2026-11-06T02:11:34.925+00:00"
+   },
+   {
+    "id": 6153,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 96,
+    "y": 95,
+    "stamp": "2026-11-06T02:11:38.214+00:00"
+   },
+   {
+    "id": 6154,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 111,
+    "y": 98,
+    "stamp": "2026-11-06T02:11:38.214+00:00"
+   },
+   {
+    "id": 6155,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 80,
+    "y": 110,
+    "stamp": "2026-11-06T02:22:21.259+00:00"
+   },
+   {
+    "id": 6156,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 80,
+    "y": 115,
+    "stamp": "2026-11-06T02:22:21.345+00:00"
+   },
+   {
+    "id": 6157,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 82,
+    "y": 115,
+    "stamp": "2026-11-06T02:22:21.838+00:00"
+   },
+   {
+    "id": 6158,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 80,
+    "y": 115,
+    "stamp": "2026-11-06T02:22:21.838+00:00"
+   },
+   {
+    "id": 6159,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 82,
+    "y": 108,
+    "stamp": "2026-11-06T02:22:23.748+00:00"
+   },
+   {
+    "id": 6160,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 119,
+    "y": 111,
+    "stamp": "2026-11-06T02:22:47.420+00:00"
+   },
+   {
+    "id": 6161,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 120,
+    "y": 107,
+    "stamp": "2026-11-06T02:22:47.421+00:00"
+   },
+   {
+    "id": 6162,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 121,
+    "y": 107,
+    "stamp": "2026-11-06T02:22:47.421+00:00"
+   },
+   {
+    "id": 6163,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 120,
+    "y": 108,
+    "stamp": "2026-11-06T02:22:47.421+00:00"
+   },
+   {
+    "id": 6164,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 121,
+    "y": 109,
+    "stamp": "2026-11-06T02:22:47.421+00:00"
+   },
+   {
+    "id": 6165,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 129,
+    "y": 102,
+    "stamp": "2026-11-06T02:22:55.208+00:00"
+   },
+   {
+    "id": 6166,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 133,
+    "y": 107,
+    "stamp": "2026-11-06T02:22:59.045+00:00"
+   },
+   {
+    "id": 6167,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 127,
+    "y": 107,
+    "stamp": "2026-11-06T02:23:01.851+00:00"
+   },
+   {
+    "id": 6168,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 122,
+    "y": 111,
+    "stamp": "2026-11-06T02:23:04.998+00:00"
+   },
+   {
+    "id": 6169,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 118,
+    "y": 112,
+    "stamp": "2026-11-06T02:23:04.998+00:00"
+   },
+   {
+    "id": 6170,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 127,
+    "y": 110,
+    "stamp": "2026-11-06T02:23:08.078+00:00"
+   },
+   {
+    "id": 6171,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 118,
+    "y": 108,
+    "stamp": "2026-11-06T02:23:13.811+00:00"
+   },
+   {
+    "id": 6172,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 110,
+    "y": 78,
+    "stamp": "2026-11-06T02:23:26.035+00:00"
+   },
+   {
+    "id": 6173,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 109,
+    "y": 78,
+    "stamp": "2026-11-06T02:23:26.035+00:00"
+   },
+   {
+    "id": 6174,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 111,
+    "y": 89,
+    "stamp": "2026-11-06T02:23:29.457+00:00"
+   },
+   {
+    "id": 6175,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 109,
+    "y": 92,
+    "stamp": "2026-11-06T02:23:38.727+00:00"
+   },
+   {
+    "id": 6176,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 113,
+    "y": 71,
+    "stamp": "2026-11-06T02:23:42.385+00:00"
+   },
+   {
+    "id": 6177,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 108,
+    "y": 57,
+    "stamp": "2026-11-06T02:23:47.144+00:00"
+   },
+   {
+    "id": 6178,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 91,
+    "y": 51,
+    "stamp": "2026-11-06T02:24:11.095+00:00"
+   },
+   {
+    "id": 6179,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 91,
+    "y": 51,
+    "stamp": "2026-11-06T02:24:11.095+00:00"
+   },
+   {
+    "id": 6180,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 100,
+    "y": 60,
+    "stamp": "2026-11-06T02:24:11.095+00:00"
+   },
+   {
+    "id": 6181,
+    "species": 1276,
+    "name": "Shinobi Ladrão",
+    "map": "0022@cata",
+    "x": 94,
+    "y": 54,
+    "stamp": "2026-11-06T02:24:11.095+00:00"
+   },
+   {
+    "id": 6182,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 101,
+    "y": 61,
+    "stamp": "2026-11-06T02:24:11.095+00:00"
+   },
+   {
+    "id": 6183,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 111,
+    "y": 73,
+    "stamp": "2026-11-06T02:24:14.802+00:00"
+   },
+   {
+    "id": 6184,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 111,
+    "y": 69,
+    "stamp": "2026-11-06T02:24:18.312+00:00"
+   },
+   {
+    "id": 6185,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 111,
+    "y": 72,
+    "stamp": "2026-11-06T02:24:18.312+00:00"
+   },
+   {
+    "id": 6186,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 111,
+    "y": 71,
+    "stamp": "2026-11-06T02:24:18.312+00:00"
+   },
+   {
+    "id": 6187,
+    "species": 1297,
+    "name": "Nukenin Procurado",
+    "map": "0022@cata",
+    "x": 118,
+    "y": 28,
+    "stamp": "2026-11-06T02:24:41.935+00:00"
+   },
+   {
+    "id": 6188,
+    "species": 1276,
+    "name": "Shinobi Ladrão",
+    "map": "0022@cata",
+    "x": 112,
+    "y": 25,
+    "stamp": "2026-11-06T02:24:41.935+00:00"
+   },
+   {
+    "id": 6189,
+    "species": 1297,
+    "name": "Nukenin Procurado",
+    "map": "0022@cata",
+    "x": 117,
+    "y": 22,
+    "stamp": "2026-11-06T02:24:42.559+00:00"
+   },
+   {
+    "id": 6190,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 112,
+    "y": 34,
+    "stamp": "2026-11-06T02:24:43.964+00:00"
+   },
+   {
+    "id": 6191,
+    "species": 1276,
+    "name": "Shinobi Ladrão",
+    "map": "0022@cata",
+    "x": 120,
+    "y": 29,
+    "stamp": "2026-11-06T02:24:44.892+00:00"
+   },
+   {
+    "id": 6192,
+    "species": 1276,
+    "name": "Shinobi Ladrão",
+    "map": "0022@cata",
+    "x": 125,
+    "y": 30,
+    "stamp": "2026-11-06T02:24:47.358+00:00"
+   },
+   {
+    "id": 6193,
+    "species": 1297,
+    "name": "Nukenin Procurado",
+    "map": "0022@cata",
+    "x": 124,
+    "y": 26,
+    "stamp": "2026-11-06T02:24:50.059+00:00"
+   },
+   {
+    "id": 6194,
+    "species": 1297,
+    "name": "Nukenin Procurado",
+    "map": "0022@cata",
+    "x": 125,
+    "y": 22,
+    "stamp": "2026-11-06T02:24:51.862+00:00"
+   },
+   {
+    "id": 6195,
+    "species": 1297,
+    "name": "Nukenin Procurado",
+    "map": "0022@cata",
+    "x": 127,
+    "y": 22,
+    "stamp": "2026-11-06T02:24:56.246+00:00"
+   },
+   {
+    "id": 6196,
+    "species": 1297,
+    "name": "Nukenin Procurado",
+    "map": "0022@cata",
+    "x": 126,
+    "y": 21,
+    "stamp": "2026-11-06T02:24:56.246+00:00"
+   },
+   {
+    "id": 6197,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 83,
+    "y": 96,
+    "stamp": "2026-11-06T02:28:37.868+00:00"
+   },
+   {
+    "id": 6198,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 122,
+    "y": 113,
+    "stamp": "2026-11-06T02:28:58.800+00:00"
+   },
+   {
+    "id": 6199,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 121,
+    "y": 112,
+    "stamp": "2026-11-06T02:28:58.801+00:00"
+   },
+   {
+    "id": 6200,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 122,
+    "y": 115,
+    "stamp": "2026-11-06T02:28:58.801+00:00"
+   },
+   {
+    "id": 6201,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 122,
+    "y": 117,
+    "stamp": "2026-11-06T02:28:58.801+00:00"
+   },
+   {
+    "id": 6202,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 117,
+    "y": 118,
+    "stamp": "2026-11-06T02:29:02.363+00:00"
+   },
+   {
+    "id": 6203,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 117,
+    "y": 118,
+    "stamp": "2026-11-06T02:29:02.363+00:00"
+   },
+   {
+    "id": 6204,
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "map": "0022@cata",
+    "x": 117,
+    "y": 118,
+    "stamp": "2026-11-06T02:29:02.363+00:00"
+   },
+   {
+    "id": 6205,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 116,
+    "y": 119,
+    "stamp": "2026-11-06T02:29:05.422+00:00"
+   },
+   {
+    "id": 6206,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 116,
+    "y": 119,
+    "stamp": "2026-11-06T02:29:08.627+00:00"
+   },
+   {
+    "id": 6207,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 115,
+    "y": 110,
+    "stamp": "2026-11-06T02:29:11.496+00:00"
+   },
+   {
+    "id": 6208,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 110,
+    "y": 75,
+    "stamp": "2026-11-06T02:29:20.901+00:00"
+   },
+   {
+    "id": 6209,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 108,
+    "y": 68,
+    "stamp": "2026-11-06T02:29:20.901+00:00"
+   },
+   {
+    "id": 6210,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 111,
+    "y": 74,
+    "stamp": "2026-11-06T02:29:24.042+00:00"
+   },
+   {
+    "id": 6211,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 110,
+    "y": 77,
+    "stamp": "2026-11-06T02:29:24.042+00:00"
+   },
+   {
+    "id": 6212,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0022@cata",
+    "x": 111,
+    "y": 74,
+    "stamp": "2026-11-06T02:29:24.042+00:00"
+   },
+   {
+    "id": 6213,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 112,
+    "y": 75,
+    "stamp": "2026-11-06T02:29:24.042+00:00"
+   },
+   {
+    "id": 6214,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0022@cata",
+    "x": 111,
+    "y": 84,
+    "stamp": "2026-11-06T02:29:27.387+00:00"
+   },
+   {
+    "id": 6215,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 110,
+    "y": 74,
+    "stamp": "2026-11-06T02:29:35.129+00:00"
+   },
+   {
+    "id": 6216,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 104,
+    "y": 66,
+    "stamp": "2026-11-06T02:29:36.038+00:00"
+   },
+   {
+    "id": 6217,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 112,
+    "y": 62,
+    "stamp": "2026-11-06T02:29:58.565+00:00"
+   },
+   {
+    "id": 6218,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0022@cata",
+    "x": 105,
+    "y": 63,
+    "stamp": "2026-11-06T02:30:04.713+00:00"
+   },
+   {
+    "id": 6219,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0012@cata",
+    "x": 102,
+    "y": 95,
+    "stamp": "2026-11-06T02:48:55.565+00:00"
+   },
+   {
+    "id": 6220,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0012@cata",
+    "x": 101,
+    "y": 94,
+    "stamp": "2026-11-06T02:48:55.565+00:00"
+   },
+   {
+    "id": 6221,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0012@cata",
+    "x": 103,
+    "y": 96,
+    "stamp": "2026-11-06T02:48:55.566+00:00"
+   },
+   {
+    "id": 6222,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0012@cata",
+    "x": 133,
+    "y": 112,
+    "stamp": "2026-11-06T02:49:10.459+00:00"
+   },
+   {
+    "id": 6223,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0012@cata",
+    "x": 122,
+    "y": 108,
+    "stamp": "2026-11-06T02:49:13.197+00:00"
+   },
+   {
+    "id": 6224,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0012@cata",
+    "x": 119,
+    "y": 117,
+    "stamp": "2026-11-06T02:49:26.185+00:00"
+   },
+   {
+    "id": 6225,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0012@cata",
+    "x": 131,
+    "y": 112,
+    "stamp": "2026-11-06T02:49:29.868+00:00"
+   },
+   {
+    "id": 6226,
+    "species": 1153,
+    "name": "Nukenin",
+    "map": "0012@cata",
+    "x": 125,
+    "y": 106,
+    "stamp": "2026-11-06T02:49:35.583+00:00"
+   },
+   {
+    "id": 6227,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0012@cata",
+    "x": 116,
+    "y": 91,
+    "stamp": "2026-11-06T02:49:43.959+00:00"
+   },
+   {
+    "id": 6228,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0012@cata",
+    "x": 111,
+    "y": 74,
+    "stamp": "2026-11-06T02:49:55.622+00:00"
+   },
+   {
+    "id": 6229,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0012@cata",
+    "x": 111,
+    "y": 72,
+    "stamp": "2026-11-06T02:50:04.818+00:00"
+   },
+   {
+    "id": 6230,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0012@cata",
+    "x": 103,
+    "y": 66,
+    "stamp": "2026-11-06T02:50:06.379+00:00"
+   },
+   {
+    "id": 6231,
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "map": "0012@cata",
+    "x": 110,
+    "y": 73,
+    "stamp": "2026-11-06T02:50:08.487+00:00"
+   },
+   {
+    "id": 6232,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0012@cata",
+    "x": 87,
+    "y": 50,
+    "stamp": "2026-11-06T02:50:13.262+00:00"
+   },
+   {
+    "id": 6233,
+    "species": 1372,
+    "name": "Bandido Assassino",
+    "map": "0012@cata",
+    "x": 92,
+    "y": 72,
+    "stamp": "2026-11-06T02:50:16.208+00:00"
+   },
+   {
+    "id": 6234,
+    "species": 1058,
+    "name": "Gafanhoto",
+    "map": "gld_dun03",
+    "x": 248,
+    "y": 270,
+    "stamp": "2026-11-06T03:09:23.343+00:00"
+   },
+   {
+    "id": 6235,
+    "species": 1139,
+    "name": "Louva-a-Deus",
+    "map": "anthell02",
+    "x": 30,
+    "y": 260,
+    "stamp": "2026-11-06T03:09:38.889+00:00"
+   },
+   {
+    "id": 6236,
+    "species": 1294,
+    "name": "Inseto Assassino",
+    "map": "anthell02",
+    "x": 30,
+    "y": 260,
+    "stamp": "2026-11-06T03:09:38.889+00:00"
    }
   ],
   "floor": [
@@ -221734,6 +223273,2129 @@
     "fresh": 0,
     "stamp": "2026-11-06T00:01:41.632+00:00",
     "source": "floor"
+   },
+   {
+    "id": 15196,
+    "item": 985,
+    "amount": 90,
+    "map": "kakashi",
+    "x": 99,
+    "y": 145,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:08:26.316+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15197,
+    "item": 985,
+    "amount": 30,
+    "map": "kakashi",
+    "x": 97,
+    "y": 146,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:08:50.502+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15198,
+    "item": 514,
+    "amount": 80,
+    "map": "kakashi",
+    "x": 97,
+    "y": 145,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:08:51.191+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15199,
+    "item": 1057,
+    "amount": 60,
+    "map": "kakashi",
+    "x": 99,
+    "y": 146,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:10:25.840+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15200,
+    "item": 1001,
+    "amount": 40,
+    "map": "kakashi",
+    "x": 99,
+    "y": 145,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:10:26.337+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15201,
+    "item": 934,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 106,
+    "y": 139,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:10:53.845+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15202,
+    "item": 926,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 104,
+    "y": 139,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:10:53.845+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15203,
+    "item": 1065,
+    "amount": 18,
+    "map": "kakashi",
+    "x": 87,
+    "y": 138,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:11:37.447+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15204,
+    "item": 1001,
+    "amount": 20,
+    "map": "kakashi",
+    "x": 98,
+    "y": 147,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:12:33.891+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15205,
+    "item": 934,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 111,
+    "y": 151,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:20:46.446+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15206,
+    "item": 926,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 109,
+    "y": 152,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:20:46.446+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15207,
+    "item": 909,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 99,
+    "y": 165,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:21:10.008+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15208,
+    "item": 926,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 109,
+    "y": 152,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:21:11.662+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15209,
+    "item": 934,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 111,
+    "y": 151,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:21:11.916+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15210,
+    "item": 934,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 111,
+    "y": 151,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:21:28.849+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15211,
+    "item": 926,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 109,
+    "y": 152,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:21:29.211+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15212,
+    "item": 909,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 99,
+    "y": 165,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:21:43.119+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15213,
+    "item": 909,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 99,
+    "y": 125,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:21:45.345+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15214,
+    "item": 909,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 94,
+    "y": 152,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:22:18.807+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15215,
+    "item": 928,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 96,
+    "y": 115,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:23:26.143+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15216,
+    "item": 1042,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 96,
+    "y": 114,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:23:26.330+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15217,
+    "item": 928,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 96,
+    "y": 115,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:23:38.663+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15218,
+    "item": 1042,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 96,
+    "y": 114,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:23:38.778+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15219,
+    "item": 928,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 96,
+    "y": 115,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:23:40.290+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15220,
+    "item": 934,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 99,
+    "y": 132,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:24:02.616+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15221,
+    "item": 926,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 100,
+    "y": 133,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:24:02.616+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15222,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 66,
+    "y": 65,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:36:13.327+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15223,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 85,
+    "y": 130,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:36:52.335+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15224,
+    "item": 578,
+    "amount": 1,
+    "map": "yuno_fild07",
+    "x": 224,
+    "y": 155,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:43:55.955+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15225,
+    "item": 556,
+    "amount": 1,
+    "map": "yuno_fild07",
+    "x": 224,
+    "y": 156,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:43:55.955+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15226,
+    "item": 702,
+    "amount": 1,
+    "map": "yuno_fild07",
+    "x": 225,
+    "y": 156,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:43:55.955+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15227,
+    "item": 7011,
+    "amount": 1,
+    "map": "yuno_fild07",
+    "x": 225,
+    "y": 154,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:43:55.955+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15228,
+    "item": 1079,
+    "amount": 2,
+    "map": "hospital2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:49:04.249+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15229,
+    "item": 7315,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:58:08.230+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15230,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 61,
+    "y": 55,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:58:15.330+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15231,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 60,
+    "y": 53,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:58:16.527+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15232,
+    "item": 7315,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:58:26.040+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15233,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 88,
+    "y": 126,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:58:42.096+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15234,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 97,
+    "y": 109,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:58:46.479+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15235,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 122,
+    "y": 100,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:58:54.706+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15236,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 122,
+    "y": 88,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:58:57.429+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15237,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 120,
+    "y": 82,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:58:59.716+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15238,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 113,
+    "y": 62,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:59:03.528+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15239,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 178,
+    "y": 59,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:59:16.689+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15240,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 167,
+    "y": 95,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:59:22.606+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15241,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 176,
+    "y": 110,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:59:26.034+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15242,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 173,
+    "y": 113,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:59:27.501+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15243,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 175,
+    "y": 120,
+    "fresh": 1,
+    "stamp": "2026-11-06T00:59:33.077+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15244,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 175,
+    "y": 120,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:59:41.446+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15245,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 173,
+    "y": 113,
+    "fresh": 0,
+    "stamp": "2026-11-06T00:59:42.282+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15246,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 164,
+    "y": 169,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:00:05.291+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15247,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 142,
+    "y": 172,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:00:14.583+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15248,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 143,
+    "y": 172,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:00:17.827+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15249,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 120,
+    "y": 174,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:00:23.366+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15250,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 122,
+    "y": 173,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:00:25.658+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15251,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 142,
+    "y": 172,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:00:30.083+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15252,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 143,
+    "y": 172,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:00:30.282+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15253,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 164,
+    "y": 169,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:00:33.302+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15254,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 156,
+    "y": 180,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:00:34.210+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15255,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 175,
+    "y": 192,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:00:39.755+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15256,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 156,
+    "y": 180,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:00:40.929+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15257,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 146,
+    "y": 223,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:00:47.939+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15258,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 153,
+    "y": 220,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:00:49.978+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15259,
+    "item": 7315,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:01:00.380+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15260,
+    "item": 7315,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:01:05.610+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15261,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 101,
+    "y": 227,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:01:06.491+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15262,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 101,
+    "y": 228,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:01:07.478+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15263,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 75,
+    "y": 243,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:01:13.680+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15264,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 65,
+    "y": 236,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:01:16.304+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15265,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 62,
+    "y": 235,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:01:17.942+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15266,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 65,
+    "y": 222,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:01:22.842+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15267,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 75,
+    "y": 243,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:01:23.827+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15268,
+    "item": 7563,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 58,
+    "y": 194,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:01:47.050+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15269,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 36,
+    "y": 175,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:01:51.554+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15270,
+    "item": 7563,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 58,
+    "y": 194,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:01:52.872+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15271,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 73,
+    "y": 153,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:02:02.022+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15272,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 113,
+    "y": 73,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:02:15.615+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15273,
+    "item": 7315,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:02:21.931+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15274,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 204,
+    "y": 41,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:02:45.370+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15275,
+    "item": 1098,
+    "amount": 1,
+    "map": "alde_dun02",
+    "x": 216,
+    "y": 45,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:02:48.485+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15276,
+    "item": 594,
+    "amount": 60,
+    "map": "hospital2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:05:43.173+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15277,
+    "item": 594,
+    "amount": 64,
+    "map": "hospital2",
+    "x": 103,
+    "y": 26,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:05:51.717+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15278,
+    "item": 1065,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 106,
+    "y": 14,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:12:15.551+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15279,
+    "item": 1065,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 106,
+    "y": 14,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:12:34.415+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15280,
+    "item": 1065,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 102,
+    "y": 7,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:12:47.386+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15281,
+    "item": 1065,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 106,
+    "y": 14,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:12:50.516+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15282,
+    "item": 942,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 83,
+    "y": 135,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:14:22.549+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15283,
+    "item": 942,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 83,
+    "y": 135,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:14:23.733+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15284,
+    "item": 942,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 83,
+    "y": 135,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:14:25.016+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15285,
+    "item": 942,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 83,
+    "y": 135,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:14:44.249+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15286,
+    "item": 942,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 83,
+    "y": 135,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:14:45.028+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15287,
+    "item": 664,
+    "amount": 5,
+    "map": "bat_c02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:22:46.366+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15288,
+    "item": 909,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 100,
+    "y": 146,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:22:48.804+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15289,
+    "item": 664,
+    "amount": 10,
+    "map": "bat_c02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:25:35.700+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15290,
+    "item": 664,
+    "amount": 5,
+    "map": "bat_c02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:27:32.065+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15291,
+    "item": 664,
+    "amount": 5,
+    "map": "bat_c02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:36:29.358+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15292,
+    "item": 664,
+    "amount": 5,
+    "map": "bat_c02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:39:01.007+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15293,
+    "item": 664,
+    "amount": 10,
+    "map": "bat_c02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:41:04.405+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15294,
+    "item": 664,
+    "amount": 5,
+    "map": "bat_c02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:43:44.216+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15295,
+    "item": 519,
+    "amount": 1000,
+    "map": "new_4-2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:45:10.561+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15296,
+    "item": 519,
+    "amount": 1000,
+    "map": "new_4-2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:45:10.925+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15297,
+    "item": 519,
+    "amount": 1000,
+    "map": "new_4-2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:45:11.220+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15298,
+    "item": 519,
+    "amount": 1000,
+    "map": "new_4-2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:45:11.501+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15299,
+    "item": 519,
+    "amount": 1000,
+    "map": "new_4-2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:45:11.816+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15300,
+    "item": 519,
+    "amount": 1000,
+    "map": "new_4-2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:45:12.067+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15301,
+    "item": 519,
+    "amount": 1000,
+    "map": "new_4-2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:45:12.289+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15302,
+    "item": 519,
+    "amount": 2000,
+    "map": "new_4-2",
+    "x": 100,
+    "y": 103,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:47:18.131+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15303,
+    "item": 513,
+    "amount": 1,
+    "map": "new_4-2",
+    "x": 97,
+    "y": 101,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:47:36.937+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15304,
+    "item": 519,
+    "amount": 7000,
+    "map": "bat_c02",
+    "x": 146,
+    "y": 54,
+    "fresh": 1,
+    "stamp": "2026-11-06T01:48:34.641+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15305,
+    "item": 664,
+    "amount": 5,
+    "map": "bat_c02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:50:08.212+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15306,
+    "item": 664,
+    "amount": 10,
+    "map": "bat_c02",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T01:59:41.834+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15307,
+    "item": 928,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 97,
+    "y": 139,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:09:38.940+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15308,
+    "item": 1042,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 98,
+    "y": 138,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:09:38.940+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15309,
+    "item": 1042,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 98,
+    "y": 138,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:09:42.450+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15310,
+    "item": 909,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 98,
+    "y": 145,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:09:44.642+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15311,
+    "item": 1042,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 98,
+    "y": 138,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:09:57.783+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15312,
+    "item": 928,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 97,
+    "y": 139,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:09:57.896+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15313,
+    "item": 909,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 98,
+    "y": 145,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:10:01.137+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15314,
+    "item": 928,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 97,
+    "y": 139,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:10:13.110+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15315,
+    "item": 1042,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 98,
+    "y": 138,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:10:13.214+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15316,
+    "item": 928,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 97,
+    "y": 139,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:10:27.758+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15317,
+    "item": 909,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 98,
+    "y": 145,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:10:28.651+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15318,
+    "item": 928,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 97,
+    "y": 139,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:10:37.337+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15319,
+    "item": 610,
+    "amount": 1,
+    "map": "treasure01",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:16:46.546+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15320,
+    "item": 7246,
+    "amount": 3,
+    "map": "0022@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:20:30.236+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15321,
+    "item": 11356,
+    "amount": 1,
+    "map": "hospital2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:20:34.866+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15322,
+    "item": 14714,
+    "amount": 1,
+    "map": "hospital2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:20:35.745+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15323,
+    "item": 14474,
+    "amount": 1,
+    "map": "hospital2",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:20:36.241+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15324,
+    "item": 11356,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 34,
+    "y": 66,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:21:11.845+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15325,
+    "item": 14714,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 34,
+    "y": 66,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:21:12.578+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15326,
+    "item": 14474,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 34,
+    "y": 68,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:21:13.059+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15327,
+    "item": 14474,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 34,
+    "y": 68,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:21:19.312+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15328,
+    "item": 14714,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 34,
+    "y": 66,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:21:19.312+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15329,
+    "item": 11356,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 34,
+    "y": 66,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:21:19.312+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15330,
+    "item": 1065,
+    "amount": 1,
+    "map": "0022@cata",
+    "x": 82,
+    "y": 52,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:26:13.961+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15331,
+    "item": 581,
+    "amount": 6,
+    "map": "0022@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:27:10.635+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15332,
+    "item": 581,
+    "amount": 6,
+    "map": "0022@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:27:11.657+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15333,
+    "item": 581,
+    "amount": 6,
+    "map": "0022@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:27:13.709+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15334,
+    "item": 7246,
+    "amount": 3,
+    "map": "0022@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:27:14.717+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15335,
+    "item": 594,
+    "amount": 6,
+    "map": "0022@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:33:16.595+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15336,
+    "item": 581,
+    "amount": 6,
+    "map": "0022@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:33:17.645+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15337,
+    "item": 581,
+    "amount": 6,
+    "map": "0022@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:33:18.681+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15338,
+    "item": 7246,
+    "amount": 3,
+    "map": "0022@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:33:19.685+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15339,
+    "item": 519,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 24,
+    "y": 75,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:33:22.785+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15340,
+    "item": 27886,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:36:18.611+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15341,
+    "item": 11499,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:36:20.332+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15342,
+    "item": 20245,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:36:21.053+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15343,
+    "item": 14532,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:36:21.614+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15344,
+    "item": 14598,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:36:22.333+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15345,
+    "item": 17616,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:36:22.895+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15346,
+    "item": 17616,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": 76,
+    "y": 142,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:36:31.961+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15347,
+    "item": 14598,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": 69,
+    "y": 140,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:37:21.753+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15348,
+    "item": 14598,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": 69,
+    "y": 140,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:37:31.944+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15349,
+    "item": 14598,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": 69,
+    "y": 140,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:38:06.099+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15350,
+    "item": 20245,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": 78,
+    "y": 147,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:38:41.549+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15351,
+    "item": 11499,
+    "amount": 1,
+    "map": "0012@cata",
+    "x": 71,
+    "y": 140,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:39:31.690+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15352,
+    "item": 594,
+    "amount": 6,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:39:32.177+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15353,
+    "item": 7246,
+    "amount": 3,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:39:37.259+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15354,
+    "item": 11462,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 25,
+    "y": 87,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:39:38.700+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15355,
+    "item": 14679,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 23,
+    "y": 88,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:39:38.700+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15356,
+    "item": 16005,
+    "amount": 1,
+    "map": "hospital2",
+    "x": 25,
+    "y": 89,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:39:38.700+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15357,
+    "item": 594,
+    "amount": 6,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:46:51.126+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15358,
+    "item": 7246,
+    "amount": 3,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:46:51.126+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15359,
+    "item": 594,
+    "amount": 6,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:52:52.279+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15360,
+    "item": 554,
+    "amount": 6,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:52:53.290+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15361,
+    "item": 7246,
+    "amount": 3,
+    "map": "0012@cata",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:52:54.331+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15362,
+    "item": 15700,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 98,
+    "y": 137,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:54:12.248+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15363,
+    "item": 27354,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 97,
+    "y": 137,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:54:12.260+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15364,
+    "item": 14766,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 97,
+    "y": 136,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:54:12.260+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15365,
+    "item": 20226,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 98,
+    "y": 137,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:54:12.260+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15366,
+    "item": 17484,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 97,
+    "y": 136,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:54:12.260+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15367,
+    "item": 1065,
+    "amount": 118,
+    "map": "kakashi",
+    "x": 99,
+    "y": 140,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:54:12.260+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15368,
+    "item": 20260,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 97,
+    "y": 137,
+    "fresh": 1,
+    "stamp": "2026-11-06T02:54:14.628+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15369,
+    "item": 639,
+    "amount": 1,
+    "map": "kakashi",
+    "x": null,
+    "y": null,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:54:20.695+00:00",
+    "source": "inventory"
+   },
+   {
+    "id": 15370,
+    "item": 27138,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 103,
+    "y": 131,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15371,
+    "item": 27355,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 101,
+    "y": 132,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15372,
+    "item": 20220,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 102,
+    "y": 131,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15373,
+    "item": 20254,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 103,
+    "y": 133,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15374,
+    "item": 28007,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 102,
+    "y": 132,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15375,
+    "item": 14411,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 103,
+    "y": 133,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15376,
+    "item": 20260,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 101,
+    "y": 133,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15377,
+    "item": 28043,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 101,
+    "y": 132,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15378,
+    "item": 11204,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 101,
+    "y": 131,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15379,
+    "item": 20243,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 102,
+    "y": 133,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15380,
+    "item": 17499,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 101,
+    "y": 133,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15381,
+    "item": 17530,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 102,
+    "y": 133,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15382,
+    "item": 27530,
+    "amount": 1,
+    "map": "kakashi",
+    "x": 101,
+    "y": 131,
+    "fresh": 0,
+    "stamp": "2026-11-06T02:58:19.338+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15383,
+    "item": 935,
+    "amount": 1,
+    "map": "gld_dun03",
+    "x": 245,
+    "y": 266,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:09:23.352+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15384,
+    "item": 757,
+    "amount": 1,
+    "map": "gld_dun03",
+    "x": 245,
+    "y": 265,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:09:23.352+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15385,
+    "item": 911,
+    "amount": 1,
+    "map": "gld_dun03",
+    "x": 245,
+    "y": 266,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:09:23.352+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15386,
+    "item": 940,
+    "amount": 1,
+    "map": "gld_dun03",
+    "x": 243,
+    "y": 266,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:09:23.352+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15387,
+    "item": 514,
+    "amount": 1,
+    "map": "anthell02",
+    "x": 28,
+    "y": 260,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:09:38.889+00:00",
+    "source": "floor"
+   },
+   {
+    "id": 15388,
+    "item": 509,
+    "amount": 1,
+    "map": "anthell02",
+    "x": 28,
+    "y": 259,
+    "fresh": 1,
+    "stamp": "2026-11-06T03:09:38.890+00:00",
+    "source": "floor"
    }
   ],
   "links": [
@@ -263431,6 +267093,291 @@
     "floor_id": 15125,
     "death_id": 6019,
     "status": "candidate"
+   },
+   {
+    "floor_id": 15201,
+    "death_id": 6066,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15202,
+    "death_id": 6066,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15214,
+    "death_id": 6068,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15220,
+    "death_id": 6069,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15221,
+    "death_id": 6069,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15222,
+    "death_id": 6070,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15223,
+    "death_id": 6071,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15224,
+    "death_id": 6072,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15225,
+    "death_id": 6072,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15226,
+    "death_id": 6072,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15227,
+    "death_id": 6072,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15230,
+    "death_id": 6084,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15230,
+    "death_id": 6085,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15231,
+    "death_id": 6084,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15231,
+    "death_id": 6085,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15233,
+    "death_id": 6087,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15234,
+    "death_id": 6088,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15235,
+    "death_id": 6089,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15236,
+    "death_id": 6090,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15237,
+    "death_id": 6091,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15238,
+    "death_id": 6092,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15239,
+    "death_id": 6093,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15240,
+    "death_id": 6094,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15241,
+    "death_id": 6095,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15242,
+    "death_id": 6096,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15243,
+    "death_id": 6098,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15246,
+    "death_id": 6101,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15248,
+    "death_id": 6103,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15249,
+    "death_id": 6104,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15250,
+    "death_id": 6105,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15254,
+    "death_id": 6106,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15255,
+    "death_id": 6107,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15257,
+    "death_id": 6108,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15258,
+    "death_id": 6109,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15261,
+    "death_id": 6112,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15261,
+    "death_id": 6113,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15262,
+    "death_id": 6112,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15262,
+    "death_id": 6113,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15263,
+    "death_id": 6114,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15264,
+    "death_id": 6115,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15265,
+    "death_id": 6116,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15266,
+    "death_id": 6117,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15268,
+    "death_id": 6120,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15268,
+    "death_id": 6121,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15269,
+    "death_id": 6122,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15271,
+    "death_id": 6123,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15272,
+    "death_id": 6124,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15274,
+    "death_id": 6127,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15275,
+    "death_id": 6128,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15282,
+    "death_id": 6129,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15307,
+    "death_id": 6146,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15308,
+    "death_id": 6146,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15310,
+    "death_id": 6147,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15387,
+    "death_id": 6235,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15387,
+    "death_id": 6236,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15388,
+    "death_id": 6235,
+    "status": "candidate"
+   },
+   {
+    "floor_id": 15388,
+    "death_id": 6236,
+    "status": "candidate"
    }
   ],
   "mob_info": [
@@ -263457,6 +267404,12 @@
     "name": "c1",
     "stamp": "2026-11-04T16:33:25.998+00:00",
     "raw": "Monster: 'c1'/'c1'/'c1' (1010)\n Level:1  HP:25000  SP:1  Base EXP:0  Job EXP:0\n DEF:30  MDEF:80  STR:1  AGI:1  VIT:1  INT:1  DEX:1  LUK:1\n ATK:1~1  Range:2~10~12  Size:Medium  Race: Demi-Human  Element: Holy (Lv:1)\n Drops:\nThis monster has no drops.\n[Cooldown]: Por favor aguarde mais 1 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 1 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 1 segundos para este jutsu recarregar.\n[Jutsu level] Rasengan level 1: 1 de 1r\n[Cooldown]: Por favor aguarde mais 0 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 0 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 0 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 0 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 0 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 0 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 0 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 1 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 1 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 0 segundos para este jutsu recarregar.\n[Sys] Level upr\n[Cooldown]: Por favor aguarde mais 0 segundos para este jutsu recarregar."
+   },
+   {
+    "species": 1018,
+    "name": "Borboleta",
+    "stamp": "2026-11-06T03:10:27.139+00:00",
+    "raw": "Monster: 'Borboleta'/'Borboleta'/'BORBOLETA' (1018)\n Level:100  HP:392000  SP:1  Base EXP:39600  Job EXP:1\n DEF:15  MDEF:20  STR:350  AGI:350  VIT:350  INT:3  DEX:350  LUK:350\n ATK:720~740  Range:1~10~12  Size:Small  Race:   Element: Neutral (Lv:1)\n Drops:\n  - Pó de Borboleta  100.00% - Mel  40.00% - Resina  100.00%"
    },
    {
     "species": 1025,
@@ -263523,6 +267476,12 @@
     "name": "Mosquito",
     "stamp": "2026-11-04T15:44:38.016+00:00",
     "raw": "Monster: 'Mosquito'/'Mosquito'/'MOSQUITO' (1042)\n Level:20  HP:610  SP:1  Base EXP:396  Job EXP:1\n DEF:0  MDEF:0  STR:24  AGI:24  VIT:24  INT:24  DEX:18  LUK:24\n ATK:22~25  Range:1~10~12  Size:Small  Race: Insect  Element: Neutral (Lv:1)\n Drops:\n  - Asa de Mosca  1.00%"
+   },
+   {
+    "species": 1048,
+    "name": "Haku",
+    "stamp": "2026-11-06T02:25:06.649+00:00",
+    "raw": "Monster: 'Haku'/'Haku'/'THIEF_BUG_EGG' (1048)\n Level:999  HP:15000000  SP:10000000  Base EXP:16  Job EXP:0\n DEF:60  MDEF:50  STR:1000  AGI:250  VIT:800  INT:1300  DEX:1800  LUK:800\n ATK:24000~26000  Range:1~10~12  Size:Medium  Race: Demi-Human  Element: Neutral (Lv:4)\n Drops:\n  - Pedra do esquecimento  20.00%"
    },
    {
     "species": 1051,
@@ -263609,10 +267568,22 @@
     "raw": "Monster: 'Akamaru'/'Akamaru'/'AKAMARU' (1106)\n Level:70  HP:69000  SP:1  Base EXP:19800  Job EXP:1\n DEF:10  MDEF:0  STR:300  AGI:150  VIT:300  INT:300  DEX:300  LUK:300\n ATK:340~360  Range:1~10~12  Size:Small  Race: Formless  Element: Neutral (Lv:1)\n Drops:\n  - Dente Fossilizado  100.00% - Garra de Lobo do Deserto   100.00% - Garras de Leopardo  100.00%\nExperience Gained Base:19800 (0.00%) Job:1 (0.00%):"
    },
    {
+    "species": 1117,
+    "name": "Nukenin Ladrão",
+    "stamp": "2026-11-06T02:23:19.640+00:00",
+    "raw": "Monster: 'Nukenin Ladrão'/'Nukenin Ladrão'/'NUKENIN_LADRAO' (1154)\n Level:999  HP:300000  SP:1  Base EXP:0  Job EXP:0\n DEF:37  MDEF:0  STR:1200  AGI:200  VIT:300  INT:200  DEX:2000  LUK:2000\n ATK:17189~18289  Range:1~10~12  Size:Medium  Race: Demi-Human  Element: Holy (Lv:1)\n Drops:\nThis monster has no drops."
+   },
+   {
     "species": 1118,
     "name": "Planta Carnívora",
     "stamp": "2026-11-04T17:39:28.685+00:00",
     "raw": "Monster: 'Planta Carnívora'/'Planta Carnívora'/'PLANTA_CARNIVORAA' (1118)\n Level:130  HP:133000  SP:1  Base EXP:57750  Job EXP:410000\n DEF:20  MDEF:0  STR:300  AGI:300  VIT:300  INT:1  DEX:300  LUK:300\n ATK:880~920  Range:4~10~12  Size:Large  Race:   Element: Neutral (Lv:1)\n Drops:\n  - Flor de Planta Carnívora  100.00% - Girassol  3.00% - Caule  40.00%\n  - Rosa Eterna  1.00%"
+   },
+   {
+    "species": 1128,
+    "name": "Besouro",
+    "stamp": "2026-11-06T03:11:08.714+00:00",
+    "raw": "Monster: 'Besouro'/'Besouro'/'BESOURO' (1128)\n Level:162  HP:300000  SP:1  Base EXP:69300  Job EXP:600000\n DEF:25  MDEF:0  STR:300  AGI:300  VIT:300  INT:2  DEX:300  LUK:300\n ATK:1400~1450  Range:1~10~12  Size:Medium  Race:   Element: Wind (Lv:1)\n Drops:\n  - Vida Verdejante  1.00% - Emveretarcon  2.00% - Chifre  20.00%\n  - Casca  100.00% - Casca Rija  100.00%"
    },
    {
     "species": 1139,
@@ -263625,6 +267596,18 @@
     "name": "Inseto Rainha",
     "stamp": "2026-11-05T12:42:07.308+00:00",
     "raw": "Monster: 'Inseto Rainha'/'Inseto Rainha'/'INSETO_RAINHA' (1147)\n Level:162  HP:870000  SP:1  Base EXP:69300  Job EXP:600000\n DEF:25  MDEF:25  STR:310  AGI:310  VIT:310  INT:3  DEX:310  LUK:310\n ATK:2000~2050  Range:1~10~7  Size:Large  Race:   Element: Neutral (Lv:1)\n Drops:\n  - Ouro  20.00% - Pesadelo Maternal  20.00% - Elunium  40.00%\n  - Oridecon  100.00%"
+   },
+   {
+    "species": 1152,
+    "name": "Nukenin Assassino",
+    "stamp": "2026-11-06T02:11:16.798+00:00",
+    "raw": "Monster: 'Nukenin Assassino'/'Nukenin Assassino'/'NUKENIN_ASSASSINO' (1401)\n Level:999  HP:300000  SP:1  Base EXP:0  Job EXP:0\n DEF:30  MDEF:60  STR:1200  AGI:300  VIT:400  INT:300  DEX:2000  LUK:2000\n ATK:16189~18289  Range:2~10~12  Size:Medium  Race: Demi-Human  Element: Holy (Lv:1)\n Drops:\nThis monster has no drops."
+   },
+   {
+    "species": 1153,
+    "name": "Nukenin",
+    "stamp": "2026-11-06T02:11:38.938+00:00",
+    "raw": "Monster: 'Nukenin'/'Nukenin'/'NUKENIN' (1771)\n Level:999  HP:300000  SP:1  Base EXP:0  Job EXP:0\n DEF:37  MDEF:0  STR:999  AGI:200  VIT:300  INT:300  DEX:999  LUK:60\n ATK:14189~15289  Range:1~10~12  Size:Medium  Race: Demi-Human  Element: Holy (Lv:1)\n Drops:\nThis monster has no drops.\nYour effect has changed.\nYour effect has changed.\nYour effect has changed.\nJutsu realizado com sucesso0"
    },
    {
     "species": 1154,
@@ -263711,10 +267694,22 @@
     "raw": "Monster: 'Estrela-do-Mar'/'Estrela-do-Mar'/'ESTRELA_DO_MAR' (1266)\n Level:130  HP:130000  SP:1  Base EXP:57750  Job EXP:350000\n DEF:20  MDEF:0  STR:300  AGI:300  VIT:300  INT:1  DEX:300  LUK:300\n ATK:870~910  Range:1~10~12  Size:Small  Race:   Element: Neutral (Lv:1)\n Drops:\n  - Muco Pegajoso  100.00% - Coral  40.00% - Célula Única  24.00%"
    },
    {
+    "species": 1276,
+    "name": "Shinobi Ladrão",
+    "stamp": "2026-11-06T02:24:13.170+00:00",
+    "raw": "Monster: 'Shinobi Ladrão'/'Shinobi Ladrão'/'SHINOBI_LADRAO' (1201)\n Level:999  HP:300000  SP:1  Base EXP:0  Job EXP:0\n DEF:50  MDEF:60  STR:1200  AGI:300  VIT:400  INT:200  DEX:2000  LUK:2000\n ATK:14000~15000  Range:1~10~12  Size:Medium  Race: Demi-Human  Element: Holy (Lv:1)\n Drops:\nThis monster has no drops.\n[Cooldown]: Por favor aguarde mais 1 segundos para este jutsu recarregar.e\n[Cooldown]: Por favor aguarde mais 0 segundos para este jutsu recarregar."
+   },
+   {
     "species": 1289,
     "name": "Inseto Rei",
     "stamp": "2026-11-05T12:42:13.035+00:00",
     "raw": "Monster: 'Inseto Rei'/'Inseto Rei'/'INSETO_REI' (1289)\n Level:162  HP:755000  SP:1  Base EXP:69300  Job EXP:600000\n DEF:25  MDEF:40  STR:300  AGI:300  VIT:300  INT:3  DEX:300  LUK:300\n ATK:2000~2050  Range:1~10~12  Size:Large  Race:   Element: Neutral (Lv:1)\n Drops:\n  - Cyfar  20.00% - Minério de Elunium  100.00% - Minério de Oridecon  100.00%\n  - Ouro  1.00% - Oridecon  40.00% - Trevo  100.00%\n  - Livro Desconhecido  1.00%\n[Cooldown]: Por favor aguarde mais 2 segundos para este jutsu recarregar.\u0002\n[Cooldown]: Por favor aguarde mais 2 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 2 segundos para este jutsu recarregar.\n[Cooldown]: Por favor aguarde mais 2 segundos para este jutsu recarregar.\nExperience Gained Base:62277 (0.00%) Job:1 (0.00%)I\nExperience Gained Base:24347 (0.00%) Job:210801 (0.00%) "
+   },
+   {
+    "species": 1293,
+    "name": "Borboleta Macho",
+    "stamp": "2026-11-06T03:11:16.587+00:00",
+    "raw": "Monster: 'Borboleta Macho'/'Borboleta Macho'/'BORBOLETA_MACHO' (1293)\n Level:62  HP:69000  SP:1  Base EXP:69300  Job EXP:600000\n DEF:30  MDEF:30  STR:300  AGI:300  VIT:300  INT:300  DEX:300  LUK:300\n ATK:2000~2500  Range:2~10~12  Size:Small  Race: Insect  Element: Wind (Lv:1)\n Drops:\n  - Pó de Borboleta  100.00% - Mel  100.00% - Mastela  20.00%"
    },
    {
     "species": 1294,
@@ -263727,6 +267722,12 @@
     "name": "Pakkun",
     "stamp": "2026-11-04T15:37:45.330+00:00",
     "raw": "Monster: 'Pakkun'/'Pakkun'/'PAKKUN' (1296)\n Level:45  HP:33500  SP:1  Base EXP:5775  Job EXP:1\n DEF:10  MDEF:10  STR:210  AGI:210  VIT:210  INT:210  DEX:210  LUK:210\n ATK:172~192  Range:1~10~12  Size:Small  Race: Beast  Element: Neutral (Lv:1)\n Drops:\n  - Bola  100.00% - Biscoito  10.00%"
+   },
+   {
+    "species": 1297,
+    "name": "Nukenin Procurado",
+    "stamp": "2026-11-06T02:24:43.175+00:00",
+    "raw": "Monster: 'Nukenin Procurado'/'Nukenin Procurado'/'NUKENIN_PROCURADO' (1839)\n Level:999  HP:300000  SP:1  Base EXP:0  Job EXP:0\n DEF:37  MDEF:60  STR:1200  AGI:300  VIT:300  INT:300  DEX:2000  LUK:2000\n ATK:11418~11828  Range:1~10~16  Size:Medium  Race: Demi-Human  Element: Holy (Lv:1)\n Drops:\nThis monster has no drops."
    },
    {
     "species": 1303,
@@ -263763,6 +267764,12 @@
     "name": "Pequena Tartaruga",
     "stamp": "2026-11-04T16:04:07.742+00:00",
     "raw": "Monster: 'Pequena Tartaruga'/'Pequena Tartaruga'/'PEQUENA_TARTARUGA' (1318)\n Level:100  HP:118000  SP:1  Base EXP:39600  Job EXP:2359\n DEF:18  MDEF:0  STR:300  AGI:300  VIT:300  INT:1  DEX:300  LUK:300\n ATK:740~770  Range:2~10~12  Size:Small  Race:   Element: Neutral (Lv:1)\n Drops:\n  - Casco de Tartaruga  88.00% - Casca Quebrada  14.00% - Madeira Queimada  24.00%"
+   },
+   {
+    "species": 1321,
+    "name": "Lavadeira",
+    "stamp": "2026-11-06T03:11:12.745+00:00",
+    "raw": "Monster: 'Lavadeira'/'Lavadeira'/'LAVADEIRA' (1321)\n Level:162  HP:300000  SP:1  Base EXP:69300  Job EXP:600000\n DEF:25  MDEF:0  STR:300  AGI:300  VIT:300  INT:2  DEX:300  LUK:300\n ATK:1050~1100  Range:1~10~8  Size:Medium  Race:   Element: Wind (Lv:1)\n Drops:\n  - Asas de Libélula  1.00% - Casca Arredondada  60.00% - Casca Rija  60.00%\n  - Galho  100.00%"
    },
    {
     "species": 1322,
@@ -263837,6 +267844,12 @@
     "raw": "Monster: 'Chamu'/'Chamu'/'CHAMU' (1405)\n Level:80  HP:152000  SP:1  Base EXP:29700  Job EXP:1\n DEF:10  MDEF:0  STR:300  AGI:300  VIT:300  INT:300  DEX:300  LUK:300\n ATK:555~595  Range:1~10~12  Size:Large  Race: Demon  Element: Neutral (Lv:1)\n Drops:\n  - Chifre Firme  100.00%"
    },
    {
+    "species": 1408,
+    "name": "Borboleta Sanguinária",
+    "stamp": "2026-11-06T03:10:31.238+00:00",
+    "raw": "Monster: 'Borboleta Sanguinária'/'Borboleta Sanguinária'/'BORBOLETA_SANGUINARIA' (1408)\n Level:100  HP:398000  SP:1  Base EXP:39600  Job EXP:300000\n DEF:18  MDEF:20  STR:300  AGI:300  VIT:300  INT:2  DEX:300  LUK:300\n ATK:740~770  Range:3~10~12  Size:Medium  Race:   Element: Neutral (Lv:1)\n Drops:\n  - Antenas Afiadas  20.00% - Asas de Libélula  100.00% - Pó de Borboleta  100.00%\n  - Grandes Asas de Borboleta  2.00%"
+   },
+   {
     "species": 1418,
     "name": "Manda",
     "stamp": "2026-11-05T00:59:56.816+00:00",
@@ -263853,6 +267866,12 @@
     "name": "marionete3",
     "stamp": "2026-11-05T20:11:01.756+00:00",
     "raw": "Monster: 'marionete3'/'marionete3'/'G_MUTANT_DRAGON' (1449)\n Level:65  HP:1000000  SP:1  Base EXP:0  Job EXP:0\n DEF:70  MDEF:20  STR:1200  AGI:300  VIT:89  INT:50  DEX:2000  LUK:50\n ATK:8000~8000  Range:1~10~12  Size:Medium  Race: Demi-Human  Element: Neutral (Lv:4)\n Drops:\nThis monster has no drops."
+   },
+   {
+    "species": 1494,
+    "name": "Besouro-Rei",
+    "stamp": "2026-11-06T03:10:35.180+00:00",
+    "raw": "Monster: 'Besouro-Rei'/'Besouro-Rei'/'BESOURO_REI' (1494)\n Level:100  HP:396000  SP:1  Base EXP:39600  Job EXP:250000\n DEF:17  MDEF:20  STR:350  AGI:350  VIT:350  INT:3  DEX:350  LUK:350\n ATK:735~765  Range:1~10~12  Size:Small  Race:   Element: Neutral (Lv:1)\n Drops:\n  - Casco de Inseto  60.00% - Pata de Besouro  100.00% - Antenas de Inseto  100.00%\n  - Pele de Verme  100.00% - Ova de Sapo  1.00%"
    },
    {
     "species": 1499,
@@ -266449,6 +270468,206 @@
     "item": 1079,
     "item_name": "Chakra Lendário",
     "rate": 1.0
+   },
+   {
+    "species": 1048,
+    "position": 0,
+    "mvp": 0,
+    "item": 1080,
+    "item_name": "Pedra do esquecimento",
+    "rate": 20.0
+   },
+   {
+    "species": 1018,
+    "position": 0,
+    "mvp": 0,
+    "item": 924,
+    "item_name": "Pó de Borboleta",
+    "rate": 100.0
+   },
+   {
+    "species": 1018,
+    "position": 1,
+    "mvp": 0,
+    "item": 518,
+    "item_name": "Mel",
+    "rate": 40.0
+   },
+   {
+    "species": 1018,
+    "position": 2,
+    "mvp": 0,
+    "item": 907,
+    "item_name": "Resina",
+    "rate": 100.0
+   },
+   {
+    "species": 1408,
+    "position": 0,
+    "mvp": 0,
+    "item": 7163,
+    "item_name": "Antenas Afiadas",
+    "rate": 20.0
+   },
+   {
+    "species": 1408,
+    "position": 1,
+    "mvp": 0,
+    "item": 7064,
+    "item_name": "Asas de Libélula",
+    "rate": 100.0
+   },
+   {
+    "species": 1408,
+    "position": 2,
+    "mvp": 0,
+    "item": 924,
+    "item_name": "Pó de Borboleta",
+    "rate": 100.0
+   },
+   {
+    "species": 1408,
+    "position": 3,
+    "mvp": 0,
+    "item": 7168,
+    "item_name": "Grandes Asas de Borboleta",
+    "rate": 2.0
+   },
+   {
+    "species": 1494,
+    "position": 0,
+    "mvp": 0,
+    "item": 7190,
+    "item_name": "Casco de Inseto",
+    "rate": 60.0
+   },
+   {
+    "species": 1494,
+    "position": 1,
+    "mvp": 0,
+    "item": 7202,
+    "item_name": "Pata de Besouro",
+    "rate": 100.0
+   },
+   {
+    "species": 1494,
+    "position": 2,
+    "mvp": 0,
+    "item": 928,
+    "item_name": "Antenas de Inseto",
+    "rate": 100.0
+   },
+   {
+    "species": 1494,
+    "position": 3,
+    "mvp": 0,
+    "item": 955,
+    "item_name": "Pele de Verme",
+    "rate": 100.0
+   },
+   {
+    "species": 1494,
+    "position": 4,
+    "mvp": 0,
+    "item": 908,
+    "item_name": "Ova de Sapo",
+    "rate": 1.0
+   },
+   {
+    "species": 1128,
+    "position": 0,
+    "mvp": 0,
+    "item": 993,
+    "item_name": "Vida Verdejante",
+    "rate": 1.0
+   },
+   {
+    "species": 1128,
+    "position": 1,
+    "mvp": 0,
+    "item": 1011,
+    "item_name": "Emveretarcon",
+    "rate": 2.0
+   },
+   {
+    "species": 1128,
+    "position": 2,
+    "mvp": 0,
+    "item": 947,
+    "item_name": "Chifre",
+    "rate": 20.0
+   },
+   {
+    "species": 1128,
+    "position": 3,
+    "mvp": 0,
+    "item": 935,
+    "item_name": "Casca",
+    "rate": 100.0
+   },
+   {
+    "species": 1128,
+    "position": 4,
+    "mvp": 0,
+    "item": 943,
+    "item_name": "Casca Rija",
+    "rate": 100.0
+   },
+   {
+    "species": 1321,
+    "position": 0,
+    "mvp": 0,
+    "item": 7064,
+    "item_name": "Asas de Libélula",
+    "rate": 1.0
+   },
+   {
+    "species": 1321,
+    "position": 1,
+    "mvp": 0,
+    "item": 1096,
+    "item_name": "Casca Arredondada",
+    "rate": 60.0
+   },
+   {
+    "species": 1321,
+    "position": 2,
+    "mvp": 0,
+    "item": 943,
+    "item_name": "Casca Rija",
+    "rate": 60.0
+   },
+   {
+    "species": 1321,
+    "position": 3,
+    "mvp": 0,
+    "item": 7203,
+    "item_name": "Galho",
+    "rate": 100.0
+   },
+   {
+    "species": 1293,
+    "position": 0,
+    "mvp": 0,
+    "item": 924,
+    "item_name": "Pó de Borboleta",
+    "rate": 100.0
+   },
+   {
+    "species": 1293,
+    "position": 1,
+    "mvp": 0,
+    "item": 518,
+    "item_name": "Mel",
+    "rate": 100.0
+   },
+   {
+    "species": 1293,
+    "position": 2,
+    "mvp": 0,
+    "item": 522,
+    "item_name": "Mastela",
+    "rate": 20.0
    }
   ]
  }

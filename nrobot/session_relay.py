@@ -198,6 +198,23 @@ class SessionRelay(QuestRelay):
         self.own_look = {}  # class, sex and hairstyle for the shadow's real sprite
         from .portals import PortalGuard
         self.portals = PortalGuard()  # warps are never walked into
+        self.quests.learned_portals = self.portals.destinations  # quests and BG also use the portals learned
+        from .npc_transports import NpcTransports
+        self.npc_transports = NpcTransports()  # NPCs that change the map (VIP room, returns), learned playing
+        self.quests.learned_transports = self.npc_transports.known
+        from .npc_map import NpcMap
+        self.npc_map = NpcMap()  # NPCs on the minimap, with names, remembered per map
+        try:
+            from . import map_routes, quest_routes
+            for entry in map_routes.load():
+                self.npc_map.learn_steps(entry.get('steps'))
+            for route in quest_routes.load():
+                for value in route.values():
+                    if isinstance(value, list) and value and isinstance(value[0], dict):
+                        self.npc_map.learn_steps(value)
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
+            pass  # names from routes are a bonus; NPCs seen in the game are still recorded
+        self.viewpoint_marks = {}  # minimap marks from the server (@showmobs, NPC quests): key -> mark
         from .player_registry import PlayerRegistry
         self.registry = PlayerRegistry()  # aba Jogadores: everyone ever seen
         self.registry_saved = 0
@@ -418,6 +435,7 @@ class SessionRelay(QuestRelay):
             self.map_loaded_at = time.monotonic()  # the client finished loading the map
         for opcode, frame in self.native_frames.frames:
             self.quests.native(opcode,frame,self.tracker.observer.map_name)
+            self.npc_transports.client(opcode,frame,self.tracker.observer.map_name,self.quests.actors)
             if opcode == 0x72 and len(frame) == 25:
                 if self.preview_rcx_self_skill(struct.unpack_from('<H',frame,10)[0],struct.unpack_from('<I',frame,21)[0],time.monotonic()):
                     self.publish_ground_cells()
@@ -673,8 +691,11 @@ class SessionRelay(QuestRelay):
                      and math.dist(own, row['position']) <= self.hunt.SEARCH_RADIUS]
         return {**state, 'recent_entities': preferred} if preferred else state
 
-    def attacker_species(self, now):
-        """Species of the monsters attacking the character, when more than the configured number do."""
+    def attacker_species(self, now, targets=None):
+        """Species of the monsters attacking the character, when more than the configured number do.
+
+        Only monsters that are not targets count: the hunted ones hitting back are fought anyway,
+        and counting them made "ignorar ate 3" attack everyone with 2 targets + 2 others around."""
         from .network_targets import is_player_id
         from .presence_guard import monster_sprite
         if self.hunt is None:
@@ -685,6 +706,8 @@ class SessionRelay(QuestRelay):
             if (now-at <= 10 and entity and entity['present_last_observation'] and not is_player_id(identity)
                     and monster_sprite(entity['species_id'])):
                 attackers[identity] = entity['species_id']
+        targets = self.configured_species() if targets is None else set(targets)
+        attackers = {i: s for i, s in attackers.items() if s not in targets}
         limit = (self.settings or {}).get('ignore_attackers', 0)
         return set(attackers.values()) if len(attackers) > limit else set()
 
@@ -1109,6 +1132,12 @@ class SessionRelay(QuestRelay):
                     raise ValueError('O servidor ainda informa o efeito ativo; aguarde o termino real')
                 self.rotation.summons.finish(time.monotonic(), 'user_observed_end')
                 self.flush_rotation_diagnostics()
+            elif command == 'loot_command':
+                from .database_hunt import loot_command
+                queue = self.__dict__.setdefault('loot_commands', [])
+                if len(queue) >= 200:
+                    raise ValueError('Muitos comandos de loot aguardando envio')
+                queue.append(loot_command(request.get('text')))
             elif command == 'mob_info':
                 species = int(request['species_id'])
                 if species <= 0:
@@ -1304,6 +1333,31 @@ class SessionRelay(QuestRelay):
                       + (f", {len(info['mvp'])} MVP" if info['mvp'] else '') + ' salvos na Database.')
             except (sqlite3.Error, OSError) as exc:
                 print(f'[DROPS] @mi {species}: nao foi possivel salvar ({exc})')
+
+    LOOT_GAP = 1.2  # s between two loot commands: the server's chat flood guard
+
+    async def send_loot_commands(self, *, game_gate):
+        """@alootid / @autoloot chosen in the hunt window, one at a time."""
+        queue = self.__dict__.get('loot_commands')
+        now = time.monotonic()
+        name = (self.own_look or {}).get('name')
+        if (not queue or not name or not self.allow_commands or self.login_phase != 'map'
+                or now-self.__dict__.get('loot_sent_at', -1e9) < self.LOOT_GAP):
+            return
+        from .mob_info import chat_command
+        payload = chat_command(queue[0], name)
+        if self.native_frames.fallback().get(0xf3) not in (-1, len(payload)):
+            print('[LOOT] Pacote de chat 00F3 nao validado para este cliente; comando nao enviado: '+queue.pop(0))
+            return
+        async with self.send_lock:
+            if not self.native_frames.ready or not game_gate() or self.upstream is None:
+                return
+            text = queue.pop(0)
+            self.loot_sent_at = now
+            self.trace_map_send('bot', 0xf3, len(payload))
+            self.upstream.write(payload)
+            await self.upstream.drain()
+            print('[LOOT] Enviado: '+text)
 
     async def send_mob_info(self, *, game_gate):
         now = time.monotonic()
@@ -1501,6 +1555,8 @@ class SessionRelay(QuestRelay):
             self.registry_saved = time.monotonic()
             try:
                 self.portals.save()
+                self.npc_transports.save()
+                self.npc_map.save()
                 self.registry.save()
             except OSError as error:
                 print(f'Registro de jogadores nao salvo: {error}')
@@ -1539,7 +1595,11 @@ class SessionRelay(QuestRelay):
                      emergency_stop=self.emergency,
                      chat_alert=self.chat_alert,
                      ground_cells={**self.ground_cells.snapshot(), "feed_file": str(self.folder/"rcx_terreno.json"), "feed_ipc": str(self.folder/"rcx_terreno.ipc")},
-                     portals=[{'position': list(cell), 'margin': margin} for cell, margin in self.portals.portals(self.tracker.observer.map_name)],
+                     portals=[{'position': list(cell), 'margin': margin,
+                               'to': (self.portals.destination(self.tracker.observer.map_name, cell) or {}).get('map')}
+                              for cell, margin in self.portals.portals(self.tracker.observer.map_name)],
+                     npcs=self.npc_map.for_map(self.tracker.observer.map_name),
+                     viewpoint_marks=self.current_viewpoint_marks(),
                      own_hidden=({'option': self.own_option & 0x4046, 'gm_invisible': bool(self.own_option & 0x40)}
                                  if self.own_option & 0x4046 else None),
                      native_frame_error=self.native_frames.error,
@@ -1682,6 +1742,9 @@ class SessionRelay(QuestRelay):
                     if event['kind']=='skill_cast' and event.get('duration_ms',0)<=0:continue
                     rcx_changed=self.preview_rcx_self_skill(event.get('skill_id'),self.tracker.observer.player_id,rcx_now,
                         duration=event.get('duration_ms',0)/1000 if event['kind']=='skill_cast' else .2,confirmed=True) or rcx_changed
+            for note in self.ground_cells.trace:
+                self.record_hunt(note)  # which spell gave each RCX area (or none): checkable later
+            self.ground_cells.trace.clear()
             if self.ground_cells.map is None:
                 self.ground_cells.map = self.tracker.observer.map_name
             if rcx_changed or any(e["kind"] in ("ground_effect", "ground_effect_removed", "map_change", "map_transfer", "skill_cast", "skill_failed", "ground_skill", "skill_cast_cancel") for e in events):
@@ -1692,7 +1755,9 @@ class SessionRelay(QuestRelay):
                 self.login_phase = 'map'
                 self.native_feed = True  # the server accepted this map connection: frames align from here
             self.observe_own_summons(events, time.monotonic())
+            self.npc_transports.observe(events,self.tracker.observer.map_name)
             self.quests.observe(events,self.tracker.observer.player_id,self.tracker.observer.map_name,time.monotonic())
+            self.bg_observe(events)
             self.flush_quest_kills()
             self.quest_events(events,time.monotonic())
             for transition in events:
@@ -1710,6 +1775,7 @@ class SessionRelay(QuestRelay):
                     print('Database de drops indisponivel; jogo e combate continuam: '+str(exc))
             self.mob_info_observe(events, time.monotonic())
             self.mob_scan.observe(events, time.monotonic())
+            self.observe_viewpoints(events, time.monotonic())
             from .monster_origin import temporary_reason
             if getattr(self, 'origin_epoch', None) != self.inventory.epoch:
                 self.origin_epoch = self.inventory.epoch
@@ -1736,8 +1802,13 @@ class SessionRelay(QuestRelay):
             if any(e['kind'] in ('map_change', 'map_transfer') for e in events):
                 self.map_changed_at = time.monotonic()
             self.check_recall(events, time.monotonic())
-            if self.portals.observe(events, self.tracker.observer.map_name, self.tracker.observer.player):
+            if self.portals.observe(events, self.tracker.observer.map_name, self.tracker.observer.player,
+                                    (self.tracker.observer.player_motion or {}).get('destination')):
                 self.collision_map()  # apply the new portal area right away
+            touched = {e.get('entity_id') for e in events if e['kind'] in ('appearance', 'name')}
+            if touched:
+                self.npc_map.observe([self.inventory.entities[i] for i in touched if i in self.inventory.entities],
+                                     self.inventory.map_name or self.tracker.observer.map_name)
             self.registry.observe(events, self.tracker.observer.player_id,
                                   self.inventory.map_name or self.tracker.observer.map_name)
             self.sync_pvp_targets()
@@ -2372,6 +2443,48 @@ class SessionRelay(QuestRelay):
             self.ground_cells.note_ground_skill(dict(skill_id=skill_id,source_id=observer.player_id,
                 position=list(position),level=metadata['level']),now)
         return True
+
+    VIEWPOINT_TTL = 90.0  # s: monsters marked by @showmobs walk away; old marks would mislead
+
+    def observe_viewpoints(self, events, now):
+        """Server minimap marks (0144): @showmobs answers one per monster; type 2 removes one."""
+        for event in events:
+            if event['kind'] in ('map_change', 'map_transfer'):
+                self.viewpoint_marks.clear()
+            elif event['kind'] == 'viewpoint' and event.get('position'):
+                key = (event.get('npc_id'), event.get('mark_id'))
+                if event.get('mark_type') == 2:
+                    self.viewpoint_marks.pop(key, None)
+                elif event.get('mark_type') == 1:
+                    species = self.mob_scan.current_species if now-self.mob_scan.sent_at <= self.mob_scan.LISTEN else None
+                    self.viewpoint_marks[key] = {'position': list(event['position']), 'species': species, 'at': now}
+        if len(self.viewpoint_marks) > 2000:
+            for key in sorted(self.viewpoint_marks, key=lambda k: self.viewpoint_marks[k]['at'])[:-2000]:
+                del self.viewpoint_marks[key]
+
+    def current_viewpoint_marks(self, now=None):
+        now = time.monotonic() if now is None else now
+        result = []
+        for key, mark in list(self.viewpoint_marks.items()):
+            if now-mark['at'] > self.VIEWPOINT_TTL:
+                del self.viewpoint_marks[key]
+                continue
+            result.append({'position': mark['position'], 'name': self.viewpoint_name(mark['species'])})
+        return result
+
+    def viewpoint_name(self, species):
+        """Monster name of an @showmobs mark, looked up once per kind: name_of reads the monster
+        files from disk, and doing it per mark on every state update froze the relay (lag)."""
+        if not species:
+            return None
+        names = self.__dict__.setdefault('viewpoint_names', {})
+        if species not in names:
+            from .monster_db import name_of
+            try:
+                names[species] = name_of(species)
+            except (OSError, ValueError, KeyError, TypeError):
+                names[species] = None
+        return names[species]
 
     def publish_ground_cells(self):
         """Small independent RCX feed; a terrain packet does not wait for the full UI snapshot."""
@@ -3033,6 +3146,7 @@ async def run(args):
                         relay.check_emergency()
                     if not loading:
                         await relay.send_mob_info(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
+                        await relay.send_loot_commands(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                         await relay.send_mob_scan(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                     if relay.hunt.enabled and not route_travel:
                         if relay.waiting_hunt_transfer(controls.connected(relay.game_peer, relay.game_local)):

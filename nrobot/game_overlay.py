@@ -1,8 +1,8 @@
 """REDE-73/76: shadow on the own character while it is hidden (hide, cloak or @hide).
 
 The game camera always keeps the character at the centre of the game view, so the shadow
-needs no calibration. Other hidden characters have last-received-cell markers on the
-minimap and a labelled on-screen list, without guessing camera projection. The layer never
+needs no calibration. Other hidden characters only get last-received-cell markers on the
+minimap (no text list over the game view), without guessing camera projection. The layer never
 receives input: clicks always reach the game.
 
 The own shadow is the character's real body + hair sprite from the game files (class, sex
@@ -53,13 +53,8 @@ class GameOverlay(QWidget):
             return None
         return 'você ('+('@hide' if hidden.get('gm_invisible') else 'escondido')+')'
 
-    def other_hidden(self):
-        presence = self.state.get('presence', {})
-        # A hider whose cell never arrived is still listed, without a minimap marker.
-        return presence.get('shadow_details', presence.get('hidden_details', []))
-
     def has_content(self):
-        return bool(self.label() or self.other_hidden())
+        return bool(self.label())
 
     def paintEvent(self, event):
         if not self.has_content():
@@ -72,20 +67,6 @@ class GameOverlay(QWidget):
             feet = QPointF(self.width()/2, self.height()/2)
             if not self.draw_sprite(painter, feet, label):
                 self.draw_shadow(painter, feet, label)
-        # Camera rotation/zoom are unknown: do not invent a body position on the floor.
-        # The minimap marks the last received cell; this panel makes other actors visible too.
-        hidden = self.other_hidden()
-        if hidden:
-            painter.fillRect(QRectF(12,65,440,28+22*min(len(hidden),8)), QColor(15,15,20,185))
-            painter.setPen(QColor(255,195,80))
-            painter.drawText(QPointF(22,85), 'Ultimos registros de jogadores ocultos/fora de visao')
-            for i, entry in enumerate(hidden[:8]):
-                name = entry.get('name') or str(entry['entity_id'])
-                tag = (f"INVISIVEL ao lado ({entry['invisible_signal']})" if entry.get('invisible_signal') else
-                       'sumiu; @hide nao confirmado' if entry.get('possible_hidden') else '@hide' if entry.get('gm_invisible') else 'hide')
-                suffix = ' [permitido]' if entry.get('allowed') else ''
-                where = f"em {entry['position']}" if entry.get('position') is not None else 'posicao desconhecida'
-                painter.drawText(QPointF(22,107+22*i), f"{name}: {tag} {where}{suffix}")
 
     def draw_shadow(self, painter, feet, label):
         height = self.height()*self.BODY
@@ -212,7 +193,7 @@ class QuestCounter(QWidget):
         screen = QGuiApplication.primaryScreen()
         ratio = screen.devicePixelRatio() if screen else 1.0
         x, y = rect[0]/ratio, rect[1]/ratio
-        dx, dy = self.offset if self.offset is not None else (10, 240)  # below the hidden-players list
+        dx, dy = self.offset if self.offset is not None else (10, 240)
         if (int(x+dx), int(y+dy)) != (self.x(), self.y()):
             self.move(int(x+dx), int(y+dy))
         return True

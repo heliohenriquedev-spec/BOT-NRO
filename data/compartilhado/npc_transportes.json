@@ -1,0 +1,503 @@
+{
+ "areia": {
+  "144,195>ra_in01>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "areia.gat",
+     "position": [
+      144,
+      195
+     ],
+     "name": "Sala Vip#2"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "select",
+     "map": "areia.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "ra_in01.gat"
+    }
+   ],
+   "to": "ra_in01",
+   "name": "Sala Vip#2",
+   "arrival": [
+    209,
+    90
+   ]
+  }
+ },
+ "ra_in01": {
+  "217,86>pay_fild10>Mamutes da Névoa": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ra_in01.gat",
+     "position": [
+      217,
+      86
+     ],
+     "name": "Viajante Ninja#h2-8"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "select",
+     "map": "ra_in01.gat",
+     "option": "Mamutes da Névoa"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "pay_fild10.gat"
+    }
+   ],
+   "to": "pay_fild10",
+   "name": "Viajante Ninja#h2-8",
+   "arrival": [
+    244,
+    85
+   ]
+  },
+  "217,86>ve_fild04>Mamutes da Suna": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ra_in01.gat",
+     "position": [
+      217,
+      86
+     ],
+     "name": "Viajante Ninja#h2-8"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "select",
+     "map": "ra_in01.gat",
+     "option": "Mamutes da Suna"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "ve_fild04.gat"
+    }
+   ],
+   "to": "ve_fild04",
+   "name": "Viajante Ninja#h2-8",
+   "arrival": [
+    226,
+    254
+   ]
+  },
+  "217,86>anthell01>Esconderijo do Clã Kamizuru Nível 2": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ra_in01.gat",
+     "position": [
+      217,
+      86
+     ],
+     "name": "Viajante Ninja#h2-8"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "select",
+     "map": "ra_in01.gat",
+     "option": "Esconderijo do Clã Kamizuru Nível 2"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "anthell01.gat"
+    }
+   ],
+   "to": "anthell01",
+   "name": "Viajante Ninja#h2-8",
+   "arrival": [
+    184,
+    38
+   ]
+  },
+  "217,86>um_dun01>Esconderijo do Clã Kamizuru": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ra_in01.gat",
+     "position": [
+      217,
+      86
+     ],
+     "name": "Viajante Ninja#h2-8"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "select",
+     "map": "ra_in01.gat",
+     "option": "Esconderijo do Clã Kamizuru"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "um_dun01.gat"
+    }
+   ],
+   "to": "um_dun01",
+   "name": "Viajante Ninja#h2-8",
+   "arrival": [
+    73,
+    260
+   ]
+  },
+  "217,86>tur_dun01>Garganta da Nuvem": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ra_in01.gat",
+     "position": [
+      217,
+      86
+     ],
+     "name": "Viajante Ninja#h2-8"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "select",
+     "map": "ra_in01.gat",
+     "option": "Garganta da Nuvem"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "tur_dun01.gat"
+    }
+   ],
+   "to": "tur_dun01",
+   "name": "Viajante Ninja#h2-8",
+   "arrival": [
+    170,
+    176
+   ]
+  }
+ },
+ "treasure01": {
+  "76,64>gef_fild04>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "treasure01.gat",
+     "position": [
+      76,
+      64
+     ],
+     "name": "Senbon"
+    },
+    {
+     "kind": "next",
+     "map": "treasure01.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "gef_fild04.gat"
+    }
+   ],
+   "to": "gef_fild04",
+   "name": "Senbon",
+   "arrival": [
+    114,
+    84
+   ]
+  }
+ },
+ "gef_fild04": {
+  "260,346>nevoa>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "gef_fild04.gat",
+     "position": [
+      260,
+      346
+     ],
+     "name": "Shinobi da Névoa"
+    },
+    {
+     "kind": "wait_map",
+     "map": "nevoa.gat"
+    }
+   ],
+   "to": "nevoa",
+   "name": "Shinobi da Névoa",
+   "arrival": [
+    148,
+    7
+   ]
+  }
+ },
+ "ama_in01": {
+  "84,186>moc_pryd01>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ama_in01.gat",
+     "position": [
+      84,
+      186
+     ],
+     "name": "Kaishin"
+    },
+    {
+     "kind": "wait_map",
+     "map": "moc_pryd01.gat"
+    }
+   ],
+   "to": "moc_pryd01",
+   "name": "Kaishin",
+   "arrival": [
+    195,
+    9
+   ]
+  }
+ },
+ "0022@cata": {
+  "80,140>hospital2>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "0022@cata.gat",
+     "position": [
+      80,
+      140
+     ],
+     "name": "Sabio de Dungeon"
+    },
+    {
+     "kind": "wait_map",
+     "map": "hospital2.gat"
+    }
+   ],
+   "to": "hospital2",
+   "name": "Sabio de Dungeon",
+   "arrival": [
+    25,
+    92
+   ]
+  }
+ },
+ "0012@cata": {
+  "80,140>hospital2>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "0012@cata.gat",
+     "position": [
+      80,
+      140
+     ],
+     "name": "Sabio de Dungeon"
+    },
+    {
+     "kind": "wait_map",
+     "map": "hospital2.gat"
+    }
+   ],
+   "to": "hospital2",
+   "name": "Sabio de Dungeon",
+   "arrival": [
+    25,
+    92
+   ]
+  }
+ },
+ "hospital2": {
+  "16,74>kakashi>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "hospital2.gat",
+     "position": [
+      16,
+      74
+     ],
+     "name": "Campo de Treinamento#c"
+    },
+    {
+     "kind": "select",
+     "map": "hospital2.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "next",
+     "map": "hospital2.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "kakashi.gat"
+    }
+   ],
+   "to": "kakashi",
+   "name": "Campo de Treinamento#c",
+   "arrival": [
+    102,
+    143
+   ]
+  }
+ },
+ "kakashi": {
+  "83,150>hospital2>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      83,
+      150
+     ],
+     "name": ""
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "hospital2.gat"
+    }
+   ],
+   "to": "hospital2",
+   "name": "",
+   "arrival": [
+    25,
+    92
+   ]
+  }
+ }
+}

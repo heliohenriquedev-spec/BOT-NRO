@@ -119,6 +119,8 @@ class QuestRoutes:
         self.slot_owner={};self.slots_dirty=False  # slot number -> mission id (both boards share the 8 slots)
         from .quest_extras import Body
         self.body=Body();self.extras=None;self.errands=[];self.mount_displaced=None
+        self.learned_portals={}  # portals.PortalGuard.destinations: ways learned crossing portals
+        self.learned_transports={}  # npc_transports.NpcTransports.known: NPCs that change the map
         self.learning=None;self.learned_extras=None;self.aggressors=set();self.printed_notice=''
         self.voltar_sent_at=-1e9  # the server answers to @voltar are traced for 15 s
         self.borrow=None;self.prefetched={};self.skipped_ids=set()
@@ -672,6 +674,11 @@ class QuestRoutes:
         original=self.route['steps']
         starts=[i for i,s in enumerate(original) if s['kind']!='wait_map' and key(s['map'])==origin]
         if starts:return copy.deepcopy(original[starts[0]:])
+        if any(s['kind'] not in ('walk','portal','wait_map','wait_transfer') and key(s['map'])==target for s in original):
+            # The point of the trip is talking to an NPC there (BG entry): reach the recording's start
+            # and run it whole, instead of only reaching the map.
+            try:return self.connection(origin,key(original[0]['map']))+copy.deepcopy(original)
+            except ValueError:pass
         return self.connection(origin,target)
 
     def connection(self,origin,target):
@@ -709,13 +716,23 @@ class QuestRoutes:
                     if leg:edges.setdefault(key(leg[0]['map']),[]).append((key(step['map']),copy.deepcopy(leg+[step])))
                     leg=[]
                 else:leg.append(step)
+        # Portals crossed while playing (auto_routes): after the recorded legs, so on equal length a
+        # recorded leg wins; a crossing seen before a way back only deduced.
+        from .auto_routes import edges as learned_edges
+        from .npc_transports import as_entries
+        for entry in as_entries(self.learned_transports):
+            steps=[s for s in entry['steps'] if s['kind']!='walk']
+            edges.setdefault(key(steps[0]['map']),[]).append((key(entry['target_map']),steps))
+        for here,links in learned_edges(self.learned_portals).items():
+            for cost,there,steps,_ in sorted(links,key=lambda link:link[0]):
+                edges.setdefault(here,[]).append((there,copy.deepcopy(steps)))
         queue=deque([(origin,[])]);seen={origin}
         while queue:
             node,path=queue.popleft()
             for destination,leg in edges.get(node,[]):
                 if destination==target:return path+leg
                 if destination not in seen:seen.add(destination);queue.append((destination,path+leg))
-        raise ValueError('Sem conexao gravada de '+origin+' para '+target+'. Grave o trecho de ida/retorno.')
+        raise ValueError('Sem caminho conhecido de '+origin+' para '+target+'. Entre uma vez nos portais ate la (o bot aprende) ou grave o trecho.')
 
     def plan(self,map_name,position,collision,portals,now):
         if self.phase not in STAGES: return None

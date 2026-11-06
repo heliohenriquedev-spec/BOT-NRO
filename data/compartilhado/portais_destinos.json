@@ -1,0 +1,412 @@
+{
+ "hospital2": {
+  "103,3": {
+   "map": "areia",
+   "arrival": [
+    179,
+    162
+   ],
+   "confirmed": true
+  }
+ },
+ "areia": {
+  "177,164": {
+   "map": "hospital2",
+   "arrival": [
+    103,
+    8
+   ],
+   "confirmed": true
+  },
+  "108,250": {
+   "map": "prt_sewb2",
+   "arrival": [
+    20,
+    17
+   ],
+   "confirmed": true
+  },
+  "153,21": {
+   "map": "moc_fild01",
+   "arrival": [
+    235,
+    379
+   ],
+   "confirmed": true
+  },
+  "206,53": {
+   "map": "biju_pri2",
+   "arrival": [
+    19,
+    20
+   ],
+   "confirmed": true
+  },
+  "208,72": {
+   "map": "yuno_in01",
+   "arrival": [
+    32,
+    33
+   ],
+   "confirmed": true
+  }
+ },
+ "prt_sewb2": {
+  "18,13": {
+   "map": "areia",
+   "arrival": [
+    109,
+    254
+   ],
+   "confirmed": true
+  },
+  "180,24": {
+   "map": "prt_sewb4",
+   "arrival": [
+    101,
+    94
+   ],
+   "confirmed": true
+  }
+ },
+ "prt_sewb4": {
+  "99,94": {
+   "map": "prt_sewb2",
+   "arrival": [
+    180,
+    24
+   ],
+   "confirmed": false
+  },
+  "99,16": {
+   "map": "gl_sew02",
+   "arrival": [
+    31,
+    275
+   ],
+   "confirmed": true
+  }
+ },
+ "gl_sew02": {
+  "29,275": {
+   "map": "prt_sewb4",
+   "arrival": [
+    99,
+    16
+   ],
+   "confirmed": false
+  },
+  "299,293": {
+   "map": "alde_dun02",
+   "arrival": [
+    41,
+    23
+   ],
+   "confirmed": true
+  }
+ },
+ "alde_dun02": {
+  "43,23": {
+   "map": "gl_sew02",
+   "arrival": [
+    299,
+    293
+   ],
+   "confirmed": false
+  },
+  "123,170": {
+   "map": "gl_prison",
+   "arrival": [
+    186,
+    47
+   ],
+   "confirmed": true
+  }
+ },
+ "gl_prison": {
+  "189,47": {
+   "map": "alde_dun02",
+   "arrival": [
+    126,
+    170
+   ],
+   "confirmed": true
+  }
+ },
+ "ve_fild04": {
+  "116,50": {
+   "map": "moc_fild08",
+   "arrival": [
+    170,
+    380
+   ],
+   "confirmed": true
+  }
+ },
+ "moc_fild08": {
+  "170,383": {
+   "map": "ve_fild04",
+   "arrival": [
+    116,
+    50
+   ],
+   "confirmed": false
+  },
+  "383,212": {
+   "map": "moc_fild13",
+   "arrival": [
+    32,
+    172
+   ],
+   "confirmed": true
+  }
+ },
+ "moc_fild13": {
+  "29,172": {
+   "map": "moc_fild08",
+   "arrival": [
+    383,
+    212
+   ],
+   "confirmed": false
+  },
+  "32,29": {
+   "map": "cmd_fild09",
+   "arrival": [
+    76,
+    379
+   ],
+   "confirmed": true
+  },
+  "264,39": {
+   "map": "cmd_fild09",
+   "arrival": [
+    309,
+    378
+   ],
+   "confirmed": true
+  },
+  "308,50": {
+   "map": "pay_fild03",
+   "arrival": [
+    18,
+    111
+   ],
+   "confirmed": true
+  }
+ },
+ "cmd_fild09": {
+  "76,382": {
+   "map": "moc_fild13",
+   "arrival": [
+    33,
+    31
+   ],
+   "confirmed": true
+  },
+  "309,381": {
+   "map": "moc_fild13",
+   "arrival": [
+    266,
+    41
+   ],
+   "confirmed": true
+  },
+  "12,175": {
+   "map": "moc_fild01",
+   "arrival": [
+    376,
+    162
+   ],
+   "confirmed": true
+  }
+ },
+ "pay_fild03": {
+  "15,111": {
+   "map": "moc_fild13",
+   "arrival": [
+    305,
+    50
+   ],
+   "confirmed": true
+  }
+ },
+ "moc_fild01": {
+  "379,162": {
+   "map": "cmd_fild09",
+   "arrival": [
+    12,
+    175
+   ],
+   "confirmed": false
+  },
+  "235,382": {
+   "map": "areia",
+   "arrival": [
+    153,
+    24
+   ],
+   "confirmed": true
+  }
+ },
+ "biju_pri2": {
+  "18,16": {
+   "map": "areia",
+   "arrival": [
+    206,
+    56
+   ],
+   "confirmed": true
+  }
+ },
+ "yuno_in01": {
+  "32,37": {
+   "map": "areia",
+   "arrival": [
+    208,
+    69
+   ],
+   "confirmed": true
+  }
+ },
+ "anthell01": {
+  "253,32": {
+   "map": "anthell02",
+   "arrival": [
+    168,
+    171
+   ],
+   "confirmed": true
+  }
+ },
+ "anthell02": {
+  "171,170": {
+   "map": "anthell01",
+   "arrival": [
+    253,
+    32
+   ],
+   "confirmed": false
+  },
+  "33,265": {
+   "map": "gld_dun03",
+   "arrival": [
+    238,
+    271
+   ],
+   "confirmed": true
+  }
+ },
+ "gld_dun03": {
+  "238,275": {
+   "map": "anthell02",
+   "arrival": [
+    33,
+    262
+   ],
+   "confirmed": true
+  }
+ },
+ "um_dun01": {
+  "48,27": {
+   "map": "um_dun02",
+   "arrival": [
+    126,
+    148
+   ],
+   "confirmed": true
+  }
+ },
+ "um_dun02": {
+  "126,153": {
+   "map": "um_dun01",
+   "arrival": [
+    48,
+    27
+   ],
+   "confirmed": false
+  },
+  "55,18": {
+   "map": "yggdrasil01",
+   "arrival": [
+    39,
+    63
+   ],
+   "confirmed": true
+  }
+ },
+ "yggdrasil01": {
+  "36,63": {
+   "map": "um_dun02",
+   "arrival": [
+    55,
+    18
+   ],
+   "confirmed": false
+  },
+  "134,55": {
+   "map": "hospital2",
+   "arrival": [
+    25,
+    92
+   ],
+   "confirmed": true
+  }
+ },
+ "tur_dun01": {
+  "154,242": {
+   "map": "tur_dun02",
+   "arrival": [
+    167,
+    23
+   ],
+   "confirmed": true
+  }
+ },
+ "tur_dun02": {
+  "167,20": {
+   "map": "tur_dun01",
+   "arrival": [
+    154,
+    242
+   ],
+   "confirmed": false
+  },
+  "148,267": {
+   "map": "tur_dun03",
+   "arrival": [
+    218,
+    74
+   ],
+   "confirmed": true
+  }
+ },
+ "tur_dun03": {
+  "218,71": {
+   "map": "tur_dun02",
+   "arrival": [
+    148,
+    267
+   ],
+   "confirmed": false
+  },
+  "45,205": {
+   "map": "hu_fild05",
+   "arrival": [
+    308,
+    142
+   ],
+   "confirmed": true
+  }
+ },
+ "hu_fild05": {
+  "310,142": {
+   "map": "tur_dun03",
+   "arrival": [
+    45,
+    205
+   ],
+   "confirmed": false
+  }
+ }
+}

@@ -22,7 +22,62 @@
       "preview_outline": null,
       "preview_symbol": null,
       "preview_opacity": null
+    },
+    "142": {
+      "enabled": true,
+      "fill": "#005500",
+      "outline": "#303030",
+      "opacity": 70,
+      "symbol": "solid",
+      "radius": 0,
+      "shape": "point",
+      "skill_id": 0,
+      "area_override": false,
+      "preview_appearance": true,
+      "selection_preview": true,
+      "cast_preview": true,
+      "preview_fill": null,
+      "preview_outline": null,
+      "preview_symbol": null,
+      "preview_opacity": null
     }
   },
-  "skill_styles": {}
+  "skill_styles": {
+    "89": {
+      "enabled": true,
+      "fill": "#003780",
+      "outline": "#303030",
+      "opacity": 70,
+      "symbol": "solid",
+      "radius": 4,
+      "shape": "square",
+      "skill_id": 89,
+      "area_override": false,
+      "preview_appearance": true,
+      "selection_preview": true,
+      "cast_preview": true,
+      "preview_fill": null,
+      "preview_outline": null,
+      "preview_symbol": null,
+      "preview_opacity": null
+    },
+    "83": {
+      "enabled": true,
+      "fill": "#800002",
+      "outline": "#303030",
+      "opacity": 70,
+      "symbol": "solid",
+      "radius": 0,
+      "shape": "point",
+      "skill_id": 83,
+      "area_override": false,
+      "preview_appearance": true,
+      "selection_preview": true,
+      "cast_preview": true,
+      "preview_fill": null,
+      "preview_outline": null,
+      "preview_symbol": null,
+      "preview_opacity": null
+    }
+  }
 }

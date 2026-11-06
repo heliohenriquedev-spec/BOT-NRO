@@ -7,6 +7,7 @@ from .quest_routes import QuestRoutes, load, save, STAGE_FIELDS, text
 from .packet_encoder import move, STAND
 from .portals import PortalGuard
 from .quest_library_relay import SharedQuestRelay
+from .database_hunt import DATABASE_HUNT, database_hunt_route, goal_reached
 
 
 class QuestRelay(SharedQuestRelay):
@@ -25,6 +26,9 @@ class QuestRelay(SharedQuestRelay):
         self.quest_hunt_id=None
 
     def quest_control(self,command,request,game_gate):
+        if command in ('quest_start','quest_resume','quest_hunt_database','quest_test_route','quest_test_stage_route',
+                       'quest_map_test','quest_record','quest_map_record','quest_bg_record'):
+            self.bg_attempt=None  # another task takes over: no more BG retries afterwards
         from . import map_routes, quest_daily, quest_extras
         try:self.quests.extras=quest_extras.for_character(quest_extras.load(),(self.own_look or {}).get('name'))
         except OSError as exc:print('[ROTA] '+str(exc))  # keeps the last read
@@ -56,6 +60,8 @@ class QuestRelay(SharedQuestRelay):
             if self.quests.active:self.quests.map_routes=map_routes.adopt_inner_portals(map_routes.load(),self.portals);self.quests.slot_owner=quest_daily.load_slots()
         elif command.startswith('quest_map_'):
             self.map_route_control(command,request,game_gate)
+        elif command.startswith('quest_bg_'):
+            self.bg_control(command,request,game_gate)
         elif command=='quest_test_stage_route':
             if self.quests.active or self.quests.recording:raise ValueError('Pause a fila e encerre a gravacao antes de testar')
             if not self.allow_commands or self.upstream is None or not game_gate():raise ValueError('Entre no personagem antes de testar')
@@ -144,7 +150,23 @@ class QuestRelay(SharedQuestRelay):
             self.quests.slot_owner=quest_daily.load_slots()
             self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
             print('[ROTA] '+self.quests.reason)
-        elif command=='quest_stop':self.quest_stop('Fila pausada pelo usuario')
+        elif command=='quest_hunt_database':
+            # Database -> "Cacar": travel along the recorded path to the map and hunt the chosen
+            # monsters there with the combat settings; a temporary quest, never saved in the queue.
+            if self.quests.recording:raise ValueError('Salve ou descarte o trajeto antes de cacar')
+            if not self.allow_commands:raise ValueError('Relay em modo somente observacao')
+            if self.upstream is None or not game_gate():raise ValueError('Entre no personagem antes de cacar')
+            if self.group_follower():raise ValueError('Desative o modo seguidor para cacar pela database')
+            from .npc_transports import as_entries
+            route=database_hunt_route(request,map_routes.load()+as_entries(self.npc_transports.known),self.tracker.observer.map_name,self.portals.destinations,self.tracker.observer.player)
+            self.quest_stop('Preparando caca pela database')
+            entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
+            self.know_quest_character()
+            self.quests.start(map_routes.apply([route],entries),time.monotonic(),map_routes=entries)
+            self.quests.slot_owner=quest_daily.load_slots()
+            self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
+            print(f"[ROTA] Caca pela database: {route['target_map']} ({len(route['species'])} monstros)")
+        elif command=='quest_stop':self.bg_attempt=None;self.quest_stop('Fila pausada pelo usuario')
         else:raise ValueError('Comando de rota desconhecido')
         if command in ('quest_start','quest_resume'):
             self.save_progress(time.monotonic(),force=True)
@@ -259,6 +281,131 @@ class QuestRelay(SharedQuestRelay):
             self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
         else:raise ValueError('Comando de rota de mapa desconhecido')
 
+    def bg_control(self,command,request,game_gate):
+        """Aba BG: record how this character joins each battleground queue, then replay it."""
+        from . import bg_entry, map_routes
+        q=self.quests;o=self.tracker.observer
+        if command=='quest_bg_record':
+            mode=bg_entry.check_mode(request.get('mode'))
+            if q.active or q.recording:raise ValueError('Pause a fila e encerre a gravacao anterior')
+            if self.upstream is None or not o.player_position_valid(time.monotonic()) or not o.map_name:
+                raise ValueError('Entre no personagem e aguarde a posicao antes de gravar')
+            self.quest_stop('Gravando entrada na BG '+mode);q.record('bg','travel')
+            q.recording.update(scope='bg',label='Entrada na BG '+mode,bg_mode=mode)
+            q.map=o.map_name;q.append(dict(kind='walk',map=o.map_name,position=list(o.player)))
+            q.reason='Gravando entrada na BG '+mode+': entre na fila no jogo e depois clique em Salvar gravacao'
+        elif command=='quest_bg_save':
+            recording=q.recording
+            if not recording or recording.get('scope')!='bg':raise ValueError('Nenhuma entrada de BG sendo gravada')
+            if recording.get('error') or self.native_frames.error:raise ValueError(recording.get('error') or self.native_frames.error)
+            entry=bg_entry.recorded_entry(recording['steps'],o.map_name,o.player)
+            bg_entry.save_entry(recording['bg_mode'],entry,bg_entry.npc_lines(recording.get('observed_texts',[])))
+            q.recording=None;q.reason='NPC da BG '+recording['bg_mode']+' salvo'
+        elif command=='quest_bg_capture':
+            which=request.get('which')
+            if which not in ('error','queue'):raise ValueError('Mensagem desconhecida')
+            self.bg_capture=dict(which=which,until=time.monotonic()+bg_entry.CAPTURE_SECONDS)
+            q.reason=('Gravando mensagem de '+('erro' if which=='error' else 'sucesso')+': fale com o NPC da BG no jogo '
+                      +('quando ele nao deixar se inscrever' if which=='error' else 'e se inscreva'))
+        elif command=='quest_bg_cancel':
+            if q.recording and q.recording.get('scope')=='bg':q.recording=None;q.reason='Gravacao da BG descartada'
+        elif command=='quest_bg_enter':
+            modes=[bg_entry.check_mode(m) for m in (request.get('modes') or [request.get('mode')])]
+            modes=list(dict.fromkeys(modes))
+            missing=[m for m in modes if bg_entry.load().get(m) is None]
+            if missing:raise ValueError('Grave antes o NPC da BG '+', '.join(missing))
+            config=bg_entry.messages()
+            if not (config['error'] or config['queue']):raise ValueError('Grave a mensagem de erro ou a de sucesso na aba BG')
+            if q.active or q.recording:raise ValueError('Pause a fila e encerre a gravacao antes de entrar na BG')
+            if not self.allow_commands or self.upstream is None or not game_gate():raise ValueError('Entre no personagem antes')
+            if not o.map_name:raise ValueError('Aguarde carregar o mapa do personagem')
+            self.bg_attempt=dict(pending=modes,registered=[],index=0,config=config,stop_all=request.get('stop_all',True) is not False,
+                                 tries={m:0 for m in modes},next_at=None,queued=False,refused=False,answered=False)
+            self.bg_try(time.monotonic())
+        else:raise ValueError('Comando de BG desconhecido')
+
+    def bg_mode(self,attempt):
+        return attempt['pending'][attempt['index']%len(attempt['pending'])]
+
+    def bg_try(self,now):
+        """One attempt at the current BG's NPC: walk there and make the recorded choices."""
+        from . import bg_entry, map_routes
+        attempt=self.bg_attempt;mode=self.bg_mode(attempt);entry=bg_entry.load().get(mode)
+        if entry is None:self.bg_attempt=None;raise ValueError('NPC da BG '+mode+' removido')
+        q=self.quests;o=self.tracker.observer
+        entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
+        attempt['tries'][mode]+=1
+        attempt.update(next_at=None,queued=False,refused=False,answered=False)
+        q.start_validation(entry['steps'],entry['target_map'],now,mode='travel',label='BG '+mode,
+                           map_routes=entries,connect_from=o.map_name,known_routes=map_routes.apply(load(),entries))
+        q.reason=f"Inscrevendo na BG {mode} (tentativa {attempt['tries'][mode]})"
+        if len(attempt['pending'])>1:q.reason+=' • na fila de tentativas: '+', '.join(attempt['pending'])
+        if self.hunt:self.hunt.pause('Entrando na BG '+mode)
+        self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
+        print('[ROTA] '+q.reason)
+
+    def bg_observe(self,events):
+        """The NPC's answer to this attempt: queue message, error message or something else.
+        Also takes the line asked by "Gravar mensagem de erro/sucesso"."""
+        from .bg_entry import answer, message_line, save_message
+        capture=getattr(self,'bg_capture',None)
+        if capture and time.monotonic()>capture['until']:
+            self.bg_capture=capture=None;self.quests.reason='Gravacao da mensagem da BG expirou; clique de novo'
+        if capture:
+            for e in events:
+                line=message_line(e.get('text')) if e['kind']=='npc_dialog' else ''
+                if line:
+                    self.bg_capture=None
+                    saved=save_message(capture['which'],line)
+                    self.quests.reason=('Mensagem de '+('erro' if capture['which']=='error' else 'sucesso')+' gravada: '+saved)
+                    print('[ROTA] '+self.quests.reason);break
+        attempt=getattr(self,'bg_attempt',None)
+        if not attempt:return
+        for e in events:
+            if e['kind']=='npc_dialog' and e.get('text'):
+                attempt['answered']=True
+                kind=answer(e['text'],attempt['config'])
+                if kind=='queue':attempt['queued']=True
+                elif kind=='error':attempt['refused']=True
+
+    def bg_registered(self,attempt):
+        """In the queue: the queue message came, or (only the error message set) the NPC answered
+        this attempt without the error."""
+        if attempt['queued']:return True
+        return not attempt['config']['queue'] and attempt['answered'] and not attempt['refused']
+
+    def bg_tick(self,now):
+        """Tries the marked BGs' NPCs one after the other until registered. A BG that succeeds
+        leaves the list; with "parar tudo" the first success ends every attempt. Only the
+        player (Parar) or another task stops it before that."""
+        attempt=getattr(self,'bg_attempt',None)
+        if not attempt:return
+        q=self.quests;mode=self.bg_mode(attempt)
+        if attempt['queued'] or (not q.active and attempt['next_at'] is None and self.bg_registered(attempt)):
+            if q.active:self.quest_stop('Inscrito na BG '+mode)
+            attempt['registered'].append(mode);attempt['pending'].remove(mode)
+            print(f"[ROTA] Inscrito na BG {mode} (tentativa {attempt['tries'][mode]})")
+            if attempt['stop_all'] or not attempt['pending']:
+                self.bg_attempt=None
+                q.reason='Inscrito na BG '+', '.join(attempt['registered'])+' • tentativas encerradas';return
+            attempt['index']%=len(attempt['pending'])
+            attempt.update(next_at=now+1,queued=False,refused=False,answered=False)
+            q.reason='Inscrito na BG '+mode+'; continuando: '+', '.join(attempt['pending']);return
+        if q.active:return
+        if attempt['next_at'] is None:
+            why='o NPC recusou' if attempt['refused'] else 'inscricao nao confirmada'
+            attempt['index']=(attempt['index']+1)%len(attempt['pending'])
+            # Next NPC right away; a full round of refusals waits the configured interval.
+            wait=attempt['config']['retry_seconds'] if attempt['index']==0 else 1
+            attempt['next_at']=now+wait
+            q.reason=f"BG {mode}: {why}; proxima tentativa: BG {self.bg_mode(attempt)} em {wait} s"
+            print('[ROTA] '+q.reason)
+        elif now>=attempt['next_at']:
+            if self.upstream is None:return  # reconnecting: try again when the character is back
+            if self.commands_blocked or not self.allow_commands:
+                self.bg_attempt=None;q.reason='Tentativas da BG paradas: envios bloqueados';return
+            self.bg_try(now)
+
     def flush_daily(self):
         """Missions found done today (skipped or delivered) are remembered for the panel."""
         from . import quest_daily
@@ -326,7 +473,7 @@ class QuestRelay(SharedQuestRelay):
 
         Normal: every counted monster (finished ones too) and whoever attacks. With "ignorar":
         only monsters still missing kills, plus the ones marked to always attack."""
-        route=q.route;always=set(route.get('always_attack',[]))|self.attacker_species(time.monotonic())
+        route=q.route;hunted=set(route.get('always_attack',[]))|set(route['species']);always=set(route.get('always_attack',[]))|self.attacker_species(time.monotonic(),hunted)
         if route.get('ignore_finished') and route['kill_targets']:
             missing=set()
             for target,progress in zip(route['kill_targets'],q.progress()):
@@ -338,6 +485,7 @@ class QuestRelay(SharedQuestRelay):
         """Persist every changed counter/stage; unchanged packet batches do no disk writes."""
         from . import quest_progress
         q=self.quests
+        if any(r.get('id')==DATABASE_HUNT for r in q.routes or []):return  # keeps the queue's resume point
         state=q.progress_state()
         if state:state['character']=(self.own_look or {}).get('name')
         if not force and state==getattr(self,'progress_saved_state',None):return
@@ -386,6 +534,7 @@ class QuestRelay(SharedQuestRelay):
 
     async def quest_tick(self,game_gate):
         q=self.quests
+        self.bg_tick(time.monotonic())
         if not q.active and q.resume and self.tracker.observer.map_name and q.resume_after_move(self.tracker.observer.map_name,time.monotonic()):
             self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
         if not q.active:
@@ -437,8 +586,10 @@ class QuestRelay(SharedQuestRelay):
                 self.hunt.target_priority={int(k):v for k,v in (q.route.get('attack_priority') or {}).items()}
             elif not self.hunt.enabled:
                 self.quest_stop('Caca interrompida: '+self.hunt.reason);return True
-            if q.hunt_complete():
-                self.hunt.pause('Objetivo da quest concluido');q.finish_hunt(now);self.quest_hunt_id=None
+            goal=goal_reached(q.route,q.body.items(),now) if q.route['id']==DATABASE_HUNT else None
+            if goal:print('[ROTA] Meta da caca concluida: '+goal)
+            if goal or q.hunt_complete():
+                self.hunt.pause('Meta da caca concluida: '+goal if goal else 'Objetivo da quest concluido');q.finish_hunt(now);self.quest_hunt_id=None
                 if q.phase=='done':
                     reason=q.reason;self.quest_stop(reason);q.phase='done'
                 return True

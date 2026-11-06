@@ -265,3 +265,21 @@ class PanelLayout(QObject):
     def eventFilter(self,obj,event):
         if obj is self.panel and event.type()==QEvent.Resize:self.reflow()
         return False
+
+
+def dialogs_block_only_their_window():
+    """Dialogs opened with exec() were application-modal: while one was open (the item database,
+    the hunt window), Qt blocked the mouse on every other window of the bot, so the minimap and the
+    quest counter over the game could not be dragged or clicked. With a parent they are now
+    window-modal: they block only the window they came from; the overlays stay usable."""
+    from PySide6.QtWidgets import QDialog
+    if getattr(QDialog, '_window_modal_exec', False):
+        return
+    original = QDialog.exec
+
+    def exec_window_modal(self, *args):
+        if self.windowModality() == Qt.NonModal and self.parentWidget() is not None:
+            self.setWindowModality(Qt.WindowModal)
+        return original(self, *args)
+    QDialog.exec = exec_window_modal
+    QDialog._window_modal_exec = True

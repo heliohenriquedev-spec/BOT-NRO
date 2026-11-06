@@ -63,8 +63,21 @@ class ItemSourcesDialog(QDialog):
         fill(table, [[s['monster_name'] or f"Monstro {s['species_id']}", s['species_id'], chance(s), s['seen'],
                       ', '.join(maps.get(s['species_id'], [])[:8]) or '—'] for s in item['sources']])
         layout.addWidget(table, 1)
+        self.sources, self.table = item['sources'], table
+        buttons = QHBoxLayout(); layout.addLayout(buttons)
+        hunt = QPushButton('Cacar monstro selecionado'); hunt.clicked.connect(self.hunt); buttons.addWidget(hunt)
+        buttons.addStretch(1)
         close = QPushButton('Fechar'); close.clicked.connect(self.accept)
-        layout.addWidget(close)
+        buttons.addWidget(close)
+
+    def hunt(self):
+        row = self.table.currentRow()
+        if not 0 <= row < len(self.sources):
+            row = 0 if len(self.sources) == 1 else -1
+        if row < 0:
+            return
+        from .hunt_dialog import HuntDialog
+        HuntDialog(self, [self.sources[row]['species_id']]).exec()
 
 
 class DropDatabaseDialog(QDialog):
@@ -79,6 +92,10 @@ class DropDatabaseDialog(QDialog):
         self.typing.timeout.connect(self.reload)
         self.search.textChanged.connect(self.typing.start)
         layout.addWidget(self.search)
+        if species:
+            hunt = QPushButton('Cacar este monstro')
+            hunt.clicked.connect(self.hunt)
+            layout.addWidget(hunt)
         self.summary = QLabel(); layout.addWidget(self.summary)
         tabs = QTabWidget(); layout.addWidget(tabs, 1)
 
@@ -118,6 +135,10 @@ class DropDatabaseDialog(QDialog):
 
         self.timer = QTimer(self); self.timer.setInterval(2000); self.timer.timeout.connect(self.refresh)
         self.reload()
+
+    def hunt(self):
+        from .hunt_dialog import HuntDialog
+        HuntDialog(self, [self.species]).exec()
 
     def showEvent(self, event):
         super().showEvent(event); self.timer.start()

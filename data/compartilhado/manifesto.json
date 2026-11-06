@@ -1,12 +1,15 @@
 {
  "schema": 1,
  "files": {
-  "database.json": "9473f8f51653730c531c5a19d989ce6b4c12c09792abc4960f444f6581dd414c",
+  "database.json": "5d6b46681b4d4045069a03824f182dd39d9c48d8ba49f46d91e406703ef5385e",
   "rotas_quests.json": "8e82e6c2362710f19f54be7a20f54935204b1f931f257d6af806dafb5e9a56b5",
   "quadros_missoes.json": "22234d95e2a661c3f6eba2e37280f0fea1522c79611e549b431d73f8d846feb2",
   "rotas_mapas.json": "3fcd0b13b78e6c83cb5326c8eccdd5baa20402c60fd20048c5da08eab6190cc6",
-  "portais.json": "5c13a4cfda6a37cc1016f8789ebad9940ec04d3e9a83617f150ac34745274052",
-  "portais_internos.json": "cd11ea237092fd878e22e16a68934a3c64fad3831f7ea555075de4f28ee76e58",
+  "portais.json": "d87a84b2e4c0b0827f55e00f1f79a7165aebba2c5d06acab7180a1f679a7f516",
+  "portais_internos.json": "e4a4656e9cc9319bbe2bcec54f24337df98e4582865aacec71cfec1f71d77562",
+  "portais_destinos.json": "f191f8e726442d97eec8a5a236c553b629dcb0b024fb6b729f6c13b1e1a3d01d",
+  "npcs.json": "f9ec3ece8f64c8fb5c7837d244c8e007690d5f9d077e3a3763270980d14baed6",
+  "npc_transportes.json": "60f2c49d98eb57755b0672c780d9eb5b212baecabf7b875156684899b715507c",
   "quest_extras.json": "7ccaad376442658c4f6ab04c59f019665124ccffe34c022b0c290cbb166dc077",
   "gm_sinais.json": "9f30ad9781cab6977ab2a677ab2da0904fc5952d80ad0c46a39884f039c1864b"
  }

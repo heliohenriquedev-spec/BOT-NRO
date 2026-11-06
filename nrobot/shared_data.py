@@ -30,6 +30,9 @@ FILES = {'database.json':'data/database/observacoes.sqlite3',
          'portais.json': 'data/mapas/portais.json',
          'portais_internos.json': 'data/mapas/portais_internos.json',
          'portais_ampliados.json': 'data/mapas/portais_ampliados.json',
+         'portais_destinos.json': 'data/mapas/portais_destinos.json',
+         'npcs.json': 'data/mapas/npcs.json',
+         'npc_transportes.json': 'data/mapas/npc_transportes.json',
          'quest_extras.json': 'data/rede/quest_extras.json',
          'gm_sinais.json': 'data/jogadores/gm_sinais.json'}
 PERSONAL_LIBRARY = ('checked_missions',)
@@ -231,6 +234,29 @@ def merge_portals(mine, theirs, *, smallest=False, largest=False):
     return result
 
 
+def merge_destinations(mine, theirs):
+    result = copy.deepcopy(mine) if isinstance(mine, dict) else {}
+    for map_name, cells in (theirs or {}).items():
+        known = result.setdefault(map_name, {})
+        for cell, value in (cells or {}).items():
+            if cell not in known or (value.get('confirmed') and not known[cell].get('confirmed')):
+                known[cell] = copy.deepcopy(value)
+    return result
+
+
+def merge_npcs(mine, theirs):
+    """NPC cells of every map; a name learned on another PC fills a nameless one here."""
+    result = copy.deepcopy(mine) if isinstance(mine, dict) else {}
+    for map_name, cells in (theirs or {}).items():
+        known = result.setdefault(map_name, {})
+        for cell, value in (cells or {}).items():
+            if cell not in known:
+                known[cell] = copy.deepcopy(value)
+            elif value.get('name') and not known[cell].get('name'):
+                known[cell]['name'] = value['name']
+    return result
+
+
 def merge_extras(mine, theirs):
     """@voltar: the published one only where this PC has not learned its own; the numbers only
     for a PC that never set them."""
@@ -313,6 +339,14 @@ def merge(root=ROOT, log=print, force=False):
     if shared.get('portais_ampliados.json') is not None:
         # Areas proved by accidental warps: the larger one wins.
         result['portais_ampliados.json'] = merge_portals(own['portais_ampliados.json'], shared['portais_ampliados.json'], largest=True)
+    if shared.get('portais_destinos.json') is not None:
+        # Where each portal leads: a crossing seen here stays; inferred ways back give way to seen ones.
+        result['portais_destinos.json'] = merge_destinations(own.get('portais_destinos.json'), shared['portais_destinos.json'])
+    if shared.get('npc_transportes.json') is not None:
+        # NPCs that change the map: what this PC learned stays, the others' are added.
+        result['npc_transportes.json'] = merge_portals(own.get('npc_transportes.json'), shared['npc_transportes.json'])
+    if shared.get('npcs.json') is not None:
+        result['npcs.json'] = merge_npcs(own.get('npcs.json'), shared['npcs.json'])
     if shared['quest_extras.json'] is not None:
         result['quest_extras.json'] = merge_extras(own['quest_extras.json'], shared['quest_extras.json'])
     if shared['gm_sinais.json'] is not None:

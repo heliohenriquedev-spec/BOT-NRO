@@ -375,6 +375,10 @@ class PacketPanel(QMainWindow):
         self.quest_panel=QuestPanel()
         self.quest_panel.command_requested.connect(lambda command,values:self.command(command,**values))
         tabs.addTab(self.quest_panel,'Rota de quests')
+        from .bg_entry import BgPanel
+        self.bg_panel=BgPanel()
+        self.bg_panel.command_requested.connect(lambda command,values:self.command(command,**values))
+        tabs.addTab(self.bg_panel,'BG')
         self.notice = QLabel('Home inicia/pausa • Alt+Tab mantém a caça')
         self.notice.setWordWrap(True)
         layout.addWidget(self.notice)
@@ -726,6 +730,7 @@ class PacketPanel(QMainWindow):
                 self.skill_panel.update_catalog(state.get('learned_skills', []), state.get('own_effects', {}), state.get('buff_candidates', {}), state.get('rotation'))
             self.skill_panel.receive_buff_learning(state.get('buff_learning_result'))
             self.quest_panel.update_state(state)
+            self.bg_panel.update_state(state)
             self.rcx_panel.update_state(state)
             self.last_state = state
             self.update_overlay()
@@ -1034,6 +1039,8 @@ def main():
         merge(log=messages.append)
     except (OSError, ValueError) as exc:
         messages.append(f'Dados compartilhados nao aplicados: {exc}')
+    from .responsive_ui import dialogs_block_only_their_window
+    dialogs_block_only_their_window()  # an open dialog must not freeze the minimap/counter over the game
     window = PacketPanel()
     # Shown in the panel: a refused import used to go to a console nobody sees, leaving the
     # queue of quests empty without a word.

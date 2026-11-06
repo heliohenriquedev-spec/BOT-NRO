@@ -130,3 +130,42 @@ def test_land_protector_is_never_expanded_by_a_nearby_area_spell():
     ground = GroundCells()
     ground.observe([ground_skill(89, [10, 20]), entry()], now=100)
     assert ground.snapshot()['cells'] == [[10, 20]]
+
+
+def test_area_is_given_when_the_spell_announcement_comes_after_its_unit():
+    ground = GroundCells()
+    ground.observe([entry(5, [50, 60], effect_type=0x86)], now=100)
+    assert ground.snapshot()['cells'] == [[50, 60]]
+    assert ground.trace[-1]['what'] == 'sem_anuncio'
+    ground.observe([ground_skill(85, [50, 60])], now=100.4)  # Ira de Thor (Lord of Vermilion)
+    assert ground.snapshot()['cells'] == square(50, 60, 5)
+    assert ground.trace[-1]['what'] == 'area_tardia' and ground.trace[-1]['skill_id'] == 85
+
+
+def test_an_old_unit_does_not_take_a_later_spell_area():
+    ground = GroundCells()
+    ground.observe([entry(5, [50, 60], effect_type=0x86)], now=100)
+    ground.observe([ground_skill(85, [50, 60])], now=110)
+    assert ground.snapshot()['cells'] == [[50, 60]]
+
+
+def test_quagmire_single_unit_gets_its_5x5_area_and_full_units_stay_the_same():
+    ground = GroundCells()
+    ground.observe([ground_skill(92, [50, 60], level=5), entry(5, [50, 60], effect_type=0x8e)], now=100)
+    assert ground.snapshot()['cells'] == square(50, 60, 2)  # Pantano dos Mortos sent as one unit
+    full = GroundCells()
+    units = [entry(10+i, [48+i % 5, 58+i//5], effect_type=0x8e) for i in range(25)]
+    full.observe([ground_skill(92, [50, 60])]+units, now=100)
+    assert full.snapshot()['cells'] == square(50, 60, 2)
+
+
+def test_quagmire_without_announcement_and_other_unit_types_keep_the_received_cells():
+    ground = GroundCells()
+    ground.observe([entry(5, [50, 60], effect_type=0x8e)], now=100)
+    assert ground.snapshot()['cells'] == [[50, 60]]
+    other = GroundCells()  # a Storm Gust announcement does not enlarge a Quagmire unit
+    other.observe([ground_skill(89, [50, 60]), entry(5, [50, 60], effect_type=0x8e)], now=100)
+    assert other.snapshot()['cells'] == [[50, 60]]
+    sanctuary = GroundCells()
+    sanctuary.observe([ground_skill(70, [15, 20]), entry(10, [15, 20], effect_type=0x83)], now=100)
+    assert sanctuary.snapshot()['cells'] == [[15, 20]]

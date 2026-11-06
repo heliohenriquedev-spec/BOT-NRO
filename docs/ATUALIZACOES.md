@@ -15,6 +15,7 @@ e, ao atualizar, recebe tudo o que foi publicado nesse meio-tempo.
   - quests da fila (`rotas_quests.json`), com as missões, os IDs e o mapa de caça de cada uma;
   - quadros e missões (`quadros_missoes.json`);
   - rotas de mapa (`rotas_mapas.json`) e portais, inclusive os internos;
+  - para onde cada portal leva (`portais_destinos.json`) e os NPCs de cada mapa com nome (`npcs.json`);
   - o @voltar aprendido (`quest_extras.json`, só ele);
   - sinais de GM.
 - **Base de monstros** (`data/monstros_base`): IDs, nomes por mapa, HP e sprites.

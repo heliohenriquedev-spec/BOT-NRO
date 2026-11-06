@@ -49,6 +49,17 @@ def test_monsters_attacking_are_fought_above_the_ignore_limit(tmp_path):
     assert r.quest_species(q) == [1, 2, 1294]  # two: above the limit, all of them
 
 
+def test_hunted_monsters_hitting_back_do_not_count_toward_the_ignore_limit(tmp_path):
+    r, q = relay_with(tmp_path, counted_route())
+    now = time.monotonic()
+    r.settings = {**r.settings, 'ignore_attackers': 3}
+    r.inventory.observe([dict(kind='appearance', entity_id=110000000+i, species_id=s, position=[5, 5])
+                         for i, s in enumerate((1, 1, 1294, 1294))], now)
+    for i in range(4):
+        r.hunt.aggressors[110000000+i] = now
+    assert r.quest_species(q) == [1, 2]  # 2 targets + 2 others: only 2 count, both ignored
+
+
 def test_players_around_do_not_hold_the_trip_only_the_combat(tmp_path):
     async def scenario():
         r, q = relay_with(tmp_path, counted_route(), phase='travel')

@@ -95,7 +95,9 @@ def test_minimap_draws_and_resizes(tmp_path):
     point = minimap.cell_point([0, 59], minimap.view())
     assert point.x() < 10 and point.y() < 30  # north-up: highest y at the top
     minimap.grab()
-    assert minimap.pinned and minimap.width() == minimap.height()  # over the game's minimap: the map square only
+    from nrobot.minimap_overlay import COORDS
+    assert minimap.pinned and minimap.width()+COORDS == minimap.height()  # the game's minimap square + coordinates
+    assert minimap.coordinates_text() == 'teste  (10, 10)'
 
     class Click:
         def __init__(self, label): self.label = label
@@ -127,3 +129,39 @@ def test_own_shadow_is_drawn_on_the_view_centre_without_calibration():
     overlay.grab()
     assert drawn == []
     overlay.close()
+
+
+def test_minimap_names_npcs_portals_and_showmobs_on_hover():
+    from PySide6.QtWidgets import QApplication
+    from PySide6.QtGui import QImage
+    from nrobot.minimap_overlay import MinimapOverlay
+    app = QApplication.instance() or QApplication([])
+    minimap = MinimapOverlay()
+    minimap.ground = {'map': 'teste.gat', 'width': 60, 'height': 60, 'image': QImage(60, 60, QImage.Format_RGBA8888)}
+    minimap.update_state({'map_name': 'teste.gat', 'player_position': [5, 5],
+                          'npcs': [{'position': [10, 10], 'name': 'Médica'}],
+                          'portals': [{'position': [30, 30], 'margin': 2, 'to': 'kakashi'}],
+                          'viewpoint_marks': [{'position': [50, 50], 'name': 'Deca'}]})
+    view = minimap.view()
+    assert minimap.hover_text(minimap.cell_point([10, 10], view)) == 'NPC: Médica'
+    assert minimap.hover_text(minimap.cell_point([30, 30], view)) == 'Portal → kakashi'
+    assert minimap.hover_text(minimap.cell_point([50, 50], view)) == '@showmobs: Deca'
+    assert minimap.hover_text(minimap.cell_point([40, 20], view)) is None
+    minimap.grab()
+    minimap.set_pinned(False)
+    assert minimap.height() > minimap.width()
+    minimap.grab()
+    minimap.close()
+
+
+def test_showmobs_marks_reach_the_minimap_state_and_are_removed(tmp_path):
+    relay = _relay(tmp_path)
+    mark = lambda kind, ident, cell: dict(kind='viewpoint', npc_id=1, mark_type=kind, mark_id=ident, position=list(cell))
+    relay.observe_viewpoints([mark(1, 1, (10, 20)), mark(1, 2, (11, 21))], 100.0)
+    assert sorted(m['position'] for m in relay.current_viewpoint_marks(102.0)) == [[10, 20], [11, 21]]
+    relay.observe_viewpoints([mark(2, 1, (10, 20))], 101.0)
+    assert [m['position'] for m in relay.current_viewpoint_marks(102.0)] == [[11, 21]]
+    relay.observe_viewpoints([dict(kind='map_change', map='outro.gat', position=[1, 1])], 102.0)
+    assert relay.current_viewpoint_marks(103.0) == []
+    relay.observe_viewpoints([mark(1, 3, (5, 5))], 200.0)
+    assert relay.current_viewpoint_marks(200.0+relay.VIEWPOINT_TTL+1) == []  # stale marks expire

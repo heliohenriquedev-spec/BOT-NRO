@@ -1,0 +1,684 @@
+{
+ "areia": {
+  "144,195": {
+   "name": "Sala Vip",
+   "sprite": null
+  },
+  "180,165": {
+   "name": "Hospital da Suna",
+   "sprite": 837
+  },
+  "174,160": {
+   "name": "Teleportador - Suna",
+   "sprite": 991
+  },
+  "196,139": {
+   "name": "Reparador",
+   "sprite": 826
+  },
+  "146,110": {
+   "name": "Takeo",
+   "sprite": 991
+  },
+  "149,99": {
+   "name": "Biblioteca da Suna",
+   "sprite": 837
+  },
+  "149,89": {
+   "name": "Teleportador - Suna",
+   "sprite": 991
+  },
+  "161,25": {
+   "name": "Viajante Ninja",
+   "sprite": 59
+  },
+  "149,26": {
+   "name": "Saída da Areia",
+   "sprite": 837
+  },
+  "177,105": {
+   "name": "",
+   "sprite": 715
+  },
+  "148,239": {
+   "name": "",
+   "sprite": 837
+  },
+  "106,253": {
+   "name": "",
+   "sprite": 837
+  },
+  "101,234": {
+   "name": "Teleportador - Suna",
+   "sprite": 991
+  },
+  "92,235": {
+   "name": "",
+   "sprite": 837
+  },
+  "204,73": {
+   "name": "",
+   "sprite": 991
+  }
+ },
+ "ra_in01": {
+  "217,86": {
+   "name": "Viajante Ninja",
+   "sprite": null
+  },
+  "208,90": {
+   "name": "Livro de Registro",
+   "sprite": 894
+  },
+  "222,95": {
+   "name": "",
+   "sprite": 951
+  },
+  "212,94": {
+   "name": "Troca de Bandana",
+   "sprite": 99
+  },
+  "202,92": {
+   "name": "",
+   "sprite": 99
+  },
+  "219,95": {
+   "name": "",
+   "sprite": 837
+  },
+  "215,91": {
+   "name": "Estilista Vip",
+   "sprite": 819
+  },
+  "213,80": {
+   "name": "",
+   "sprite": 706
+  },
+  "199,91": {
+   "name": "",
+   "sprite": 99
+  }
+ },
+ "kakashi": {
+  "93,145": {
+   "name": "BattlePass",
+   "sprite": 831
+  },
+  "78,129": {
+   "name": "Torre Sangrenta",
+   "sprite": 64
+  },
+  "90,143": {
+   "name": "Comércio Shinobi",
+   "sprite": 505
+  },
+  "96,127": {
+   "name": "Vale Rops",
+   "sprite": 745
+  },
+  "92,127": {
+   "name": "Loja ROPs",
+   "sprite": 939
+  },
+  "78,133": {
+   "name": "Entrada - Gamakishi",
+   "sprite": 716
+  },
+  "78,132": {
+   "name": "",
+   "sprite": 715
+  },
+  "78,141": {
+   "name": "",
+   "sprite": 882
+  },
+  "78,145": {
+   "name": "",
+   "sprite": 882
+  },
+  "78,125": {
+   "name": "Bingo Book",
+   "sprite": 46
+  },
+  "78,121": {
+   "name": "Battleground",
+   "sprite": 819
+  },
+  "78,137": {
+   "name": "",
+   "sprite": 734
+  },
+  "87,140": {
+   "name": "Quadro de missões",
+   "sprite": 837
+  },
+  "78,149": {
+   "name": "",
+   "sprite": 65
+  },
+  "100,146": {
+   "name": "Arenas de Guerra",
+   "sprite": 60
+  },
+  "83,150": {
+   "name": "Retorno",
+   "sprite": 706
+  },
+  "75,152": {
+   "name": "",
+   "sprite": 423
+  },
+  "73,155": {
+   "name": "",
+   "sprite": 99
+  },
+  "115,140": {
+   "name": "",
+   "sprite": 831
+  },
+  "115,144": {
+   "name": "",
+   "sprite": 100
+  },
+  "78,117": {
+   "name": "Dojo",
+   "sprite": 953
+  },
+  "120,136": {
+   "name": "",
+   "sprite": 882
+  },
+  "123,140": {
+   "name": "",
+   "sprite": 831
+  },
+  "126,143": {
+   "name": "",
+   "sprite": 100
+  },
+  "72,158": {
+   "name": "",
+   "sprite": 869
+  },
+  "72,161": {
+   "name": "",
+   "sprite": 57
+  },
+  "78,113": {
+   "name": "Treasure Hunt",
+   "sprite": 935
+  },
+  "78,109": {
+   "name": "",
+   "sprite": 734
+  },
+  "83,107": {
+   "name": "",
+   "sprite": 56
+  },
+  "87,107": {
+   "name": "",
+   "sprite": 55
+  },
+  "87,175": {
+   "name": "",
+   "sprite": 46
+  },
+  "79,175": {
+   "name": "",
+   "sprite": 100
+  },
+  "83,175": {
+   "name": "",
+   "sprite": 882
+  },
+  "72,167": {
+   "name": "",
+   "sprite": 706
+  },
+  "72,170": {
+   "name": "",
+   "sprite": 123
+  }
+ },
+ "hospital2": {
+  "22,92": {
+   "name": "Enfermeira",
+   "sprite": 91
+  },
+  "40,85": {
+   "name": "Anbu Shiken",
+   "sprite": 882
+  },
+  "35,76": {
+   "name": "Enfermeira",
+   "sprite": 91
+  },
+  "16,74": {
+   "name": "Campo de Treinamento",
+   "sprite": 843
+  },
+  "25,70": {
+   "name": "Médica",
+   "sprite": 739
+  },
+  "59,73": {
+   "name": "Enfermeira",
+   "sprite": 91
+  },
+  "102,73": {
+   "name": "Enfermeira",
+   "sprite": 91
+  },
+  "110,26": {
+   "name": "Enfermeira",
+   "sprite": 91
+  },
+  "103,16": {
+   "name": "Hospital",
+   "sprite": 837
+  },
+  "72,14": {
+   "name": "Cozinheiro de Kiri",
+   "sprite": 931
+  },
+  "72,22": {
+   "name": "",
+   "sprite": 91
+  }
+ },
+ "yuno_fild07": {
+  "225,154": {
+   "name": "",
+   "sprite": 8
+  },
+  "224,154": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "232,165": {
+   "name": "",
+   "sprite": 8
+  },
+  "234,165": {
+   "name": "",
+   "sprite": 8
+  },
+  "228,165": {
+   "name": "",
+   "sprite": 8
+  },
+  "228,163": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "227,163": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "227,169": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "230,170": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "227,167": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "227,168": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "229,163": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "226,165": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "226,168": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "230,166": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "231,171": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "226,166": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "232,171": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "230,175": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "230,169": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "230,176": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "230,178": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "232,172": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "230,174": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "231,175": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "234,177": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "232,175": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "229,177": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "232,184": {
+   "name": "",
+   "sprite": 8
+  },
+  "231,176": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "232,176": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "232,178": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "229,173": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "241,176": {
+   "name": "",
+   "sprite": 8
+  },
+  "233,176": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "232,177": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "225,175": {
+   "name": "",
+   "sprite": 8
+  },
+  "232,174": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "231,173": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "233,177": {
+   "name": "",
+   "sprite": 8
+  },
+  "232,167": {
+   "name": "",
+   "sprite": 8
+  },
+  "242,184": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "225,159": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "227,165": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "230,164": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "225,161": {
+   "name": "",
+   "sprite": 8
+  },
+  "231,165": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "230,165": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "231,164": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "223,159": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "231,166": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "232,166": {
+   "name": "",
+   "sprite": 8
+  },
+  "229,158": {
+   "name": "",
+   "sprite": 8
+  },
+  "229,160": {
+   "name": "",
+   "sprite": 8
+  },
+  "231,170": {
+   "name": "",
+   "sprite": 8
+  },
+  "243,169": {
+   "name": "",
+   "sprite": 8
+  },
+  "251,185": {
+   "name": "",
+   "sprite": 8
+  },
+  "248,173": {
+   "name": "",
+   "sprite": 8
+  },
+  "249,174": {
+   "name": "",
+   "sprite": 8
+  },
+  "250,185": {
+   "name": "",
+   "sprite": 8
+  },
+  "248,189": {
+   "name": "",
+   "sprite": 8
+  },
+  "250,186": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "248,187": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "248,190": {
+   "name": "",
+   "sprite": 8
+  },
+  "234,164": {
+   "name": "",
+   "sprite": 8
+  },
+  "234,166": {
+   "name": "",
+   "sprite": 8
+  },
+  "234,167": {
+   "name": "",
+   "sprite": 8
+  },
+  "233,166": {
+   "name": "",
+   "sprite": 8
+  },
+  "232,163": {
+   "name": "",
+   "sprite": 8
+  },
+  "230,163": {
+   "name": "",
+   "sprite": 8
+  },
+  "233,163": {
+   "name": "",
+   "sprite": 8
+  },
+  "231,163": {
+   "name": "",
+   "sprite": 8
+  },
+  "222,156": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "221,156": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  },
+  "224,153": {
+   "name": "",
+   "sprite": 8
+  },
+  "222,154": {
+   "name": "Mula sem Cabesa",
+   "sprite": 8
+  }
+ },
+ "new_4-2": {
+  "92,99": {
+   "name": "Suporte BG",
+   "sprite": 882
+  },
+  "91,111": {
+   "name": "Troca - PB",
+   "sprite": 99
+  },
+  "99,112": {
+   "name": "Battleground 5x5",
+   "sprite": 806
+  },
+  "100,92": {
+   "name": "Retorno - CT",
+   "sprite": 706
+  },
+  "83,114": {
+   "name": "Battleground 3x3",
+   "sprite": 806
+  },
+  "115,114": {
+   "name": "Battleground 4x4",
+   "sprite": 806
+  }
+ },
+ "0022@cata": {
+  "80,140": {
+   "name": "Sabio de Dungeon",
+   "sprite": 55
+  }
+ },
+ "um_fild01": {
+  "118,280": {
+   "name": "Estranho Desesperado",
+   "sprite": 412
+  }
+ },
+ "gef_fild04": {
+  "135,90": {
+   "name": "",
+   "sprite": 445
+  },
+  "260,346": {
+   "name": "Shinobi da Névoa",
+   "sprite": 57
+  },
+  "259,358": {
+   "name": "",
+   "sprite": 119
+  }
+ },
+ "nevoa": {
+  "221,55": {
+   "name": "",
+   "sprite": 117
+  }
+ },
+ "ama_in01": {
+  "84,186": {
+   "name": "Kaishin",
+   "sprite": 939
+  },
+  "98,20": {
+   "name": "Suplementos Suna",
+   "sprite": 726
+  },
+  "102,28": {
+   "name": "Reparador",
+   "sprite": 826
+  },
+  "103,23": {
+   "name": "",
+   "sprite": 85
+  }
+ },
+ "0012@cata": {
+  "80,140": {
+   "name": "Sabio de Dungeon",
+   "sprite": 55
+  }
+ },
+ "moc_fild01": {
+  "239,382": {
+   "name": "",
+   "sprite": 119
+  }
+ }
+}

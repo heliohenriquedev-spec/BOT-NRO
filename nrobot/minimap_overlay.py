@@ -7,7 +7,11 @@ game: "+" / "-" resize it, the mouse wheel zooms around the character, dragging 
 
 Pinned (the default): exactly over the game's own minimap, which this client always draws in the
 top-right corner of its window, 128 pixels times the minimap zoom it keeps in the registry
-(UIRectInfo m_minimapZoomWnd). Only the map square is drawn there; a small button unpins it.
+(UIRectInfo m_minimapZoomWnd). Only the map square is drawn there, with the character's
+coordinates on a strip right below it; a small button unpins it.
+
+NPCs (cyan), monsters found by @showmobs (pink crosses) and portals (purple) show their name or
+destination map when the mouse rests on them.
 """
 import base64
 import json
@@ -16,12 +20,14 @@ import zlib
 import numpy as np
 from PySide6.QtCore import Qt, QPointF, QRectF
 from PySide6.QtGui import QColor, QFont, QGuiApplication, QImage, QPainter, QPainterPath, QPen
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QToolTip, QWidget
 
 from .radar_overlay import game_client_rect
 
 HEADER = 22
-FOOTER = 34
+FOOTER = 50
+COORDS = 16  # strip under the pinned minimap with the character's coordinates
+HOVER = 7  # pixels from a marker that show its name
 GAME_MINIMAP = 128  # pixels of the client's minimap at zoom 1
 UI_KEY = r'Software\Classes\VirtualStore\MACHINE\SOFTWARE\WOW6432Node\Gravity Soft\Ragnarok\UIRectInfo'
 
@@ -72,6 +78,7 @@ class MinimapOverlay(QWidget):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool | Qt.WindowDoesNotAcceptFocus)
+        self.setMouseTracking(True)  # names of NPCs, portals and @showmobs marks under the cursor
         self.apply_size()
 
     # -- data -------------------------------------------------------------------------
@@ -88,7 +95,7 @@ class MinimapOverlay(QWidget):
             screen = QGuiApplication.primaryScreen()
             ratio = screen.devicePixelRatio() if screen else 1
             self.pinned_side = max(32, round(GAME_MINIMAP*game_minimap_zoom()/ratio)+self.pin_side_adjust)
-            self.resize(self.side, self.side)
+            self.resize(self.side, self.side+COORDS)
         else:
             self.resize(self.side, self.side+HEADER+FOOTER)
         self.update()
@@ -197,6 +204,7 @@ class MinimapOverlay(QWidget):
         self.on_hover(True)
 
     def leaveEvent(self, event):
+        QToolTip.hideText()
         if self.drag is None:
             self.on_hover(False)
 
@@ -204,6 +212,35 @@ class MinimapOverlay(QWidget):
         if self.drag is not None:
             target = event.globalPosition()-self.drag
             self.move(int(target.x()), int(target.y()))
+            return
+        text = self.hover_text(event.position())
+        if text:
+            QToolTip.showText(event.globalPosition().toPoint(), text, self)
+        else:
+            QToolTip.hideText()
+
+    def hover_items(self):
+        """[(cell, text)] of the markers that have a name to show."""
+        items = []
+        for npc in self.state.get('npcs') or []:
+            items.append((npc['position'], 'NPC: '+(npc.get('name') or 'sem nome ainda (passe o mouse nele no jogo)')))
+        for portal in self.state.get('portals') or []:
+            items.append((portal['position'], 'Portal → '+portal['to'] if portal.get('to') else 'Portal (destino ainda não registrado)'))
+        for mark in self.state.get('viewpoint_marks') or []:
+            items.append((mark['position'], '@showmobs: '+(mark.get('name') or 'monstro')))
+        return items
+
+    def hover_text(self, point):
+        view = self.view()
+        if view is None or not self.map_rect().contains(point):
+            return None
+        best = None
+        for cell, text in self.hover_items():
+            spot = self.cell_point(cell, view)
+            distance = max(abs(spot.x()-point.x()), abs(spot.y()-point.y()))
+            if distance <= HOVER and (best is None or distance < best[0]):
+                best = (distance, text)
+        return best[1] if best else None
 
     def mouseReleaseEvent(self, event):
         if self.drag is None:
@@ -282,6 +319,7 @@ class MinimapOverlay(QWidget):
         painter.restore()
         if self.pinned:
             self.draw_pin(painter)
+            self.draw_coordinates(painter, QRectF(4, self.side, self.side-8, COORDS))
         else:
             self.draw_footer(painter, same_map)
 
@@ -343,6 +381,20 @@ class MinimapOverlay(QWidget):
         painter.setBrush(QColor(200, 200, 200))
         for monster in self.state.get('recent_entities', []):
             painter.drawEllipse(self.cell_point(monster.get('effective_position') or monster['position'], view), 2.2, 2.2)
+        for npc in self.state.get('npcs') or []:
+            point = self.cell_point(npc['position'], view)
+            painter.setPen(QPen(QColor(10, 40, 50), 1))
+            painter.setBrush(QColor(60, 220, 240))
+            diamond = QPainterPath()
+            diamond.moveTo(point+QPointF(0, -3.5)); diamond.lineTo(point+QPointF(3.5, 0))
+            diamond.lineTo(point+QPointF(0, 3.5)); diamond.lineTo(point+QPointF(-3.5, 0)); diamond.closeSubpath()
+            painter.drawPath(diamond)
+        painter.setPen(QPen(QColor(255, 90, 170), 1.8))
+        for mark in self.state.get('viewpoint_marks') or []:
+            point = self.cell_point(mark['position'], view)
+            painter.drawLine(point+QPointF(-3, -3), point+QPointF(3, 3))
+            painter.drawLine(point+QPointF(-3, 3), point+QPointF(3, -3))
+        painter.setPen(Qt.NoPen)
         for portal in self.state.get('portals', []):
             # Warp and the area the bot never walks into.
             point = self.cell_point(portal['position'], view)
@@ -374,8 +426,7 @@ class MinimapOverlay(QWidget):
             point = self.cell_point(hidden['position'], view)
             painter.setPen(QPen(QColor(255, 50, 50), 2))
             painter.setBrush(QColor(255, 50, 50, 90))
-            painter.drawEllipse(point, 5, 5)
-            painter.drawText(point+QPointF(7, -5), ('invisivel' if hidden.get('invisible_signal') else '?' if hidden.get('possible_hidden') else '@hide' if hidden.get('gm_invisible') else 'hide')+' '+(hidden.get('name') or str(hidden['entity_id']))+' (ultimo registro)')
+            painter.drawEllipse(point, 5, 5)  # marker only: no text over the minimap
         own = self.state.get('player_position')
         if own is not None:
             point = self.cell_point(own, view)
@@ -391,15 +442,30 @@ class MinimapOverlay(QWidget):
             painter.setPen(QColor(235, 235, 235))
             painter.drawText(rect, Qt.AlignCenter, '↗' if label == 'solta' else label)
 
+    def coordinates_text(self):
+        own = self.state.get('player_position')
+        name = (self.state.get('map_name') or (self.ground or {}).get('map') or '').replace('.gat', '')
+        if own is None:
+            return name or 'posição desconhecida'
+        return f"{name}  ({own[0]}, {own[1]})" if name else f"({own[0]}, {own[1]})"
+
+    def draw_coordinates(self, painter, rect):
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(QColor(12, 14, 20, 210))
+        painter.drawRect(QRectF(0, rect.top(), self.width(), rect.height()))
+        painter.setPen(QColor(235, 235, 235))
+        painter.drawText(rect, Qt.AlignCenter, self.coordinates_text())
+
     def draw_footer(self, painter, same_map):
         coverage = (self.route.get('coverage') or {}) if same_map else {}
         total = len(coverage.get('waypoints') or {})
         done = len(coverage.get('done') or [])
-        top = self.header+self.side+2
+        self.draw_coordinates(painter, QRectF(8, self.header+self.side+1, self.side-16, 15))
+        top = self.header+self.side+17
         painter.setPen(QColor(220, 220, 220))
         text = (f"Ciclo {coverage.get('cycle', 1)}: {done}/{total} pontos ({round(100*done/total)}%)" if total
                 else 'Patrulha ainda não iniciada neste mapa')
         painter.drawText(QRectF(8, top, self.side-16, 15), Qt.AlignLeft, text)
         painter.setPen(QColor(170, 175, 185))
         painter.drawText(QRectF(8, top+15, self.side-16, 15), Qt.AlignLeft,
-                         'verde falta • azul feito • amarelo rota • vermelho hide')
+                         'verde falta • azul feito • amarelo rota • ciano NPC • rosa @showmobs')

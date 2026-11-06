@@ -112,9 +112,14 @@ class MonsterPanel(QWidget):
         self.extract_button.clicked.connect(self.extract)
         row.addWidget(self.extract_button)
         layout.addLayout(row)
+        actions = QHBoxLayout()
         database = QPushButton('Database de itens e drops')
         database.clicked.connect(lambda: self.show_drops())
-        layout.addWidget(database)
+        actions.addWidget(database, 1)
+        hunt = QPushButton('Cacar monstro selecionado')
+        hunt.clicked.connect(self.hunt_selected)
+        actions.addWidget(hunt)
+        layout.addLayout(actions)
         self.summary = QLabel()
         layout.addWidget(self.summary)
         self.model = MonsterModel()
@@ -148,6 +153,14 @@ class MonsterPanel(QWidget):
             species = self.model.rows[self.model.visible[index.row()]]['species_id']
         dialog = DropDatabaseDialog(self, species=species)
         dialog.exec()
+
+    def hunt_selected(self):
+        index = self.table.currentIndex()
+        if not index.isValid():
+            self.summary.setText('Selecione um monstro na tabela para cacar.')
+            return
+        from .hunt_dialog import HuntDialog
+        HuntDialog(self, [self.model.rows[self.model.visible[index.row()]]['species_id']]).exec()
 
     def showEvent(self, event):
         super().showEvent(event)

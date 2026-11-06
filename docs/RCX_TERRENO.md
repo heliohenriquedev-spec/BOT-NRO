@@ -69,10 +69,17 @@ Proteger Terreno, Santuário e demais unidades explícitas usam as células rece
 a configuração de raio da prévia não amplia essas células.
 
 A exceção já existente são magias que anunciam uma área Ragnarok com unidade única
-DUMMYSKILL (0x86). Chuva de Meteoros, Nevasca, Lorde dos Kaos, Ira de Thor e Fúria da
-Terra podem usar esse tipo compartilhado. Só se associa uma área quando há anúncio
+DUMMYSKILL (0x86). Chuva de Meteoros (83), Nevasca (89), Ira de Thor (Lord of
+Vermilion, 85), Tempestade de Raios (Thunderstorm, 21) e Fúria da Terra (91) podem usar
+esse tipo compartilhado. Só se associa uma área quando há anúncio
 da mesma magia/conjurador em posição compatível (0117 ou 013E). Ela dura enquanto
 a unidade existir. Sem anúncio compatível, mostra-se somente a unidade recebida.
+O mesmo vale para magias de área com unidade própria do catálogo (Pântano dos Mortos/
+Quagmire 0x8E, Pneuma, Vulcão, Dilúvio, Gravidade...): com o anúncio da magia, a área é
+desenhada em volta da célula da magia, igual à que chegaria com todas as unidades. Santuário,
+Proteção do Terreno e armadilhas continuam só com as células recebidas. O aviso da magia pode
+chegar antes ou logo depois da unidade. Cada associação (ou falta dela) vai para
+caca_eventos.jsonl como "rcx_area".
 Essas áreas usam modelos Ragnarok, que podem diferir das customizações do NRO.
 
 Fontes dos IDs e modelos padrão:

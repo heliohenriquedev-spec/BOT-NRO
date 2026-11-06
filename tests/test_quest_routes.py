@@ -56,7 +56,7 @@ def test_portal_is_allowed_only_for_explicit_transition(engine,tmp_path):
 
 def test_missing_connection_pauses_instead_of_inventing_return(engine,tmp_path):
     engine.plan('unrecorded',[5,5],None,PortalGuard(tmp_path/'p'),0)
-    assert engine.phase=='paused' and 'Sem conexao' in engine.reason
+    assert engine.phase=='paused' and 'Sem caminho conhecido' in engine.reason
 
 
 def test_reuses_directed_connections_from_unchecked_routes(engine):

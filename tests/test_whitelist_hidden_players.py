@@ -88,16 +88,12 @@ def test_teleport_and_map_change_clear_hidden_markers():
     assert not g.snapshot([10,20],2)['shadow_details']
 
 
-def test_overlay_has_other_player_content_without_own_hide():
+def test_overlay_draws_nothing_over_the_game_for_other_hidden_players():
     from PySide6.QtWidgets import QApplication
     from nrobot.game_overlay import GameOverlay
     app=QApplication.instance() or QApplication([])
     overlay=GameOverlay();overlay.resize(1280,800)
     shadow=dict(entity_id=2003143,name='Outro',position=[10,20],gm_invisible=True,last_known=True)
     overlay.update_state({'presence':{'shadow_details':[shadow]}})
-    assert overlay.has_content() and overlay.other_hidden()==[shadow] and overlay.label() is None
-    drawn=[];overlay.draw_shadow=lambda *args:drawn.append(args)
-    overlay.grab()
-    assert not drawn  # no invented floor projection; the on-screen list/minimap is used
-    overlay.update_state({});assert not overlay.has_content()
+    assert not overlay.has_content() and overlay.label() is None  # minimap markers only
     overlay.close()

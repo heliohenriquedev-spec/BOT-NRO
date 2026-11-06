@@ -1,7 +1,7 @@
 {
- "version": "2026.11.05.4",
- "published_at": "2026-11-05T21:03:17",
- "notes": "Discord",
+ "version": "2026.11.06.1",
+ "published_at": "2026-11-06T00:15:20",
+ "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
   "CHANGELOG.md",
@@ -15,7 +15,10 @@
   "data/compartilhado/database.json",
   "data/compartilhado/gm_sinais.json",
   "data/compartilhado/manifesto.json",
+  "data/compartilhado/npc_transportes.json",
+  "data/compartilhado/npcs.json",
   "data/compartilhado/portais.json",
+  "data/compartilhado/portais_destinos.json",
   "data/compartilhado/portais_internos.json",
   "data/compartilhado/quadros_missoes.json",
   "data/compartilhado/quest_extras.json",
@@ -1422,6 +1425,7 @@
   "data/recursos/sprites_por_nome/미케닉_로봇_물리.png",
   "data/recursos/sprites_por_nome/새해인형.png",
   "data/recursos/sprites_por_nome/워그.png",
+  "data/rede/bg_entradas.json",
   "data/rede/especies_nro.json",
   "data/rede/habilidades_chao_validacao.json",
   "data/rede/identidades_cliente.json",
@@ -1442,6 +1446,8 @@
   "instalar.bat",
   "nrobot/__init__.py",
   "nrobot/ammo.py",
+  "nrobot/auto_routes.py",
+  "nrobot/bg_entry.py",
   "nrobot/capture_guard.py",
   "nrobot/catalog.py",
   "nrobot/changelog.py",
@@ -1449,6 +1455,7 @@
   "nrobot/client_frame_guard.py",
   "nrobot/combat_rotation.py",
   "nrobot/continuous_observer.py",
+  "nrobot/database_hunt.py",
   "nrobot/database_share.py",
   "nrobot/drop_db.py",
   "nrobot/drop_panel.py",
@@ -1461,6 +1468,7 @@
   "nrobot/grf_header.py",
   "nrobot/ground_cells.py",
   "nrobot/group_hunt.py",
+  "nrobot/hunt_dialog.py",
   "nrobot/immediate_monster_removal.py",
   "nrobot/item_names.py",
   "nrobot/kuchiyose_dialog.py",
@@ -1482,6 +1490,8 @@
   "nrobot/network_observer.py",
   "nrobot/network_targets.py",
   "nrobot/npc_labels.py",
+  "nrobot/npc_map.py",
+  "nrobot/npc_transports.py",
   "nrobot/own_summons.py",
   "nrobot/packet_controls.py",
   "nrobot/packet_encoder.py",
@@ -2126,5 +2136,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "51374e136886"
+ "files_digest": "1268727f3530"
 }
