@@ -1,7 +1,7 @@
 """The hunt patrol published by the developer: the same on every PC.
 
 How the character walks while hunting (patrol on, spacing, coverage, wall margin, give-up time,
-search radius, attackers ignored...) is taken from the developer's panel settings when publishing
+search radius, attackers ignored...; the combat tuning stays each character's or the map's) is taken from the developer's panel settings when publishing
 (data/compartilhado/caca_patrulha.json). On the other PCs it is received into
 data/rede/caca_patrulha.json and laid over every hunt the bot starts: the common hunt, the quest
 hunts and the database hunt. The developer's PC has no such file: its panel is the source.
@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FILE = ROOT/'data'/'rede'/'caca_patrulha.json'
 KEYS = ('patrol', 'radius', 'patrol_step', 'patrol_spacing', 'patrol_coverage', 'patrol_wall_margin',
-        'patrol_avoid_walls', 'patrol_give_up', 'ignore_attackers', 'target_defer', 'auto_movement',
+        'patrol_avoid_walls', 'patrol_give_up', 'ignore_attackers', 'auto_movement',
         'require_collision')
 
 

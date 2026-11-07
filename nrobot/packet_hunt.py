@@ -74,6 +74,7 @@ class PacketHunt:
         self.aggressors.clear()
         self.excluded_until.clear()
         self.blocked_until.clear()
+        self.wall_checks.clear()
         self.approach_cache = None
         self.attempts = 0
         self.ready_at = 0
@@ -114,6 +115,23 @@ class PacketHunt:
         check = self.wall_checks.get(identity)
         return bool(check and check[3] and now < check[0])
 
+    def refresh_wall_targets(self, candidates, collision, player, now):
+        """A wall classification belongs to positions, never permanently to an ID."""
+        if collision is None or player is None:
+            return
+        collision = collision.plain() if hasattr(collision, 'plain') else collision
+        for entity in candidates:
+            identity = entity['entity_id']
+            cached = self.wall_checks.get(identity)
+            if not cached or not cached[3]:
+                continue
+            point = tuple((entity.get('attack_positions') or [entity.get('effective_position', entity['position'])])[0])
+            clear = collision.line_clear(player, point)
+            if clear or math.dist(cached[1], player) > 3 or math.dist(cached[2], point) > 3:
+                self.wall_checks.pop(identity, None)
+                self.excluded_until.pop(identity, None)
+                self.record('target_wall_recheck', target_id=identity, line_clear=clear)
+
     def reachable_targets(self, candidates, collision, player, now):
         """Candidates in order of preference, leaving out the ones behind a wall."""
         if collision is None:
@@ -125,10 +143,11 @@ class PacketHunt:
             cached = self.wall_checks.get(e['entity_id'])
             if collision.line_clear(player, point):
                 wall = False  # nothing in between: no route to measure
+                self.wall_checks.pop(e['entity_id'], None)
             elif (cached and now < cached[0] and math.dist(cached[1], player) <= 3 and math.dist(cached[2], point) <= 3):
                 wall = cached[3]
             elif checked >= self.WALL_CHECKS:
-                break
+                continue  # expensive checks are bounded; still inspect later clear-line targets
             else:
                 checked += 1
                 wall = self.behind_wall(collision, player, point)
@@ -346,6 +365,9 @@ class PacketHunt:
 
     def observe(self, events, player_id, now, movement_motion=None):
         events = [{**e, 'kind': 'player_move'} if e['kind'] == 'move' and e.get('entity_id') == player_id and e.get('destination') is not None else e for e in events]
+        own_cast_response = player_id is not None and any(
+            e.get('source_id')==player_id and (e['kind'] in ('skill_cast','skill_damage')
+                or e['kind']=='skill_no_damage' and e.get('success') is True) for e in events)
         for event in events:
             kind = event['kind']
             if kind in ('map_change', 'map_transfer'):
@@ -410,6 +432,14 @@ class PacketHunt:
                                 origin=origin, destination=destination, position=position,
                                 partial_progress=progressed)
                     if progressed:
+                        self.pending = None
+                        self.ready_at = now+.05
+                    elif position == origin and own_cast_response:
+                        # The server stopped the walk on this cell to execute our skill. It has
+                        # not proved the next cell is a wall: retry the same path after the cast,
+                        # instead of adding fake obstacles and zigzagging around every skill.
+                        self.record('movement_interrupted_by_skill', target_id=self.pending['target_id'],
+                                    origin=origin, destination=destination, position=position)
                         self.pending = None
                         self.ready_at = now+.05
                     else:
@@ -514,6 +544,7 @@ class PacketHunt:
         if not self.enabled:
             self.last_action_at = None
             return None
+        self.refresh_wall_targets(state.get('recent_entities', []), collision, state.get('player_position'), now)
         if getattr(self, 'last_action_at', None) is None or self.target is not None or self.engaged is not None:
             self.last_action_at = now  # fighting is not standing still (skills go through the rotation)
         if self.pending is None and now-self.last_action_at > self.IDLE_LIMIT:

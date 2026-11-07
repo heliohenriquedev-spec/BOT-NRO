@@ -232,6 +232,7 @@ class SessionRelay(QuestRelay):
         self.char_list = b''
         self.manual_until = 0  # REDE-76: the bot yields while the player walks by hand
         self.manual_active = False
+        self.manual_walk_input = None  # live GameControls confirms a physical click in the game
         self.trails = {}  # REDE-76: walked cells per map, for the minimap
         self.trail_started = {}  # map -> when its trail began (cleared after TRAIL_KEEP)
         from .monster_db import load_captured
@@ -521,7 +522,11 @@ class SessionRelay(QuestRelay):
                     origin = 'mouse no jogo' if opcode == 0x8c else 'clique no jogo'
                     if self.capture_player(identity, origin):
                         break
-        if self.hunt is not None and 0xa7 in completed and not getattr(self, 'manual_movement', False):
+        native_walk = self.hunt is not None and 0xa7 in completed and not getattr(self, 'manual_movement', False)
+        physical_click = native_walk and (self.manual_walk_input is None or self.manual_walk_input())
+        if native_walk and not physical_click:
+            self.record_hunt({'kind': 'client_automatic_walk', 'target_id': self.hunt.target})
+        if physical_click:
             # REDE-76: a click on the ground hands control to the player for a moment only.
             if not self.manual_active:
                 self.record_hunt({'kind': 'manual_movement_override'})
@@ -812,6 +817,7 @@ class SessionRelay(QuestRelay):
 
     def map_combat_intent(self, combat, state, now):
         collision = self.collision_map()
+        self.hunt.refresh_wall_targets(state.get('recent_entities', []),collision,state.get('player_position'),now)
         def reachable(rows):
             rows = [e for e in rows if combat.distance(state,e) <= self.hunt.SEARCH_RADIUS
                     and self.hunt.excluded_until.get(e['entity_id'],0) <= now
@@ -851,13 +857,6 @@ class SessionRelay(QuestRelay):
         combat = self.active_map_combat()
         if combat and self.rotation is not None and state.get('player_position'):
             intent = self.map_combat_intent(combat,state,now)
-            if intent and intent['mode']=='emergency':
-                old_patrol=self.hunt.patrol
-                self.hunt.patrol=None
-                try:
-                    self.hunt.plan({**state,'recent_entities':[]},now,speed,collision=collision)
-                finally:self.hunt.patrol=old_patrol
-                return combat.emergency.retreat(state,self.hunt,collision,now,speed)
             recent=state['recent_entities']
             candidates=combat.candidates(state,self.rotation,now)
             if intent and intent['mode']=='control':
@@ -872,6 +871,12 @@ class SessionRelay(QuestRelay):
                 self.hunt.target=self.hunt.engaged=None
             self.hunt.target_priority = dict(combat.ranks)
             self.hunt.priority_target = intent['target_id'] if intent else None
+            if intent and self.hunt.engaged != intent['target_id']:
+                # Delayed damage from the previous fight must not override the map's current pick.
+                self.hunt.engaged = None
+            if intent and self.hunt.pending and self.hunt.pending.get('target_id') != intent['target_id']:
+                self.hunt.pending = None
+                self.hunt.ready_at = min(self.hunt.ready_at, now)
             if intent and self.hunt.target != intent['target_id']:
                 self.hunt.engaged = None
                 self.hunt.target = intent['target_id']
@@ -893,11 +898,18 @@ class SessionRelay(QuestRelay):
                 try:return self.hunt.plan(state,now,speed,collision=collision)
                 finally:self.hunt.melee_approach,self.hunt.kite=old_melee,old_kite
             if intent and intent['mode']=='control':
+                pending=self.hunt.pending
+                if pending and (pending['kind']!='move' or pending.get('target_id')!=intent['target_id']
+                                or pending.get('control_skill_id')!=intent['skill_id']):
+                    # A patrol/attack or the previous stun approach must not hold the urgent
+                    # silence approach at the old destination or at the longer stun range.
+                    self.hunt.pending=None
+                    self.hunt.ready_at=min(self.hunt.ready_at,now)
                 meta = next((s for s in state.get('learned_skills',[]) if s['skill_id']==intent['skill_id']),{})
                 if meta.get('range',0)>0:
                     from .combat_rotation import configured_range
                     profile = next((p for p in self.rotation.profiles if p['skill_id']==intent['skill_id']),{})
-                    state['engagement_range'] = configured_range(profile,meta)
+                    state['engagement_range'] = max(0,configured_range(profile,meta)-combat.control_margin(intent['skill_id'],self.rotation,state))
                 # Approach within the control skill range, not melee range. No damage before control.
                 old_melee,old_kite=self.hunt.melee_approach,self.hunt.kite
                 self.hunt.melee_approach=self.hunt.kite=False
@@ -905,7 +917,9 @@ class SessionRelay(QuestRelay):
                     action=self.hunt.plan(state,now,speed,collision=collision)
                 finally:
                     self.hunt.melee_approach,self.hunt.kite=old_melee,old_kite
-                return action if action is None or action['kind']=='move' else None
+                if action and action['kind']=='move':
+                    return {**action,'control_skill_id':intent['skill_id']}
+                return None
         if not self.group_follower():
             return self.hunt.plan(state,now,speed,collision=collision)
         leader_id=self.group_leader_id()
@@ -1342,6 +1356,10 @@ class SessionRelay(QuestRelay):
             collision = self.map_repository.get(base) if base else None
         if collision is not None:
             hazards=self.ground_hazards(time.monotonic())
+            own=self.tracker.observer.player
+            collision.cornered_by_hazards=bool(hazards and own is not None and self.cornered(collision,tuple(own),hazards))
+            if collision.cornered_by_hazards:
+                hazards=frozenset()  # boxed in by skill areas: routes may cross them
             collision.hazard_cells=hazards
             collision.set_forbidden(set(self.portals.cells(name))|set(hazards))
             collision.links = tuple(self.portals.links(name))
@@ -1365,9 +1383,36 @@ class SessionRelay(QuestRelay):
 
     def crosses_ground_hazard(self, origin, destination, now):
         settings=self.settings or {}
+        collision=self.collision_map()
+        if collision is not None and getattr(collision,'cornered_by_hazards',False):
+            return False  # cornered by skill areas (see cornered): crossing them is allowed
         return self.toxic_ground.crosses(origin,destination,now,
             include_active=bool(settings.get('avoid_ground_effects', True)),
             include_forecasts=bool(settings.get('predict_ground_effects', True)))
+
+    CORNERED_CELLS = 40  # fewer free cells than this around the character, with areas closing it in
+
+    def cornered(self, collision, origin, hazards):
+        """Boxed in by skill areas on the floor (or standing in one with no free cell close by): the
+        free ground reachable without crossing them is tiny. Bounded search, cached per area set."""
+        key=(id(collision),origin,hazards)
+        cached=getattr(self,'cornered_cache',None)
+        if cached and cached[0]==key:return cached[1]
+        from collections import deque
+        portals=set(self.portals.cells(self.tracker.observer.map_name))
+        def free(p):return collision.ground(p) and p not in hazards and p not in portals
+        starts=[origin] if free(origin) else [
+            (origin[0]+dx,origin[1]+dy) for dx in range(-2,3) for dy in range(-2,3) if free((origin[0]+dx,origin[1]+dy))]
+        seen=set(starts);queue=deque(starts)
+        while queue and len(seen)<self.CORNERED_CELLS:
+            x,y=queue.popleft()
+            for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
+                n=(x+dx,y+dy)
+                if n not in seen and free(n):
+                    seen.add(n);queue.append(n)
+        result=len(seen)<self.CORNERED_CELLS
+        self.cornered_cache=(key,result)
+        return result
 
     def server_collision_map(self):
         # Hazard avoidance must not distort prediction of paths the server actually walks.
@@ -1414,8 +1459,10 @@ class SessionRelay(QuestRelay):
                 include_active=bool((self.settings or {}).get('avoid_ground_effects',True)),
                 include_forecasts=bool((self.settings or {}).get('predict_ground_effects',True))) if collision is not None and origin in hazards else None
             if origin in hazards and destination is None:
-                if self.hunt:self.hunt.reason='nevoa toxica: sem saida segura confirmada'
-                return True
+                # No way out at all: holding still here kept the character idle for as long as the
+                # area lasted. The hunt goes on, walking over the area if it has to.
+                if self.hunt:self.hunt.reason='area de habilidade no chao sem saida: atravessando'
+                return False
             destination=destination or origin  # stop an already sent path before it enters the cloud
             payload=move(*destination)
             self.trace_map_send('bot',struct.unpack_from('<H',payload)[0],len(payload))
@@ -1474,24 +1521,29 @@ class SessionRelay(QuestRelay):
         log.write(json.dumps({'time': datetime.now().isoformat(), **event}, ensure_ascii=False)+'\n')
         log.flush()
 
-    SKILL_FAIL_WINDOW = 1.5  # s of offensive skills on one target without any confirmed hit
-    SKILL_FAIL_SENDS = 3
+    SKILL_FAIL_WINDOW = 2.0  # s of damage skills on one target without any confirmed hit
+    SKILL_FAIL_SENDS = 6
+    SKILL_FAIL_GAP = .6  # s: a longer pause between sends (manual control, a fight elsewhere) starts over
     SKILL_FAIL_RETURN = 1.0  # s before that target is taken again
 
     def note_skill_result(self, event):
         """Offensive skills sent and hits confirmed per target, for skill_failure_switch."""
         kind = event.get('kind')
         if kind == 'rotation_skill_sent' and event.get('role') == 'offensive':
+            combat = self.active_map_combat() if hasattr(self, 'active_map_combat') else None
+            if combat is not None and event.get('skill_id') in combat.control_skill_ids:
+                return  # stun/sleep/silence: control, not damage; their own retries apply
             now, target = time.monotonic(), event.get('target_id')
             track = getattr(self, 'skill_fail_track', None)
-            if track is None or track[0] != target:
-                track = [target, now, 0]
+            if track is None or track[0] != target or now-track[3] > self.SKILL_FAIL_GAP:
+                track = [target, now, 0, now]
             track[2] += 1
+            track[3] = now
             self.skill_fail_track = track
         elif kind in ('rotation_skill_confirmed', 'attack_confirmed', 'rotation_control_confirmed'):
             track = getattr(self, 'skill_fail_track', None)
             if track is not None and track[0] == event.get('target_id'):
-                self.skill_fail_track = [track[0], time.monotonic(), 0]
+                self.skill_fail_track = None
 
     def skill_failure_switch(self, state, now):
         """Many offensive skills on one target and none taking: go for the next monster close by now,
@@ -1499,7 +1551,8 @@ class SessionRelay(QuestRelay):
         track = getattr(self, 'skill_fail_track', None)
         hunt = self.hunt
         if (track is None or hunt is None or track[0] != hunt.target or track[2] < self.SKILL_FAIL_SENDS
-                or now-track[1] < self.SKILL_FAIL_WINDOW):
+                or now-track[1] < self.SKILL_FAIL_WINDOW or now-track[3] > self.SKILL_FAIL_GAP
+                or (self.manual_active and now < self.manual_until)):
             return False
         target = track[0]
         own = state.get('player_position')
@@ -1712,9 +1765,9 @@ class SessionRelay(QuestRelay):
         self.mob_scan.include_cached(self.viewpoint_marks, now, self.VIEWPOINT_TTL,
                                      self.quest_missing_species())
         collision = self.collision_map()
-        found = self.mob_scan.finish(observer.player, now, collision.walkable if collision is not None else None,collision=collision)
+        found = self.mob_scan.poll_finish(observer.player, now, collision=collision)
         if found:
-            self.record_hunt({'kind': 'showmobs_goal', **found})
+            self.record_hunt({'kind': 'showmobs_goal', 'calculation_ms': self.mob_scan.last_calculation_ms, **found})
             print(f"[ROTA] @showmobs: indo onde ha mais monstros da quest ({found['monsters']} de {found['total']} "
                   f"perto de {found['position']}, a {found.get('walk_cells')} celulas; soma por tipo: {found.get('species_counts',{})}).")
         elif self.mob_scan.map_failed(observer.map_name) and getattr(self, 'mob_scan_failed_note', None) != observer.map_name:
@@ -1810,13 +1863,16 @@ class SessionRelay(QuestRelay):
                     return False
                 if action['role'] == 'summon' and (entity.kind != 'monster' or max(math.dist(own, p) for own in observer.combat_positions(now) for p in entity.combat_bounds(now)[0]) > 12):
                     return False
-                if collision is not None and action['role'] == 'offensive' and not action.get('emergency_stage'):
+                if collision is not None and action['role'] == 'offensive':
+                    # Ground-skill/portal reservations constrain walking, not shooting. Keep
+                    # actual walls in the final range/line check without treating poison as one.
+                    attack_collision=collision.plain()
                     bounds, _ = entity.combat_bounds(now)
                     if (entity.destination is not None and not entity.position_bounds(now)[1]
-                        and not collision.line_clear([entity.x, entity.y], entity.destination)):
+                        and not attack_collision.line_clear([entity.x, entity.y], entity.destination)):
                         self.rotation.reason = 'movimento estimado contorna obstaculo; aguardando posicao segura'
                         return False
-                    if not all(collision.line_clear(own, point) for own in observer.combat_positions(now) for point in bounds):
+                    if not all(attack_collision.line_clear(own, point) for own in observer.combat_positions(now) for point in bounds):
                         self.rotation.reason = 'linha de ataque bloqueada; aproximando por rota livre'
                         return False
             elif action['target_id'] != observer.player_id:
@@ -1905,9 +1961,7 @@ class SessionRelay(QuestRelay):
                 for e in self.inventory.entities.values() if e.get('present_last_observation') and not e.get('dead')
                 and is_confirmed_monster(e,self.tracker.observer.player_id)]
             state.update(idle_summon_skill_id=combat.config['idle_summon']['skill_id'],idle_summon_clear=combat.idle_clear(state))
-        state['map_combat'] = {'active':combat is not None,'reason':combat.reason if combat else None,
-            'emergency': {'phase':combat.emergency.phase,'coelho_confirmed':combat.emergency.confirmed,
-                          'reason':combat.emergency.reason} if combat and combat.emergency else None}
+        state['map_combat'] = {'active':combat is not None,'reason':combat.reason if combat else None}
         state['toxic_ground']={'blocked_cells':len(self.ground_hazards(time.monotonic())),
             'predicted_casts':len(self.toxic_ground.forecasts)}
         state['player_focus'] = self.player_focus()
@@ -1956,6 +2010,9 @@ class SessionRelay(QuestRelay):
             scan = self.mob_scan.current_goal(observer.player, time.monotonic()) if self.quests.active else None
             state['showmobs_goal'] = {'position': scan} if scan else None
             state['showmobs_failed'] = bool(self.quests.active and self.mob_scan.map_failed(observer.map_name))
+            scan_job = getattr(self.mob_scan, '_finish_job', None)
+            state['showmobs_calculation'] = {'running': bool(scan_job and not scan_job['task'].done()),
+                'last_ms': self.mob_scan.last_calculation_ms, 'error': self.mob_scan.calculation_error}
             state['hunt'] = self.hunt.snapshot()
             if self.rotation is not None:
                 state['rotation'] = self.rotation.snapshot()
@@ -3263,11 +3320,8 @@ class SessionRelay(QuestRelay):
             if action['kind'] == 'move' and not self.hunt.auto_movement:
                 raise HuntTargetChanged('Movimentação automática desativada')
             group_follow = action.get('purpose') == 'group_follow'
-            retreat = action.get('purpose') == 'map_retreat'
-            if retreat and (self.active_map_combat() is None or not self.active_map_combat().emergency or self.active_map_combat().emergency.phase!='retreat'):
-                raise HuntTargetChanged('Retirada de emergencia nao esta ativa')
-            is_patrol = action.get('purpose') in ('patrol','group_follow','map_retreat')
-            move_limit = 4 if group_follow or retreat or not is_patrol else self.hunt.patrol.max_step
+            is_patrol = action.get('purpose') in ('patrol','group_follow')
+            move_limit = 4 if group_follow or not is_patrol else self.hunt.patrol.max_step
             if group_follow and not self.group_follower():
                 raise HuntTargetChanged('Modo seguidor nao esta ativo')
             if self.group_follower():
@@ -3279,7 +3333,7 @@ class SessionRelay(QuestRelay):
             if (not game_gate() or self.upstream is None or state['state'] != 'tracking'
                 or not observer.player_position_valid(time.monotonic()) or observer.player_id is None):
                 raise ValueError('Foco, personagem ou alvo recente não confirmado')
-            if is_patrol and (action['kind'] != 'move' or (not group_follow and not retreat and self.hunt.patrol is None)
+            if is_patrol and (action['kind'] != 'move' or (not group_follow and self.hunt.patrol is None)
                               or action['target_id'] is not None):
                 raise ValueError('Comando de patrulha inválido')
             captured = entity is not None and entity.kind == 'player' and self.player_target_allowed(entity.entity_id)
@@ -3294,7 +3348,7 @@ class SessionRelay(QuestRelay):
             player = observer.player
             target = None if is_patrol else entity.combat_bounds(time.monotonic())[0][0]
             # A monster across a wall is no reason to stop walking: the patrol is what gets there.
-            if is_patrol and not group_follow and not retreat:
+            if is_patrol and not group_follow:
                 combat=self.active_map_combat()
                 if combat:
                     interrupt=self.map_combat_intent(combat,state,time.monotonic()) is not None
@@ -3471,6 +3525,7 @@ async def run(args):
     if active_test or hunt_mode:
         from .packet_controls import GameControls
         controls = GameControls()
+        relay.manual_walk_input = lambda: controls.movement_input(relay.game_peer, relay.game_local)
     previous_key = False
     previous_hunt_key = False
     try:
@@ -3491,6 +3546,7 @@ async def run(args):
         while True:
             await asyncio.sleep(.02)
             if hunt_mode:
+                controls.movement_input(relay.game_peer, relay.game_local)
                 relay.process_control(lambda: controls.connected(relay.game_peer, relay.game_local))
                 relay.sync_map_behavior()
                 relay.finish_buff_learning(time.monotonic())
@@ -3584,9 +3640,7 @@ async def run(args):
                                 if relay.rotation is not None:
                                     state['engagement_range'] = relay.rotation.navigation_range(state, time.monotonic(), relay.hunt.target)
                                 action = relay.plan_group_or_hunt(state, time.monotonic(), relay.tracker.observer.walk_speed_ms, relay.collision_map())
-                                active_combat=relay.active_map_combat()
-                                emergency_active=bool(active_combat and active_combat.emergency and active_combat.emergency.phase)
-                                homun_sent = (not emergency_active and relay.group_combat_allowed()
+                                homun_sent = (relay.group_combat_allowed()
                                               and await relay.keep_homunculus_alive(time.monotonic()))
                                 if homun_sent and action is not None and action['kind'] != 'move':
                                     action = None
@@ -3600,7 +3654,10 @@ async def run(args):
                                     candidates = [e for e in state['recent_entities']
                                                   if relay.hunt.excluded_until.get(e['entity_id'], 0) <= now
                                                   and not relay.hunt.walled(e['entity_id'], now)]
-                                    if not relay.group_follower() and candidates and relay.hunt.target not in {e['entity_id'] for e in candidates}:
+                                    # The ordinary combat's own pick, only without a map behavior: with one, the
+                                    # map's decision is the only one (two pickers took turns overriding each other).
+                                    if (relay.active_map_combat() is None and not relay.group_follower() and candidates
+                                            and relay.hunt.target not in {e['entity_id'] for e in candidates}):
                                         candidate = min(candidates, key=lambda e: (relay.hunt.target_priority.get(e.get('species_id'), 1000),
                                                                                    math.dist(own, e.get('effective_position', e['position']))))
                                         if math.dist(own, candidate.get('effective_position', candidate['position'])) <= relay.hunt.SEARCH_RADIUS:

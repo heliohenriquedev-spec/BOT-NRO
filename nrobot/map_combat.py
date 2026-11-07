@@ -41,9 +41,8 @@ def validate(data):
             all_ids.append(row['skill_id'])
     if len(set(all_ids))!=len(all_ids):
         raise ValueError('Habilidade duplicada no comportamento')
-    if 'emergency' in data:
-        from .map_emergency import validate as emergency_validate
-        emergency_validate(data['emergency'])
+    # 'emergency' (Coelho x3, Fukai Kemuri and escape) was removed: never confirmed by the server and
+    # it left the character without hitting. Older profiles still load; the block is ignored.
     if 'engagement' in data:
         rule=data['engagement']
         expected={'radius','only_targeting_player','target_memory_seconds','no_basic_attack_species','no_chase_species'}
@@ -78,8 +77,18 @@ def validate(data):
             raise ValueError('Configuracao de rajada invalida')
     return copy.deepcopy(data)
 
+# The map behavior's combat replaces the ordinary one: these tuning values of the ordinary combat
+# (Combate tab) are not carried into a map with its own combat; the defaults are used instead.
+ORDINARY_COMBAT_KEYS=('skill_interval','skill_timeout','skill_attempts','target_defer','skill_global_delay',
+                      'limit_target_failures','defer_failed_targets','pvp_enabled','pvp_all','pvp_first','pvp_targets',
+                      'summon_queue_mode')
+
+
 def settings_for(config, base, learned):
+    from .packet_settings import DEFAULTS
     result=copy.deepcopy(base)
+    for key in ORDINARY_COMBAT_KEYS:
+        result[key]=copy.deepcopy(DEFAULTS[key])
     previous={p['skill_id']:p for p in base.get('skill_profiles',[])}
     known={s['skill_id']:s for s in learned if s.get('level',0)>0}
     profiles=[]
@@ -116,6 +125,8 @@ def settings_for(config, base, learned):
     return result
 
 class MapCombat:
+    SILENCE_RANGE=3  # approach before casting; do not chase the advertised outer range
+    PASSIVE_SILENCE_WAIT=2.0  # s a passive monster waits for the silence before being attacked anyway
     CONFIRM_WAIT=.15
     def __init__(self,config):
         self.config=validate(config)
@@ -124,20 +135,18 @@ class MapCombat:
         self.passive={r['species_id'] for r in config['passive_species']}
         self.history={}
         self.attacked=set()
+        self.passive_wait={}  # passive monster -> when the silence wait started
         self.targeting={}
         self.control_skill_ids={self.config['skills'][key]['skill_id'] for key in ('stun','sleep','silence')}
         self.pull_id=None
         self.reason='aguardando combate'
-        from .map_emergency import Emergency
-        self.emergency=Emergency(config['emergency']) if config.get('emergency') else None
 
     def observe(self,events,player_id,now):
-        if self.emergency:self.emergency.observe(events,player_id,now)
         for e in events:
             if e['kind'] in ('map_change','map_transfer'):
-                self.history.clear();self.attacked.clear();self.targeting.clear();self.pull_id=None
+                self.history.clear();self.passive_wait.clear();self.attacked.clear();self.targeting.clear();self.pull_id=None
             elif e['kind']=='remove':
-                self.attacked.discard(e['entity_id']);self.history.pop(e['entity_id'],None);self.targeting.pop(e['entity_id'],None)
+                self.attacked.discard(e['entity_id']);self.history.pop(e['entity_id'],None);self.passive_wait.pop(e['entity_id'],None);self.targeting.pop(e['entity_id'],None)
                 if self.pull_id==e['entity_id']:self.pull_id=None
             elif e['kind'] in ('normal_attack','skill_damage','skill_cast'):
                 source=e.get('source_id')
@@ -150,7 +159,6 @@ class MapCombat:
                     if e.get('target_id') not in (None,0,player_id):self.pull_id=e['target_id']
 
     def sent(self,action,now):
-        if self.emergency:self.emergency.sent(action,now)
         if action.get('control_status'):
             self.history.setdefault(action['target_id'],{})[action['control_status']]=now
         elif action.get('role')=='offensive':
@@ -262,6 +270,14 @@ class MapCombat:
                     and identity not in rotation.pending
                     and now>=max(rotation.ready.get(identity,0),cds.get(identity,cds.get(str(identity),0))))
 
+    def control_margin(self,skill_id,rotation,state):
+        if skill_id!=self.config['skills']['silence']['skill_id']:
+            return rotation.range_margin
+        from .combat_rotation import configured_range
+        meta=next((s for s in state.get('learned_skills',[]) if s['skill_id']==skill_id),{})
+        profile=next((p for p in rotation.profiles if p['skill_id']==skill_id),{})
+        return max(rotation.range_margin,configured_range(profile,meta)-self.SILENCE_RANGE)
+
     def control(self,entity,state,rotation,now,*,passive=False,release=False):
         status=self.statuses(entity)
         if status['silence'] or release and (status['stun'] or status['sleep']):return None
@@ -287,9 +303,6 @@ class MapCombat:
         return None
 
     def decide(self,state,rotation,now,*,current=None,reachable=None):
-        if self.emergency:
-            intent=self.emergency.intent(state,now,self.distance)
-            if intent:return intent
         entities=self.candidates(state,rotation,now)
         entities.sort(key=lambda e:(self.ranks[e['species_id']],self.distance(state,e),e['entity_id']))
         if reachable is not None:entities=reachable(entities)
@@ -300,6 +313,7 @@ class MapCombat:
                         if e.get('kind','monster')=='monster' and e.get('species_id') in self.controllers
                         and self.distance(state,e)<=self.config['control_radius']),
                        key=lambda e:self.distance(state,e))
+        if reachable is not None:threats=reachable(threats)
         waiting=None
         for e in threats:
             intent=self.control(e,state,rotation,now)
@@ -316,9 +330,15 @@ class MapCombat:
         if previous and kill['species_id'] in ({r['species_id'] for r in self.config['kill_priority'][:2]}):
             intent=self.control(previous,state,rotation,now,release=True)
             if intent:return intent
+        if kill['species_id'] in self.passive and self.statuses(kill)['silence']:
+            self.passive_wait.pop(kill['entity_id'],None)  # silenced: when it wears off, a new short wait
         if kill['species_id'] in self.passive and not self.statuses(kill)['silence']:
-            intent=self.control(kill,state,rotation,now,passive=True)
-            return intent or dict(target_id=kill['entity_id'],mode='control',skill_id=None,reason='Doki aguardando silencio disponivel')
+            # Silence first, but never for long: it was refused 17 times in 5 min and each Doki
+            # waited 13-33 s untouched (2026-11-06). Past PASSIVE_SILENCE_WAIT it is simply attacked.
+            since=self.passive_wait.setdefault(kill['entity_id'],now)
+            if now-since<self.PASSIVE_SILENCE_WAIT:
+                intent=self.control(kill,state,rotation,now,passive=True)
+                return intent or dict(target_id=kill['entity_id'],mode='control',skill_id=None,reason='Doki aguardando silencio disponivel')
         reason='aproximando alvo visivel em area livre' if kill['entity_id']==self.pull_id and rule and self.distance(state,kill)>rule['radius'] else 'prioridade de morte'
         return dict(target_id=kill['entity_id'],mode='kill',skill_id=None,reason=reason)
 
@@ -340,17 +360,17 @@ class MapCombat:
                                or p['role']=='summon' and p['skill_id']==self.config.get('idle_summon',{}).get('skill_id')]
             try:return rotation.plan(self.idle_state(state),now,None)
             finally:rotation.profiles=original
-        if intent['mode']=='emergency':
-            self.reason=intent['reason']
-            return self.emergency.plan(state,rotation,now,intent)
         original=rotation.profiles
         species=next((e.get('species_id') for e in state.get('recent_entities',[]) if e['entity_id']==intent['target_id']),None)
         allowed={r['skill_id'] for r in self.config['skills']['offensives'] if self.offensive_allowed(r['skill_id'],species)} if intent['mode']=='kill' else {intent['skill_id']}
         rotation.profiles=[p for p in original if (p['role']=='buff' and p['skill_id'] in clear_buffs
-                              and (intent['mode']!='control' or intent['skill_id'] is None)) or p['skill_id'] in allowed]
+                              and intent['mode']!='control') or p['skill_id'] in allowed]
         old_priority=getattr(rotation,'control_priority',False)
         old_burst=rotation.burst
-        if intent['mode']=='control':rotation.burst=False
+        old_margin=rotation.range_margin
+        if intent['mode']=='control':
+            rotation.burst=False
+            rotation.range_margin=self.control_margin(intent['skill_id'],rotation,state)
         rotation.control_priority=intent['mode']=='control'
         try:
             action=None
@@ -365,6 +385,7 @@ class MapCombat:
             rotation.profiles=original
             rotation.control_priority=old_priority
             rotation.burst=old_burst
+            rotation.range_margin=old_margin
         self.reason=intent['reason']
         if action and action['role']=='offensive' and intent['mode']=='control':
             action={**action,'control_status':intent['status']}

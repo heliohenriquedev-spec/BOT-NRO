@@ -17,6 +17,22 @@ def test_settings_persist_and_reject_invalid_values(tmp_path):
         with pytest.raises(ValueError): validate(invalid)
 
 
+def test_map_buff_duration_and_clear_radius_survive_save_and_validation(tmp_path):
+    import copy
+    config=copy.deepcopy(DEFAULTS)
+    config['skill_profiles']=[dict(skill_id=532,role='buff',enabled=True,level=5,effect_id=207,
+                                  only_when_clear_radius=9),
+                              dict(skill_id=775,role='buff',enabled=True,level=1,effect_duration=15)]
+    path=tmp_path/'settings.json'
+    save(config,path)
+    saved=read(path)['skill_profiles']
+    assert saved[0]['only_when_clear_radius']==9 and saved[1]['effect_duration']==15
+    for key,value in [('only_when_clear_radius',True),('only_when_clear_radius',31),('effect_duration',float('nan'))]:
+        invalid=copy.deepcopy(config)
+        invalid['skill_profiles'][0][key]=value
+        with pytest.raises(ValueError):validate(invalid)
+
+
 def test_apply_settings_keeps_hunting_changes_filters_and_restores_only_recent_sightings(tmp_path):
     relay = SessionRelay('127.0.0.1', folder=tmp_path, allow_commands=True)
     relay.hunt = PacketHunt(patrol=True)

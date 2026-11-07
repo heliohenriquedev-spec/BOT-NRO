@@ -10,7 +10,6 @@
   "patrol_avoid_walls": true,
   "patrol_give_up": 10,
   "ignore_attackers": 3,
-  "target_defer": 2,
   "auto_movement": true,
   "require_collision": true
  }

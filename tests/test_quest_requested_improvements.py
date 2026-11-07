@@ -87,6 +87,20 @@ def test_showmobs_chooses_largest_combined_group_across_three_species():
     assert found['field'][1] <= found['position'][1] < found['field'][1]+50
 
 
+def test_overlapping_showmobs_fields_share_route_without_losing_density(monkeypatch):
+    scan=MobScan();scan.start('field',[1],0,True);scan.sent(1,0)
+    scan.observe([dict(kind='viewpoint',mark_type=1,npc_id=100+i,position=[10+i,10+i]) for i in range(6)],.1)
+    collision=CollisionMap(80,80,[1]*6400)
+    calls=[];route=collision.route
+    def measured(origin,target,**kwargs):
+        calls.append(tuple(target))
+        return route(origin,target,**kwargs)
+    monkeypatch.setattr(collision,'route',measured)
+    result=scan.finish([2,2],4,collision.walkable,collision)
+    assert result['monsters']==6 and result['total']==6 and result['position']==[15,15]
+    assert calls==[(15,15)]
+
+
 def test_showmobs_includes_live_cached_marks_from_prior_query_rounds():
     scan=MobScan();scan.start('field',[1],0,True);scan.sent(1,0)
     scan.observe([dict(kind='viewpoint',mark_type=1,npc_id=1,position=[48,48])],.5)
@@ -103,11 +117,11 @@ def scan_with(points,own,now=4,scan=None):
     return scan,scan.finish(own,now)
 
 
-def test_showmobs_selects_the_most_populated_fixed_50_cell_field():
+def test_showmobs_weighs_the_group_size_against_the_walk():
     near=[[10,10],[11,10],[12,10],[13,10]]
     far=[[60,60],[61,60],[60,61],[61,61],[62,60],[60,62]]
     _,found=scan_with(near+far,[5,5])
-    assert found['position'][0]>50 and found['monsters']==6
+    assert found['position'][0]<20 and found['monsters']==4  # 6 a long walk away are not worth more than 4 here
     huge=far+[[62,61],[61,62],[62,62],[63,60],[60,63],[63,61]]
     _,found=scan_with(near+huge,[5,5])
     assert found['position'][0]>50 and found['monsters']==12

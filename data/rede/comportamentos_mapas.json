@@ -3,7 +3,7 @@
     "schema": 2,
     "name": "ra_fild03 - controle e combate",
     "map": "ra_fild03",
-    "description": "Namekuji abaixo de 60% HP e sem monstro a 4 celulas. Jounin controlados a 9 celulas; com 3 ou mais, Coelho x3 + Fukai Kemuri e fuga como prioridade maxima. Salamandra sem autoataque; se estiver a ate 9 celulas, aproxima ao alcance das ofensivas, sem perseguir mais longe; evita a cruz de Venom Dust.",
+    "description": "Exemplo importavel para ra_fild03: prioriza combate proximo; adquire e aproxima de Ninkame, Jounin e Salamandra visiveis dentro de 9 celulas, sem perseguir Salamandras distantes nem usar ataque basico nelas. Namekuji abaixo de 60% HP e sem monstro a 4 celulas. Jounin controlados a 9 celulas; TsuutenKyaku nao e usada nos Jounin. A esquiva de habilidades de chao segue as opcoes normais de combate.",
     "enabled": true,
     "settings": {
       "skills": true,
@@ -99,20 +99,6 @@
           }
         ]
       },
-      "emergency": {
-        "species_id": 1634,
-        "minimum_count": 3,
-        "radius": 9,
-        "prepare_skill": {
-          "skill_id": 500,
-          "name": "Selo de Mao: Coelho"
-        },
-        "prepare_casts": 3,
-        "area_skill": {
-          "skill_id": 668,
-          "name": "Fukai Kemuri"
-        }
-      },
       "engagement": {
         "radius": 9,
         "only_targeting_player": true,
@@ -125,6 +111,7 @@
         ],
         "seek_when_clear": true,
         "proactive_species": [
+          1315,
           1177
         ],
         "approach_species": [
@@ -142,6 +129,11 @@
         "370": [
           1315,
           1831
+        ],
+        "62": [
+          1315,
+          1831,
+          1177
         ]
       },
       "burst": {

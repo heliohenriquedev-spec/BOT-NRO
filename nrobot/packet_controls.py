@@ -32,10 +32,12 @@ class GameControls:
     # time in combat, and that loop also forwards the server's packets to the game (2026-11-06).
     PID_TTL = 1.0  # s a found connection owner is reused
     MISS_TTL = .25  # s a missing one is reused
+    WALK_INPUT_TTL = .5  # tolerate packet framing/delivery after a real game click
 
     def __init__(self):
         self.owner_cache = {}  # (peer, local) -> (pid or None, checked at)
         self.exe_cache = {}  # pid -> is NRO.exe
+        self.last_walk_input = -float('inf')
         self.ui = C.WinDLL('user32')
         self.ui.GetForegroundWindow.restype = C.c_void_p
         self.ui.GetWindowThreadProcessId.argtypes = [C.c_void_p, C.POINTER(C.c_uint32)]
@@ -59,6 +61,23 @@ class GameControls:
 
     def focused(self, peer, local):
         return self._check_connection(peer, local, require_focus=True)
+
+    def movement_input(self, peer, local):
+        """A real left click in the game, including a short click between control ticks.
+
+        The client also emits walk packets by itself after an attack; those packets alone
+        are not evidence that the user took control. This reads input only, never simulates it.
+        """
+        now = time.monotonic()
+        pressed = bool(self.ui.GetAsyncKeyState(0x01) & 0x8001)
+        if not pressed and now-self.last_walk_input > self.WALK_INPUT_TTL:
+            return False
+        if not self.focused(peer, local):
+            self.last_walk_input = -float('inf')
+            return False
+        if pressed:
+            self.last_walk_input = now
+        return now-self.last_walk_input <= self.WALK_INPUT_TTL
 
     def _check_connection(self, peer, local, require_focus):
         if self.panic() or peer is None or local is None:

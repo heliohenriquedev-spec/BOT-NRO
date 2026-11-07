@@ -17,6 +17,9 @@ No answer or no useful group does not disable scanning: the patrol continues nor
 scheduled (or no-target) round retries. Three fully silent rounds raise a diagnostic warning only;
 they do not permanently disable the command because a later response may still arrive."""
 import math
+import asyncio
+import copy
+import time
 from collections import Counter, defaultdict
 
 from .portals import chebyshev
@@ -39,6 +42,8 @@ class MobScan:
     SILENT_ROUNDS = 3  # rounds with no mark at all: show a warning, then keep retrying
     KEEP_MARGIN = 1.25  # switch fields only if the new field is clearly denser
     FAR_SINGLE = 60  # walking cells: a lone monster farther than this is not a destination
+    MEASURED = 6  # biggest groups measured on foot each round
+    WALK_WEIGHT = 60.0  # walking cells that halve a group's worth
 
     def __init__(self):
         self.reset()
@@ -51,6 +56,7 @@ class MobScan:
         self.failed_maps.clear()
         self.silent = 0
         self.suspended = False
+        self._generation = getattr(self, '_generation', 0)+1
 
     def map_failed(self, map_name):
         from .portals import PortalGuard
@@ -63,6 +69,7 @@ class MobScan:
         self.goal = None
 
     def reset(self):
+        self._generation = getattr(self, '_generation', 0)+1
         self.map = None
         self.queue = []
         self.marks = []
@@ -75,6 +82,69 @@ class MobScan:
         self.goal = None
         self.goal_until = 0.0
         self.round_open = False
+        self.last_calculation_ms = None
+        self.calculation_error = None
+
+    def poll_finish(self, own, now, collision=None):
+        """Poll one isolated scan calculation; path searches never block the network loop.
+
+        The worker owns copied marks and a separate collision cache. A map/reset that happens
+        before it finishes invalidates its result, so an old scan cannot redirect a new hunt.
+        """
+        job = getattr(self, '_finish_job', None)
+        if job is not None:
+            if not job['task'].done():
+                return None
+            self._finish_job = None
+            if job['task'].cancelled():
+                return None
+            try:
+                worker, result, elapsed = job['task'].result()
+            except Exception as exc:
+                if job['generation'] == self._generation:
+                    self.round_open = False
+                    self.calculation_error = f'{type(exc).__name__}: {exc}'
+                return None
+            if job['generation'] != self._generation:
+                return None
+            for field in ('goal', 'goal_until', 'round_open', 'silent', 'suspended', 'failed_maps'):
+                setattr(self, field, getattr(worker, field))
+            self.last_calculation_ms = elapsed
+            self.calculation_error = None
+            return result
+        if not self.round_open or self.queue or now-self.sent_at <= self.LISTEN:
+            return None
+        if not self.mark_records or own is None:
+            return self.finish(own, now)  # no route search needed
+        worker = copy.copy(self)
+        worker.mark_records = dict(self.mark_records)
+        worker.marks = list(self.marks)
+        worker.queried_species = list(self.queried_species)
+        worker.failed_maps = set(self.failed_maps)
+        physical = None
+        if collision is not None:
+            from .map_navigation import CollisionMap
+            # Preserve portal avoidance, but changing skill hazards must not invalidate the
+            # component cache on every cast, nor alter a calculation already in progress.
+            forbidden = collision.forbidden-frozenset(getattr(collision, 'hazard_cells', ()))
+            key = (id(collision.cells), collision.width, collision.height, forbidden)
+            cached = getattr(self, '_worker_collision', None)
+            if cached is None or cached[0] != key:
+                physical = CollisionMap(collision.width, collision.height, collision.cells)
+                physical.set_forbidden(forbidden)
+                self._worker_collision = (key, physical)
+            else:
+                physical = cached[1]
+        origin = list(own)
+        def calculate():
+            started = time.perf_counter()
+            result = worker.finish(origin, now, physical.walkable if physical is not None else None,
+                                   collision=physical)
+            return worker, result, round((time.perf_counter()-started)*1000, 2)
+        task = asyncio.get_running_loop().create_task(asyncio.to_thread(calculate))
+        task.add_done_callback(lambda done: None if done.cancelled() else done.exception())
+        self._finish_job = {'task': task, 'generation': self._generation}
+        return None
 
     EARLY_GUARD = 15  # s: an early scan only when the scheduled one is at least this far off
     EARLY_INTERVAL = 10.0  # s: minimum time between scans started by the no-target trigger
@@ -155,7 +225,11 @@ class MobScan:
         if not self.round_open or self.queue or now-self.sent_at <= self.LISTEN:
             return None
         self.round_open = False
-        reachable=collision.reachable(own) if collision is not None and own is not None else None
+        # Skill areas on the floor come and go: standing in one left almost nothing "reachable" and
+        # the scan failed (whole map swept in line). Only real walls count here.
+        if collision is not None and hasattr(collision, 'plain'):
+            collision=collision.plain()
+        reachable=collision.reachable(own) if self.mark_records and collision is not None and own is not None else None
         records=[r for r in self.mark_records.values() if (walkable is None or walkable(r[0])) and (reachable is None or r[0] in reachable)]
         marks=[r[0] for r in records]
         self.silent = 0 if self.marks else self.silent+1
@@ -205,20 +279,33 @@ class MobScan:
                 unique[key]=item
         candidates=list(unique.values())
         candidates.sort(key=lambda c:(-len(c[1]),math.dist(c[2],own),c[0]))
-        best=candidates[0]
-        kept=next((c for c in candidates if self.goal is not None
-                   and c[3][0]-self.FIELD_SIZE/2 <= self.goal[0] < c[3][0]+self.FIELD_SIZE/2
-                   and c[3][1]-self.FIELD_SIZE/2 <= self.goal[1] < c[3][1]+self.FIELD_SIZE/2),None)
-        if kept and len(best[1]) <= len(kept[1])*self.KEEP_MARGIN:
-            best=kept
-        field,members,spot,center=best
-        if kept is best and self.goal is not None:
-            spot=tuple(min(members,key=lambda p:(math.dist(p,self.goal),math.dist(p,own),p)))
-        path=collision.route(own,list(spot),exact=True,max_nodes=12000) if collision is not None else None
-        if collision is not None and not path:
+        # Monsters against the walk: 4 Jounin 266 cells away were chosen over groups close by and
+        # kept for 3 minutes while the character drifted away (2026-11-06). The biggest groups are
+        # measured on foot and each is worth its size over (1 + cells/WALK_WEIGHT).
+        measured=[]
+        paths={}
+        for c in candidates[:self.MEASURED]:
+            spot=c[2]
+            if collision is not None and spot not in paths:
+                # Overlapping 50x50 windows often select the same central monster. Measure its
+                # route once per scan; density/counts still belong to each original window.
+                paths[spot]=collision.route(own,list(spot),exact=True,max_nodes=12000)
+            path=paths.get(spot)
+            if collision is not None and not path:
+                continue
+            cells=len(path)-1 if path else math.dist(c[2],own)
+            measured.append((len(c[1])/(1+cells/self.WALK_WEIGHT),c,path,cells))
+        if not measured:
             self.fail()
             return None
-        cells=len(path)-1 if path else math.dist(spot,own)
+        measured.sort(key=lambda m:(-m[0],m[3]))
+        best=measured[0]
+        kept=next((m for m in measured if self.goal is not None
+                   and m[1][3][0]-self.FIELD_SIZE/2 <= self.goal[0] < m[1][3][0]+self.FIELD_SIZE/2
+                   and m[1][3][1]-self.FIELD_SIZE/2 <= self.goal[1] < m[1][3][1]+self.FIELD_SIZE/2),None)
+        if kept and best[0] <= kept[0]*self.KEEP_MARGIN:
+            best=kept
+        _score,(field,members,spot,center),path,cells=best
         if len(members)<2 and cells>self.FAR_SINGLE:
             # One monster on the other side of the map is not worth the walk: keep patrolling.
             self.goal=None

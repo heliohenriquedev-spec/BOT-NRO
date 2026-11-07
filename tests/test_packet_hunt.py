@@ -14,6 +14,25 @@ def state(player, entities):
             'recent_entities': [{'entity_id': i, 'position': pos} for i, pos in entities]}
 
 
+@pytest.mark.parametrize('skill_confirmed',[True,False])
+def test_cast_stopping_walk_at_origin_does_not_invent_an_obstacle(skill_confirmed):
+    hunt=PacketHunt();hunt.start()
+    seen=state([10,10],[(20,[18,10])])
+    action=hunt.plan(seen,0)
+    hunt.sent(action,0)
+    events=[dict(kind='position',entity_id=1,position=[10,10])]
+    if skill_confirmed:
+        events.append(dict(kind='skill_damage',source_id=1,target_id=20,skill_id=523,level=10,damage_raw=1))
+    hunt.observe(events,1,.1)
+    assert hunt.pending is None
+    if skill_confirmed:
+        assert hunt.movement_failures==0 and not hunt.blocked_until
+        assert any(e['kind']=='movement_interrupted_by_skill' for e in hunt.diagnostics)
+        assert hunt.plan(seen,.2)['destination']==action['destination']
+    else:
+        assert hunt.movement_failures==1 and tuple(action['destination']) in hunt.blocked_until
+
+
 def test_hunt_keeps_moving_target_and_waits_for_each_confirmation():
     hunt = PacketHunt()
     initial = state([0, 0], [(20, [8, 0]), (21, [12, 0])])

@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -76,14 +76,9 @@ def test_control_nine_and_three_jounin_take_absolute_combat_priority(config):
     assert c.decide(s,r,100)['skill_id']==179
     s['recent_entities'][0]['position']=[30,20]
     assert c.decide(s,r,100)['mode']=='kill'  # approach, then control on entering 9
-    for count,trigger in [(2,False),(3,True),(4,True)]:
-        c,r,s=setup(config,[entity(10+i,1634,26+i) for i in range(count)])
-        s['learned_skills'].append(dict(skill_id=500,level=1,sp_cost=1,range=0,target_flags=4))
-        intent=c.decide(s,r,100)
-        assert bool(intent and intent['mode']=='emergency')==trigger
-        if trigger:
-            a=c.plan(s,r,100)
-            assert a['skill_id']==500 and a['emergency_stage']=='prepare'
+    c,r,s=setup(config,[entity(10+i,1634,26+i) for i in range(4)])
+    intent=c.decide(s,r,100)
+    assert intent is None or intent['mode']!='emergency'  # no Coelho/Kemuri sequence any more
 
 def test_hp_received_preserved_on_map_transfer_and_new_connection_unknown():
     from nrobot.network_observer import Observer

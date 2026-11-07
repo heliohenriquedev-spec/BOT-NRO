@@ -1,4 +1,18 @@
 {
+ "7": {
+  "species_id": 7,
+  "maps": {
+   "kakashi": 0
+  },
+  "name": "Yondaime",
+  "max_hp": 2182227,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "kakashi": [
+    "Yondaime"
+   ]
+  }
+ },
  "8": {
   "species_id": 8,
   "maps": {
@@ -163,8 +177,8 @@
    "yuno_fild07": 0,
    "kakashi": 0
   },
-  "walk_speed_ms": 300,
-  "name": "Namekuji",
+  "walk_speed_ms": 150,
+  "name": "blade",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -191,7 +205,9 @@
     "Macaco Mico Meu",
     "Musashi",
     "Mymma Cetha",
-    "Yoriichi"
+    "Tobirama Senju",
+    "Yoriichi",
+    "blade"
    ],
    "moc_fild03": [
     "Namekuji"
@@ -327,7 +343,7 @@
    "gef_fild04": 0
   },
   "walk_speed_ms": 200,
-  "name": "Filhote de Cobra",
+  "name": "Filhote de cobra",
   "max_hp": 45,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -1384,15 +1400,19 @@
  "1324": {
   "species_id": 1324,
   "maps": {
-   "chunin": 0
+   "chunin": 0,
+   "06guild_03": 0
   },
   "captured_sprite": true,
-  "name": "Midoriya",
+  "name": "Manobra Arriscada",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
     "Midoriya"
+   ],
+   "06guild_03": [
+    "Manobra Arriscada"
    ]
   }
  },
@@ -1427,9 +1447,10 @@
   "species_id": 1327,
   "maps": {
    "izlu2dun": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "chunin": 0
   },
-  "name": "Neji Hyuuga",
+  "name": "Mukai Kohinata",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -1438,8 +1459,12 @@
    ],
    "0045@tower": [
     "Neji Hyuuga"
+   ],
+   "chunin": [
+    "Mukai Kohinata"
    ]
-  }
+  },
+  "captured_sprite": true
  },
  "1328": {
   "species_id": 1328,
@@ -1720,7 +1745,8 @@
    "0015@tower": 0,
    "0045@tower": 0,
    "0035@tower": 0,
-   "arenaflo": 0
+   "arenaflo": 0,
+   "chunin": 0
   },
   "name": "Natsu Dragneel",
   "max_hp": 2000000,
@@ -1737,6 +1763,9 @@
    ],
    "arenaflo": [
     "Natsu Dragneel"
+   ],
+   "chunin": [
+    "Natsu Dragneel"
    ]
   }
  },
@@ -1745,10 +1774,14 @@
   "symbol": "G_DARK_FRAME",
   "sprite_source": "dados do jogo",
   "maps": {
-   "arenaflo": 0
+   "arenaflo": 0,
+   "chunin": 0
   },
   "names_by_map": {
    "arenaflo": [
+    "Natsu Dragneel"
+   ],
+   "chunin": [
     "Natsu Dragneel"
    ]
   },
@@ -1762,13 +1795,17 @@
   "sprite_source": "dados do jogo",
   "maps": {
    "0015@tower": 0,
-   "arenaflo": 0
+   "arenaflo": 0,
+   "chunin": 0
   },
   "names_by_map": {
    "0015@tower": [
     "Doppo"
    ],
    "arenaflo": [
+    "Natsu Dragneel"
+   ],
+   "chunin": [
     "Natsu Dragneel"
    ]
   },
@@ -2162,7 +2199,7 @@
    "bat_c02": 0,
    "0022@cata": 0
   },
-  "name": "Hoshigaki Kisame",
+  "name": "Ootsutsuki Kabuto",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -2204,7 +2241,7 @@
    "new_4-2": 0,
    "bat_c02": 0
   },
-  "name": "Gangetsu Hozuki",
+  "name": "Black Yugan",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -2213,6 +2250,7 @@
     "Ootsutsuki Kabuto"
    ],
    "chunin": [
+    "Black Yugan",
     "Ootsutsuki Kabuto"
    ],
    "new_4-2": [
@@ -2331,8 +2369,17 @@
   "species_id": 1790,
   "symbol": "G_RAFFLESIA",
   "sprite_source": "dados do jogo",
-  "maps": {},
-  "names_by_map": {}
+  "maps": {
+   "chunin": 0
+  },
+  "names_by_map": {
+   "chunin": [
+    "Natsu Dragneel"
+   ]
+  },
+  "name": "Natsu Dragneel",
+  "max_hp": 2000000,
+  "walk_speed_ms": 150
  },
  "1829": {
   "species_id": 1829,
@@ -2455,11 +2502,12 @@
    "ve_fild03": 0,
    "bat_c02": 0,
    "hospital2": 0,
-   "yuno_fild07": 0
+   "yuno_fild07": 0,
+   "kakashi": 0
   },
-  "name": "Mula sem Cabesa",
+  "name": "Yondaime",
   "max_hp": 2300000,
-  "walk_speed_ms": 600,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "0015@tower": [
     "Black Over",
@@ -2489,6 +2537,9 @@
    ],
    "yuno_fild07": [
     "Mula sem Cabesa"
+   ],
+   "kakashi": [
+    "Yondaime"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -2617,16 +2668,19 @@
    "bat_c02": 0,
    "bat_c03": 0,
    "new_4-2": 0,
-   "bat_c01": 0
+   "bat_c01": 0,
+   "kakashi": 0
   },
-  "name": "Massacrento",
+  "name": "Ootsutsuki Kabuto",
   "max_hp": 2000000,
-  "walk_speed_ms": 112,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
+    "Anko",
     "Kaguya",
     "Massacrento",
-    "Ootsutsuki Kabuto"
+    "Ootsutsuki Kabuto",
+    "silas"
    ],
    "bat_c02": [
     "Hisoka",
@@ -2643,6 +2697,9 @@
    "bat_c01": [
     "Hisoka",
     "Kaguya"
+   ],
+   "kakashi": [
+    "Anko"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -2655,11 +2712,12 @@
    "bat_c03": 0,
    "bat_c01": 0
   },
-  "name": "Massacrento",
+  "name": "Ootsutsuki Kabuto",
   "max_hp": 2000000,
-  "walk_speed_ms": 112,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
+    "Anko",
     "Kaguya",
     "Massacrento",
     "Ootsutsuki Kabuto"

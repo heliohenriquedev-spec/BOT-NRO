@@ -93,7 +93,7 @@
  },
  "mensagens": {
   "error": "Ha um evento em andamento!",
-  "queue": "Ha um evento em andamento!",
+  "queue": "Deseja se registrar?",
   "retry_seconds": 5,
   "seen": [
    "Deseja se registrar?",

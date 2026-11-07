@@ -144,6 +144,14 @@ def validate(data, *, links_path=None):
         normalized.append({k: p[k] for k in ('skill_id', 'enabled', 'role', 'level', 'interval', 'effect_id')})
         if 'range_override' in p:
             normalized[-1]['range_override'] = distance
+        for key, minimum, maximum in (('effect_duration', 1, 86400), ('only_when_clear_radius', 1, 30)):
+            if key not in p:
+                continue
+            value=p[key]
+            if (p['role']!='buff' or type(value) not in (int,float) or not math.isfinite(value)
+                    or not minimum<=value<=maximum or key=='only_when_clear_radius' and type(value) is not int):
+                raise ValueError(f'{key}: valor invalido')
+            normalized[-1][key]=value
         for key, minimum, maximum in (('summon_duration', 0, 86400), ('summon_priority', 0, 999)):
             value = p.get(key, 0)
             if type(value) not in (int, float) or not math.isfinite(value) or not minimum <= value <= maximum:

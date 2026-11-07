@@ -54,6 +54,25 @@ def test_throws_take_their_turn_in_a_burst_and_the_ammo_is_swapped_in_that_turn(
     assert kinds[-1] == ('equip', 523)  # Shuriken's turn: equipped right there, not starved
 
 
+def test_alternating_throws_uses_ready_kunai_when_shuriken_is_out_of_range():
+    rotation=CombatRotation([profile(523),profile(524)],burst=True)
+    rotation.last_throw=524
+    snapshot=state()
+    snapshot['learned_skills']=[dict(s,range=3) if s['skill_id']==523 else dict(s) for s in SKILLS]
+    snapshot['recent_entities'][0]['position']=[16,10]
+    action=rotation.plan(snapshot,10,20)
+    assert action['kind']=='skill' and action['skill_id']==524
+
+
+def test_alternating_throws_reads_server_cooldown_even_without_local_timer():
+    rotation=CombatRotation([profile(523),profile(524)],burst=True)
+    rotation.last_throw=524
+    snapshot=state()
+    snapshot['skill_cooldowns']={'523':30}
+    action=rotation.plan(snapshot,10,20)
+    assert action['kind']=='skill' and action['skill_id']==524
+
+
 def hunt_state(player, monster, engagement=6):
     return {'state': 'tracking', 'player_position_recent': True, 'player_position': player, 'player_sp': 999,
             'learned_skills': [], 'engagement_range': engagement,

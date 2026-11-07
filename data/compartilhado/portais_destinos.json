@@ -514,5 +514,15 @@
    ],
    "confirmed": true
   }
+ },
+ "chunin": {
+  "52,2": {
+   "map": "kakashi",
+   "arrival": [
+    112,
+    62
+   ],
+   "confirmed": true
+  }
  }
 }

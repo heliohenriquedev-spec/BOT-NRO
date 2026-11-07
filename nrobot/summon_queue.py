@@ -70,6 +70,8 @@ class SummonQueue:
         active = self.active
         if active['effect_id'] or active['expires_at'] is not None or active['skill_id'] != profile['skill_id']:
             return False
+        if active.get('visible_creatures'):
+            return False  # its living creature is still on screen: no probe/recast is needed
         # An unknown lifetime must not suspend maintenance forever. Probe only the
         # same summon, at its configured interval; this is not proof it has expired.
         return now-active.get('last_attempt_at', active['started_at'] or now) >= max(2, profile['interval'])
@@ -156,6 +158,7 @@ class SummonQueue:
             return  # an old summon's creature (e.g. back into view): not a new one
         if self.active is not None:
             self.active.setdefault('creatures', set()).add(creature_id)
+            self.active.setdefault('visible_creatures', set()).add(creature_id)
             self.active['confirmed'] = True
 
     def creature_gone(self, creature_id, now):
@@ -163,6 +166,7 @@ class SummonQueue:
         active = self.active
         if active is not None and creature_id in active.get('creatures', ()):
             active['creatures'].discard(creature_id)
+            active.get('visible_creatures', set()).discard(creature_id)
             if not active['creatures']:
                 self.finish(now, 'creature_gone')
 
@@ -172,6 +176,11 @@ class SummonQueue:
             if kind in ('map_change', 'map_transfer'):
                 self.reset()
                 continue
+            if self.active is not None and event.get('entity_id') in self.active.get('creatures', ()):
+                if kind=='appearance':
+                    self.active.setdefault('visible_creatures',set()).add(event['entity_id'])
+                elif kind=='remove':
+                    self.active.get('visible_creatures',set()).discard(event['entity_id'])
             entry = self.waiting or self.active
             if entry is None:
                 continue
@@ -249,7 +258,7 @@ class SummonQueue:
                            'duracao desconhecida: aguardando efeito vinculado ou duracao configurada')
 
     def snapshot(self, profiles, now):
-        active = {k:v for k,v in (self.active or {}).items() if k not in ('candidates', 'initial_effects', 'learn_until', 'creatures')}
+        active = {k:v for k,v in (self.active or {}).items() if k not in ('candidates', 'initial_effects', 'learn_until', 'creatures', 'visible_creatures')}
         if active:
             active['remaining_seconds'] = max(0, active['expires_at']-now) if active['expires_at'] else None
         return {'active': active or None, 'waiting_skill_id': self.waiting['skill_id'] if self.waiting else None,

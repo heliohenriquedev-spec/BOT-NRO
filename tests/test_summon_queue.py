@@ -215,6 +215,21 @@ def test_unknown_lifetime_probes_same_summon_only_after_interval():
     assert r.plan(s,31) is None
     assert r.plan(s,35) is None
 
+
+def test_unknown_lifetime_does_not_probe_a_visible_confirmed_creature():
+    q=SummonQueue();profile=p(700);profile['interval']=30
+    q.reserve(profile,0)
+    q.creature_created(110000001,.1)
+    assert not q.may_invoke(profile,60)
+    # Leaving the screen is not proof of death: the existing limited probe remains available.
+    q.observe([dict(kind='remove',entity_id=110000001,reason=0)],1,61)
+    assert q.active and q.may_invoke(profile,61)
+    q.observe([dict(kind='appearance',entity_id=110000001)],1,62)
+    assert not q.may_invoke(profile,62)
+    assert 'visible_creatures' not in q.snapshot([profile],62)['active']
+    q.creature_gone(110000001,63)
+    assert q.active is None and q.may_invoke(profile,63)
+
 def combat_with_summon(sp=100, reach=6):
     profiles=[p(700,0,10),dict(skill_id=800,role='offensive',enabled=True,level=1,interval=.1,effect_id=0)]
     s=state(profiles,sp=sp)

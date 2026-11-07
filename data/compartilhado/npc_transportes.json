@@ -658,7 +658,7 @@
       83,
       150
      ],
-     "name": ""
+     "name": "Retorno#f"
     },
     {
      "kind": "next",
@@ -679,10 +679,297 @@
     }
    ],
    "to": "hospital2",
-   "name": "",
+   "name": "Retorno#f",
    "arrival": [
     25,
     92
+   ]
+  },
+  "100,146>06guild_03>^9A32CDArena Suna^000000  [1]|Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Suna^000000  [1]"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "06guild_03.gat"
+    }
+   ],
+   "to": "06guild_03",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    48,
+    80
+   ]
+  },
+  "100,146>chunin>^9A32CDArena Chunin^000000 [0] |Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Chunin^000000 [0] "
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "chunin.gat"
+    }
+   ],
+   "to": "chunin",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    16,
+    19
+   ]
+  },
+  "100,146>chunin>^9A32CDArena Chunin^000000 [3] |Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Chunin^000000 [3] "
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "chunin.gat"
+    }
+   ],
+   "to": "chunin",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    48,
+    45
+   ]
+  },
+  "100,146>chunin>^9A32CDArena Chunin^000000 [5] |Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Chunin^000000 [5] "
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "chunin.gat"
+    }
+   ],
+   "to": "chunin",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    50,
+    51
+   ]
+  },
+  "100,146>chunin>^9A32CDArena Chunin^000000 [1] |Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Chunin^000000 [1] "
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "chunin.gat"
+    }
+   ],
+   "to": "chunin",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    68,
+    59
+   ]
+  },
+  "100,146>chunin>^9A32CDArena Chunin^000000 [4] |Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Chunin^000000 [4] "
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "chunin.gat"
+    }
+   ],
+   "to": "chunin",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    30,
+    48
+   ]
+  },
+  "100,146>chunin>^9A32CDArena Chunin^000000 [6] |Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Chunin^000000 [6] "
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "chunin.gat"
+    }
+   ],
+   "to": "chunin",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    36,
+    5
    ]
   }
  },

@@ -159,4 +159,9 @@ class ToxicGround:
                     if point not in hazards:left=True
                     elif left:valid=False;break
                 if valid:return destination
+        # Cornered: every way out crosses the area again (several clouds side by side). Walking over
+        # it beats standing inside, which left the character still next to a Salamandra (2026-11-06).
+        for index in range(min(4,len(path)-1),0,-1):
+            if physical.segment(origin,path[index],blocked,max_steps=4):
+                return path[index]
         return None

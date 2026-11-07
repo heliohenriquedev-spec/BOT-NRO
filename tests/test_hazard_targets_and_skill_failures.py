@@ -31,6 +31,40 @@ def test_monster_standing_in_poison_is_fought_from_the_cell_next_to_it():
     assert collision.route((10, 20), (20, 20), exact=True) is None  # never steps into it
 
 
+def test_final_skill_send_allows_ground_hazards_but_keeps_real_walls(tmp_path):
+    import asyncio
+    from nrobot.packet_settings import DEFAULTS
+    from nrobot.network_targets import Entity
+    async def scenario(wall):
+        relay=SessionRelay('127.0.0.1',folder=tmp_path,allow_commands=True)
+        relay.hunt=PacketHunt()
+        profile=dict(skill_id=525,role='offensive',enabled=True,level=10,interval=.5,effect_id=0)
+        relay.apply_settings(dict(DEFAULTS,species=[1037],auto_map_targets=False,skill_profiles=[profile]))
+        relay.hunt.start();relay.hunt.target=20
+        now=time.monotonic();o=relay.tracker.observer
+        o.player_id=1;o.player=[10,20];o.player_at=now;o.sp=100
+        o.skills[525]=dict(skill_id=525,level=10,sp_cost=1,range=6,target_flags=1)
+        o.registry.update(Entity(20,1037,14,20,now,'monster'))
+        cells=[1]*1600
+        if wall:cells[20*40+12]=0
+        collision=CollisionMap(40,40,cells)
+        collision.hazard_cells=frozenset({(14,20)})
+        collision.set_forbidden(collision.hazard_cells)
+        relay.collision_map=lambda:collision
+        class Writer:
+            def __init__(self):self.packets=[]
+            def write(self,data):self.packets.append(data)
+            async def drain(self):pass
+        relay.upstream=Writer()
+        action=relay.rotation.plan(relay.status(),now,20)
+        assert action is not None
+        sent=await relay.send_rotation_action(action,game_gate=lambda:True)
+        assert sent is (not wall) and bool(relay.upstream.packets) is (not wall)
+        assert not collision.walkable((14,20))  # walking still avoids the hazard
+    asyncio.run(scenario(False))
+    asyncio.run(scenario(True))
+
+
 def test_monster_cut_off_by_poison_gives_way_to_another_close_by_for_one_second():
     ring = {(x, y) for x in range(16, 25) for y in range(16, 25)} - {(20, 20)}
     collision = poisoned(ring)
@@ -55,19 +89,21 @@ def test_alone_in_poison_the_character_gets_as_close_as_the_area_allows():
 
 
 def relay_with_target(target, others):
-    relay = SimpleNamespace(hunt=PacketHunt(), skill_fail_track=None, events=[])
+    relay = SimpleNamespace(hunt=PacketHunt(), skill_fail_track=None, events=[], manual_active=False, manual_until=0,
+                            active_map_combat=lambda: None)
     relay.hunt.target = target
     relay.record_hunt = lambda event: relay.events.append(event)
-    relay.SKILL_FAIL_WINDOW, relay.SKILL_FAIL_SENDS, relay.SKILL_FAIL_RETURN = 1.5, 3, 1.0
+    for name in ('SKILL_FAIL_WINDOW', 'SKILL_FAIL_SENDS', 'SKILL_FAIL_GAP', 'SKILL_FAIL_RETURN'):
+        setattr(relay, name, getattr(SessionRelay, name))
     entities = [(target, [11, 10])]+[(i, [12+i, 10]) for i in others]
     return relay, state([10, 10], entities)
 
 
 def test_many_offensive_skills_without_a_hit_switch_target_and_come_back_in_one_second():
     relay, seen = relay_with_target(7, [8])
-    for _ in range(4):
+    for _ in range(8):
         SessionRelay.note_skill_result(relay, {'kind': 'rotation_skill_sent', 'role': 'offensive', 'target_id': 7})
-    relay.skill_fail_track[1] -= 2  # two seconds of skills without any confirmation
+    relay.skill_fail_track[1] -= 2.5  # 2.5 s of skills in a row without any confirmation
     now = time.monotonic()
     assert SessionRelay.skill_failure_switch(relay, seen, now)
     assert relay.hunt.target is None and abs(relay.hunt.excluded_until[7]-(now+1)) < 1e-6
@@ -76,14 +112,14 @@ def test_many_offensive_skills_without_a_hit_switch_target_and_come_back_in_one_
 
 def test_a_confirmed_hit_or_no_other_monster_keeps_the_target():
     relay, seen = relay_with_target(7, [8])
-    for _ in range(4):
+    for _ in range(8):
         SessionRelay.note_skill_result(relay, {'kind': 'rotation_skill_sent', 'role': 'offensive', 'target_id': 7})
     SessionRelay.note_skill_result(relay, {'kind': 'attack_confirmed', 'target_id': 7})
     assert not SessionRelay.skill_failure_switch(relay, seen, time.monotonic()+2)
     alone, seen = relay_with_target(7, [])
-    for _ in range(4):
+    for _ in range(8):
         SessionRelay.note_skill_result(alone, {'kind': 'rotation_skill_sent', 'role': 'offensive', 'target_id': 7})
-    alone.skill_fail_track[1] -= 2
+    alone.skill_fail_track[1] -= 2.5
     assert not SessionRelay.skill_failure_switch(alone, seen, time.monotonic())
     assert alone.hunt.target == 7
 
@@ -126,3 +162,39 @@ def test_monsters_all_beyond_the_poison_do_not_make_it_hop_between_them():
     action = hunt.plan(seen, 100, collision=collision)
     assert hunt.target == 1 and 1 not in hunt.excluded_until  # nobody else reachable: no switch
     assert action is not None and action['kind'] == 'move' and action['destination'][0] < 15
+
+
+def test_manual_pause_or_control_skills_never_trigger_the_switch():
+    relay, seen = relay_with_target(7, [8])
+    relay.active_map_combat = lambda: SimpleNamespace(control_skill_ids={76, 179, 182})
+    for _ in range(8):
+        SessionRelay.note_skill_result(relay, {'kind': 'rotation_skill_sent', 'role': 'offensive', 'target_id': 7, 'skill_id': 76})
+    assert relay.skill_fail_track is None  # silence retries are control, not damage
+    for _ in range(8):
+        SessionRelay.note_skill_result(relay, {'kind': 'rotation_skill_sent', 'role': 'offensive', 'target_id': 7, 'skill_id': 524})
+    relay.skill_fail_track[1] -= 2.5
+    relay.skill_fail_track[3] -= 3  # the last send was 3 s ago (player moving by hand): starts over
+    assert not SessionRelay.skill_failure_switch(relay, seen, time.monotonic())
+
+
+def test_cornered_inside_clouds_walks_over_them_instead_of_standing_still():
+    from nrobot.toxic_ground import ToxicGround
+    collision = CollisionMap(40, 40, [1]*1600)
+    # clouds side by side: every way out crosses another one after a free cell
+    clouds = {(x, y) for x in range(10, 31) for y in range(10, 31)} - {(19, 20), (21, 20)}
+    ground = ToxicGround()
+    ground.cells = lambda now, **k: frozenset(clouds)
+    destination = ground.escape(collision, (20, 20), set(), 0)
+    assert destination is not None and destination != (20, 20)
+
+
+def test_boxed_in_by_skill_areas_lets_routes_cross_them():
+    collision = CollisionMap(40, 40, [1]*1600)
+    ring = {(x, y) for x in range(14, 27) for y in range(14, 27)} - {(x, y) for x in range(18, 23) for y in range(18, 23)}
+    relay = SimpleNamespace(cornered_cache=None, CORNERED_CELLS=40,
+                            portals=SimpleNamespace(cells=lambda name: []),
+                            tracker=SimpleNamespace(observer=SimpleNamespace(map_name='m')))
+    assert SessionRelay.cornered(relay, collision, (20, 20), frozenset(ring))  # 25 free cells, closed in
+    open_field = {(x, 20) for x in range(14, 27)}
+    relay.cornered_cache = None
+    assert not SessionRelay.cornered(relay, collision, (20, 25), frozenset(open_field))

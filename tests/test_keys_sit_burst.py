@@ -75,7 +75,7 @@ def state(distance=2):
             'recent_entities': [{'entity_id': 20, 'position': [10+distance, 10], 'position_age_seconds': .1}]}
 
 
-def test_burst_sends_every_offensive_in_range_every_50_ms_without_waiting_answers():
+def test_burst_interleaves_skills_but_paces_retries_of_unanswered_requests():
     rotation = CombatRotation([profile(1001), profile(1002), profile(1003)], burst=True, burst_interval=.05)
     sent, now = [], 0.0
     while now < .6:
@@ -86,8 +86,11 @@ def test_burst_sends_every_offensive_in_range_every_50_ms_without_waiting_answer
         now = round(now+.01, 2)
     assert {skill for _, skill in sent} == {1001, 1002}
     gaps = [b[0]-a[0] for a, b in zip(sent, sent[1:])]
-    assert min(gaps) >= .05-1e-9 and max(gaps) <= .06
-    assert len(sent) >= 10 and not rotation.failures  # unanswered burst packets are not failures
+    assert min(gaps) >= .05-1e-9
+    for identity in (1001, 1002):
+        times = [t for t, skill in sent if skill == identity]
+        assert all(b-a >= rotation.BURST_RETRY-1e-9 for a,b in zip(times,times[1:]))
+    assert len(sent) >= 6 and not rotation.failures
 
 
 def test_server_cooldown_still_holds_a_skill_in_burst():
@@ -96,9 +99,21 @@ def test_server_cooldown_still_holds_a_skill_in_burst():
     skills = set()
     for step in range(10):
         action = rotation.plan(state(), step*.05, 20)
-        rotation.sent(action, step*.05)
-        skills.add(action['skill_id'])
+        if action is not None:
+            rotation.sent(action, step*.05)
+            skills.add(action['skill_id'])
     assert skills == {1002}
+
+
+def test_burst_confirmation_releases_retry_wait_and_server_cooldown_still_wins():
+    rotation = CombatRotation([profile(1001)], burst=True)
+    rotation.sent(rotation.plan(state(), 0, 20), 0)
+    assert rotation.plan(state(), .06, 20) is None
+    rotation.observe([dict(kind='skill_damage', skill_id=1001, source_id=1, target_id=20,
+                           level=10, damage_raw=10)], 1, .07)
+    assert rotation.plan(state(), .08, 20)['skill_id'] == 1001
+    rotation.observe([dict(kind='skill_cooldown', skill_id=1001, duration_ms=1000)], 1, .09)
+    assert rotation.plan(state(), .3, 20) is None
 
 
 def test_failure_rules_can_be_switched_off(tmp_path):

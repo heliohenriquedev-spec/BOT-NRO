@@ -30,6 +30,7 @@ def targeting(c,identity,now=100,target=1,kind='normal_attack'):
 def test_only_close_observed_targeting_and_target_changes(config):
     # Isolate target evidence from the profile's Salamandra approach exception.
     config['engagement']['approach_species']=[]
+    config['engagement']['proactive_species']=[1177]
     c,r,s=setup(config,[entity(10,1315),entity(11,1831)])
     assert c.decide(s,r,100) is None  # visibility alone is not aggression
     targeting(c,11)
@@ -218,12 +219,12 @@ def test_relay_does_not_chase_or_attack_salamandra(tmp_path,config):
         asyncio.run(relay.send_hunt_action(dict(kind='attack',target_id=110000001),game_gate=lambda:True))
     assert not relay.upstream.packets
 
-def test_unengaged_monsters_dont_become_chase_target(tmp_path,config):
+def test_nearby_ninkame_is_acquired_without_waiting_for_first_hit(tmp_path,config):
     relay,now=relay_for(tmp_path,config)
     add_monster(relay,110000001,1315,[25,20],now)
     action=relay.plan_group_or_hunt(relay.status(),now,150,relay.collision_map())
-    assert action is None or action.get('purpose')=='patrol'
-    assert relay.hunt.target is None
+    assert action and action['kind']=='move' and action['target_id']==110000001
+    assert relay.hunt.target==110000001
 
 def test_idle_summon_send_rechecks_all_monsters_under_lock(tmp_path,config):
     relay,now=relay_for(tmp_path,config)
@@ -266,7 +267,8 @@ def test_burst_profile_fast_offensives_but_cooldowns_and_controls_are_guarded(co
     r.sent(a,100)
     assert r.pending[370]['burst_sent']
     assert c.plan(s,r,100.04) is None
-    assert c.plan(s,r,100.06)['skill_id']==370
+    assert c.plan(s,r,100.06) is None  # same unconfirmed request is paced; other skills remain independent
+    assert c.plan(s,r,100.21)['skill_id']==370
     s['skill_cooldowns']={370:150}
     assert c.plan(s,r,100.06) is None
     # Negative status attempts remain non-burst and await their own confirmation.

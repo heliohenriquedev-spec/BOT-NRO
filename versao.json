@@ -1,6 +1,6 @@
 {
- "version": "2026.11.06.8",
- "published_at": "2026-11-06T17:50:57",
+ "version": "2026.11.06.9",
+ "published_at": "2026-11-06T21:32:17",
  "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
@@ -53,6 +53,7 @@
   "data/monstros_base/sprites/1315.png",
   "data/monstros_base/sprites/1324.png",
   "data/monstros_base/sprites/1325.png",
+  "data/monstros_base/sprites/1327.png",
   "data/monstros_base/sprites/1328.png",
   "data/monstros_base/sprites/1329.png",
   "data/monstros_base/sprites/1381.png",
@@ -1486,7 +1487,6 @@
   "nrobot/map_behavior.py",
   "nrobot/map_behavior_panel.py",
   "nrobot/map_combat.py",
-  "nrobot/map_emergency.py",
   "nrobot/map_monsters.py",
   "nrobot/map_navigation.py",
   "nrobot/map_routes.py",
@@ -2149,5 +2149,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "04f9429e9487"
+ "files_digest": "e1c68c340d88"
 }

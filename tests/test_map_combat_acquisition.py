@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import pytest
 from nrobot.map_combat import MapCombat
-from test_map_combat import state,entity
+from test_map_combat import state,entity,rotation
 from test_map_combat_focus import setup,targeting,relay_for,add_monster
 
 @pytest.fixture
@@ -47,7 +47,30 @@ def test_controlled_jounin_is_approached_to_silence_range_even_during_cooldown(t
     assert intent and intent['mode']=='control' and intent['skill_id']==76
     action=relay.plan_group_or_hunt(state,now,150,relay.collision_map())
     assert action and action['kind']=='move' and action['target_id']==identity
-    assert action['destination']==[21,20]  # silence range is 5 cells, Kunai range is longer
+    assert action['destination']==[23,20]  # approach to 3 cells before silence
+
+
+def test_silence_approach_preempts_pending_attack_on_another_target(tmp_path,config):
+    relay,now=relay_for(tmp_path,config)
+    identity=110000001
+    add_monster(relay,identity,1634,[26,20],now)
+    relay.inventory.entities[identity]['body_state']=3
+    relay.hunt.target=110000002
+    relay.hunt.pending=dict(kind='attack',target_id=110000002,deadline=now+1)
+    action=relay.plan_group_or_hunt(relay.status(),now,150,relay.collision_map())
+    assert action and action['kind']=='move' and action['target_id']==identity
+    assert action['control_skill_id']==76 and action['destination']==[23,20]
+
+
+def test_imported_buff_rules_survive_into_live_rotation(tmp_path,config):
+    relay,now=relay_for(tmp_path,config)
+    profiles={p['skill_id']:p for p in relay.rotation.profiles}
+    assert profiles[532]['only_when_clear_radius']==9
+    assert profiles[775]['effect_duration']==15
+    add_monster(relay,110000001,1634,[22,20],now)
+    relay.tracker.observer.effects[207]=False
+    action=relay.plan_map_rotation(relay.status(),now)
+    assert action is None or action['skill_id']!=532
 
 def test_no_pursuit_salamandra_and_no_stealing_from_known_other_target(config):
     c,r,s=setup(config,[entity(10,1831,33)])
@@ -73,6 +96,7 @@ def test_first_offensive_does_not_wait_for_buff_renewal(config):
     assert c.plan(s,r,100.1)['skill_id']==357
 
 def test_ignored_visible_monster_no_longer_cancels_patrol_send(tmp_path,config):
+    config['engagement']['proactive_species']=[1177]  # explicitly configure aggression-only Ninkames
     relay,now=relay_for(tmp_path,config)
     add_monster(relay,110000001,1315,[25,20],now)  # not targeting us, not passive exception
     action=relay.plan_group_or_hunt(relay.status(),now,150,relay.collision_map())
@@ -99,3 +123,12 @@ def kill_intent(combat, identity, state, rotation, now):
     """The map behavior plans a kill on this monster (what the relay's map_damage_allowed asks)."""
     intent = combat.decide(state, rotation, now, current=identity)
     return bool(intent and intent['mode'] == 'kill' and intent['target_id'] == identity)
+
+
+def test_doki_is_attacked_anyway_when_the_silence_does_not_come(config):
+    c=MapCombat(config);r=rotation(config)
+    s=state([entity(10,1177,22)])
+    first=c.decide(s,r,100)
+    assert first['mode']=='control'  # silence first
+    later=c.decide(s,r,102.5)  # 2.5 s without the silence: attacked normally
+    assert later['mode']=='kill' and later['target_id']==10

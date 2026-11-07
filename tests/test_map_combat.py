@@ -11,7 +11,6 @@ from nrobot.entity_inventory import EntityInventory
 def config():
     result=json.loads(Path('exemplos/comportamentos/ra_fild03.json').read_text(encoding='utf-8'))['combat']
     result.pop('engagement',None);result.pop('idle_summon',None);result.pop('burst',None)
-    result['emergency'].update(minimum_count=3,radius=5)
     result['control_radius']=8
     return result
 
@@ -148,7 +147,7 @@ def test_control_uses_real_skill_range_and_global_delay(config):
     s=state([entity(10,1634,28,body=3)])
     assert c.decide(s,r,100)['skill_id']==76
     assert c.plan(s,r,100) is None
-    s['recent_entities'][0]['position']=[25,20]
+    s['recent_entities'][0]['position']=[23,20]  # close to 3 cells before silence
     assert c.plan(s,r,100)['skill_id']==76
     r.next_send=101
     assert c.plan(s,r,100) is None
@@ -204,3 +203,13 @@ def kill_intent(combat, identity, state, rotation, now):
     """The map behavior plans a kill on this monster (what the relay's map_damage_allowed asks)."""
     intent = combat.decide(state, rotation, now, current=identity)
     return bool(intent and intent['mode'] == 'kill' and intent['target_id'] == identity)
+
+
+def test_map_combat_does_not_inherit_the_ordinary_combat_tuning(config):
+    from nrobot.packet_settings import DEFAULTS
+    ordinary={**DEFAULTS,'skill_interval':2.5,'skill_timeout':6,'skill_attempts':1,'target_defer':30,
+              'skill_global_delay':5,'limit_target_failures':False,'pvp_enabled':True}
+    result=settings_for(config,ordinary,[])
+    for key in ('skill_interval','skill_timeout','skill_attempts','target_defer','skill_global_delay',
+                'limit_target_failures','pvp_enabled'):
+        assert result[key]==DEFAULTS[key], key

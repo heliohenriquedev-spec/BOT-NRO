@@ -4,6 +4,37 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.06.9 (06/11/2026)
+
+- Silêncio nos comportamentos de mapa: o personagem aproxima até 3 células antes de enviar a habilidade; alcance e posição são conferidos novamente no envio.
+- Continuidade do combate: monstros de controle atrás de paredes não bloqueiam o ataque em alvos alcançáveis; a checagem de parede é refeita quando o personagem ou o monstro muda de lado. Respostas atrasadas de ataques e comandos pendentes do alvo anterior deixam de disputar o alvo escolhido pelo comportamento do mapa.
+- Habilidades ofensivas e controle: a validação final da linha de ataque distingue paredes de áreas de habilidade no chão; o personagem pode disparar em alcance sem caminhar pela área perigosa.
+- Movimento e habilidades: uma caminhada interrompida na origem junto da confirmação da própria habilidade não marca mais um obstáculo falso; o bot pode retomar o mesmo trajeto após a conjuração.
+- Invocações: uma criatura confirmada e visível impede novas tentativas da mesma invocação sem duração conhecida, evitando conjurações redundantes enquanto ela já está ativa.
+- Controle de monstros: a confirmação de stun/sono respeita o intervalo entre habilidades também em rajada; a aproximação para silêncio entra uma célula no alcance e pode interromper a aproximação ou o ataque do alvo anterior. Tentativas de controle sem confirmação deixam de herdar a pausa longa das falhas de dano, respeitando as recargas do servidor.
+- Buffs de comportamentos importados: a duração e a condição de área livre são preservadas na validação das configurações, evitando renovações indevidas durante o combate e perda de informações do buff.
+- @showmobs: grupos sobrepostos reaproveitam o caminho quando apontam para a mesma coordenada, reduzindo buscas repetidas durante cada consulta.
+- Kunai e Shuriken: a alternância considera o alcance do alvo e as recargas do servidor, evitando aguardar um arremesso indisponível quando o outro pode ser usado.
+- Desempenho: a busca de grupos do @showmobs calcula caminhos em segundo plano, permitindo que o relay continue encaminhando os pacotes durante a busca. Resultados de um mapa anterior são descartados e consultas sem marcas não percorrem o mapa inteiro.
+- Combate em rajada: a mesma habilidade sem confirmação aguarda pelo menos 0,2 s antes de repetir; outras habilidades prontas continuam intercaladas. A confirmação libera essa espera, respeitando as recargas do servidor.
+- Controle manual: exige um clique real no jogo para pausar a caça; caminhadas que o cliente envia automaticamente após ataques não provocam mais pausas falsas de 3 segundos.
+- Comportamento do mapa (ra_fild03):
+  - Removida a emergência dos Jounin (Selo de Mão: Coelho ×3, Fukai Kemuri e fuga). Ela não funcionava e deixava o personagem parado ou fugindo sem atacar. Perfis antigos que ainda a tenham continuam carregando, e a parte da emergência é ignorada.
+  - A TsuutenKyaku não é mais usada nos Jounin; nos outros monstros do mapa continua igual.
+  - Doki: o bot tenta silenciar primeiro, mas espera no máximo 2 s. Se o silêncio não pegar, ataca normalmente. Antes, cada Doki chegava a ficar 13–33 s sem apanhar.
+  - A esquiva de habilidades de chão (como o veneno da Salamandra) segue as opções normais da aba de combate. O perfil do mapa não tem regra própria de esquiva.
+- Combate: com configuração de mapa, só ela decide o combate. O alvo é escolhido apenas pelo comportamento do mapa. Antes, a escolha do combate comum também atuava, e os dois ficavam trocando o alvo. Os ajustes do combate comum também não entram mais no mapa: intervalo, espera de resposta, falhas por alvo, adiamento, delay global, PvP e fila de invocações. Sem configuração de mapa, vale o combate comum.
+- @showmobs:
+  - Pesa o tamanho do grupo contra a caminhada até ele. Um grupo pequeno muito longe não ganha mais de grupos perto: 4 Jounin a 266 células já tinham sido escolhidos e perseguidos por 3 minutos.
+  - Não "falha" mais quando o personagem está dentro de uma área de habilidade no chão. Antes isso fazia a patrulha passar a varrer o mapa em linha.
+- Patrulha igual para todos: o "adiar alvo após falhas" deixou de ser enviado junto. É ajuste de combate e fica com cada personagem ou com o perfil do mapa.
+- Troca de alvo por falhas de habilidade, mais precisa:
+  - Conta só habilidades de dano, não as de controle (atordoar, dormir, silenciar).
+  - Exige 2 s de habilidades seguidas sem nenhum acerto.
+  - Recomeça a contagem depois de uma pausa (por exemplo, quando você move o personagem na mão).
+  - Antes, trocava de alvo no momento em que o silêncio pegava, ou logo depois do controle manual.
+- Áreas de habilidade no chão (névoa tóxica da Salamandra e outras): encurralado, sem caminho de saída livre, o bot agora passa por cima da área. Antes ficava parado dentro dela até a área sumir.
+
 ## 2026.11.06.8 (06/11/2026)
 
 - Desempenho: o bot ficou mais leve durante a caça, o que reduz o lag no combate. Ele deixou de repetir a cada instante a checagem da conexão do jogo e as leituras dos arquivos da lista de observação e das opções da fila, e parou de calcular uma busca de monstros que não era usada. Também não reabre mais o arquivo de registro da caça a cada evento. Como os pacotes do servidor passam pelo bot antes de chegar ao jogo, isso deixa as respostas mais rápidas.

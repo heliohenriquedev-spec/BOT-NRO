@@ -177,7 +177,7 @@
    "sprite": 837
   },
   "78,149": {
-   "name": "",
+   "name": "Jounin Shiken 1x1",
    "sprite": 65
   },
   "100,146": {
@@ -189,7 +189,7 @@
    "sprite": 706
   },
   "75,152": {
-   "name": "",
+   "name": "Cassino",
    "sprite": 423
   },
   "73,155": {
@@ -197,7 +197,7 @@
    "sprite": 99
   },
   "115,140": {
-   "name": "",
+   "name": "Teleportador - Guerra",
    "sprite": 831
   },
   "115,144": {
@@ -221,7 +221,7 @@
    "sprite": 100
   },
   "72,158": {
-   "name": "",
+   "name": "Verificar KG",
    "sprite": 869
   },
   "72,161": {
@@ -263,6 +263,138 @@
   "72,170": {
    "name": "",
    "sprite": 123
+  },
+  "99,133": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "93,133": {
+   "name": "",
+   "sprite": 7
+  },
+  "86,134": {
+   "name": "",
+   "sprite": 7
+  },
+  "86,133": {
+   "name": "",
+   "sprite": 7
+  },
+  "86,129": {
+   "name": "",
+   "sprite": 7
+  },
+  "86,132": {
+   "name": "",
+   "sprite": 7
+  },
+  "86,128": {
+   "name": "",
+   "sprite": 7
+  },
+  "86,131": {
+   "name": "",
+   "sprite": 7
+  },
+  "86,127": {
+   "name": "",
+   "sprite": 7
+  },
+  "86,130": {
+   "name": "",
+   "sprite": 7
+  },
+  "89,129": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "86,126": {
+   "name": "",
+   "sprite": 7
+  },
+  "87,125": {
+   "name": "",
+   "sprite": 7
+  },
+  "90,125": {
+   "name": "",
+   "sprite": 7
+  },
+  "84,127": {
+   "name": "",
+   "sprite": 7
+  },
+  "86,124": {
+   "name": "",
+   "sprite": 7
+  },
+  "91,124": {
+   "name": "",
+   "sprite": 7
+  },
+  "88,124": {
+   "name": "",
+   "sprite": 7
+  },
+  "92,123": {
+   "name": "",
+   "sprite": 7
+  },
+  "93,122": {
+   "name": "",
+   "sprite": 7
+  },
+  "91,125": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "94,118": {
+   "name": "",
+   "sprite": 7
+  },
+  "97,118": {
+   "name": "",
+   "sprite": 7
+  },
+  "96,118": {
+   "name": "",
+   "sprite": 7
+  },
+  "90,127": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "87,131": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "102,140": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "92,135": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "90,132": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "91,134": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "98,142": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "96,142": {
+   "name": "Yondaime",
+   "sprite": 7
+  },
+  "72,176": {
+   "name": "",
+   "sprite": 745
   }
  },
  "hospital2": {
