@@ -72,6 +72,7 @@ class GroundCells:
         self.units = {}
         self.overflow = False
         self.casts = {}
+        self.external_casts = {}
         self.requests = {}
         self.ground_skills = {}
         self.trace = []
@@ -81,6 +82,7 @@ class GroundCells:
         self.units.clear()
         self.overflow = False
         self.casts = {}
+        self.external_casts = {}
         self.requests = {}
         self.ground_skills = {}
 
@@ -149,6 +151,20 @@ class GroundCells:
         now = time.monotonic() if now is None else now
         for event in events:
             kind = event['kind']
+            source=event.get('source_id')
+            if kind=='skill_cast' and source is not None and source!=own_id:
+                position=event.get('position');duration=max(0,event.get('duration_ms') or 0)/1000
+                if duration>0 and isinstance(position,(list,tuple)) and len(position)==2 and all(type(v) is int and 0<=v<1024 for v in position):
+                    self.external_casts[source]=dict(skill_id=event['skill_id'],source_id=source,level=event.get('level') or 1,
+                        position=list(position),expires=now+min(60,duration),external=True)
+                    if len(self.external_casts)>1024:self.external_casts.pop(next(iter(self.external_casts)))
+                else:self.external_casts.pop(source,None)
+            elif kind=='skill_cast_cancel':
+                self.external_casts.pop(source,None)
+            elif kind in ('ground_skill','skill_damage') or kind=='skill_no_damage' and event.get('success'):
+                cast=self.external_casts.get(source)
+                if cast and cast['skill_id']==event.get('skill_id'):self.external_casts.pop(source,None)
+            elif kind=='remove':self.external_casts.pop(event.get('entity_id'),None)
             if kind in ('map_change', 'map_transfer'):
                 self.reset(event.get('map'))
             elif kind == 'ground_skill':
@@ -216,6 +232,6 @@ class GroundCells:
             else:
                 cells.add(tuple(unit['position']))
         cells = sorted(cells)
-        return dict(effects=[dict(effect_id=i, **u) for i,u in self.units.items()], casts=list(self.casts.values()), requests=list(self.requests.values()), map=self.map, cells=[list(cell) for cell in cells], units=len(self.units),
+        return dict(effects=[dict(effect_id=i, **u) for i,u in self.units.items()], casts=list(self.casts.values())+list(self.external_casts.values()), requests=list(self.requests.values()), map=self.map, cells=[list(cell) for cell in cells], units=len(self.units),
                     unit_type=LAND_PROTECTOR, style=dict(GRAY_STYLE), incomplete=self.overflow,
                     evidence='unidades de terreno recebidas; area so para magias em area confirmadas pelo pacote da magia')

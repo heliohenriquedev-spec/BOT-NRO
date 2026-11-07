@@ -4,6 +4,26 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.07.1 (07/11/2026)
+
+- Visualizacao: removida a sombra vermelha antiga de hide sobre o personagem. O minimapa, os alertas e o contador de quests continuam independentes.
+- RCX: opcao de visao local de ocultos baseada no efeito observado do Byakugan, limitada as entidades recebidas do servidor; nao equipa itens nem altera atributos. Corrigido o destinatario do efeito para usar o ID do jogador no mapa, em vez do ID de selecao do personagem; o estado de aplicacao fica registrado no diagnostico.
+
+- Rotas de quest: escolhem entre acessos, portais e transportes conhecidos pelo percurso estimado a partir da posição atual, considerando a caminhada e os pontos de chegada. Os diálogos necessários para pegar e entregar missões são preservados.
+- RCX: mostra a prévia de habilidades de outros conjuradores durante o cast confirmado pelo servidor, mesmo sem a habilidade aprendida no personagem. Cada habilidade permite mostrar ou ocultar efeitos aliados e inimigos, com ambas as opções ligadas por padrão.
+- Quests: acompanha entregas e novas aceitações manuais pelos diálogos e slots do quadro, sincroniza o progresso salvo e evita retomar missões já entregues. Uma nova aceitação confirmada reinicia os contadores correspondentes; missões ausentes durante a entrega voltam à etapa de coleta.
+- Fila de quests: botões Marcar todas e Desmarcar todas, sem excluir os cadastros.
+- Exploração: passar perto dos pontos conta também durante combate e viagens para outros destinos. O progresso acompanha a posição do personagem, sem marcar pontos do outro lado de paredes ou caminhos intermediários de teleportes.
+- Patrulha: registra a última passagem por setor. Quando o caminho calculado só passa por áreas já visitadas, prefere uma alternativa percorrida há mais tempo, desde que não imponha uma volta excessiva nem atravesse obstáculos.
+- Patrulha: circuito linear contínuo em todos os mapas, com memória dos pontos pendentes e retorno necessário em corredores sem saída. O @showmobs automático está temporariamente suspenso; destinos antigos deixam de direcionar a patrulha.
+- Patrulha: após desvios de combate ou viagens do @showmobs, retoma o circuito por um trecho próximo, preservando as áreas ainda não exploradas. Consultas novas não trocam um destino em andamento, e grupos já alcançados não são revisitados pelo @showmobs no mesmo ciclo de cobertura.
+- BG: respostas de inscrição indisponível fecham o diálogo automaticamente e liberam uma nova tentativa após o intervalo configurado, sem aguardar etapas restantes da gravação.
+- BG: a viagem para inscrição deixa de equipar montaria automaticamente.
+- Entradas da BG 3x3 e 4x4: corrigida a associação aos NPCs e aplicada a sequência de inscrição já gravada na 5x5.
+- BG: ao reconhecer a confirmação de inscrição, fecha o diálogo automaticamente, também durante a gravação, sem escolher a opção de cancelar o registro.
+- Gravação da BG: botão de entrada mais claro e instruções para selecionar as opções manualmente. Ao repetir a conversa com o mesmo NPC, salva a última tentativa com o percurso de acesso, evitando acumular tentativas na reprodução.
+- BG: verifica o estado local a cada 0,05 s, mantendo uma inscrição por vez. Novas tentativas aguardam o fim da anterior, a resposta e o intervalo configurado; sem resposta, o bot interrompe as tentativas para evitar inscrições duplicadas.
+
 ## 2026.11.06.9 (06/11/2026)
 
 - Silêncio nos comportamentos de mapa: o personagem aproxima até 3 células antes de enviar a habilidade; alcance e posição são conferidos novamente no envio.

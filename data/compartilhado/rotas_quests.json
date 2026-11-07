@@ -619,7 +619,7 @@
  },
  {
   "name": "Kami 1 - Andar 1",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1018,
@@ -736,7 +736,7 @@
  },
  {
   "name": "Kami 1 - Andar 2",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1114,
@@ -867,7 +867,7 @@
  },
  {
   "name": "Kami 1 - Andar 3",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1128,
@@ -1013,7 +1013,7 @@
  },
  {
   "name": "Esgoto Suna - Andar 2",
-  "enabled": false,
+  "enabled": true,
   "kills": 1,
   "species": [
    1053,

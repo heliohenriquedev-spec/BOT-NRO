@@ -6,33 +6,6 @@
      "kind": "npc",
      "map": "new_4-2.gat",
      "position": [
-      115,
-      114
-     ],
-     "name": "Battleground 4x4"
-    },
-    {
-     "kind": "cancel",
-     "map": "new_4-2.gat"
-    },
-    {
-     "kind": "walk",
-     "map": "new_4-2.gat",
-     "position": [
-      109,
-      109
-     ]
-    }
-   ],
-   "target_map": "new_4-2.gat",
-   "recorded_at": "2026-11-05T22:52:02"
-  },
-  "4x4": {
-   "steps": [
-    {
-     "kind": "npc",
-     "map": "new_4-2.gat",
-     "position": [
       83,
       114
      ],
@@ -41,7 +14,7 @@
     {
      "kind": "select",
      "map": "new_4-2.gat",
-     "option": "Quero cancelar meu registro"
+     "option": "Sim"
     },
     {
      "kind": "next",
@@ -50,18 +23,38 @@
     {
      "kind": "close",
      "map": "new_4-2.gat"
-    },
-    {
-     "kind": "walk",
-     "map": "new_4-2.gat",
-     "position": [
-      103,
-      102
-     ]
     }
    ],
    "target_map": "new_4-2.gat",
-   "recorded_at": "2026-11-05T22:51:39"
+   "recorded_at": "2026-11-06T22:31:02"
+  },
+  "4x4": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "new_4-2.gat",
+     "position": [
+      115,
+      114
+     ],
+     "name": "Battleground 4x4"
+    },
+    {
+     "kind": "select",
+     "map": "new_4-2.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "next",
+     "map": "new_4-2.gat"
+    },
+    {
+     "kind": "close",
+     "map": "new_4-2.gat"
+    }
+   ],
+   "target_map": "new_4-2.gat",
+   "recorded_at": "2026-11-06T22:31:02"
   },
   "5x5": {
    "steps": [
@@ -75,6 +68,15 @@
      "name": "Battleground 5x5"
     },
     {
+     "kind": "select",
+     "map": "new_4-2.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "next",
+     "map": "new_4-2.gat"
+    },
+    {
      "kind": "close",
      "map": "new_4-2.gat"
     },
@@ -82,21 +84,20 @@
      "kind": "walk",
      "map": "new_4-2.gat",
      "position": [
-      89,
-      105
+      107,
+      108
      ]
     }
    ],
    "target_map": "new_4-2.gat",
-   "recorded_at": "2026-11-05T22:51:25"
+   "recorded_at": "2026-11-06T22:31:02"
   }
  },
  "mensagens": {
   "error": "Ha um evento em andamento!",
-  "queue": "Deseja se registrar?",
-  "retry_seconds": 5,
+  "queue": "VocÃª ja se registrou no evento!",
+  "retry_seconds": 6,
   "seen": [
-   "Deseja se registrar?",
    "Ha um evento em andamento!",
    "[Battleground 5x5]",
    "[Battleground 3x3]",
@@ -104,7 +105,19 @@
    "Seu registro foi cancelado.",
    "[Battleground 4x4]",
    "Ao iniciar a partida, voce saira da sua PT atual e entrara automaticamente na PT do seu time.",
-   "A PT do BG sera encerrada ao final. Sua PT anterior nao sera restaurada automaticamente."
+   "A PT do BG sera encerrada ao final. Sua PT anterior nao sera restaurada automaticamente.",
+   "O evento esta em espera, aguarde!",
+   "Bem-vindo ao Battleground!",
+   "Jogadores registrados:",
+   "- Black Yugan",
+   "- Sasori",
+   "- O Pimposo",
+   "- neon",
+   "- Macro",
+   "- Ishida",
+   "- Void",
+   "- Temari",
+   "Registro feito com sucesso"
   ]
  }
 }

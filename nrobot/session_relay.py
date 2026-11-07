@@ -1748,6 +1748,19 @@ class SessionRelay(QuestRelay):
 
     async def send_mob_scan(self, *, game_gate):
         """From time to time in the quest hunt: @showmobs of each missing monster, then the densest spot."""
+        if not self.mob_scan.AUTOMATIC_ENABLED:
+            if not getattr(self,'automatic_scan_stopped',False):
+                self.mob_scan.reset()  # invalidates results from an already-running background job
+                self.automatic_scan_stopped=True
+            patrol=self.hunt.patrol if self.hunt is not None else None
+            if patrol is not None and patrol.focus is not None:
+                patrol.focus=patrol.goal=patrol.goal_block=None
+                patrol.focus_key=patrol.focus_block=None
+                patrol.route_cache_key=patrol.route_cache=None
+                if self.hunt.pending and self.hunt.pending.get('purpose')=='patrol':self.hunt.pending=None
+            self.scan_no_target_since=None
+            return
+        self.automatic_scan_stopped=False
         from .portals import PortalGuard
         q, observer, now = self.quests, self.tracker.observer, time.monotonic()
         if (not q.active or q.phase != 'hunt' or q.errands or self.hunt is None or not self.hunt.enabled
@@ -1939,6 +1952,8 @@ class SessionRelay(QuestRelay):
             self.record_test()
             print('O ataque de teste foi enviado, mas não houve confirmação de dano no prazo. Não repetirei automaticamente.')
         state = self.tracker.snapshot(time.monotonic())
+        if self.hunt is not None and self.hunt.patrol is not None and state.get('player_position_recent'):
+            self.hunt.patrol.observe_position(state.get('player_position'),time.monotonic(),self.tracker.observer.map_name)
         state.update(login_phase=self.login_phase)
         # Map behaviors such as low-HP Namekuji must use server-reported vitals.
         state.update(player_hp=self.tracker.observer.hp,
@@ -1987,7 +2002,7 @@ class SessionRelay(QuestRelay):
                      own_look=self.own_look or None,
                      emergency_stop=self.emergency,
                      chat_alert=self.chat_alert,
-                     ground_cells={**self.ground_cells.snapshot(), "feed_file": str(self.folder/"rcx_terreno.json"), "feed_ipc": str(self.folder/"rcx_terreno.ipc")},
+                     ground_cells={**self.rcx_ground_snapshot(), "feed_file": str(self.folder/"rcx_terreno.json"), "feed_ipc": str(self.folder/"rcx_terreno.ipc")},
                      portals=[{'position': list(cell), 'margin': margin,
                                'to': (self.portals.destination(self.tracker.observer.map_name, cell) or {}).get('map')}
                               for cell, margin in self.portals.portals(self.tracker.observer.map_name)],
@@ -1996,6 +2011,7 @@ class SessionRelay(QuestRelay):
                      own_hidden=({'option': self.own_option & 0x4046, 'gm_invisible': bool(self.own_option & 0x40)}
                                  if self.own_option & 0x4046 else None),
                      native_frame_error=self.native_frames.error,
+                     client_vision=(self.client_vision.diagnostic() if getattr(self,'client_vision',None) else None),
                      map_monsters=list(self.discovered_monsters.values()),
                      map_monster_names=self.map_monster_names_cached(observer.player_id),
                      buff_candidates=dict(self.buff_candidates), buff_learning_result=self.buff_learning_result,
@@ -2007,9 +2023,10 @@ class SessionRelay(QuestRelay):
                      upstream_connected=self.upstream is not None,
                      updated_at=datetime.now().isoformat())
         if self.hunt is not None:
-            scan = self.mob_scan.current_goal(observer.player, time.monotonic()) if self.quests.active else None
+            scan = self.mob_scan.current_goal(observer.player, time.monotonic()) if self.quests.active and self.mob_scan.AUTOMATIC_ENABLED else None
             state['showmobs_goal'] = {'position': scan} if scan else None
-            state['showmobs_failed'] = bool(self.quests.active and self.mob_scan.map_failed(observer.map_name))
+            state['showmobs_failed'] = bool(self.mob_scan.AUTOMATIC_ENABLED and self.quests.active and self.mob_scan.map_failed(observer.map_name))
+            state['showmobs_suspended'] = not self.mob_scan.AUTOMATIC_ENABLED
             scan_job = getattr(self.mob_scan, '_finish_job', None)
             state['showmobs_calculation'] = {'running': bool(scan_job and not scan_job['task'].done()),
                 'last_ms': self.mob_scan.last_calculation_ms, 'error': self.mob_scan.calculation_error}
@@ -2129,7 +2146,13 @@ class SessionRelay(QuestRelay):
             rcx_changed=False
             rcx_now=time.monotonic()
             for event in events:
-                self.ground_cells.observe([event],self.tracker.observer.player_id,rcx_now)
+                ground_event=event
+                if event['kind']=='skill_cast' and event.get('source_id')!=self.tracker.observer.player_id and event.get('target_id')==event.get('source_id'):
+                    track=self.player_tracks.get(event.get('source_id'))
+                    entity=self.inventory.entities.get(event.get('source_id'),{})
+                    position=track.combat_bounds(rcx_now)[0][0] if track is not None else entity.get('position')
+                    if position is not None:ground_event={**event,'position':[round(v) for v in position]}
+                self.ground_cells.observe([ground_event],self.tracker.observer.player_id,rcx_now)
                 if event['kind'] in ('skill_cast','skill_no_damage','skill_damage') and event.get('source_id')==self.tracker.observer.player_id:
                     if event['kind']=='skill_no_damage' and not event.get('success'):continue
                     if event['kind']=='skill_cast' and event.get('duration_ms',0)<=0:continue
@@ -2209,6 +2232,8 @@ class SessionRelay(QuestRelay):
                                      self.inventory.map_name or self.tracker.observer.map_name)
             self.registry.observe(events, self.tracker.observer.player_id,
                                   self.inventory.map_name or self.tracker.observer.map_name)
+            if any(e['kind']=='name' and any(e.get(k) for k in ('party','guild','guild_id')) for e in events):
+                self.publish_ground_cells()
             self.sync_pvp_targets()
             if self.group_follower():
                 self.group.observe(events, self.group_leader_id(), time.monotonic())
@@ -2621,6 +2646,9 @@ class SessionRelay(QuestRelay):
             async def server_to_client():
                 frames = HandshakeFrames(stage, self.account)
                 endpoints = MapEndpointStream(self.account, self.register, self.begin_hunt_transfer) if stage == 'map' else None
+                from .client_vision import ClientVision, VisionConfig
+                vision=ClientVision.for_account(self.account,VisionConfig()) if stage=='map' else None
+                if vision is not None:self.client_vision=vision
                 removal = None
                 # Part of the bot for every user (instant death removal, multi-hit shown as one hit):
                 # on unless perfis/sem_remocao_visual exists. It used to need a file in perfis/, which
@@ -2642,6 +2670,7 @@ class SessionRelay(QuestRelay):
                     if stage == 'map':
                         routed = await endpoints.feed(data)
                         visible = removal.feed(routed) if removal is not None else routed
+                        visible = vision.feed(visible)
                         if visible:
                             client_writer.write(visible)
                             await client_writer.drain()
@@ -2672,11 +2701,14 @@ class SessionRelay(QuestRelay):
                         self.last_saved = time.monotonic()
                         self.status()
                 if endpoints is not None and (remaining := endpoints.flush()):
-                    client_writer.write(removal.feed(remaining) if removal is not None else remaining)
+                    remaining=removal.feed(remaining) if removal is not None else remaining
+                    client_writer.write(vision.feed(remaining))
                     await client_writer.drain()
                 if removal is not None and (remaining := removal.flush()):
-                    client_writer.write(remaining)
+                    client_writer.write(vision.feed(remaining))
                     await client_writer.drain()
+                if vision is not None and (remaining := vision.flush()):
+                    client_writer.write(remaining);await client_writer.drain()
                 if stage == 'map':
                     self.record_hunt({'kind': 'connection_eof', 'source': 'remote_server', 'recent_map_sends': list(self.recent_map_sends)})
             jobs = [asyncio.create_task(client_to_server()), asyncio.create_task(server_to_client())]
@@ -2929,10 +2961,21 @@ class SessionRelay(QuestRelay):
                 names[species] = None
         return names[species]
 
+    def rcx_ground_snapshot(self):
+        value=self.ground_cells.snapshot();own=self.tracker.observer.player_id
+        allies=set(self.group_member_ids())|self.own_summons.allies()
+        records=self.registry.players;me=records.get(str(own),{})
+        for source in {e.get('source_id') for e in value['effects']+value['casts']}:
+            other=records.get(str(source),{})
+            if any(me.get(field) and me.get(field)==other.get(field) for field in ('party','guild_id','guild')):
+                allies.add(source)
+        value.update(own_id=own,allied_ids=sorted(i for i in allies if type(i) is int))
+        return value
+
     def publish_ground_cells(self):
         """Small independent RCX feed; a terrain packet does not wait for the full UI snapshot."""
         try:
-            value = self.ground_cells.snapshot()
+            value = self.rcx_ground_snapshot()
             from .rcx_stream import Publisher
             if self.ground_stream is None:
                 self.ground_stream = Publisher(self.folder/'rcx_terreno.ipc')

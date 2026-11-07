@@ -177,7 +177,12 @@ def test_showmobs_focus_keeps_the_existing_cycle_order_when_reached():
     assert patrol.focus == [40, 40]
     patrol.plan([40, 40], 3, 100, collision)
     assert patrol.focus is None and patrol.focus_reached == (40, 40)
-    assert patrol.sweep_order == original_order
+    # Rejoin at a nearby point, preserving the original cyclic order and all pending areas.
+    index=original_order.index(patrol.sweep_order[0])
+    assert patrol.sweep_order == original_order[index:]+original_order[:index]
+    distances=patrol.tour.distances([40,40])
+    pending=patrol.remaining-set(patrol.deferred)
+    assert distances[patrol.next_block([40,40])] <= min(distances[b] for b in pending)+patrol.tour.spacing*.5
 
 
 def test_showmobs_marker_jitter_does_not_reverse_or_reset_focus():
@@ -195,6 +200,7 @@ def test_showmobs_marker_jitter_does_not_reverse_or_reset_focus():
 def test_stall_recovery_keeps_cycle_order_and_promotes_reachable_waypoints():
     collision = CollisionMap(80, 80, [1]*6400)
     patrol = PacketPatrol()
+    patrol.linear = False  # exercise recovery of the legacy ordered sweep
     patrol.plan([10, 10], 0, 100, collision)
     original = list(patrol.sweep_order)
     first, second = original[:2]

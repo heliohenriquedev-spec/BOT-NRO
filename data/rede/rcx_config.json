@@ -21,7 +21,9 @@
       "preview_fill": null,
       "preview_outline": null,
       "preview_symbol": null,
-      "preview_opacity": null
+      "preview_opacity": null,
+      "show_allies": true,
+      "show_enemies": true
     },
     "142": {
       "enabled": true,
@@ -39,7 +41,9 @@
       "preview_fill": null,
       "preview_outline": null,
       "preview_symbol": null,
-      "preview_opacity": null
+      "preview_opacity": null,
+      "show_allies": true,
+      "show_enemies": true
     },
     "146": {
       "enabled": true,
@@ -57,7 +61,9 @@
       "preview_fill": null,
       "preview_outline": null,
       "preview_symbol": null,
-      "preview_opacity": null
+      "preview_opacity": null,
+      "show_allies": true,
+      "show_enemies": true
     }
   },
   "skill_styles": {
@@ -77,7 +83,9 @@
       "preview_fill": null,
       "preview_outline": null,
       "preview_symbol": null,
-      "preview_opacity": null
+      "preview_opacity": null,
+      "show_allies": true,
+      "show_enemies": true
     },
     "83": {
       "enabled": true,
@@ -95,7 +103,10 @@
       "preview_fill": null,
       "preview_outline": null,
       "preview_symbol": null,
-      "preview_opacity": null
+      "preview_opacity": null,
+      "show_allies": true,
+      "show_enemies": true
     }
-  }
+  },
+  "client_vision": true
 }

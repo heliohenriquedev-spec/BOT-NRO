@@ -211,9 +211,7 @@ class PacketPanel(QMainWindow):
         self.priority_panel = PriorityPanel()
         self.priority_panel.apply_requested.connect(self.apply)
         from .minimap_overlay import MinimapOverlay
-        from .game_overlay import GameOverlay
         self.overlay = MinimapOverlay()
-        self.game_overlay = GameOverlay()
         from .game_overlay import QuestCounter
         self.quest_counter = QuestCounter()
         self.priority_panel.minimap.toggled.connect(lambda checked: self.update_overlay())
@@ -666,7 +664,6 @@ class PacketPanel(QMainWindow):
 
     def finished(self, *args):
         self.overlay.hide()
-        self.game_overlay.hide()
         self.quest_counter.hide()
         self.open_button.setEnabled(True)
         self.pending_command = None
@@ -845,7 +842,7 @@ class PacketPanel(QMainWindow):
         self.check_minimap_key()
         if self.session is None or self.process.state() == QProcess.NotRunning:
             return
-        if not (self.game_overlay.isVisible() or self.overlay.isVisible() or self.quest_counter.isVisible() or self.priority_panel.minimap.isChecked()):
+        if not (self.overlay.isVisible() or self.quest_counter.isVisible() or self.priority_panel.minimap.isChecked()):
             return
         try:
             self.last_state = json.loads((self.session/'estado.json').read_text(encoding='utf-8'))
@@ -876,14 +873,6 @@ class PacketPanel(QMainWindow):
                 self.overlay.show()
         elif self.overlay.isVisible():
             self.overlay.hide()
-        # Shadow on the own character while hidden; other hidden characters are on the minimap.
-        self.game_overlay.update_state(state)
-        if self.game_overlay.has_content() and front:
-            self.game_overlay.follow_game()
-            if not self.game_overlay.isVisible():
-                self.game_overlay.show()
-        elif self.game_overlay.isVisible():
-            self.game_overlay.hide()
         # Quest kill counter: its own window, dragged apart from the minimap.
         self.quest_counter.update_state(state)
         if self.quest_counter.has_content() and front and self.quest_counter.follow_game():
@@ -1033,7 +1022,6 @@ class PacketPanel(QMainWindow):
             self.autosave()
         self.save_ui()
         self.overlay.close()
-        self.game_overlay.close()
         self.quest_counter.close()
         self.close_relay()
         event.accept()

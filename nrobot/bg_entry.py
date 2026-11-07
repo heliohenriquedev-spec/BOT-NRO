@@ -30,6 +30,8 @@ from PySide6.QtWidgets import (QComboBox, QFormLayout, QHBoxLayout, QLabel, QPus
 FILE = Path(__file__).resolve().parents[1]/'data'/'rede'/'bg_entradas.json'
 MODES = ('5x5', '4x4', '3x3')
 RETRY = 5  # s between two attempts while the NPC refuses
+POLL_SECONDS = .05  # local state checks only; never the network retry interval
+RESPONSE_TIMEOUT = 10  # no answer after the recorded trip: stop rather than duplicate a registration
 MESSAGES = dict(error='', queue='', retry_seconds=RETRY, seen=[])
 
 
@@ -124,6 +126,13 @@ def recorded_entry(steps, map_name, position):
     steps = copy.deepcopy(steps)
     if not any(s['kind'] == 'npc' for s in steps):
         raise ValueError('Fale com o NPC da BG durante a gravacao antes de salvar')
+    # Manual retries are observations, not a request to replay the whole sequence.
+    # Keep the last interaction with that NPC, preserving the route before its first visit.
+    last = max(i for i, step in enumerate(steps) if step['kind'] == 'npc')
+    npc = steps[last]
+    first = next(i for i, step in enumerate(steps) if step['kind'] == 'npc'
+                 and step.get('map') == npc.get('map') and step.get('position') == npc.get('position'))
+    steps = steps[:first]+steps[last:]
     if position is not None and steps[-1].get('position') != list(position):
         steps.append(dict(kind='walk', map=map_name, position=list(position)))
     steps = validate_steps(compact(steps))
@@ -152,7 +161,7 @@ class BgPanel(QWidget):
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout(self)
-        intro = QLabel('1) Para cada BG, clique em "Gravar NPC", faça no jogo o que você faz para se inscrever (andar, falar '
+        intro = QLabel('1) Para cada BG, clique em "Gravar entrada na BG", faça no jogo o que você faz para se inscrever (andar, falar '
                        'com o NPC, escolher as opções) e clique em "Salvar gravação".\n'
                        '2) Escolha abaixo a mensagem de erro e a mensagem de fila: valem para todas as BGs. As falas do '
                        'NPC vistas nas gravações aparecem na lista.\n'
@@ -160,6 +169,11 @@ class BgPanel(QWidget):
                        'até a inscrição dar certo; aí para sozinho.')
         intro.setWordWrap(True)
         layout.addWidget(intro)
+        recording_help = QLabel('Durante a gravação, selecione manualmente as opções de entrada no jogo. '
+                               'Pode repetir a conversa com o mesmo NPC: ao salvar, fica a última tentativa, '
+                               'sem acumular as anteriores. Grave somente a inscrição, sem cancelar o registro depois.')
+        recording_help.setWordWrap(True)
+        layout.addWidget(recording_help)
         row = QHBoxLayout()
         row.addWidget(QLabel('BG para gravar/ver:'))
         self.mode = QComboBox()
@@ -180,7 +194,7 @@ class BgPanel(QWidget):
         buttons = QHBoxLayout()
         self.stop = QPushButton('Parar tentativas')
         self.stop.clicked.connect(lambda: self.request('quest_stop'))
-        self.record = QPushButton('Gravar NPC')
+        self.record = QPushButton('Gravar entrada na BG')
         self.record.clicked.connect(lambda: self.request('quest_bg_record', mode=self.mode.currentText()))
         self.save = QPushButton('Salvar gravação')
         self.save.clicked.connect(lambda: self.request('quest_bg_save'))
@@ -206,6 +220,9 @@ class BgPanel(QWidget):
         self.retry.valueChanged.connect(self.store_messages)
         form.addRow('Tentar de novo a cada:', self.retry)
         layout.addLayout(form)
+        polling = QLabel('Verificação local: 0,05 s. Uma inscrição por vez; novas tentativas aguardam a resposta e o intervalo acima.')
+        polling.setWordWrap(True)
+        layout.addWidget(polling)
         capture = QHBoxLayout()
         self.capture_error = QPushButton('Gravar mensagem de erro')
         self.capture_error.setToolTip('Clique e fale com o NPC quando ele NÃO deixar se inscrever: a fala dele vira a mensagem de erro.')
@@ -241,6 +258,7 @@ class BgPanel(QWidget):
         self.retry.blockSignals(True)
         self.retry.setValue(config['retry_seconds'])
         self.retry.blockSignals(False)
+        self.mode.setEnabled(not self.recording)
         entry = load().get(self.mode.currentText())
         recorded = ', '.join(m for m in MODES if m in load()) or 'nenhuma'
         if entry:

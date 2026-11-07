@@ -664,6 +664,9 @@ class QuestPanel(QWidget):
         self.list.setToolTip('Arraste para ordenar. Ctrl seleciona varias rotas; Shift seleciona um intervalo. A ordem e salva automaticamente.')
         self.edit_buttons=[]
         actions=FlowLayout();layout.addLayout(actions)
+        self.mark_all=QPushButton('Marcar todas');self.mark_all.clicked.connect(lambda:self.set_all_enabled(True))
+        self.unmark_all=QPushButton('Desmarcar todas');self.unmark_all.clicked.connect(lambda:self.set_all_enabled(False))
+        for button in (self.mark_all,self.unmark_all):actions.addWidget(button);self.edit_buttons.append(button)
         for name,callback in [('Nova quest',self.new),('Editar rota',self.edit),('Excluir',self.delete),('Subir',lambda:self.reorder(-1)),('Descer',lambda:self.reorder(1)),('Recarregar',self.reload),('Executar somente viagem',self.test_travel),
                               ('Executar so coleta da rota',lambda:self.test_stage('pickup')),('Executar so entrega da rota',lambda:self.test_stage('delivery'))]:
             b=QPushButton(name);b.clicked.connect(callback);actions.addWidget(b);self.edit_buttons.append(b)
@@ -748,6 +751,11 @@ class QuestPanel(QWidget):
     def checked(self,item):
         route=next((r for r in self.routes if r['id']==item.data(Qt.UserRole)),None)
         if route:route['enabled']=item.checkState()==Qt.Checked;self.persist()
+
+    def set_all_enabled(self,enabled):
+        if not self.list.isEnabled():return
+        for route in self.routes:route['enabled']=enabled
+        if self.persist():self.notice.setText('Todas as rotas marcadas.' if enabled else 'Todas as rotas desmarcadas; cadastros preservados.')
 
     def dropped(self):
         by_id={r['id']:r for r in self.routes}

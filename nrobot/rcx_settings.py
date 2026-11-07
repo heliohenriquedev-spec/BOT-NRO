@@ -14,7 +14,9 @@ FILE = ROOT/'data/rede/rcx_config.json'
 SYMBOLS = {'solid': '■ Preenchido', 'outline': '□ Contorno', 'cross': '＋ Cruz', 'diagonal': '× Diagonal', 'diamond': '◇ Losango', 'dot': '• Centro'}
 SHAPES = {'point': 'Somente centro', 'square': 'Quadrado', 'diamond': 'Losango', 'cross': 'Cruz', 'sanctuary': 'Santuário (modelo Ragnarok)'}
 DEFAULT_STYLE = dict(enabled=True, fill='#808080', outline='#303030', opacity=70, symbol='solid', radius=0, shape='point', skill_id=0, area_override=False, preview_appearance=False, selection_preview=True, cast_preview=True, preview_fill=None, preview_outline=None, preview_symbol=None, preview_opacity=None)
+DEFAULT_STYLE.update(show_allies=True,show_enemies=True)
 DEFAULTS = dict(selection_preview=True, cast_preview=True, preview_opacity=35, preview_color='#70d6ff', preview_symbol='outline', effects={}, skill_styles={})
+DEFAULTS['client_vision']=False
 
 
 @lru_cache(maxsize=1)
@@ -25,7 +27,7 @@ def catalog():
 def validate(value):
     if not isinstance(value, dict):raise ValueError('Configuração RCX inválida')
     result = copy.deepcopy(DEFAULTS)
-    for name in ('selection_preview', 'cast_preview'):
+    for name in ('selection_preview', 'cast_preview', 'client_vision'):
         result[name] = bool(value.get(name, result[name]))
     result['preview_opacity'] = max(10, min(100, int(value.get('preview_opacity', 35))))
     color=value.get('preview_color',result['preview_color'])
@@ -43,6 +45,7 @@ def validate(value):
         if s['symbol'] not in SYMBOLS or s['shape'] not in SHAPES:raise ValueError('Símbolo ou formato inválido')
         s.update(preview_appearance=bool(s['preview_appearance']),area_override=bool(s['area_override']),enabled=bool(s['enabled']), opacity=max(0,min(100,int(s['opacity']))), radius=max(0,min(15,int(s['radius']))), skill_id=max(0,min(65535,int(s['skill_id']))))
         for field in ('selection_preview','cast_preview'):s[field]=bool(style.get(field,value.get(field,True)))
+        for field in ('show_allies','show_enemies'):s[field]=bool(style.get(field,True))
         for field in ('preview_fill','preview_outline'):
             if s[field] is not None and not re.fullmatch(r'#[0-9a-fA-F]{6}',str(s[field])):raise ValueError('Cor da previa invalida')
         if s['preview_symbol'] is not None and s['preview_symbol'] not in SYMBOLS:raise ValueError('Simbolo da previa invalido')
@@ -129,6 +132,25 @@ def style_for(config, unit_type, skill_id=None):
     return {**DEFAULT_STYLE, 'selection_preview':config.get('selection_preview',True), 'cast_preview':config.get('cast_preview',True), **config.get('effects', {}).get(str(unit_type), {}), **config.get('skill_styles', {}).get(str(skill_id), {})}
 
 
+def visible_source(style, source, ground):
+    own=ground.get('own_id')
+    if source is None:return style.get('show_allies',True) or style.get('show_enemies',True)
+    if own is not None and source==own:return True  # own visibility keeps its existing controls
+    allied=source in ground.get('allied_ids',[])
+    return style.get('show_allies' if allied else 'show_enemies',True)
+
+
+def external_preview_definitions(config, casts):
+    models={s['skill_id']:s for row in catalog() for s in row['skills']}
+    keys={(c['skill_id'],max(1,c.get('level') or 1)) for c in casts if c.get('external') and c['skill_id'] in models}
+    result={}
+    for identity,level in keys:
+        known=[dict(skill_id=identity,level=level,target_flags=2 if models[identity].get('ground',True) else 4)]
+        definitions=preview_definitions(config,known)
+        if definitions:result[identity,level]=definitions[0]
+    return result
+
+
 def argb(color, opacity=100):
     return (round(opacity*255/100)<<24) | int(color[1:], 16)
 
@@ -151,6 +173,7 @@ def preview_definitions(config, learned):
                 radius=style['radius'] if custom else min(15,skill.get('radius_by_level',{}).get(str(learned[mapped]['level']),skill['radius'])),
                 shape=style['shape'] if custom else skill['shape'], self_centered=self_centered,
                 selection_preview=style['selection_preview'], cast_preview=style['cast_preview'],
+                show_allies=style['show_allies'],show_enemies=style['show_enemies'],
                 preview_fill=style['preview_fill'],preview_outline=style['preview_outline'],preview_symbol=style['preview_symbol'],preview_opacity=style['preview_opacity'],
                 **{k:style[k] for k in ('fill','outline','symbol','opacity')})
     return list(result.values())[:256]

@@ -37,6 +37,11 @@ class RcxPanel(QWidget):
         self.toggle=QPushButton('Ativar RCX');self.toggle.setCheckable(True);self.toggle.toggled.connect(self.set_enabled)
         top.addWidget(self.toggle)
         self.status=QLabel();self.status.setWordWrap(True);top.addWidget(self.status,1);layout.addLayout(top)
+        self.client_vision=QCheckBox('Visao local de ocultos (Byakugan) — entidades recebidas')
+        self.client_vision.setChecked(self.config['client_vision'])
+        self.client_vision.setToolTip('Ajuste visual local baseado no efeito 184 observado no NRO. Nao equipa o item, nao altera atributos e nao revela entidades que o servidor nao enviou. Requer jogo conectado pelo relay; independe do desenho de terreno RCX.')
+        self.client_vision.toggled.connect(self.set_client_vision)
+        layout.addWidget(self.client_vision)
         self.observed=QLabel('Aguardando unidades de terreno do servidor.');layout.addWidget(self.observed)
         hint=QLabel('Efeitos ativos e previas possuem controles separados por habilidade. A previa e uma estimativa visual; nao altera as regras do combate.')
         hint.setWordWrap(True);layout.addWidget(hint)
@@ -54,6 +59,11 @@ class RcxPanel(QWidget):
         self.effect_help=QLabel();self.effect_help.setWordWrap(True);form.addWidget(self.effect_help)
         box=QGroupBox('Aparência das células confirmadas');f=QFormLayout(box)
         self.effect_enabled=QCheckBox('Mostrar este efeito');f.addRow(self.effect_enabled)
+        self.show_allies=QCheckBox('Mostrar habilidades aliadas')
+        self.show_enemies=QCheckBox('Mostrar habilidades inimigas')
+        f.addRow(self.show_allies);f.addRow(self.show_enemies)
+        side_hint=QLabel('Aliados: grupo configurado, mesma PT/cla informado pelo servidor e suas invocacoes. Outros conjuradores usam a opcao inimiga. Suas habilidades mantem os controles de previa abaixo.')
+        side_hint.setWordWrap(True);f.addRow(side_hint)
         self.fill=QPushButton();self.outline=QPushButton();self.fill.clicked.connect(lambda:self.choose_color(self.fill));self.outline.clicked.connect(lambda:self.choose_color(self.outline))
         f.addRow('Preenchimento',self.fill);f.addRow('Traço',self.outline)
         self.symbol=QComboBox()
@@ -88,7 +98,7 @@ class RcxPanel(QWidget):
         self.save_path=QLabel(str(rcx_settings.FILE));self.save_path.setWordWrap(True);self.save_path.setTextInteractionFlags(Qt.TextSelectableByMouse);form.addWidget(self.save_path)
         self.save_status=QLabel('Alteracoes salvas imediatamente neste computador.');self.save_status.setWordWrap(True);form.addWidget(self.save_status);form.addStretch()
         self.save_timer=QTimer(self);self.save_timer.setSingleShot(True);self.save_timer.timeout.connect(self.persist)
-        for field in (self.effect_enabled,self.selection_preview,self.cast_preview,self.area_override):field.toggled.connect(self.edited)
+        for field in (self.effect_enabled,self.selection_preview,self.cast_preview,self.area_override,self.show_allies,self.show_enemies):field.toggled.connect(self.edited)
         for field in (self.radius,self.opacity,self.preview_opacity):field.valueChanged.connect(self.edited)
         for field in (self.symbol,self.shape,self.preview_symbol):field.currentIndexChanged.connect(self.edited)
         self.timer=QTimer(self);self.timer.setInterval(100);self.timer.timeout.connect(self.refresh_renderer)
@@ -102,6 +112,10 @@ class RcxPanel(QWidget):
     def choose_color(self,button):
         color=QColorDialog.getColor(QColor(button.property('rcx_color')),self,'Cor RCX')
         if color.isValid():self.set_color(button,color.name());self.edited(appearance=button in (self.fill,self.outline))
+
+    def set_client_vision(self,enabled):
+        self.config['client_vision']=enabled
+        self.persist()
 
     def build_list(self):
         selected=self.current
@@ -161,6 +175,7 @@ class RcxPanel(QWidget):
         count=len(list(rcx_settings.footprint(100,100,style['radius'],style['shape'])))
         self.area_dimensions.setText('Area visual: '+str(count)+' celulas'+(' ('+str(2*style['radius']+1)+'x'+str(2*style['radius']+1)+')' if style['shape']=='square' else ''))
         self.selection_preview.setChecked(style['selection_preview']);self.cast_preview.setChecked(style['cast_preview'])
+        self.show_allies.setChecked(style['show_allies']);self.show_enemies.setChecked(style['show_enemies'])
         self.set_color(self.preview_color,style['preview_fill'] or style['fill'])
         self.set_color(self.preview_outline,style['preview_outline'] or style['outline'])
         self.preview_symbol.setCurrentIndex(self.preview_symbol.findData(style['preview_symbol'] or style['symbol']))
@@ -185,6 +200,7 @@ class RcxPanel(QWidget):
             identity=self.current.split(':')[1]
             previous=self.config[section].get(identity,{})
             self.config[section][identity]=dict(**{k:previous.get(k) for k in ('preview_fill','preview_outline','preview_symbol','preview_opacity')},enabled=self.effect_enabled.isChecked(),fill=self.fill.property('rcx_color'),outline=self.outline.property('rcx_color'),opacity=self.opacity.value(),symbol=self.symbol.currentData(),radius=self.radius.value(),shape=self.shape.currentData(),skill_id=int(self.current.split(':')[1]) if section=='skill_styles' else 0,area_override=self.area_override.isChecked(),selection_preview=self.selection_preview.isChecked(),cast_preview=self.cast_preview.isChecked())
+            self.config[section][identity].update(show_allies=self.show_allies.isChecked(),show_enemies=self.show_enemies.isChecked())
             visible=dict(preview_fill=self.preview_color.property('rcx_color'),preview_outline=self.preview_outline.property('rcx_color'),preview_symbol=self.preview_symbol.currentData(),preview_opacity=self.preview_opacity.value())
             for key,value in visible.items():
                 if value!=self.displayed_preview.get(key):self.config[section][identity][key]=value

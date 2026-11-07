@@ -216,7 +216,7 @@ class PatrolTour:
                     point = self.points.get(node)
                     radius = min(2, self.seen_radius) if node in self.endpoints else self.seen_radius
                     if (point is not None and math.dist(position, point) <= radius
-                        and (not self.corridor_mode or self.collision.line_clear(position, point))):
+                        and self.collision.line_clear(position, point)):
                         yield node
 
     def coverage(self, done):
@@ -285,10 +285,12 @@ class PatrolTour:
         if getattr(self, '_plan_nodes', None) != nodes:
             self._plan_nodes = nodes
             self._plan_index = {node: i for i, node in enumerate(nodes)}
-            self._plan_matrix = []
-            for node in nodes:
-                walked = self.distances(self.points[node])
-                self._plan_matrix.append(array('f', (walked.get(other, math.inf) for other in nodes)))
+            self._plan_matrix = getattr(self,'_sweep_distances',None)
+            if self._plan_matrix is None:
+                self._plan_matrix = []
+                for node in nodes:
+                    walked = self.distances(self.points[node])
+                    self._plan_matrix.append(array('f', (walked.get(other, math.inf) for other in nodes)))
         return self._plan_index, self._plan_matrix
 
     def plan_order(self, position, nodes):

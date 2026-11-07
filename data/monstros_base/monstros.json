@@ -178,7 +178,7 @@
    "kakashi": 0
   },
   "walk_speed_ms": 150,
-  "name": "blade",
+  "name": "Gomen",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -223,28 +223,36 @@
     "Mula sem Cabesa"
    ],
    "bat_c02": [
-    "Deca",
-    "Gomen",
-    "Kaguya",
-    "Kakashi",
-    "Macaco Mico Meu",
-    "Mula sem Cabesa",
-    "Musashi",
-    "Mymma Cetha",
-    "Tobirama Senju",
-    "Void",
-    "Yoriichi"
-   ],
-   "new_4-2": [
+    "Aegon",
     "Deca",
     "Gomen",
     "Kaguya",
     "Kakashi",
     "Kuka Beludo",
+    "Kuri",
+    "Macaco Mico Meu",
+    "Mula sem Cabesa",
+    "Musashi",
+    "Mymma Cetha",
+    "Sasori",
+    "Tobirama Senju",
+    "Void",
+    "Yoriichi",
+    "neon"
+   ],
+   "new_4-2": [
+    "Aegon",
+    "Deca",
+    "Gomen",
+    "Kaguya",
+    "Kakashi",
+    "Kuka Beludo",
+    "Kuri",
     "Macaco Mico Meu",
     "Mymma Cetha",
     "Void",
-    "Yoriichi"
+    "Yoriichi",
+    "neon"
    ],
    "bat_c03": [
     "Mymma Cetha",
@@ -253,9 +261,11 @@
     "Yoriichi"
    ],
    "bat_c01": [
+    "Gomen",
     "Vagnerock",
     "Void",
-    "Yoriichi"
+    "Yoriichi",
+    "neon"
    ],
    "arenaflo": [
     "blade"
@@ -264,7 +274,9 @@
     "Mula sem Cabesa"
    ],
    "kakashi": [
-    "Mula sem Cabesa"
+    "Mula sem Cabesa",
+    "Mymma Cetha",
+    "neon"
    ]
   }
  },
@@ -1474,9 +1486,10 @@
    "0045@tower": 0,
    "bat_c02": 0,
    "bat_c03": 0,
-   "new_4-2": 0
+   "new_4-2": 0,
+   "bat_c01": 0
   },
-  "name": "Myka",
+  "name": "Ishida",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -1509,6 +1522,10 @@
     "Funkeiro",
     "Ishida",
     "Macro"
+   ],
+   "bat_c01": [
+    "Ishida",
+    "Macro"
    ]
   },
   "captured_sprite": true
@@ -1538,7 +1555,8 @@
     "Ishida"
    ],
    "bat_c01": [
-    "Ishida"
+    "Ishida",
+    "Macro"
    ],
    "bat_c02": [
     "Ishida",
@@ -2241,8 +2259,8 @@
    "new_4-2": 0,
    "bat_c02": 0
   },
-  "name": "Black Yugan",
-  "max_hp": 2000000,
+  "name": "Temari",
+  "max_hp": 2100000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "kakashi": [
@@ -2254,10 +2272,13 @@
     "Ootsutsuki Kabuto"
    ],
    "new_4-2": [
-    "Gangetsu Hozuki"
+    "Gangetsu Hozuki",
+    "Temari"
    ],
    "bat_c02": [
-    "Gangetsu Hozuki"
+    "Black Yugan",
+    "Gangetsu Hozuki",
+    "Temari"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -2305,6 +2326,7 @@
   "names_by_map": {
    "bat_c02": [
     "Kakashi",
+    "Kuka Beludo",
     "Vagnerock"
    ],
    "kakashi": [
@@ -2327,7 +2349,7 @@
     "Vagnerock"
    ]
   },
-  "name": "Kakashi",
+  "name": "Kuka Beludo",
   "max_hp": 2000000,
   "walk_speed_ms": 150
  },
@@ -2353,13 +2375,17 @@
  "1789": {
   "species_id": 1789,
   "maps": {
-   "bat_c02": 0
+   "bat_c02": 0,
+   "bat_c01": 0
   },
   "name": "O Pimposo",
   "max_hp": 2100000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "bat_c02": [
+    "O Pimposo"
+   ],
+   "bat_c01": [
     "O Pimposo"
    ]
   },

@@ -29,6 +29,9 @@ class QuestRelay(SharedQuestRelay):
         self.quest_hunt_id=None
 
     def quest_control(self,command,request,game_gate):
+        self.quests.route_position=self.tracker.observer.player
+        self.quests.route_position_map=self.tracker.observer.map_name
+        self.quests.route_collision=self.map_repository.get if self.map_repository else None
         if command in ('quest_start','quest_resume','quest_hunt_database','quest_test_route','quest_test_stage_route',
                        'quest_map_test','quest_record','quest_map_record','quest_bg_record'):
             self.bg_attempt=None  # another task takes over: no more BG retries afterwards
@@ -457,7 +460,7 @@ class QuestRelay(SharedQuestRelay):
             self.quest_stop('Gravando entrada na BG '+mode);q.record('bg','travel')
             q.recording.update(scope='bg',label='Entrada na BG '+mode,bg_mode=mode)
             q.map=o.map_name;q.append(dict(kind='walk',map=o.map_name,position=list(o.player)))
-            q.reason='Gravando entrada na BG '+mode+': entre na fila no jogo e depois clique em Salvar gravacao'
+            q.reason='Gravando entrada na BG '+mode+': selecione a entrada manualmente no jogo; pode repetir a conversa. Ao finalizar, clique em Salvar gravacao (fica a ultima tentativa).'
         elif command=='quest_bg_save':
             recording=q.recording
             if not recording or recording.get('scope')!='bg':raise ValueError('Nenhuma entrada de BG sendo gravada')
@@ -474,6 +477,8 @@ class QuestRelay(SharedQuestRelay):
         elif command=='quest_bg_cancel':
             if q.recording and q.recording.get('scope')=='bg':q.recording=None;q.reason='Gravacao da BG descartada'
         elif command=='quest_bg_enter':
+            if getattr(self,'bg_attempt',None) is not None:
+                raise ValueError('Ja existe uma tentativa de BG em andamento; use Parar tentativas antes de iniciar outra')
             modes=[bg_entry.check_mode(m) for m in (request.get('modes') or [request.get('mode')])]
             modes=list(dict.fromkeys(modes))
             missing=[m for m in modes if bg_entry.load().get(m) is None]
@@ -495,13 +500,16 @@ class QuestRelay(SharedQuestRelay):
         """One attempt at the current BG's NPC: walk there and make the recorded choices."""
         from . import bg_entry, map_routes
         attempt=self.bg_attempt;mode=self.bg_mode(attempt);entry=bg_entry.load().get(mode)
+        if self.quests.active:
+            return  # a trip/dialogue is still running; do not start a second registration
         if entry is None:self.bg_attempt=None;raise ValueError('NPC da BG '+mode+' removido')
         q=self.quests;o=self.tracker.observer
         entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
         attempt['tries'][mode]+=1
-        attempt.update(next_at=None,queued=False,refused=False,answered=False)
+        attempt.update(next_at=None,queued=False,refused=False,answered=False,next_poll=0,response_wait_at=None)
         q.start_validation(entry['steps'],entry['target_map'],now,mode='travel',label='BG '+mode,
                            map_routes=entries,connect_from=o.map_name,known_routes=map_routes.apply(load(),entries))
+        q.errands=[errand for errand in q.errands if errand.kind!='mount']
         q.reason=f"Inscrevendo na BG {mode} (tentativa {attempt['tries'][mode]})"
         if len(attempt['pending'])>1:q.reason+=' • na fila de tentativas: '+', '.join(attempt['pending'])
         if self.hunt:self.hunt.pause('Entrando na BG '+mode)
@@ -511,7 +519,7 @@ class QuestRelay(SharedQuestRelay):
     def bg_observe(self,events):
         """The NPC's answer to this attempt: queue message, error message or something else.
         Also takes the line asked by "Gravar mensagem de erro/sucesso"."""
-        from .bg_entry import answer, message_line, save_message
+        from .bg_entry import answer, message_line, save_message, messages
         capture=getattr(self,'bg_capture',None)
         if capture and time.monotonic()>capture['until']:
             self.bg_capture=capture=None;self.quests.reason='Gravacao da mensagem da BG expirou; clique de novo'
@@ -524,13 +532,53 @@ class QuestRelay(SharedQuestRelay):
                     self.quests.reason=('Mensagem de '+('erro' if capture['which']=='error' else 'sucesso')+' gravada: '+saved)
                     print('[ROTA] '+self.quests.reason);break
         attempt=getattr(self,'bg_attempt',None)
-        if not attempt:return
+        recording=self.quests.recording or {}
+        recording_bg=recording.get('scope')=='bg'
+        if not attempt and not recording_bg:return
+        config=attempt['config'] if attempt else messages()
         for e in events:
             if e['kind']=='npc_dialog' and e.get('text'):
-                attempt['answered']=True
-                kind=answer(e['text'],attempt['config'])
-                if kind=='queue':attempt['queued']=True
-                elif kind=='error':attempt['refused']=True
+                if recording_bg and e.get('entity_id')!=recording.get('npc_id'):continue
+                kind=answer(e['text'],config)
+                if attempt:
+                    attempt['answered']=True
+                    attempt['next_poll']=0  # process new evidence on the next relay tick
+                    if kind=='queue':attempt['queued']=True
+                    elif kind=='error':attempt['refused']=True
+                if kind in ('queue','error') and e.get('entity_id') and not getattr(self,'bg_dialog_close',None):
+                    self.bg_dialog_close=dict(entity_id=e['entity_id'],map=self.tracker.observer.map_name,
+                                              deadline=time.monotonic()+3,result=kind)
+
+    async def close_bg_result_dialog(self,game_gate):
+        """Close a success/refusal dialogue without choosing 'cancel registration'."""
+        pending=getattr(self,'bg_dialog_close',None)
+        if not pending:return
+        async with self.send_lock:
+            observer=self.tracker.observer;dialog=self.quests.dialog
+            if (observer.map_name!=pending['map'] or time.monotonic()>pending['deadline']
+                or self.commands_blocked or not self.allow_commands):
+                self.bg_dialog_close=None;return
+            if not game_gate() or self.upstream is None or not self.native_frames.ready:return
+            if not dialog:return
+            if dialog.get('entity_id')!=pending['entity_id']:
+                self.bg_dialog_close=None;return
+            action=dialog.get('action')
+            if action not in ('menu','next','close'):return
+            opcode=0xb8 if action=='menu' else 0x146
+            payload=(struct.pack('<HIB',opcode,pending['entity_id'],255) if action=='menu'
+                     else struct.pack('<HI',opcode,pending['entity_id']))
+            if self.native_frames.fallback().get(opcode)!=len(payload):
+                self.bg_dialog_close=None;return
+            self.bg_dialog_close=None  # at most one close, even when the connection fails
+            self.quests.dialog=None
+            self.trace_map_send('bot',opcode,len(payload))
+            self.upstream.write(payload);await self.upstream.drain()
+            attempt=getattr(self,'bg_attempt',None)
+            if pending.get('result')=='error' and not (attempt and attempt['queued']):
+                if attempt and self.quests.active:self.quest_stop('NPC da BG recusou a inscricao; dialogo encerrado')
+                print('[ROTA] NPC da BG recusou a inscricao; dialogo fechado, aguardando a proxima tentativa.')
+            else:
+                print('[ROTA] Inscricao na BG confirmada; dialogo encerrado sem cancelar o registro.')
 
     def bg_registered(self,attempt):
         """In the queue: the queue message came, or (only the error message set) the NPC answered
@@ -544,6 +592,9 @@ class QuestRelay(SharedQuestRelay):
         player (Parar) or another task stops it before that."""
         attempt=getattr(self,'bg_attempt',None)
         if not attempt:return
+        from .bg_entry import POLL_SECONDS, RESPONSE_TIMEOUT
+        if now<attempt.get('next_poll',0):return
+        attempt['next_poll']=now+POLL_SECONDS
         q=self.quests;mode=self.bg_mode(attempt)
         if attempt['queued'] or (not q.active and attempt['next_at'] is None and self.bg_registered(attempt)):
             if q.active:self.quest_stop('Inscrito na BG '+mode)
@@ -556,6 +607,15 @@ class QuestRelay(SharedQuestRelay):
             attempt.update(next_at=now+1,queued=False,refused=False,answered=False)
             q.reason='Inscrito na BG '+mode+'; continuando: '+', '.join(attempt['pending']);return
         if q.active:return
+        if not attempt['answered'] and attempt['next_at'] is None:
+            if attempt.get('response_wait_at') is None:attempt['response_wait_at']=now
+            if now-attempt['response_wait_at']>=RESPONSE_TIMEOUT:
+                self.bg_attempt=None
+                q.reason='BG sem resposta do NPC: tentativas paradas para nao duplicar a inscricao; confira no jogo antes de tentar novamente'
+                print('[ROTA] '+q.reason)
+            else:
+                q.reason='BG aguardando resposta do NPC; nenhuma nova inscricao sera enviada'
+            return
         if attempt['next_at'] is None:
             why='o NPC recusou' if attempt['refused'] else 'inscricao nao confirmada'
             attempt['index']=(attempt['index']+1)%len(attempt['pending'])
@@ -573,6 +633,19 @@ class QuestRelay(SharedQuestRelay):
     def flush_daily(self):
         """Missions found done today (skipped or delivered) are remembered for the panel."""
         from . import quest_daily
+        from . import quest_progress
+        from .quest_board_observer import update_progress
+        self.know_quest_character()
+        while self.quests.external_updates:
+            mission,operation=self.quests.external_updates.pop(0)
+            if operation!='delivery':
+                try:quest_daily.unmark(mission['board_id'],mission.get('rank') or mission['name'])
+                except OSError as exc:print('[ROTA] Nao foi possivel atualizar o estado diario da missao: '+str(exc))
+            saved=quest_progress.load()
+            character=(self.own_look or {}).get('name')
+            if saved and (not saved.get('character') or saved.get('character')==character) and update_progress(saved,mission,operation):
+                try:quest_progress.save(saved)
+                except OSError as exc:print('[ROTA] Nao foi possivel sincronizar a missao manual: '+str(exc))
         if self.quests.learned_extras:
             from . import quest_extras
             try:
@@ -691,7 +764,7 @@ class QuestRelay(SharedQuestRelay):
             from .quest_progress_log import QuestProgressLog
             try:QuestProgressLog(self.progress_log_path()).prune()
             except OSError:pass
-        if q.learned_extras or q.slots_dirty or q.learned or q.daily_marks:self.flush_daily()
+        if q.learned_extras or q.slots_dirty or q.learned or q.daily_marks or q.external_updates:self.flush_daily()
         if now-q.voltar_sent_at<15 and events:
             import json
             from datetime import datetime
@@ -706,7 +779,9 @@ class QuestRelay(SharedQuestRelay):
 
     async def quest_tick(self,game_gate):
         q=self.quests
+        await self.close_bg_result_dialog(game_gate)
         self.bg_tick(time.monotonic())
+        if getattr(self,'bg_dialog_close',None):return True
         if await self.hunt_death_watch(time.monotonic(),game_gate):return True
         if not q.active and q.resume and self.tracker.observer.map_name and q.resume_after_move(self.tracker.observer.map_name,time.monotonic()):
             self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
@@ -780,7 +855,9 @@ class QuestRelay(SharedQuestRelay):
         if self.walking_now():return True
         positions=observer.combat_positions(now)
         position=positions[0] if positions else observer.player
-        action=q.plan(observer.map_name,position,self.collision_map(),self.portals,now)
+        collision=self.collision_map()
+        q.route_collision=self.map_repository.get if self.map_repository else None
+        action=q.plan(observer.map_name,position,collision,self.portals,now)
         self.flush_daily()
         if q.phase=='paused':
             print('[ROTA] Parada: '+q.reason);self.quest_stop(q.reason);return True

@@ -68,7 +68,9 @@ def test_access_is_composed_with_mission_without_copying_to_route(tmp_path):
     library=dict(missions=[mission()],access_paths=[dict(id='P',name='Hospital VIP',board_id='vip',steps=vip_access())])
     q=QuestRoutes();q.start([route(['A'])],0,library=library)
     steps=q.itinerary('hospital2')
-    assert steps[:5]==vip_access()
+    # The nearest connection keeps the portal and Sala Vip transport; the final NPC
+    # approach can replace a redundant recorded walk to the board's exact tile.
+    assert steps[:4]==vip_access()[:4]
     assert steps[-2]['position']==[219,95] and steps[-2]['kind']=='npc'
     assert q.route['pickup_steps']==[]
     # Starting inside the VIP room never repeats the entrance conversation.

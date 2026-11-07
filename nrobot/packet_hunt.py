@@ -587,7 +587,7 @@ class PacketHunt:
             elif self.pending and self.pending.get('origin') == state['player_position']:
                 self.fail_movement(now, 'sem progresso na caminhada; procurando outra rota', state['player_position'])
             if self.pending and self.patrol is not None:
-                self.patrol.reached(state['player_position'], self.pending.get('origin'))
+                self.patrol.reached(state['player_position'], self.pending.get('origin'),now=now)
             self.pending = None
         if now < self.ready_at:
             return None
@@ -660,7 +660,7 @@ class PacketHunt:
                     # collision map, then resume the persistent coverage circuit.
                     focus = (state.get('showmobs_goal') or {}).get('position')
                     # @showmobs failed here: sweep the whole map in one planned walk (like the mazes).
-                    self.patrol.linear = bool(state.get('showmobs_failed'))
+                    self.patrol.linear = True  # one continuous planned circuit on every map
                     if focus:
                         self.patrol.update_focus(focus, now)
                     self.patrol.search_destination = None  # the coverage cycle owns exploration

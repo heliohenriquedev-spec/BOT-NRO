@@ -175,6 +175,7 @@ class RcxRenderer:
             if key!=self.prepared_key:
                 definitions=rcx_settings.preview_definitions(self.config,learned)
                 by_id={d['skill_id']:d for d in definitions}
+                external_definitions=rcx_settings.external_preview_definitions(self.config,casts)
                 points={}
                 effects=ground.get('effects')
                 unique={r['unit_type']:r['skills'][0]['skill_id'] for r in rcx_settings.catalog() if len(r['skills'])==1}
@@ -185,7 +186,7 @@ class RcxRenderer:
                         p=e.get('position');kind=e.get('effect_type')
                         if not isinstance(p,(list,tuple)) or len(p)!=2 or any(type(v) is not int or not 0<=v<1024 for v in p):continue
                         style=rcx_settings.style_for(self.config,kind,e.get('skill_id') or (activation.get(kind) or {}).get('skill_id') or unique.get(kind))
-                        if style['enabled']:
+                        if style['enabled'] and rcx_settings.visible_source(style,e.get('source_id'),ground):
                             area=e.get('area')
                             covered=rcx_settings.footprint(*area,'square') if isinstance(area,list) and len(area)==3 else [p]
                             if kind in activation:
@@ -196,8 +197,9 @@ class RcxRenderer:
                             for cell in covered:
                                 points[tuple(cell)]=(rcx_settings.argb(style['fill'],style['opacity']),rcx_settings.argb(style['outline'],style['opacity']),list(rcx_settings.SYMBOLS).index(style['symbol']))
                     for cast in casts:
-                        definition=by_id.get(cast['skill_id'])
+                        definition=(external_definitions.get((cast['skill_id'],max(1,cast.get('level') or 1))) if cast.get('external') else by_id.get(cast['skill_id']))
                         if definition is None or not definition.get('cast_preview',True):continue
+                        if cast.get('external') and not rcx_settings.visible_source(definition,cast.get('source_id'),ground):continue
                         for p in rcx_settings.footprint(*cast['position'],definition['radius'],definition['shape']):
                             points.setdefault(tuple(p),rcx_settings.preview_visual(self.config,definition))
                 name=rcx_client.map_key(ground.get('map')) if recent else ''

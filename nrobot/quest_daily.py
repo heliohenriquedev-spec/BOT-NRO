@@ -55,6 +55,15 @@ def today_keys(character, path=None):
     return {k for k, v in load(path, character).items() if v == today}
 
 
+def unmark(board_id,label,path=None,character=None):
+    name=character if character is not None else (CHARACTER or '')
+    people=load_all(path)
+    marks=people.get(name,{})
+    if key(board_id,label) in marks:
+        marks.pop(key(board_id,label))
+        write_json(Path(path or FILE),{'personagens':people})
+
+
 def write_json(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp')

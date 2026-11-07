@@ -7,6 +7,7 @@ may require returning through previously visited ground."""
 from collections import Counter, deque
 import math
 import random
+import time
 
 from .patrol_tour import SPACING, PatrolTour
 
@@ -19,7 +20,7 @@ class PacketPatrol:
     FOCUS_CLUSTER_RADIUS = 12  # suppress tiny @showmobs marker shifts around the same group
     ROUTE_NODES = 4000  # cell search budget per plan (~0.1 s); longer trips go by stepping stones
     ROUTE_GREED = 1.5
-    MAP_FIELDS = ('tour', 'remaining', 'done', 'walked', 'cycle_number', 'sweep_order', 'corridor_plan')
+    MAP_FIELDS = ('tour', 'remaining', 'done', 'walked', 'cycle_number', 'sweep_order', 'corridor_plan', 'last_passage')
     # Mazes where the planned walk measured worse than the nearest pending waypoint
     # (tools/validar_patrulha.py, 6 starts each, 2026-11-05: gl_sew02 +16% steps).
     NEAREST_FIRST_MAPS = frozenset({'gl_sew02.gat', 'gl_sew02'})
@@ -34,6 +35,24 @@ class PacketPatrol:
         self.reset()
 
     def route(self, collision, start, goal, **options):
+        route=self.direct_route(collision,start,goal,**options)
+        if not route or len(route)<2 or options.get('partial') or not self.last_passage:
+            return route
+        start_sector=(start[0]//4,start[1]//4)
+        sectors={(p[0]//4,p[1]//4) for p in route}-{start_sector}
+        if not sectors or not sectors.issubset(self.last_passage):
+            return route  # fresh ground remains the first choice
+        oldest,newest=min(self.last_passage.values()),max(self.last_passage.values())
+        costs={s:.25+2.75*(at-oldest)/max(1,newest-oldest) for s,at in self.last_passage.items()}
+        alternative=collision.route(start,goal,**{**options,'sector_costs':costs})
+        if alternative and len(alternative)-1 <= (len(route)-1)*1.25+8:
+            def recency(path):
+                return sum(costs.get((p[0]//4,p[1]//4),0) for p in path
+                           if (p[0]//4,p[1]//4)!=start_sector)
+            if recency(alternative)<recency(route):return alternative
+        return route
+
+    def direct_route(self, collision, start, goal, **options):
         """Route that keeps off walls, unless that costs a long detour: in mazes of one-cell
         corridors keeping off walls chose ways 3-4 times longer (gl_sew02: 436 steps for a
         119-step trip), back and forth over the same ground."""
@@ -66,6 +85,8 @@ class PacketPatrol:
     def reset(self):
         self.map_memory = {}
         self.visits = Counter()
+        self.last_passage = {}
+        self.observed_position = None
         self.last_sector = None
         self.heading = self.rng.choice(self.DIRECTIONS)
         self.goal = None
@@ -73,11 +94,12 @@ class PacketPatrol:
         self.search_destination = None
         self.focus = None  # a spot to go to first (@showmobs); reached through the normal waypoints
         self.focus_reached = None  # the last such spot reached: not gone to again
+        self.focus_history = []  # scan areas already reached during this coverage cycle
         self.focus_suppressed = None
         self.focus_suppressed_until = 0
         self.focus_key = None
         self.focus_block = None
-        self.linear = False  # @showmobs failed on this map: one planned walk through every point
+        self.linear = True  # all maps: one planned walk through every pending point
         self.goal_at = 0
         self.goal_distance = None
         self.last_plan_position = None
@@ -119,10 +141,12 @@ class PacketPatrol:
                 sectors.append(sector)
         return sectors
 
-    def reached(self, position, origin=None):
+    def reached(self, position, origin=None, now=None):
+        now=time.monotonic() if now is None else now
         if origin is not None and max(abs(position[i]-origin[i]) for i in (0, 1)) > 2*self.max_step+2:
             origin = None  # a jump (inner portal, teleport): nothing was walked in between
         for sector in self.sectors_on_segment(origin or position, position):
+            self.last_passage[sector]=now
             self.walked.add(sector)
             if sector != self.last_sector:
                 self.visits[sector] += 1
@@ -144,6 +168,21 @@ class PacketPatrol:
                 self.escape_next = True
                 self.loop_escapes += 1
                 self.recent_positions.clear()
+
+    def observe_position(self, position, now, map_name=None):
+        """Account for real progress during combat, quest travel or a different patrol goal."""
+        if self.tour is None or position is None:return
+        collision=self.tour.collision
+        name=getattr(collision,'name',None)
+        if name and map_name and name.lower().removesuffix('.gat')!=map_name.lower().removesuffix('.gat'):
+            self.observed_position=None;return
+        point=tuple(round(v) for v in position)
+        if point==self.observed_position:return
+        if not collision.walkable(point):return
+        origin=self.observed_position
+        if origin is not None and not collision.line_clear(origin,point):origin=None
+        self.reached(point,origin,now=now)
+        self.observed_position=point
 
     def mark_seen(self, point):
         for block in self.tour.seen_from(point):
@@ -181,7 +220,9 @@ class PacketPatrol:
         if not point:
             return
         candidate = tuple(point)
-        if self.focus is not None and math.dist(candidate, self.focus) <= self.FOCUS_CLUSTER_RADIUS:
+        if self.focus is not None:
+            return  # finish the current scan trip before accepting a competing destination
+        if any(math.dist(candidate, old) <= self.FOCUS_CLUSTER_RADIUS for old in self.focus_history):
             return
         if self.focus_reached is not None and math.dist(candidate, self.focus_reached) <= self.FOCUS_CLUSTER_RADIUS:
             return
@@ -205,7 +246,12 @@ class PacketPatrol:
         self.map_memory = {}
         if same_map:
             self.map_memory[id(collision)] = {f: getattr(self, f) for f in self.MAP_FIELDS}
+        elif self.tour is not None:
+            self.focus = self.focus_reached = self.focus_suppressed = None
+            self.focus_history = []
+            self.last_passage = {}
         self.goal = self.goal_block = self.search_destination = None
+        self.observed_position = None
         self.focus_key = self.focus_block = None
         self.route_cache_key = self.route_cache = None
         self.deferred = {}
@@ -235,6 +281,7 @@ class PacketPatrol:
         self.remaining = set(self.tour.points)
         self.done.clear()
         self.walked.clear()
+        self.focus_history.clear()
         self.deferred.clear()
         self.partial_ends = {}
         self.goal = self.goal_block = None
@@ -243,12 +290,40 @@ class PacketPatrol:
         if not self.remaining:  # tiny map: everything is in view from here
             self.remaining = set(self.tour.points)-set(self.tour.seen_from(position)) or set(self.tour.points)
 
+    def resume_forward(self, position):
+        """Rotate the existing circuit to a nearby pending point after a combat/scan detour.
+
+        No new tour or all-pairs search, and skipped pending points stay in the same cycle.
+        Corridor branch traversal retains its ordered return through bottlenecks.
+        """
+        if self.tour is None or self.tour.corridor_mode:
+            return
+        pending = self.remaining-set(self.deferred)
+        distances = self.tour.distances(position)
+        order = self.corridor_plan if self.linear and self.corridor_plan else self.sweep_order
+        candidates = [b for b in order if b in pending and b in distances]
+        if not candidates:
+            return
+        nearest = min(distances[b] for b in candidates)
+        nearby = [b for b in candidates if distances[b] <= nearest+.5*self.tour.spacing]
+        def score(block):
+            point = self.tour.points[block]
+            offset = (point[0]-position[0], point[1]-position[1])
+            alignment = sum(offset[i]*self.heading[i] for i in (0,1))/max(1,math.hypot(*offset)*math.hypot(*self.heading))
+            return distances[block]-.5*self.tour.spacing*alignment,block
+        chosen = min(nearby,key=score)
+        index = self.sweep_order.index(chosen)
+        self.sweep_order = self.sweep_order[index:]+self.sweep_order[:index]
+        if self.linear and self.corridor_plan and chosen in self.corridor_plan:
+            index=self.corridor_plan.index(chosen)
+            self.corridor_plan=self.corridor_plan[index:]+self.corridor_plan[:index]
+
     def next_block(self, position):
         """Next pending point of the stable circuit; blocked points wait without resetting it."""
         candidates = self.remaining-set(self.deferred)
         if not candidates:
             return None
-        if self.tour.corridor_mode and getattr(self.tour.collision, 'name', None) in self.NEAREST_FIRST_MAPS:
+        if not self.linear and self.tour.corridor_mode and getattr(self.tour.collision, 'name', None) in self.NEAREST_FIRST_MAPS:
             distances = self.tour.distances(position)
             reachable = [block for block in candidates if block in distances]
             return min(reachable, key=lambda block: (distances[block], block)) if reachable else None
@@ -336,30 +411,28 @@ class PacketPatrol:
             elif now-self.cycle_started_at >= self.CYCLE_KEEP:
                 self.new_cycle(position)  # 30 minutes on this map: its coverage starts over
                 self.cycle_started_at = now
-        self.reached(position)
+        self.reached(position,now=now)
         if self.focus is not None and max(abs(position[i]-self.focus[i]) for i in (0, 1)) <= 5:
             self.focus_reached = tuple(self.focus)
+            self.focus_history.append(tuple(self.focus))
             self.focus_suppressed = None
             self.focus_suppressed_until = 0
             self.focus = None
             self.focus_key = self.focus_block = None
             self.goal = self.goal_block = None
             self.route_cache_key = self.route_cache = None
-            # Resume the existing cycle order. Rebuilding the sweep at the scan point
-            # often selected the just-walked approach corridor and visibly reversed the route.
+            self.resume_forward(position)
             self.retry_at=now+.05
             return None
         self.failed_edges = {edge: until for edge, until in self.failed_edges.items() if until > now}
         route = None
         if (self.last_plan_position is not None and now-self.last_plan_at > 2
             and math.dist(position, self.last_plan_position) > 12):
-            # Combat or a portal displaced us. Mark the interrupted point covered for this cycle,
-            # otherwise the ordered tour walks back to it and creates a visible U-turn.
-            if self.goal_block is not None:
-                self.remaining.discard(self.goal_block)
-                self.done.add(self.goal_block)
+            # Combat or a portal displaced us: rejoin nearby without claiming the old goal
+            # was explored. It stays pending for the later part of this same circuit.
             if self.tour is not None:
                 self.mark_seen(position)
+                self.resume_forward(position)
             self.goal = self.goal_block = None
         self.last_plan_position, self.last_plan_at = tuple(position), now
         if self.goal is not None:
@@ -384,9 +457,6 @@ class PacketPatrol:
             if self.focus is not None:
                 destination=tuple(self.focus)
                 if self.goal != destination or self.goal_block is not None:
-                    if self.goal_block is not None:
-                        self.remaining.discard(self.goal_block)
-                        self.done.add(self.goal_block)
                     self.goal=destination
                     self.goal_block=None
                     self.goal_at=now
@@ -578,7 +648,7 @@ class PacketPatrol:
                 'general_heading': list(self.heading), 'loop_escapes': self.loop_escapes,
                 'cycle': self.cycle_number, 'cycle_sectors_total': len(points),
                 'cycle_mode': ('corredores: completar ramificacao e retornar' if self.tour is not None and self.tour.corridor_mode
-                               else 'circuito ordenado por distancia caminhavel'),
+                               else 'circuito linear continuo por distancia caminhavel'),
                 'cycle_sectors_explored': len(self.done), 'cycle_sectors_visited': len(self.done),
                 'cycle_sectors_remaining': len(self.remaining),
                 'goal': list(self.goal) if self.goal is not None else None}

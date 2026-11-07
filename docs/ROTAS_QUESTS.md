@@ -544,3 +544,16 @@ tipos consultados. Áreas inacessíveis são descartadas e o destino resultante 
 para o planejador de caminhos. Monstros de quest encontrados no trajeto continuam
 sendo combatidos normalmente. As consultas são espaçadas; o snapshot não equivale
 a rastreamento contínuo de todos os monstros do mapa.
+
+### Escolha do percurso de viagem
+
+A execução compara portais cruzados, transportes de NPC e percursos registrados
+para chegar ao destino da etapa. Considera a posição atual, a caminhada até os
+acessos, as chegadas conhecidas e a aproximação ao quadro de missões. Quando há
+colisão disponível, a estimativa de caminhada respeita as paredes; sem coordenada
+de chegada ou mapa legível, usa uma estimativa conservadora.
+
+O caminho gravado continua como uma opção conhecida, mas não obriga o bot a
+repeti-lo quando há alternativa mais próxima. Conversas de coleta e entrega são
+preservadas. O percurso é escolhido ao preparar a etapa e não fica sendo trocado
+a cada instante durante a caminhada. O `@showmobs` automático permanece suspenso.

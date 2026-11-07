@@ -37,7 +37,7 @@
    "sprite": 837
   },
   "177,105": {
-   "name": "",
+   "name": "Entrada - Bikouchuu",
    "sprite": 715
   },
   "148,239": {
@@ -169,7 +169,7 @@
    "sprite": 819
   },
   "78,137": {
-   "name": "",
+   "name": "Evento Katsu",
    "sprite": 734
   },
   "87,140": {
@@ -201,7 +201,7 @@
    "sprite": 831
   },
   "115,144": {
-   "name": "",
+   "name": "Recompensa WoE",
    "sprite": 100
   },
   "78,117": {
@@ -861,7 +861,7 @@
    "sprite": 778
   },
   "15,66": {
-   "name": "",
+   "name": "Instrutor Inicial",
    "sprite": 882
   },
   "92,126": {
@@ -963,6 +963,116 @@
   "99,299": {
    "name": "",
    "sprite": 831
+  }
+ },
+ "hospital4": {
+  "16,74": {
+   "name": "Campo de Treinamento",
+   "sprite": 843
+  },
+  "25,70": {
+   "name": "Médica",
+   "sprite": 739
+  },
+  "35,76": {
+   "name": "Enfermeira",
+   "sprite": 91
+  },
+  "40,85": {
+   "name": "",
+   "sprite": 882
+  },
+  "22,92": {
+   "name": "",
+   "sprite": 91
+  },
+  "59,73": {
+   "name": "Enfermeira",
+   "sprite": 91
+  },
+  "102,73": {
+   "name": "Enfermeira",
+   "sprite": 91
+  },
+  "110,26": {
+   "name": "Enfermeira",
+   "sprite": 91
+  },
+  "103,16": {
+   "name": "Hospital",
+   "sprite": 837
+  }
+ },
+ "nuvem": {
+  "53,235": {
+   "name": "Teleportador - Nuvem",
+   "sprite": 846
+  },
+  "53,243": {
+   "name": "Hospital da Núvem",
+   "sprite": 837
+  },
+  "141,162": {
+   "name": "Entrada - Bikouchuu",
+   "sprite": 715
+  },
+  "151,209": {
+   "name": "Teleportador - Nuvem",
+   "sprite": 846
+  },
+  "160,209": {
+   "name": "Escritório do Kage",
+   "sprite": 837
+  },
+  "218,94": {
+   "name": "Resetadora",
+   "sprite": 59
+  },
+  "192,83": {
+   "name": "Teleportador - Nuvem",
+   "sprite": 846
+  },
+  "197,60": {
+   "name": "Fidelidade",
+   "sprite": 47
+  },
+  "189,54": {
+   "name": "Reparar Edifício",
+   "sprite": 100
+  },
+  "192,30": {
+   "name": "Chun",
+   "sprite": 846
+  },
+  "238,105": {
+   "name": "Sala Vip",
+   "sprite": 922
+  },
+  "70,208": {
+   "name": "Academia",
+   "sprite": 837
+  },
+  "79,207": {
+   "name": "Teleportador - Nuvem",
+   "sprite": 846
+  }
+ },
+ "salakagex": {
+  "39,16": {
+   "name": "",
+   "sprite": 57
+  },
+  "32,22": {
+   "name": "",
+   "sprite": 707
+  },
+  "19,20": {
+   "name": "",
+   "sprite": 843
+  },
+  "26,8": {
+   "name": "",
+   "sprite": 434
   }
  }
 }

@@ -291,6 +291,14 @@
     69
    ],
    "confirmed": true
+  },
+  "116,41": {
+   "map": "nuvem",
+   "arrival": [
+    188,
+    77
+   ],
+   "confirmed": true
   }
  },
  "anthell01": {
@@ -463,10 +471,10 @@
  },
  "payon_in03": {
   "20,60": {
-   "map": "areia",
+   "map": "nuvem",
    "arrival": [
-    219,
-    241
+    74,
+    211
    ],
    "confirmed": true
   },
@@ -521,6 +529,60 @@
    "arrival": [
     112,
     62
+   ],
+   "confirmed": true
+  }
+ },
+ "hospital4": {
+  "103,3": {
+   "map": "nuvem",
+   "arrival": [
+    54,
+    239
+   ],
+   "confirmed": true
+  }
+ },
+ "nuvem": {
+  "50,239": {
+   "map": "hospital4",
+   "arrival": [
+    103,
+    3
+   ],
+   "confirmed": false
+  },
+  "188,80": {
+   "map": "yuno_in01",
+   "arrival": [
+    116,
+    37
+   ],
+   "confirmed": true
+  },
+  "74,208": {
+   "map": "payon_in03",
+   "arrival": [
+    20,
+    63
+   ],
+   "confirmed": true
+  },
+  "155,215": {
+   "map": "salakagex",
+   "arrival": [
+    31,
+    8
+   ],
+   "confirmed": true
+  }
+ },
+ "salakagex": {
+  "31,4": {
+   "map": "nuvem",
+   "arrival": [
+    155,
+    212
    ],
    "confirmed": true
   }

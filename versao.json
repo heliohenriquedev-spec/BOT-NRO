@@ -1,6 +1,6 @@
 {
- "version": "2026.11.06.9",
- "published_at": "2026-11-06T21:32:17",
+ "version": "2026.11.07.1",
+ "published_at": "2026-11-07T13:30:18",
  "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
@@ -1462,6 +1462,7 @@
   "nrobot/character_sprite.py",
   "nrobot/client_frame_guard.py",
   "nrobot/client_table.py",
+  "nrobot/client_vision.py",
   "nrobot/combat_rotation.py",
   "nrobot/continuous_observer.py",
   "nrobot/database_hunt.py",
@@ -1520,12 +1521,14 @@
   "nrobot/presence_guard.py",
   "nrobot/priority_panel.py",
   "nrobot/pvp_panel.py",
+  "nrobot/quest_board_observer.py",
   "nrobot/quest_daily.py",
   "nrobot/quest_extras.py",
   "nrobot/quest_library.py",
   "nrobot/quest_library_panel.py",
   "nrobot/quest_library_relay.py",
   "nrobot/quest_monster_index.py",
+  "nrobot/quest_navigation.py",
   "nrobot/quest_panel.py",
   "nrobot/quest_progress.py",
   "nrobot/quest_progress_log.py",
@@ -2149,5 +2152,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "e1c68c340d88"
+ "files_digest": "274bced9cdb5"
 }

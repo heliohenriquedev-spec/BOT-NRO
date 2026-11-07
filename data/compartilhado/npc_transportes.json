@@ -437,6 +437,42 @@
     89,
     204
    ]
+  },
+  "213,80>hospital4>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ra_in01.gat",
+     "position": [
+      213,
+      80
+     ],
+     "name": "Retorno#D"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "select",
+     "map": "ra_in01.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "hospital4.gat"
+    }
+   ],
+   "to": "hospital4",
+   "name": "Retorno#D",
+   "arrival": [
+    25,
+    92
+   ]
   }
  },
  "treasure01": {
@@ -763,8 +799,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    16,
-    19
+    62,
+    42
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [3] |Sim": {
@@ -971,6 +1007,78 @@
     36,
     5
    ]
+  },
+  "78,121>new_4-2>- Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      78,
+      121
+     ],
+     "name": "Battleground"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "- Sim"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "new_4-2.gat"
+    }
+   ],
+   "to": "new_4-2",
+   "name": "Battleground",
+   "arrival": [
+    99,
+    104
+   ]
+  },
+  "83,150>hospital4>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      83,
+      150
+     ],
+     "name": "Retorno#f"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "hospital4.gat"
+    }
+   ],
+   "to": "hospital4",
+   "name": "Retorno#f",
+   "arrival": [
+    25,
+    92
+   ]
   }
  },
  "payon_in03": {
@@ -1026,6 +1134,251 @@
    "arrival": [
     35,
     188
+   ]
+  }
+ },
+ "new_4-2": {
+  "99,112>bat_c02>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "new_4-2.gat",
+     "position": [
+      99,
+      112
+     ],
+     "name": "Battleground 5x5"
+    },
+    {
+     "kind": "select",
+     "map": "new_4-2.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "next",
+     "map": "new_4-2.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "bat_c02.gat"
+    }
+   ],
+   "to": "bat_c02",
+   "name": "Battleground 5x5",
+   "arrival": [
+    53,
+    130
+   ]
+  },
+  "99,112>bat_c02>Ok": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "new_4-2.gat",
+     "position": [
+      99,
+      112
+     ],
+     "name": "Battleground 5x5"
+    },
+    {
+     "kind": "select",
+     "map": "new_4-2.gat",
+     "option": "Ok"
+    },
+    {
+     "kind": "wait_map",
+     "map": "bat_c02.gat"
+    }
+   ],
+   "to": "bat_c02",
+   "name": "Battleground 5x5",
+   "arrival": [
+    53,
+    130
+   ]
+  },
+  "99,112>bat_c02>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "new_4-2.gat",
+     "position": [
+      99,
+      112
+     ],
+     "name": "Battleground 5x5"
+    },
+    {
+     "kind": "wait_map",
+     "map": "bat_c02.gat"
+    }
+   ],
+   "to": "bat_c02",
+   "name": "Battleground 5x5",
+   "arrival": [
+    146,
+    53
+   ]
+  },
+  "83,114>bat_c01>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "new_4-2.gat",
+     "position": [
+      83,
+      114
+     ],
+     "name": "Battleground 3x3"
+    },
+    {
+     "kind": "select",
+     "map": "new_4-2.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "next",
+     "map": "new_4-2.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "bat_c01.gat"
+    }
+   ],
+   "to": "bat_c01",
+   "name": "Battleground 3x3",
+   "arrival": [
+    146,
+    53
+   ]
+  },
+  "83,114>bat_c01>Ok": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "new_4-2.gat",
+     "position": [
+      83,
+      114
+     ],
+     "name": "Battleground 3x3"
+    },
+    {
+     "kind": "select",
+     "map": "new_4-2.gat",
+     "option": "Ok"
+    },
+    {
+     "kind": "wait_map",
+     "map": "bat_c01.gat"
+    }
+   ],
+   "to": "bat_c01",
+   "name": "Battleground 3x3",
+   "arrival": [
+    146,
+    55
+   ]
+  },
+  "100,92>kakashi>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "new_4-2.gat",
+     "position": [
+      100,
+      92
+     ],
+     "name": "Retorno - CT"
+    },
+    {
+     "kind": "select",
+     "map": "new_4-2.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "kakashi.gat"
+    }
+   ],
+   "to": "kakashi",
+   "name": "Retorno - CT",
+   "arrival": [
+    96,
+    130
+   ]
+  }
+ },
+ "hospital4": {
+  "16,74>kakashi>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "hospital4.gat",
+     "position": [
+      16,
+      74
+     ],
+     "name": "Campo de Treinamento#d"
+    },
+    {
+     "kind": "select",
+     "map": "hospital4.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "next",
+     "map": "hospital4.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "kakashi.gat"
+    }
+   ],
+   "to": "kakashi",
+   "name": "Campo de Treinamento#d",
+   "arrival": [
+    102,
+    143
+   ]
+  }
+ },
+ "nuvem": {
+  "238,105>ra_in01>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "nuvem.gat",
+     "position": [
+      238,
+      105
+     ],
+     "name": "Sala Vip#5"
+    },
+    {
+     "kind": "next",
+     "map": "nuvem.gat"
+    },
+    {
+     "kind": "next",
+     "map": "nuvem.gat"
+    },
+    {
+     "kind": "select",
+     "map": "nuvem.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "ra_in01.gat"
+    }
+   ],
+   "to": "ra_in01",
+   "name": "Sala Vip#5",
+   "arrival": [
+    209,
+    90
    ]
   }
  }

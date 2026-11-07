@@ -20,6 +20,10 @@ def test_multiple_routes_move_as_a_block_and_keep_selection_and_enabled(tmp_path
         assert [r['id'] for r in load(path)] == list('ADBC')
         assert {item.data(Qt.UserRole) for item in panel.list.selectedItems()} == {'B', 'C'}
         assert not next(r for r in load(path) if r['id']=='B')['enabled']
+        panel.mark_all.click()
+        assert len(load(path))==4 and all(r['enabled'] for r in load(path))
+        panel.unmark_all.click()
+        assert len(load(path))==4 and not any(r['enabled'] for r in load(path))
         # Feed the completed internal drop order to the same persistence handler as dropEvent.
         panel.list.blockSignals(True)
         moved = [panel.list.takeItem(2), panel.list.takeItem(2)]

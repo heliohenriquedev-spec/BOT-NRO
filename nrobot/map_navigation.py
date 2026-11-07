@@ -184,7 +184,7 @@ class CollisionMap:
         return True
 
     def route(self, start, target, blocked=frozenset(), max_nodes=6000, *, exact=False, visited_sectors=frozenset(),
-              revisit_cost=2.5, greed=1.0, partial=False, wall_cost=2):
+              revisit_cost=2.5, greed=1.0, partial=False, wall_cost=2, sector_costs=None):
         """A* path. greed > 1 weights the heuristic (much faster, slightly longer paths);
         partial returns the path to the expanded cell closest to target when the budget runs out."""
         start, target = tuple(start), tuple(target)
@@ -223,6 +223,9 @@ class CollisionMap:
                     continue
                 new_cost = cost+(math.sqrt(2) if dx and dy else 1)
                 new_cost += max(0, 3-self.clearance(nxt))*wall_cost
+                sector=(nxt[0]//4,nxt[1]//4)
+                if sector_costs and sector!=(start[0]//4,start[1]//4):
+                    new_cost += sector_costs.get(sector,0)
                 if (nxt[0]//4, nxt[1]//4) in visited_sectors and (nxt[0]//4, nxt[1]//4) != (start[0]//4, start[1]//4):
                     new_cost += revisit_cost
                 if new_cost < costs.get(nxt, float('inf')):

@@ -197,3 +197,26 @@ coordenadas de instalação explicitamente recebidas.
 
 Referência de confirmação/cancelamento: [rAthena clif.cpp](https://github.com/rathena/rathena/blob/master/src/map/clif.cpp),
 funções clif_skillcasting, clif_skillcastcancel e clif_skill_fail.
+
+### Conjurações de outros personagens
+
+O início de conjuração recebido do servidor também pode mostrar a área de outros
+conjuradores, sem exigir que seu personagem tenha a habilidade aprendida. A prévia
+usa a célula anunciada, o catálogo e a personalização da habilidade; não transforma
+essa estimativa em células de efeito confirmado. Cancelamento e fim do cast removem
+a prévia daquele conjurador, sem apagar casts simultâneos de outras pessoas.
+
+Cada habilidade tem **Mostrar habilidades aliadas** e **Mostrar habilidades inimigas**,
+ambas ligadas por padrão. Valem para as prévias e as células recebidas. São aliados
+o grupo configurado, suas invocações e personagens da mesma PT/clã quando esses
+dados estão disponíveis nos pacotes. Demais fontes usam o filtro de inimigos para
+exibição. Suas próprias habilidades mantêm os controles de prévia já existentes.
+
+
+## Visao local de ocultos
+
+A opcao "Visao local de ocultos (Byakugan)" aplica ao cliente o efeito visual observado no teste com o item, sem equipar o item nem alterar atributos no servidor. E independente do RCX de terreno e vale para os personagens conectados pelo relay neste computador. A disponibilidade visual ainda precisa ser conferida no jogo; entidades que o servidor nao envia nao podem ser reveladas.
+
+Apos instalar esta alteracao, reabra o painel e reconecte o personagem para carregar o novo relay. Depois, o controle pode ser ligado ou desligado na aba RCX sem reiniciar. A sombra vermelha antiga de hide foi retirada; o minimapa e os alertas permanecem.
+
+O estado `client_vision` em `estado.json` registra o ID do jogador usado no mapa, se o cliente esta pronto, o efeito visual encaminhado e possiveis erros de enquadramento. Esse ID vem da conta; o ID da selecao do personagem nao identifica o ator no mapa. Os registros originais do servidor continuam separados da alteracao visual local.

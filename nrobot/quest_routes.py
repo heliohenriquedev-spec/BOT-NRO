@@ -103,6 +103,8 @@ def save(routes, path=None):
 
 class QuestRoutes:
     def __init__(self):
+        from .quest_board_observer import QuestBoardObserver
+        self.manual_board=QuestBoardObserver();self.external_updates=[];self.pending_new_pickup=None
         self.recording=None;self.routes=[];self.index=0;self.step=0;self.phase='idle'
         self.reason='Fila parada';self.dialog=None;self.npc=None;self.sent_at=0;self.pending=None
         self.allies=set()  # own summons and homunculus: their kills count like the character's (the server credits the master)
@@ -111,6 +113,7 @@ class QuestRoutes:
         self.known_routes=[];self.steps=None
         self.stage_confirmed=False;self.last_npc_text=''
         self.library=None;self.mission_index=0;self.completed_missions={'pickup':[],'delivery':[]}
+        self.route_position=None;self.route_position_map=None;self.route_collision=None
         self.validation=None
         self.return_context=None;self.return_board=None;self.return_seen=None;self.return_sent=False
         self.extra_pages=0;self.deferred_check=None;self.npc_texts=[];self.skipped=[];self.skip_current=False
@@ -405,6 +408,7 @@ class QuestRoutes:
 
     def native(self,opcode,frame,map_name):
         import struct
+        self.manual_board.native(self,opcode,frame,map_name)
         if self.learning:self.learn_frame(opcode,frame)
         if not self.recording: return
         if self.recording.get('finished_at_transition'):return
@@ -501,6 +505,18 @@ class QuestRoutes:
         for k,values in (saved.get('chain_routes') or {}).items():
             if int(k)<len(self.routes):self.routes[int(k)].update(copy.deepcopy(values))
         phase=saved.get('phase','pickup')
+        if route['mission_ids'] and self.library:
+            from . import quest_daily
+            for mission in self.library['missions']:
+                if mission['id'] in route['mission_ids'] and not saved.get('replay_completed') and quest_daily.done_today(mission['board_id'],mission.get('rank') or mission['name']):
+                    if mission['id'] not in self.completed_missions['delivery']:self.completed_missions['delivery'].append(mission['id'])
+            delivered=set(self.completed_missions['delivery'])
+            if set(route['mission_ids'])<=delivered:
+                self.advance(now)
+                self.reason='Retomada: missoes ja entregues; '+self.reason
+                return
+            pending=[i for i in route['mission_ids'] if i not in delivered]
+            if len(pending)<len(route['mission_ids']):self.narrow(route,pending)
         if phase=='pickup':self.skip_done_today()
         if phase in ('pickup','delivery'):
             first=self.pending_index(phase,0)
@@ -542,6 +558,7 @@ class QuestRoutes:
         self.reason='Montaria aprendida: item '+str(item['item_id'])+'; tira '+str(len(displaced))+' equipamento(s)'
 
     def observe(self,events,own,map_name,now):
+        self.manual_board.observe(self,events)
         from .network_targets import is_player_id
         if self.body.map is None and map_name:self.body.map=map_name  # the map before any change seen here
         self.body.observe(events,own,now)
@@ -658,16 +675,8 @@ class QuestRoutes:
             else:original=self.route[STAGE_FIELDS[self.phase]]
             if origin==key(original[0]['map']):return copy.deepcopy(original)
             if self.current_mission:
-                choices=[]
-                for path in self.library['access_paths']:
-                    if path['board_id']!=self.current_mission['board_id']:continue
-                    source=key(path['steps'][0]['map'])
-                    if source==key(original[0]['map']):continue
-                    try:prefix=self.connection(origin,source)
-                    except ValueError:continue
-                    choices.append(prefix+copy.deepcopy(path['steps']))
-                if not choices:raise ValueError('Grave um percurso de acesso ao quadro a partir deste mapa, ou uma ligacao ate a origem de um acesso salvo.')
-                return min(choices,key=len)+copy.deepcopy(original)
+                try:return self.connection(origin,key(original[0]['map']),target_position=original[0].get('position'))+copy.deepcopy(original)
+                except ValueError as exc:raise ValueError('Sem percurso de acesso conhecido ao quadro. '+str(exc)) from exc
             return self.connection(origin,key(original[0]['map']))+copy.deepcopy(original)
         target=key(self.route['target_map'])
         original=self.route['steps']
@@ -676,20 +685,26 @@ class QuestRoutes:
             # Already on the map: a trip whose point is talking to an NPC there (healer, BG) still talks.
             return copy.deepcopy([s for s in original if key(s['map'])==target]) if talks_there else []
         starts=[i for i,s in enumerate(original) if s['kind']!='wait_map' and key(s['map'])==origin]
-        if starts:return copy.deepcopy(original[starts[0]:])
+        if starts and not any(s['kind'] in ('wait_map','wait_transfer') for s in original):
+            return copy.deepcopy(original[starts[0]:])
         if talks_there:
             # The point of the trip is talking to an NPC there (BG entry): reach the recording's start
             # and run it whole, instead of only reaching the map.
-            try:return self.connection(origin,key(original[0]['map']))+copy.deepcopy(original)
+            final=[s for s in original if key(s['map'])==target and s['kind']!='wait_map']
+            point=next((s['position'] for s in final if s.get('position')),None)
+            try:return self.connection(origin,target,target_position=point)+copy.deepcopy(final)
             except ValueError:pass
-        return self.connection(origin,target)
+        try:return self.connection(origin,target)
+        except ValueError:
+            if starts:return copy.deepcopy(original[starts[0]:])
+            raise
 
-    def connection(self,origin,target):
-        from collections import deque
+    def connection(self,origin,target,target_position=None):
         key=PortalGuard.key
         if origin==target:return []
         edges={}
-        for route in self.known_routes:
+        routes=([self.route] if self.route else [])+[r for r in self.known_routes if not self.route or r['id']!=self.route['id']]
+        for route in routes:
             if route['needs_recording']:continue
             leg=[]
             for step in route['steps']:
@@ -729,15 +744,18 @@ class QuestRoutes:
         for here,links in learned_edges(self.learned_portals).items():
             for cost,there,steps,_ in sorted(links,key=lambda link:link[0]):
                 edges.setdefault(here,[]).append((there,copy.deepcopy(steps)))
-        queue=deque([(origin,[])]);seen={origin}
-        while queue:
-            node,path=queue.popleft()
-            for destination,leg in edges.get(node,[]):
-                if destination==target:return path+leg
-                if destination not in seen:seen.add(destination);queue.append((destination,path+leg))
-        raise ValueError('Sem caminho conhecido de '+origin+' para '+target+'. Entre uma vez nos portais ate la (o bot aprende) ou grave o trecho.')
+        from .quest_navigation import closest_connection
+        position=self.route_position if PortalGuard.key(self.route_position_map or '')==key(origin) else None
+        def collision_for(name):
+            current=getattr(self,'route_current_collision',None)
+            if current and key(name)==current[0]:return current[1]
+            return self.route_collision(name) if self.route_collision else None
+        try:return closest_connection(edges,origin,target,position,target_position,collision_for,self.learned_portals)
+        except ValueError:raise ValueError('Sem caminho conhecido de '+origin+' para '+target+'. Entre uma vez nos portais ate la (o bot aprende) ou grave o trecho.')
 
     def plan(self,map_name,position,collision,portals,now):
+        self.route_position=position;self.route_position_map=map_name
+        self.route_current_collision=(PortalGuard.key(map_name or ''),collision)
         if self.phase not in STAGES: return None
         if self.pending:
             if position and (chebyshev(position,self.pending['position'])==0 or now-self.sent_at>4):
@@ -930,8 +948,17 @@ class QuestRoutes:
                 free=sorted(((i,s) for i,s in slots if s['empty']),key=lambda pair:pair[1]['number'])
                 if not free:self.stop('Sem slots livres para '+step['option']+'; nenhuma missao foi abandonada');return None
                 choice,chosen=free[0];self.slot_number=chosen['number']
+                self.pending_new_pickup=(mine,self.slot_number)
                 return dict(kind='select',entity_id=dialog['entity_id'],choice=choice)
             if kind=='select_mission_slot':
+                if not wanted and self.current_mission:
+                    mission=self.current_mission
+                    self.reset_mission_counts(mission)
+                    self.completed_missions['pickup']=[i for i in self.completed_missions['pickup'] if i!=mine]
+                    self.completed_missions['delivery']=[i for i in self.completed_missions['delivery'] if i!=mine]
+                    self.enter_stage('pickup',now,self.mission_index)
+                    self.reason='Missao ausente do quadro (expirada ou removida); pegando novamente: '+mission['name']
+                    return None
                 if len(wanted)!=1:self.stop('Missao nao localizada de forma unica nos slots para entregar: '+step['option']);return None
                 self.slot_number=wanted[0][1]['number']
                 return dict(kind='select',entity_id=dialog['entity_id'],choice=wanted[0][0])
@@ -1078,8 +1105,19 @@ class QuestRoutes:
         return None
 
     def own_slot(self,number,identity):
+        if self.pending_new_pickup==(identity,number):
+            self.pending_new_pickup=None
+            mission=next((m for m in (self.library or {}).get('missions',[]) if m['id']==identity),None)
+            if mission:self.reset_mission_counts(mission)
         if number is not None and identity and self.slot_owner.get(number)!=identity:
             self.slot_owner[number]=identity;self.slots_dirty=True
+
+    def reset_mission_counts(self,mission):
+        from .quest_board_observer import update_progress
+        state=self.progress_state()
+        if update_progress(state,mission,'pickup'):
+            self.kill_counts={int(k):v for k,v in state['kill_counts'].items()}
+            self.name_counts=state['name_counts'];self.kills=state['kills']
 
     def release_slot(self,number):
         if self.slot_owner.pop(number,None) is not None:self.slots_dirty=True

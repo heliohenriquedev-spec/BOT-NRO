@@ -33,6 +33,7 @@ def mark_key(npc_id, mark_id, serial=0):
 
 
 class MobScan:
+    AUTOMATIC_ENABLED = False  # temporarily suspended: use the normal continuous patrol
     INTERVAL = 60.0  # s between two searches of the same hunt
     GAP = 4.0  # s between two @showmobs
     LISTEN = 3.0  # s in which marks are taken as the answer to the last @showmobs
