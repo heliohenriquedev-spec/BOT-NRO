@@ -147,6 +147,8 @@ class SessionRelay(QuestRelay):
         self.listeners = {}
         self.tasks = set()
         self.character_id = None
+        from .rcx_sides import Sides
+        self.rcx_sides = Sides()  # RCX ally/enemy: battleground team, PvP map, party, guild, summons
         self.account = None
         self.upstream = None
         self.send_lock = asyncio.Lock()
@@ -2232,7 +2234,8 @@ class SessionRelay(QuestRelay):
                                      self.inventory.map_name or self.tracker.observer.map_name)
             self.registry.observe(events, self.tracker.observer.player_id,
                                   self.inventory.map_name or self.tracker.observer.map_name)
-            if any(e['kind']=='name' and any(e.get(k) for k in ('party','guild','guild_id')) for e in events):
+            affiliation_changed=self.observe_rcx_affiliation(events)
+            if affiliation_changed or any(e['kind']=='name' and any(k in e for k in ('guild','guild_id')) for e in events):
                 self.publish_ground_cells()
             self.sync_pvp_targets()
             if self.group_follower():
@@ -2368,6 +2371,7 @@ class SessionRelay(QuestRelay):
         if self.character_id != identity:
             self.tracker.observer.clear()
             self.own_option = 0
+            self.rcx_sides.reset()
         self.character_id = identity
 
     def begin_map_observation(self):
@@ -2652,8 +2656,9 @@ class SessionRelay(QuestRelay):
                 removal = None
                 # Part of the bot for every user (instant death removal, multi-hit shown as one hit):
                 # on unless perfis/sem_remocao_visual exists. It used to need a file in perfis/, which
-                # updates never carry, so only the developer's copy had it.
-                if stage == 'map' and not (Path(__file__).resolve().parents[1]/'perfis'/'sem_remocao_visual').is_file():
+                # updates never carry, so only the developer's copy had it. The same pass withholds
+                # the game's own drawing of skills RCX draws, when asked (hide_native_effect).
+                if stage == 'map':
                     from .immediate_monster_removal import ImmediateMonsterRemoval
                     from .map_monsters import is_confirmed_monster
 
@@ -2665,7 +2670,9 @@ class SessionRelay(QuestRelay):
                                           'map': self.tracker.observer.map_name})
                         return True
 
-                    removal = ImmediateMonsterRemoval(self.account, confirmed_monster)
+                    removal = ImmediateMonsterRemoval(
+                        self.account, confirmed_monster, drop=self.hide_native_effect,
+                        rewrite=not (Path(__file__).resolve().parents[1]/'perfis'/'sem_remocao_visual').is_file())
                 while data := await remote_reader.read(65536):
                     if stage == 'map':
                         routed = await endpoints.feed(data)
@@ -2961,15 +2968,114 @@ class SessionRelay(QuestRelay):
                 names[species] = None
         return names[species]
 
+    RCX_HEARTBEAT = 3.0  # s: the RCX panel touches rcx_ativo while it draws in the game
+
+    def rcx_drawing(self, now):
+        """RCX config and whether RCX is drawing now; re-read at most twice a second."""
+        cached = getattr(self, 'rcx_native_cache', None)
+        if cached and now < cached[0]:
+            return cached[1], cached[2]
+        from . import rcx_settings
+        try:
+            active = time.time()-(self.folder/'rcx_ativo').stat().st_mtime < self.RCX_HEARTBEAT
+        except OSError:
+            active = False
+        config = None
+        if active:
+            try:
+                stamp = rcx_settings.FILE.stat().st_mtime_ns
+            except OSError:
+                stamp = None
+            previous = getattr(self, 'rcx_native_config', None)
+            if previous and previous[0] == stamp:
+                config = previous[1]
+            else:
+                config = rcx_settings.load()
+                self.rcx_native_config = (stamp, config)
+        self.rcx_native_cache = (now+.5, active, config)
+        return active, config
+
+    def hide_native_effect(self, packet):
+        """A skill unit on the floor (011F) or a ground skill's animation (0117) that RCX acts on
+        (its side checked) and whose entry asks to hide the GRF effect is not forwarded to the client."""
+        op = bytes(packet[:2])
+        if not ((op == b'\x1f\x01' and len(packet) == 16) or (op == b'\x17\x01' and len(packet) == 18)):
+            return False
+        now = time.monotonic()
+        active, config = self.rcx_drawing(now)
+        if not active or not config:
+            return False
+        if not any(s.get('hide_native') for section in ('effects', 'skill_styles') for s in config[section].values()):
+            return False
+        from . import rcx_settings
+        own = self.tracker.observer.player_id
+        def ground_for(source):
+            # Only this caster's side is needed (a full snapshot per packet would cost too much).
+            records = self.registry.players
+            guild = {k: v for k, v in {**records.get(str(own), {}), **(self.own_look or {})}.items() if k in ('guild_id', 'guild')}
+            allied = self.rcx_sides.allied(source, own, records, set(self.group_member_ids()), self.own_summons.allies(), guild)
+            return {'own_id': own, 'allied_ids': [source] if allied else []}
+        if op == b'\x1f\x01':
+            source, unit_type = struct.unpack_from('<I', packet, 6)[0], packet[14]
+            skill = self.ground_cells.area_skill(source, now, unit_type)
+            hidden = rcx_settings.hides_native(config, unit_type, skill, source, ground_for(source))
+        else:
+            skill, source = struct.unpack_from('<HI', packet, 2)
+            hidden = rcx_settings.hides_native(config, None, skill, source, ground_for(source))
+        return hidden
+
+    def rcx_summon_skills(self):
+        """Summon skills known to the bot (own profiles and learned creatures): another player's
+        creature created right after one of them belongs to that player."""
+        skills = {p['skill_id'] for p in (self.settings or {}).get('skill_profiles', []) if p.get('role') == 'summon'}
+        learned = self.rotation.summons.learned if self.rotation is not None else None
+        if learned is None:
+            if not hasattr(self, 'rcx_learned_summons'):
+                try:
+                    path = Path(__file__).resolve().parents[1]/'data/rede/invocacoes_aprendidas.json'
+                    self.rcx_learned_summons = json.loads(path.read_text(encoding='utf-8'))
+                except (OSError, ValueError):
+                    self.rcx_learned_summons = {}
+            learned = self.rcx_learned_summons
+        for key, row in (learned or {}).items():
+            if isinstance(row, dict) and row.get('creature') and str(key).split(':')[0].isdigit():
+                skills.add(int(str(key).split(':')[0]))
+        return skills
+
+    def observe_rcx_affiliation(self, events):
+        """Battleground team, PvP map, party, own guild and other players' summons (rcx_sides)."""
+        if not any(e['kind'] in ('map_change', 'map_transfer', 'bg_team', 'map_property', 'map_type', 'pvp_rank', 'party_list',
+                                 'party_join', 'party_leave', 'name', 'appearance', 'skill_cast', 'skill_no_damage',
+                                 'remove') for e in events):
+            return False
+        own = self.tracker.observer.player_id
+        def position_of(identity):
+            if identity == own:
+                return self.tracker.observer.player
+            entity = self.inventory.entities.get(identity)
+            return entity.get('position') if entity else None
+        self.rcx_sides.map_name = self.tracker.observer.map_name or ''
+        before = self.rcx_sides.describe()
+        changed = self.rcx_sides.observe(events, own, time.monotonic(), self.rcx_summon_skills(), position_of)
+        for event in events:
+            if event['kind'] in ('map_property', 'map_type', 'pvp_rank'):
+                self.record_hunt({'kind': 'rcx_map_side', 'packet': event['kind'], 'value': event.get('value'),
+                                  'map': self.tracker.observer.map_name, 'mode': self.rcx_sides.describe()})
+        if self.rcx_sides.describe() != before:
+            print(f"RCX: aliados/inimigos agora pela regra de mapa {self.rcx_sides.describe()}.")
+        return changed
+
     def rcx_ground_snapshot(self):
-        value=self.ground_cells.snapshot();own=self.tracker.observer.player_id
-        allies=set(self.group_member_ids())|self.own_summons.allies()
-        records=self.registry.players;me=records.get(str(own),{})
-        for source in {e.get('source_id') for e in value['effects']+value['casts']}:
-            other=records.get(str(source),{})
-            if any(me.get(field) and me.get(field)==other.get(field) for field in ('party','guild_id','guild')):
-                allies.add(source)
-        value.update(own_id=own,allied_ids=sorted(i for i in allies if type(i) is int))
+        value = self.ground_cells.snapshot(); own = self.tracker.observer.player_id
+        sides = self.rcx_sides
+        records = self.registry.players
+        guild = {k: v for k, v in {**records.get(str(own), {}), **(self.own_look or {})}.items() if k in ('guild_id', 'guild')}
+        group = set(self.group_member_ids()); summons = self.own_summons.allies()
+        sources = {e.get('source_id') for e in value['effects']+value['casts']} | group | summons
+        allies = {s for s in sources if type(s) is int and sides.allied(s, own, records, group, summons, guild)}
+        value.update(own_id=own, allied_ids=sorted(allies), rcx_side_rule=sides.describe())
+        if sides.battleground:
+            value['battleground_team'] = sides.own_team
         return value
 
     def publish_ground_cells(self):

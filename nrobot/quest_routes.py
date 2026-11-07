@@ -853,7 +853,7 @@ class QuestRoutes:
         if kind=='wait_map': self.step+=1;self.progress_at=now;return None
         if kind in ('walk','portal','npc'):
             goal=step['position'];distance=chebyshev(position,goal)
-            if distance<=(2 if kind=='npc' else 0):
+            if distance<=(2 if kind=='npc' else 0) or kind=='npc' and (self.validation or {}).get('stationary_npc'):
                 if kind!='npc': self.step+=1;self.progress_at=now;return None
                 from .npc_labels import npc_name
                 from .network_targets import is_player_id

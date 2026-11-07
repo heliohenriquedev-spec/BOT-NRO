@@ -96,7 +96,7 @@
  "mensagens": {
   "error": "Ha um evento em andamento!",
   "queue": "VocÃª ja se registrou no evento!",
-  "retry_seconds": 6,
+  "retry_seconds": 0.05,
   "seen": [
    "Ha um evento em andamento!",
    "[Battleground 5x5]",
@@ -118,6 +118,7 @@
    "- Void",
    "- Temari",
    "Registro feito com sucesso"
-  ]
+  ],
+  "stationary": true
  }
 }

@@ -160,7 +160,7 @@ LENGTHS = {0x78: 55, 0x7c: 42, 0x22a: 58, 0x22b: 57, 0xc3: 8, 0x1d7: 11, 0x7f: 6
            0x11f: 16, 0x120: 6, 0x1de: 33,
            0xaf: 6, 0xa8: 7, 0xac: 7, 0x1c8: 13, 0x9d: 17, 0x9e: 17, 0xa1: 6,
            0x73: 11, 0x2eb: 13, 0x43d: 8, 0x148: 8,
-           0x22e: 71, 0x22f: 5, 0x230: 12, 0x144: 23}  # homunculus: status, feed answer, state
+           0x22e: 71, 0x22f: 5, 0x230: 12, 0x144: 23, 0x2dd: 32, 0x19a: 14, 0x104: 79, 0x105: 31}  # homunculus: status, feed answer, state
 
 # Chat-room information is unrelated to targeting but must be framed correctly.
 # 00D7 was observed with length 28 and title [Instrutor] in the local capture.
@@ -497,6 +497,25 @@ def decode(message: bytes) -> dict:
         event.update(kind='homunculus_fed', success=message[2] == 1, item_id=u16(3))
     elif op == 0x148 and len(message) == 8:
         event.update(kind='resurrection', entity_id=u32(2))
+    elif op == 0x2dd and len(message) == 32:
+        # rAthena clif_sendbgemblem_area/single: the battleground team (bg_id) of a character,
+        # sent on entering the BG map and whenever a player comes into view there.
+        event.update(kind='bg_team', entity_id=u32(2),
+                     name=message[6:30].split(b'\0')[0].decode('cp1252', 'replace'), team=u16(30))
+    elif op == 0x199 and len(message) == 4:
+        # rAthena clif_map_property: 0 none, 1 free PvP, 2 event PvP, 3 WoE, 4 PK, 5 PvP server.
+        event.update(kind='map_property', value=u16(2))
+    elif op == 0x1d6 and len(message) == 4:
+        event.update(kind='map_type', value=u16(2))  # clif_map_type (battlefield, arena...)
+    elif op == 0x19a and len(message) == 14:
+        event.update(kind='pvp_rank', entity_id=u32(2), rank=u32(6), total=u32(10))
+    elif op == 0xfb and len(message) >= 28 and (len(message)-28) % 46 == 0:
+        # rAthena clif_party_info: party name, then 46 bytes per member (account id first).
+        event.update(kind='party_list', members=[u32(28+i*46) for i in range((len(message)-28)//46)])
+    elif op == 0x104 and len(message) == 79:
+        event.update(kind='party_join', entity_id=u32(2))  # clif_party_member_info
+    elif op == 0x105 and len(message) == 31:
+        event.update(kind='party_leave', entity_id=u32(2))  # clif_party_withdraw
     elif op == 0x92:
         event.update(kind='map_transfer', map=message[2:18].split(b'\0')[0].decode('cp1252','replace'),
                      position=[u16(18),u16(20)])

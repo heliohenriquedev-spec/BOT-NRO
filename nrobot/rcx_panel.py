@@ -58,11 +58,17 @@ class RcxPanel(QWidget):
         self.effect_title=QLabel('Selecione um efeito');self.effect_title.setWordWrap(True);form.addWidget(self.effect_title)
         self.effect_help=QLabel();self.effect_help.setWordWrap(True);form.addWidget(self.effect_help)
         box=QGroupBox('Aparência das células confirmadas');f=QFormLayout(box)
-        self.effect_enabled=QCheckBox('Mostrar este efeito');f.addRow(self.effect_enabled)
-        self.show_allies=QCheckBox('Mostrar habilidades aliadas')
-        self.show_enemies=QCheckBox('Mostrar habilidades inimigas')
+        self.show_allies=QCheckBox('RCX nas habilidades aliadas (inclui as suas)')
+        self.show_allies.setToolTip('Inclui suas proprias habilidades e invocacoes. Em mapa sem PvP, todos os jogadores; em mapa PvP, grupo, PT e guilda; na BG, a sua equipe. Tambem liga suas previas de selecao e conjuracao.')
+        self.show_enemies=QCheckBox('RCX nas habilidades inimigas')
+        self.show_enemies.setToolTip('Habilidades de quem nao foi identificado como aliado, e de monstros.')
         f.addRow(self.show_allies);f.addRow(self.show_enemies)
-        side_hint=QLabel('Aliados: grupo configurado, mesma PT/cla informado pelo servidor e suas invocacoes. Outros conjuradores usam a opcao inimiga. Suas habilidades mantem os controles de previa abaixo.')
+        self.side_note=QLabel();self.side_note.setWordWrap(True);f.addRow(self.side_note)
+        self.hide_native=QCheckBox('Ocultar o efeito original do jogo (fica so o desenho do RCX)')
+        self.hide_native.setToolTip('Com RCX ativo, o jogo deixa de receber o efeito da GRF desta habilidade: o desenho no chao e a animacao da magia no local. '
+                                    'So vale para o lado (aliadas/inimigas) marcado acima. O dano e os efeitos reais continuam iguais; desativar o RCX volta a mostrar as proximas.')
+        f.addRow(self.hide_native)
+        side_hint=QLabel('Nenhuma marcada: o RCX nao age nesta habilidade e o jogo mostra o efeito normal. Marcada: o RCX desenha a habilidade daquele lado; com "Ocultar o efeito original" marcado, o efeito da GRF deixa de aparecer. Mapa sem PvP: todos os jogadores sao aliados. Mapa PvP: grupo, PT e guilda. BG: a sua equipe. Invocacoes seguem o dono; monstros sao inimigos.')
         side_hint.setWordWrap(True);f.addRow(side_hint)
         self.fill=QPushButton();self.outline=QPushButton();self.fill.clicked.connect(lambda:self.choose_color(self.fill));self.outline.clicked.connect(lambda:self.choose_color(self.outline))
         f.addRow('Preenchimento',self.fill);f.addRow('Traço',self.outline)
@@ -98,7 +104,7 @@ class RcxPanel(QWidget):
         self.save_path=QLabel(str(rcx_settings.FILE));self.save_path.setWordWrap(True);self.save_path.setTextInteractionFlags(Qt.TextSelectableByMouse);form.addWidget(self.save_path)
         self.save_status=QLabel('Alteracoes salvas imediatamente neste computador.');self.save_status.setWordWrap(True);form.addWidget(self.save_status);form.addStretch()
         self.save_timer=QTimer(self);self.save_timer.setSingleShot(True);self.save_timer.timeout.connect(self.persist)
-        for field in (self.effect_enabled,self.selection_preview,self.cast_preview,self.area_override,self.show_allies,self.show_enemies):field.toggled.connect(self.edited)
+        for field in (self.selection_preview,self.cast_preview,self.area_override,self.show_allies,self.show_enemies,self.hide_native):field.toggled.connect(self.edited)
         for field in (self.radius,self.opacity,self.preview_opacity):field.valueChanged.connect(self.edited)
         for field in (self.symbol,self.shape,self.preview_symbol):field.currentIndexChanged.connect(self.edited)
         self.timer=QTimer(self);self.timer.setInterval(100);self.timer.timeout.connect(self.refresh_renderer)
@@ -170,12 +176,19 @@ class RcxPanel(QWidget):
             self.effect_help.setText(self.effect_help.text()+'\nArmadilha: previa da area de ativacao (padrao Ragnarok 3x3), distinta da celula onde ela e instalada. Ajuste se o NRO usar outra area.')
         if row['skills'] and not row['skills'][0].get('ground',True):
             self.effect_help.setText(self.effect_help.text()+'\nUso em si: a area aparece ao usar, ao redor do personagem. Nao espera selecionar uma celula com o mouse.')
-        self.effect_enabled.setChecked(style['enabled']);self.set_color(self.fill,style['fill']);self.set_color(self.outline,style['outline'])
+        self.set_color(self.fill,style['fill']);self.set_color(self.outline,style['outline'])
         self.opacity.setValue(style['opacity']);self.symbol.setCurrentIndex(self.symbol.findData(style['symbol']));self.area_override.setChecked(style['area_override']);self.radius.setEnabled(True);self.shape.setEnabled(True);self.radius.setValue(style['radius']);self.shape.setCurrentIndex(self.shape.findData(style['shape']));self.skill_id.setValue(row['skills'][0]['skill_id'] if row['skills'] else self.general_skill_id(row['unit_type']))
         count=len(list(rcx_settings.footprint(100,100,style['radius'],style['shape'])))
         self.area_dimensions.setText('Area visual: '+str(count)+' celulas'+(' ('+str(2*style['radius']+1)+'x'+str(2*style['radius']+1)+')' if style['shape']=='square' else ''))
         self.selection_preview.setChecked(style['selection_preview']);self.cast_preview.setChecked(style['cast_preview'])
-        self.show_allies.setChecked(style['show_allies']);self.show_enemies.setChecked(style['show_enemies'])
+        # Each entry shows its own boxes; a general effect's side also covers its skills.
+        section='skill_styles' if self.current.startswith('skill:') else 'effects'
+        own=self.config[section].get(self.current.split(':')[1],{})
+        self.show_allies.setChecked(bool(own.get('show_allies')));self.show_enemies.setChecked(bool(own.get('show_enemies')))
+        self.hide_native.setChecked(style['hide_native'])
+        general=self.config['effects'].get(str(row['unit_type']),{}) if section=='skill_styles' else {}
+        covered=[label for field,label in (('show_allies','aliadas'),('show_enemies','inimigas')) if general.get(field)]
+        self.side_note.setText('O efeito geral deste tipo ja esta marcado para '+' e '.join(covered)+': vale tambem para esta habilidade.' if covered else '')
         self.set_color(self.preview_color,style['preview_fill'] or style['fill'])
         self.set_color(self.preview_outline,style['preview_outline'] or style['outline'])
         self.preview_symbol.setCurrentIndex(self.preview_symbol.findData(style['preview_symbol'] or style['symbol']))
@@ -199,8 +212,8 @@ class RcxPanel(QWidget):
             section='skill_styles' if self.current.startswith('skill:') else 'effects'
             identity=self.current.split(':')[1]
             previous=self.config[section].get(identity,{})
-            self.config[section][identity]=dict(**{k:previous.get(k) for k in ('preview_fill','preview_outline','preview_symbol','preview_opacity')},enabled=self.effect_enabled.isChecked(),fill=self.fill.property('rcx_color'),outline=self.outline.property('rcx_color'),opacity=self.opacity.value(),symbol=self.symbol.currentData(),radius=self.radius.value(),shape=self.shape.currentData(),skill_id=int(self.current.split(':')[1]) if section=='skill_styles' else 0,area_override=self.area_override.isChecked(),selection_preview=self.selection_preview.isChecked(),cast_preview=self.cast_preview.isChecked())
-            self.config[section][identity].update(show_allies=self.show_allies.isChecked(),show_enemies=self.show_enemies.isChecked())
+            self.config[section][identity]=dict(**{k:previous.get(k) for k in ('preview_fill','preview_outline','preview_symbol','preview_opacity')},fill=self.fill.property('rcx_color'),outline=self.outline.property('rcx_color'),opacity=self.opacity.value(),symbol=self.symbol.currentData(),radius=self.radius.value(),shape=self.shape.currentData(),skill_id=int(self.current.split(':')[1]) if section=='skill_styles' else 0,area_override=self.area_override.isChecked(),selection_preview=self.selection_preview.isChecked(),cast_preview=self.cast_preview.isChecked())
+            self.config[section][identity].update(show_allies=self.show_allies.isChecked(),show_enemies=self.show_enemies.isChecked(),hide_native=self.hide_native.isChecked())
             visible=dict(preview_fill=self.preview_color.property('rcx_color'),preview_outline=self.preview_outline.property('rcx_color'),preview_symbol=self.preview_symbol.currentData(),preview_opacity=self.preview_opacity.value())
             for key,value in visible.items():
                 if value!=self.displayed_preview.get(key):self.config[section][identity][key]=value
@@ -248,9 +261,27 @@ class RcxPanel(QWidget):
             except (OSError,ValueError,KeyError) as exc:
                 self.toggle.blockSignals(True);self.toggle.setChecked(False);self.toggle.blockSignals(False);self.renderer.close();self.status.setText('Nao ativado: '+str(exc));self.toggle.setText('Ativar RCX')
         else:
+            self.waiting_game=False
             self.timer.stop();self.renderer.close();self.status.setText('RCX desativado.');self.toggle.setText('Ativar RCX')
 
+    def follow_game(self):
+        """The game was closed or reopened: the drawing attached to the old process is dropped and
+        RCX starts again on the new one as soon as it is in a map. Returns True while waiting."""
+        waiting=getattr(self,'waiting_game',False)
+        if not waiting and not (self.renderer.enabled and not self.renderer.game_alive()):return False
+        if not waiting:self.renderer.close();self.waiting_game=True
+        try:
+            self.renderer.configure(self.config);self.renderer.start()
+        except (OSError,ValueError,KeyError):
+            self.renderer.close()
+            self.status.setText('Jogo fechado ou fora do mapa: o RCX volta sozinho quando o jogo estiver no mapa.')
+            return True
+        self.waiting_game=False;self.started_at=time.monotonic()
+        self.status.setText('Jogo reaberto: reconectando o RCX...')
+        return True
+
     def refresh_renderer(self):
+        if self.follow_game():return
         # Legacy JSON source remains compatible with a relay from before direct mmap streaming.
         if self.feed_path is not None and not (self.renderer.state.get('ground_cells') or {}).get('feed_ipc'):
             try:

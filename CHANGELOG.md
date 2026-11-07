@@ -4,6 +4,28 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.07.2 (07/11/2026)
+
+- BG: reconhece a resposta de inscricao existente que informa a modalidade (3x3, 4x4 ou 5x5), fecha o dialogo e encerra as tentativas. Quando o servidor informa outra modalidade, mostra o motivo sem cancelar o registro nem indicar sucesso na modalidade solicitada.
+
+- BG: opcao de tentar da posicao atual sem caminhar ate o NPC. Usa somente o NPC recebido no mesmo mapa e os dialogos de inscricao gravados; o servidor continua validando a distancia. O percurso gravado permanece disponivel ao desmarcar a opcao.
+
+- BG: intervalo configuravel a partir de 0,05 segundo, preservado ao salvar e reabrir o painel. Uma tentativa por vez: a proxima aguarda a resposta e o encerramento do dialogo anterior, inclusive ao alternar NPCs de BG.
+
+- BG: as respostas de evento em andamento e evento em espera fecham o dialogo e mantem as tentativas no intervalo configurado, sem limite de recusas. Reconhece Registro feito com sucesso e Voce ja se registrou no evento como confirmacoes; outras respostas deixam de ser interpretadas como inscricao bem-sucedida.
+
+- RCX: o filtro de habilidades aliadas inclui as proprias habilidades, nas celulas confirmadas e nas previas de selecao e conjuracao. Filtros do efeito geral deixam de ser anulados por estilos individuais salvos; corrigida a identificacao de aliados da mesma PT/guilda usando os dados do proprio personagem.
+
+- RCX: nova regra de aliado e inimigo. Em mapa sem PvP, as habilidades de todos os jogadores contam como aliadas (por exemplo, o Santuario de qualquer um). Em mapa PvP, sao aliados so o grupo configurado, a PT e a guilda. Dentro do mapa da BG vale a equipe da batalha informada pelo servidor, mesmo que o jogador da outra equipe seja da mesma vila; na cidade, enquanto espera na fila, vale a regra normal do mapa. Invocacoes de outros jogadores seguem o lado do dono, e monstros sao sempre inimigos. O rank mostrado depois do nome nao interfere.
+
+- RCX: a caixa "Mostrar este efeito" foi removida. Agora o RCX age numa habilidade somente para o lado marcado: "RCX nas habilidades aliadas" (inclui as suas), "RCX nas habilidades inimigas", ou nenhum. Todas as habilidades comecam desmarcadas e voce escolhe as que quer. Marcar no efeito geral vale para todas as habilidades daquele efeito. Nas configuracoes salvas antes, as entradas que estavam com os dois lados ligados (o padrao antigo) ficam desmarcadas; as que voce tinha ajustado mantem a escolha.
+
+- RCX: nova opcao "Ocultar o efeito original do jogo" em cada habilidade ou efeito. Com o RCX ativo, o efeito da GRF (o desenho da habilidade no chao e a animacao da magia no local) deixa de aparecer e fica so o desenho do RCX. Vale apenas para o lado em que o RCX age: com so inimigas marcado, o efeito some nas habilidades inimigas e continua aparecendo nas aliadas. O dano e o efeito real nao mudam. Ao desativar o RCX, as proximas habilidades voltam a aparecer normalmente.
+
+- RCX: o Fire Pillar passa a ser desenhado com a area 3x3 em volta da coluna de fogo, onde ela dispara, e nao so na celula central. Em "Personalizar area" e possivel ajustar o tamanho.
+
+- RCX: ao fechar e reabrir o jogo com o RCX ativado, o desenho ficava preso ao jogo fechado e nada aparecia no novo. Agora o RCX percebe o jogo fechado e volta a ligar sozinho quando o jogo e reaberto e entra no mapa. Enquanto o jogo estiver fechado, nenhum efeito do jogo e ocultado.
+
 ## 2026.11.07.1 (07/11/2026)
 
 - Visualizacao: removida a sombra vermelha antiga de hide sobre o personagem. O minimapa, os alertas e o contador de quests continuam independentes.

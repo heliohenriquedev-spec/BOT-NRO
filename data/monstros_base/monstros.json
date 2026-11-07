@@ -178,7 +178,7 @@
    "kakashi": 0
   },
   "walk_speed_ms": 150,
-  "name": "Gomen",
+  "name": "Mula sem Cabesa",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -203,6 +203,7 @@
     "Konan Uchiha",
     "Kuka Beludo",
     "Macaco Mico Meu",
+    "Mula sem Cabesa",
     "Musashi",
     "Mymma Cetha",
     "Tobirama Senju",
@@ -236,6 +237,7 @@
     "Mymma Cetha",
     "Sasori",
     "Tobirama Senju",
+    "Vagnerock",
     "Void",
     "Yoriichi",
     "neon"
@@ -249,6 +251,7 @@
     "Kuka Beludo",
     "Kuri",
     "Macaco Mico Meu",
+    "Mula sem Cabesa",
     "Mymma Cetha",
     "Void",
     "Yoriichi",
@@ -937,10 +940,11 @@
    "ra_fild03": 43,
    "chunin": 0,
    "bat_c01": 0,
-   "bat_c03": 0
+   "bat_c03": 0,
+   "bat_c02": 0
   },
   "walk_speed_ms": 150,
-  "name": "Doki",
+  "name": "Kaguya",
   "max_hp": 2000000,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -958,6 +962,9 @@
    ],
    "bat_c03": [
     "Hisoka"
+   ],
+   "bat_c02": [
+    "Kaguya"
    ]
   }
  },
@@ -1006,9 +1013,9 @@
    "um_dun02": 0,
    "prt_sewb4": 0
   },
-  "name": "Shinobi Ladrão",
+  "name": "Abelha Macho",
   "max_hp": 120000,
-  "walk_speed_ms": 200,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "um_dun02": [
     "Abelha Macho"
@@ -1413,18 +1420,23 @@
   "species_id": 1324,
   "maps": {
    "chunin": 0,
-   "06guild_03": 0
+   "06guild_03": 0,
+   "bat_c02": 0
   },
   "captured_sprite": true,
-  "name": "Manobra Arriscada",
+  "name": "Midoriya",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
+    "Manobra Arriscada",
     "Midoriya"
    ],
    "06guild_03": [
     "Manobra Arriscada"
+   ],
+   "bat_c02": [
+    "Midoriya"
    ]
   }
  },
@@ -1437,7 +1449,7 @@
    "new_4-2": 0
   },
   "captured_sprite": true,
-  "name": "dzsete",
+  "name": "Lanju",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -1448,6 +1460,8 @@
     "Midoriya"
    ],
    "bat_c02": [
+    "Lanju",
+    "Midoriya",
     "dzsete"
    ],
    "new_4-2": [
@@ -1487,13 +1501,15 @@
    "bat_c02": 0,
    "bat_c03": 0,
    "new_4-2": 0,
-   "bat_c01": 0
+   "bat_c01": 0,
+   "kakashi": 0
   },
-  "name": "Ishida",
+  "name": "Massacrento",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
+    "Ishida",
     "KillaKween",
     "Macro",
     "Myka",
@@ -1511,6 +1527,7 @@
     "Funkeiro",
     "Ishida",
     "Macro",
+    "Massacrento",
     "Myka",
     "Portajanela",
     "Zetsu"
@@ -1521,10 +1538,14 @@
    "new_4-2": [
     "Funkeiro",
     "Ishida",
-    "Macro"
+    "Macro",
+    "Massacrento"
    ],
    "bat_c01": [
     "Ishida",
+    "Macro"
+   ],
+   "kakashi": [
     "Macro"
    ]
   },
@@ -1546,6 +1567,7 @@
   "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
+    "Ishida",
     "Macro"
    ],
    "kakashi": [
@@ -2327,12 +2349,14 @@
    "bat_c02": [
     "Kakashi",
     "Kuka Beludo",
+    "Low profile",
     "Vagnerock"
    ],
    "kakashi": [
     "Saga"
    ],
    "chunin": [
+    "Kakashi",
     "Saga"
    ],
    "tur_dun01": [
@@ -2349,7 +2373,7 @@
     "Vagnerock"
    ]
   },
-  "name": "Kuka Beludo",
+  "name": "Vagnerock",
   "max_hp": 2000000,
   "walk_speed_ms": 150
  },
@@ -2376,7 +2400,8 @@
   "species_id": 1789,
   "maps": {
    "bat_c02": 0,
-   "bat_c01": 0
+   "bat_c01": 0,
+   "new_4-2": 0
   },
   "name": "O Pimposo",
   "max_hp": 2100000,
@@ -2386,6 +2411,9 @@
     "O Pimposo"
    ],
    "bat_c01": [
+    "O Pimposo"
+   ],
+   "new_4-2": [
     "O Pimposo"
    ]
   },
@@ -2529,9 +2557,10 @@
    "bat_c02": 0,
    "hospital2": 0,
    "yuno_fild07": 0,
-   "kakashi": 0
+   "kakashi": 0,
+   "chunin": 0
   },
-  "name": "Yondaime",
+  "name": "Mula sem Cabesa",
   "max_hp": 2300000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -2555,6 +2584,7 @@
    ],
    "bat_c02": [
     "Cloud Emperor",
+    "Masashi Kishimoto",
     "Mula sem Cabesa",
     "dnZERAAA"
    ],
@@ -2566,6 +2596,9 @@
    ],
    "kakashi": [
     "Yondaime"
+   ],
+   "chunin": [
+    "Mula sem Cabesa"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -2697,7 +2730,7 @@
    "bat_c01": 0,
    "kakashi": 0
   },
-  "name": "Ootsutsuki Kabuto",
+  "name": "Kaguya",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -2738,7 +2771,7 @@
    "bat_c03": 0,
    "bat_c01": 0
   },
-  "name": "Ootsutsuki Kabuto",
+  "name": "Kaguya",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -3971,14 +4004,22 @@
  "4008": {
   "species_id": 4008,
   "maps": {
-   "kakashi": 0
+   "kakashi": 0,
+   "bat_c02": 0,
+   "chunin": 0
   },
-  "name": "Ishida",
-  "max_hp": 3221401,
+  "name": "Mula sem Cabesa",
+  "max_hp": 4246922,
   "walk_speed_ms": 150,
   "names_by_map": {
    "kakashi": [
     "Ishida"
+   ],
+   "bat_c02": [
+    "Mula sem Cabesa"
+   ],
+   "chunin": [
+    "Mula sem Cabesa"
    ]
   }
  },

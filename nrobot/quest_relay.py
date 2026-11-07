@@ -505,10 +505,21 @@ class QuestRelay(SharedQuestRelay):
         if entry is None:self.bg_attempt=None;raise ValueError('NPC da BG '+mode+' removido')
         q=self.quests;o=self.tracker.observer
         entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
+        steps=entry['steps'];target_map=entry['target_map']
+        stationary=attempt['config'].get('stationary',False)
+        if stationary:
+            last=max(i for i,s in enumerate(steps) if s['kind']=='npc')
+            npc=steps[last]
+            if PortalGuard.key(npc['map'])!=PortalGuard.key(o.map_name):
+                self.bg_attempt=None
+                raise ValueError('BG sem caminhada: entre no mapa do NPC antes de tentar')
+            steps=[copy.deepcopy(npc)]+[copy.deepcopy(s) for s in steps[last+1:] if s['kind'] in ('select','next','close')]
+            target_map=npc['map']
         attempt['tries'][mode]+=1
         attempt.update(next_at=None,queued=False,refused=False,answered=False,next_poll=0,response_wait_at=None)
-        q.start_validation(entry['steps'],entry['target_map'],now,mode='travel',label='BG '+mode,
-                           map_routes=entries,connect_from=o.map_name,known_routes=map_routes.apply(load(),entries))
+        q.start_validation(steps,target_map,now,mode='travel',label='BG '+mode,
+                           map_routes=entries,connect_from=None if stationary else o.map_name,known_routes=map_routes.apply(load(),entries))
+        if stationary:q.validation['stationary_npc']=True
         q.errands=[errand for errand in q.errands if errand.kind!='mount']
         q.reason=f"Inscrevendo na BG {mode} (tentativa {attempt['tries'][mode]})"
         if len(attempt['pending'])>1:q.reason+=' • na fila de tentativas: '+', '.join(attempt['pending'])
@@ -519,7 +530,7 @@ class QuestRelay(SharedQuestRelay):
     def bg_observe(self,events):
         """The NPC's answer to this attempt: queue message, error message or something else.
         Also takes the line asked by "Gravar mensagem de erro/sucesso"."""
-        from .bg_entry import answer, message_line, save_message, messages
+        from .bg_entry import answer, message_line, save_message, messages, registered_mode
         capture=getattr(self,'bg_capture',None)
         if capture and time.monotonic()>capture['until']:
             self.bg_capture=capture=None;self.quests.reason='Gravacao da mensagem da BG expirou; clique de novo'
@@ -540,14 +551,18 @@ class QuestRelay(SharedQuestRelay):
             if e['kind']=='npc_dialog' and e.get('text'):
                 if recording_bg and e.get('entity_id')!=recording.get('npc_id'):continue
                 kind=answer(e['text'],config)
+                reported_mode=registered_mode(e['text']) if kind=='registered_mode' else None
+                if reported_mode:
+                    kind='other_queue' if attempt and reported_mode!=self.bg_mode(attempt) else 'queue'
                 if attempt:
                     attempt['answered']=True
                     attempt['next_poll']=0  # process new evidence on the next relay tick
                     if kind=='queue':attempt['queued']=True
                     elif kind=='error':attempt['refused']=True
-                if kind in ('queue','error') and e.get('entity_id') and not getattr(self,'bg_dialog_close',None):
+                    elif kind=='other_queue':attempt['other_queue']=reported_mode
+                if kind in ('queue','error','other_queue') and e.get('entity_id') and not getattr(self,'bg_dialog_close',None):
                     self.bg_dialog_close=dict(entity_id=e['entity_id'],map=self.tracker.observer.map_name,
-                                              deadline=time.monotonic()+3,result=kind)
+                                              deadline=time.monotonic()+3,result=kind,registered_mode=reported_mode)
 
     async def close_bg_result_dialog(self,game_gate):
         """Close a success/refusal dialogue without choosing 'cancel registration'."""
@@ -576,15 +591,16 @@ class QuestRelay(SharedQuestRelay):
             attempt=getattr(self,'bg_attempt',None)
             if pending.get('result')=='error' and not (attempt and attempt['queued']):
                 if attempt and self.quests.active:self.quest_stop('NPC da BG recusou a inscricao; dialogo encerrado')
+                if attempt:self.quests.reason='BG: evento indisponivel; tentativas continuam ate confirmar a inscricao'
                 print('[ROTA] NPC da BG recusou a inscricao; dialogo fechado, aguardando a proxima tentativa.')
+            elif pending.get('result')=='other_queue':
+                print('[ROTA] NPC informa inscricao na BG '+pending['registered_mode']+'; dialogo encerrado sem cancelar o registro.')
             else:
                 print('[ROTA] Inscricao na BG confirmada; dialogo encerrado sem cancelar o registro.')
 
     def bg_registered(self,attempt):
-        """In the queue: the queue message came, or (only the error message set) the NPC answered
-        this attempt without the error."""
-        if attempt['queued']:return True
-        return not attempt['config']['queue'] and attempt['answered'] and not attempt['refused']
+        """Only an explicit positive registration reply confirms success."""
+        return attempt['queued']
 
     def bg_tick(self,now):
         """Tries the marked BGs' NPCs one after the other until registered. A BG that succeeds
@@ -596,6 +612,12 @@ class QuestRelay(SharedQuestRelay):
         if now<attempt.get('next_poll',0):return
         attempt['next_poll']=now+POLL_SECONDS
         q=self.quests;mode=self.bg_mode(attempt)
+        if attempt.get('other_queue'):
+            reason='NPC informou inscricao existente na BG '+attempt['other_queue']+' ao tentar BG '+mode+'; tentativas encerradas, registro preservado'
+            if q.active:self.quest_stop(reason)
+            q.reason=reason;self.bg_attempt=None
+            print('[ROTA] '+reason)
+            return
         if attempt['queued'] or (not q.active and attempt['next_at'] is None and self.bg_registered(attempt)):
             if q.active:self.quest_stop('Inscrito na BG '+mode)
             attempt['registered'].append(mode);attempt['pending'].remove(mode)
@@ -604,7 +626,7 @@ class QuestRelay(SharedQuestRelay):
                 self.bg_attempt=None
                 q.reason='Inscrito na BG '+', '.join(attempt['registered'])+' • tentativas encerradas';return
             attempt['index']%=len(attempt['pending'])
-            attempt.update(next_at=now+1,queued=False,refused=False,answered=False)
+            attempt.update(next_at=now+min(1,attempt['config']['retry_seconds']),queued=False,refused=False,answered=False)
             q.reason='Inscrito na BG '+mode+'; continuando: '+', '.join(attempt['pending']);return
         if q.active:return
         if not attempt['answered'] and attempt['next_at'] is None:
@@ -620,7 +642,7 @@ class QuestRelay(SharedQuestRelay):
             why='o NPC recusou' if attempt['refused'] else 'inscricao nao confirmada'
             attempt['index']=(attempt['index']+1)%len(attempt['pending'])
             # Next NPC right away; a full round of refusals waits the configured interval.
-            wait=attempt['config']['retry_seconds'] if attempt['index']==0 else 1
+            wait=attempt['config']['retry_seconds'] if attempt['index']==0 else min(1,attempt['config']['retry_seconds'])
             attempt['next_at']=now+wait
             q.reason=f"BG {mode}: {why}; proxima tentativa: BG {self.bg_mode(attempt)} em {wait} s"
             print('[ROTA] '+q.reason)

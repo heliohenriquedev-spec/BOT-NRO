@@ -14,8 +14,12 @@ FILE = ROOT/'data/rede/rcx_config.json'
 SYMBOLS = {'solid': '■ Preenchido', 'outline': '□ Contorno', 'cross': '＋ Cruz', 'diagonal': '× Diagonal', 'diamond': '◇ Losango', 'dot': '• Centro'}
 SHAPES = {'point': 'Somente centro', 'square': 'Quadrado', 'diamond': 'Losango', 'cross': 'Cruz', 'sanctuary': 'Santuário (modelo Ragnarok)'}
 DEFAULT_STYLE = dict(enabled=True, fill='#808080', outline='#303030', opacity=70, symbol='solid', radius=0, shape='point', skill_id=0, area_override=False, preview_appearance=False, selection_preview=True, cast_preview=True, preview_fill=None, preview_outline=None, preview_symbol=None, preview_opacity=None)
-DEFAULT_STYLE.update(show_allies=True,show_enemies=True)
+# RCX acts on a skill only for the sides checked; every skill starts with none (no RCX, the
+# game's own effect). Where RCX acts and hide_native is checked, the game's effect is withheld.
+DEFAULT_STYLE.update(show_allies=False,show_enemies=False)
+SIDES_VERSION = 2  # files before it had both sides on by default for every saved entry
 DEFAULTS = dict(selection_preview=True, cast_preview=True, preview_opacity=35, preview_color='#70d6ff', preview_symbol='outline', effects={}, skill_styles={})
+DEFAULTS['sides_version'] = SIDES_VERSION
 DEFAULTS['client_vision']=False
 
 
@@ -45,7 +49,9 @@ def validate(value):
         if s['symbol'] not in SYMBOLS or s['shape'] not in SHAPES:raise ValueError('Símbolo ou formato inválido')
         s.update(preview_appearance=bool(s['preview_appearance']),area_override=bool(s['area_override']),enabled=bool(s['enabled']), opacity=max(0,min(100,int(s['opacity']))), radius=max(0,min(15,int(s['radius']))), skill_id=max(0,min(65535,int(s['skill_id']))))
         for field in ('selection_preview','cast_preview'):s[field]=bool(style.get(field,value.get(field,True)))
-        for field in ('show_allies','show_enemies'):s[field]=bool(style.get(field,True))
+        for field in ('show_allies','show_enemies'):s[field]=bool(style.get(field,False))
+        if 'hide_native' in style:s['hide_native']=bool(style['hide_native'])  # absent: follows the general effect
+        s['enabled']=s['show_allies'] or s['show_enemies']
         for field in ('preview_fill','preview_outline'):
             if s[field] is not None and not re.fullmatch(r'#[0-9a-fA-F]{6}',str(s[field])):raise ValueError('Cor da previa invalida')
         if s['preview_symbol'] is not None and s['preview_symbol'] not in SYMBOLS:raise ValueError('Simbolo da previa invalido')
@@ -55,9 +61,37 @@ def validate(value):
     return result
 
 
+def migrate_sides(value):
+    """Older files: both sides on was only the old default (all skills drawn), so it becomes none;
+    a side the user turned off keeps the other one. 'Mostrar este efeito' off means none."""
+    if not isinstance(value, dict) or value.get('sides_version') == SIDES_VERSION:return value, False
+    value = copy.deepcopy(value)
+    for section in ('effects', 'skill_styles'):
+        for style in (value.get(section) or {}).values():
+            if not isinstance(style, dict):continue
+            allies, enemies = style.get('show_allies', True), style.get('show_enemies', True)
+            if style.get('enabled', True) is False or (allies and enemies):
+                allies = enemies = False
+            style.update(show_allies=bool(allies), show_enemies=bool(enemies))
+            style.pop('enabled', None)
+    value['sides_version'] = SIDES_VERSION
+    return value, True
+
+
 def load():
-    try:return validate(json.loads(FILE.read_text(encoding='utf-8-sig')))
+    try:raw=json.loads(FILE.read_text(encoding='utf-8-sig'))
     except (OSError, ValueError, TypeError):return copy.deepcopy(DEFAULTS)
+    try:
+        raw,migrated=migrate_sides(raw)
+        value=validate(raw)
+    except (ValueError, TypeError):return copy.deepcopy(DEFAULTS)
+    if migrated:
+        try:
+            backup=FILE.with_name(FILE.name+'.antes_lados')
+            if not backup.exists():backup.write_text(FILE.read_text(encoding='utf-8-sig'),encoding='utf-8')
+            save(value)
+        except OSError:pass
+    return value
 
 
 def save(value):
@@ -109,7 +143,7 @@ def _save_changes(value, baseline):
     """Merge only this panel's edits; another open RCX panel may have saved newer fields."""
     value, baseline = validate(value), validate(baseline)
     if FILE.exists():
-        current = validate(json.loads(FILE.read_text(encoding='utf-8-sig')))
+        current = validate(migrate_sides(json.loads(FILE.read_text(encoding='utf-8-sig')))[0])
     else:
         current = copy.deepcopy(DEFAULTS)
     for key in DEFAULTS:
@@ -129,15 +163,45 @@ def _save_changes(value, baseline):
 
 
 def style_for(config, unit_type, skill_id=None):
-    return {**DEFAULT_STYLE, 'selection_preview':config.get('selection_preview',True), 'cast_preview':config.get('cast_preview',True), **config.get('effects', {}).get(str(unit_type), {}), **config.get('skill_styles', {}).get(str(skill_id), {})}
+    general=config.get('effects', {}).get(str(unit_type), {})
+    skill=config.get('skill_styles', {}).get(str(skill_id), {})
+    result={**DEFAULT_STYLE, 'hide_native':False, 'selection_preview':config.get('selection_preview',True), 'cast_preview':config.get('cast_preview',True), **general, **skill}
+    # A side checked on the general effect covers all of its skills; one checked on the skill
+    # covers that skill. RCX acts on the skill when any side applies.
+    for field in ('show_allies','show_enemies'):
+        result[field]=bool(general.get(field,False) or skill.get(field,False))
+    result['enabled']=result['show_allies'] or result['show_enemies']
+    return result
 
 
 def visible_source(style, source, ground):
     own=ground.get('own_id')
     if source is None:return style.get('show_allies',True) or style.get('show_enemies',True)
-    if own is not None and source==own:return True  # own visibility keeps its existing controls
+    if own is not None and source==own:return style.get('show_allies',True)
     allied=source in ground.get('allied_ids',[])
     return style.get('show_allies' if allied else 'show_enemies',True)
+
+
+@lru_cache(maxsize=1)
+def unit_skills():
+    """unit type -> its only skill (shared types: None), skill id -> unit type."""
+    single={r['unit_type']:(r['skills'][0]['skill_id'] if len(r['skills'])==1 else None) for r in catalog()}
+    units={s['skill_id']:r['unit_type'] for r in catalog() for s in r['skills']}
+    return single,units
+
+
+def hides_native(config, unit_type=None, skill_id=None, source=None, ground=None):
+    """The game's own drawing (GRF effect) of this skill is withheld from the client when the entry
+    asks for it and RCX acts on it for this caster's side, so it never just vanishes."""
+    single,units=unit_skills()
+    if unit_type is None:
+        unit_type=units.get(skill_id)
+        if unit_type is None:return False
+    elif skill_id is None:
+        skill_id=single.get(unit_type)
+    if unit_type not in single:return False
+    style=style_for(config,unit_type,skill_id)
+    return bool(style['hide_native'] and style['enabled'] and visible_source(style,source,ground or {}))
 
 
 def external_preview_definitions(config, casts):

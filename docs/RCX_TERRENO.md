@@ -10,7 +10,7 @@ mesmo controle independente do painel principal.
 1. Busque pelo nome, código Ragnarok, ID da habilidade ou ID do efeito.
 2. **Do personagem** filtra as habilidades aprendidas recebidas na conexão atual.
    **No mapa** mostra os tipos de efeito observados agora.
-3. Selecione uma habilidade. Ative/desative **Mostrar este efeito** e escolha as
+3. Selecione uma habilidade. Marque **RCX nas habilidades aliadas** e/ou **inimigas** e escolha as
    cores de preenchimento e traço, a opacidade e o símbolo. Há preenchimento,
    contorno, cruz, diagonal, losango e ponto central.
 4. As alterações são gravadas imediatamente, mesmo com RCX desativado. O bot
@@ -143,7 +143,7 @@ por habilidade.
 
 **Mostrar área enquanto escolho a célula no jogo** e **Mostrar durante a
 conjuração confirmada** ativam/desativam as respectivas prévias somente para
-a entrada selecionada. **Mostrar este efeito** controla separadamente o desenho
+a entrada selecionada. Os lados marcados (aliadas/inimigas) controlam separadamente o desenho
 das unidades confirmadas. Desativar uma prévia não muda as outras habilidades.
 Salvar aplica sem reiniciar; reabra o painel uma vez para carregar esta reorganização.
 
@@ -210,7 +210,45 @@ Cada habilidade tem **Mostrar habilidades aliadas** e **Mostrar habilidades inim
 ambas ligadas por padrão. Valem para as prévias e as células recebidas. São aliados
 o grupo configurado, suas invocações e personagens da mesma PT/clã quando esses
 dados estão disponíveis nos pacotes. Demais fontes usam o filtro de inimigos para
-exibição. Suas próprias habilidades mantêm os controles de prévia já existentes.
+exibição. Suas proprias habilidades tambem usam o filtro de aliadas, incluindo as previas de selecao, conjuracao e os efeitos confirmados. Desmarcar um lado no efeito geral oculta esse lado para todas as habilidades daquele efeito, mesmo com estilos individuais salvos.
+
+Regra de aliado/inimigo (`nrobot/rcx_sides.py`), decidida por pacotes do servidor:
+
+- **Mapa sem PvP:** todos os jogadores sao aliados (o Santuario de qualquer um cura voce).
+- **Mapa PvP** (propriedade de mapa 0199 com PvP/GdE, ou ranking PvP 019A no mapa atual):
+  aliados sao o grupo configurado, a PT (00FB/0104/0105) e a mesma guilda.
+- **BG:** o servidor informa a equipe de cada personagem (02DD) ao entrar no mapa e quando
+  alguem aparece. So a sua equipe e aliada; a vila e ignorada ali.
+- **Invocacoes:** uma criatura criada ate 8 celulas de um jogador nos 3 s apos uma habilidade
+  de invocacao conhecida pelo bot segue o lado desse jogador. As suas seguem a deteccao propria.
+- **Monstros** sao inimigos. O rank exibido depois do nome (campo de PT no NRO) nunca conta.
+
+A troca de mapa volta para "sem PvP" e descarta equipes e donos de invocacoes. Cada pacote de
+propriedade de mapa recebido fica em caca_eventos.jsonl como "rcx_map_side".
+
+## Ocultar o efeito original do jogo
+
+Nao ha mais **Mostrar este efeito**: o RCX age numa habilidade apenas para os lados marcados
+em **RCX nas habilidades aliadas** (inclui as suas e as previas) e **RCX nas habilidades
+inimigas**. Nenhum marcado: o RCX nao age e o jogo mostra o efeito normal. Todas as entradas
+comecam desmarcadas. Um lado marcado no efeito geral vale para todas as habilidades do tipo.
+Arquivos anteriores (sem `sides_version` 2) sao convertidos uma vez: entradas com os dois lados
+ligados (o padrao antigo) ou com o efeito desligado ficam sem lados; os ajustes feitos pelo
+usuario permanecem. Uma copia do arquivo anterior fica em `rcx_config.json.antes_lados`.
+
+Cada entrada tem **Ocultar o efeito original do jogo (fica so o desenho do RCX)**, desligada
+por padrao. Ligada, e com o RCX desenhando no jogo, o relay deixa de repassar ao cliente a
+unidade no chao (011F) e a animacao da magia no local (0117) dessa habilidade. O bot continua
+lendo os pacotes originais, entao as celulas do RCX, a esquiva e o combate nao mudam.
+
+- So oculta no lado em que o RCX age: com apenas inimigas marcado, o efeito some nas
+  habilidades inimigas e continua no jogo para as aliadas.
+- Uma habilidade sem estilo proprio segue a opcao do efeito geral; marcada ou desmarcada
+  na habilidade, vale a da habilidade.
+- O painel do RCX renova o arquivo `rcx_ativo` na pasta da conexao enquanto desenha. Sem
+  ele (RCX desativado, painel fechado) nada e ocultado. Unidades ja ocultadas continuam
+  invisiveis no cliente ate o servidor remove-las; as novas voltam a aparecer.
+- Altera so o que o cliente desenha. Nao muda dano, duracao nem o que o servidor aplica.
 
 
 ## Visao local de ocultos

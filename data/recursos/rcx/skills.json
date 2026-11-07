@@ -345,9 +345,11 @@
           "skill_id": 80,
           "code": "WZ_FIREPILLAR",
           "name": "Fire Pillar",
-          "radius": 0,
-          "shape": "point",
-          "ground": true
+          "radius": 1,
+          "shape": "square",
+          "ground": true,
+          "activation_area": true,
+          "preview_basis": "Ragnarok Unit.Range=1: the pillar fires on whoever steps in the 3x3 around its cell; placement stays one server unit"
         }
       ]
     },

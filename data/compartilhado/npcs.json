@@ -57,7 +57,7 @@
    "sprite": 837
   },
   "204,73": {
-   "name": "",
+   "name": "Teleportador - Suna",
    "sprite": 991
   },
   "228,242": {
@@ -65,20 +65,24 @@
    "sprite": 106
   },
   "224,237": {
-   "name": "",
+   "name": "Guia da Suna",
    "sprite": 989
   },
   "215,244": {
-   "name": "",
+   "name": "Academia",
    "sprite": 837
   },
   "223,244": {
-   "name": "",
+   "name": "Teleportador - Suna",
    "sprite": 991
   },
   "211,234": {
    "name": "Genin",
    "sprite": 703
+  },
+  "213,167": {
+   "name": "",
+   "sprite": 47
   }
  },
  "ra_in01": {
@@ -149,7 +153,7 @@
    "sprite": 716
   },
   "78,132": {
-   "name": "",
+   "name": "Entrada - Bikouchuu",
    "sprite": 715
   },
   "78,141": {
@@ -209,11 +213,11 @@
    "sprite": 953
   },
   "120,136": {
-   "name": "",
+   "name": "WoE Draft",
    "sprite": 882
   },
   "123,140": {
-   "name": "",
+   "name": "Teleportador - Guerra",
    "sprite": 831
   },
   "126,143": {
@@ -395,6 +399,10 @@
   "72,176": {
    "name": "",
    "sprite": 745
+  },
+  "76,93": {
+   "name": "",
+   "sprite": 837
   }
  },
  "hospital2": {
@@ -853,7 +861,7 @@
    "sprite": 121
   },
   "12,70": {
-   "name": "",
+   "name": "Estudante",
    "sprite": 703
   },
   "33,66": {
@@ -873,7 +881,7 @@
    "sprite": 837
   },
   "102,131": {
-   "name": "",
+   "name": "Sala de Treinamentos",
    "sprite": 837
   },
   "104,129": {
@@ -905,7 +913,7 @@
    "sprite": 63
   },
   "13,29": {
-   "name": "",
+   "name": "Velocidade",
    "sprite": 67
   },
   "11,8": {
@@ -915,11 +923,15 @@
   "4,21": {
    "name": "Área de Combate",
    "sprite": 837
+  },
+  "117,129": {
+   "name": "",
+   "sprite": 106
   }
  },
  "yuno_in03": {
   "52,181": {
-   "name": "",
+   "name": "Estudante",
    "sprite": 96
   },
   "52,176": {
@@ -935,7 +947,7 @@
    "sprite": 402
   },
   "56,188": {
-   "name": "",
+   "name": "Localizações",
    "sprite": 837
   },
   "62,179": {
@@ -943,7 +955,7 @@
    "sprite": 882
   },
   "48,179": {
-   "name": "",
+   "name": "Estudante",
    "sprite": 99
   },
   "48,175": {
@@ -955,13 +967,25 @@
    "sprite": 99
   },
   "32,191": {
-   "name": "",
+   "name": "Área de Jutsus",
    "sprite": 837
   }
  },
  "moc_fild13": {
   "99,299": {
    "name": "",
+   "sprite": 831
+  },
+  "70,236": {
+   "name": "",
+   "sprite": 831
+  },
+  "77,340": {
+   "name": "",
+   "sprite": 831
+  },
+  "285,241": {
+   "name": "Ninjutsu Intermediário",
    "sprite": 831
   }
  },

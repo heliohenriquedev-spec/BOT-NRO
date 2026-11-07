@@ -9,17 +9,31 @@ from nrobot.ground_cells import GroundCells
 from nrobot.rcx_stream import Publisher, Reader
 
 
-def renderer(state, config=None):
+ON=dict(show_allies=True,show_enemies=True)
+
+
+def all_on(config=None):
+    """RCX acting on every effect for both sides (each skill starts with none since sides_version 2).
+    Entries given explicitly keep their own sides."""
+    config=dict(config or {});effects=dict(config.get('effects') or {})
+    for row in rcx_settings.catalog():
+        effects[str(row['unit_type'])]={**ON,**effects.get(str(row['unit_type']),{})}
+    config['effects']=effects
+    return config
+
+
+def renderer(state, config=None, sides=True):
     r=RcxRenderer();r.shared=Shared();r.enabled=True
+    if sides:config=all_on(config)
     if config:r.configure(config)
     r.update(state);r.feed();return r
 
 
 def test_skill_colors_symbols_and_disabled_effect_survive_restart():
-    value=rcx_settings.save({'effects':{'131':dict(enabled=False)},'skill_styles':{'288':dict(fill='#27ab80',symbol='cross',opacity=40,radius=5,shape='square')}})
+    value=rcx_settings.save({'effects':{'131':dict(show_allies=False,show_enemies=False)},'skill_styles':{'288':dict(fill='#27ab80',symbol='cross',opacity=40,radius=5,shape='square')}})
     assert rcx_settings.load()==value
     state={'ground_cells':{'map':'test','effects':[dict(position=[10,10],effect_type=157),dict(position=[11,10],effect_type=131)]}}
-    r=renderer(state)
+    r=renderer(state,rcx_settings.load())
     assert r.shared.count==1
     cell=r.shared.cells[0]
     assert cell.fill==rcx_settings.argb('#27ab80',40) and cell.symbol==2
@@ -226,7 +240,7 @@ def test_desperado_is_included_as_self_skill_and_uses_its_own_visual_style():
     assert r.shared.cells[0].fill==rcx_settings.argb('#22aa66',60)
     assert r.shared.cells[0].symbol==2
     config['skill_styles']['516']['fill']='#aa2266'
-    r.configure(config)
+    r.configure(all_on(config))
     assert r.shared.cells[0].fill==rcx_settings.argb('#aa2266',60)
     r.close()
 
@@ -278,6 +292,7 @@ def test_native_desperado_frame_records_request_without_painting_or_sending_any_
 
 def test_editing_desperado_radius_automatically_enables_override_and_updates_rendering():
     from nrobot.rcx_panel import RcxPanel
+    rcx_settings.save({'skill_styles':{'516':dict(show_allies=True)}})
     p=RcxPanel();select_skill(p,516)
     assert not p.area_override.isChecked() and p.radius.isEnabled()
     p.renderer.shared=Shared();p.renderer.enabled=True
@@ -364,7 +379,7 @@ def test_trap_active_area_is_3x3_and_configured_radius_updates_both_aim_and_acti
     r=renderer({'learned_skills':[dict(skill_id=117,level=5,target_flags=2)],
         'ground_cells':dict(map='test',effects=[dict(position=[20,20],effect_type=145)])})
     assert r.shared.count==9 and r.shared.previews[0].radius==1
-    r.configure(rcx_settings.validate({'skill_styles':{'117':dict(radius=2,shape='square',area_override=True)}}))
+    r.configure(all_on(rcx_settings.validate({'skill_styles':{'117':dict(radius=2,shape='square',area_override=True)}})))
     assert r.shared.count==25 and r.shared.previews[0].radius==2
     r.update({'ground_cells':dict(map='test',effects=[])})
     r.feed();assert r.shared.count==0

@@ -1,6 +1,6 @@
 {
- "version": "2026.11.07.1",
- "published_at": "2026-11-07T13:30:18",
+ "version": "2026.11.07.2",
+ "published_at": "2026-11-07T17:30:28",
  "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
@@ -1541,6 +1541,7 @@
   "nrobot/rcx_panel.py",
   "nrobot/rcx_renderer.py",
   "nrobot/rcx_settings.py",
+  "nrobot/rcx_sides.py",
   "nrobot/rcx_stream.py",
   "nrobot/recall_guard.py",
   "nrobot/relay_profile.py",
@@ -2152,5 +2153,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "274bced9cdb5"
+ "files_digest": "a4e016905759"
 }

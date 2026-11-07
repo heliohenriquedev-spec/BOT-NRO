@@ -84,8 +84,60 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-4",
    "arrival": [
-    265,
-    298
+    289,
+    164
+   ]
+  },
+  "161,25>um_dun01>Esconderijo do Clã Kamizuru": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "areia.gat",
+     "position": [
+      161,
+      25
+     ],
+     "name": "Viajante Ninja#h2-4"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "select",
+     "map": "areia.gat",
+     "option": "Esconderijo do Clã Kamizuru"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "um_dun01.gat"
+    }
+   ],
+   "to": "um_dun01",
+   "name": "Viajante Ninja#h2-4",
+   "arrival": [
+    29,
+    53
    ]
   }
  },
@@ -190,8 +242,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    71,
-    153
+    96,
+    245
    ]
   },
   "217,86>anthell01>Esconderijo do Clã Kamizuru Nível 2": {
@@ -294,8 +346,8 @@
    "to": "um_dun01",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    73,
-    260
+    254,
+    139
    ]
   },
   "217,86>tur_dun01>Garganta da Nuvem": {
@@ -682,6 +734,29 @@
     179,
     162
    ]
+  },
+  "35,76>areia>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "hospital2.gat",
+     "position": [
+      35,
+      76
+     ],
+     "name": "Enfermeira#8"
+    },
+    {
+     "kind": "wait_map",
+     "map": "areia.gat"
+    }
+   ],
+   "to": "areia",
+   "name": "Enfermeira#8",
+   "arrival": [
+    179,
+    162
+   ]
   }
  },
  "kakashi": {
@@ -799,8 +874,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    62,
-    42
+    14,
+    32
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [3] |Sim": {
@@ -840,8 +915,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    48,
-    45
+    28,
+    43
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [5] |Sim": {
@@ -882,7 +957,7 @@
    "name": "Arenas de Guerra#3",
    "arrival": [
     50,
-    51
+    9
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [1] |Sim": {
@@ -922,8 +997,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    68,
-    59
+    45,
+    28
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [4] |Sim": {
@@ -963,8 +1038,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    30,
-    48
+    68,
+    43
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [6] |Sim": {
@@ -1004,8 +1079,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    36,
-    5
+    65,
+    7
    ]
   },
   "78,121>new_4-2>- Sim": {
@@ -1079,6 +1154,88 @@
     25,
     92
    ]
+  },
+  "100,146>chunin>^9A32CDArena Chunin^000000 [2] |Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Chunin^000000 [2] "
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "chunin.gat"
+    }
+   ],
+   "to": "chunin",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    66,
+    31
+   ]
+  },
+  "100,146>chunin>^9A32CDArena Chunin^000000 [7] |Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Chunin^000000 [7] "
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "chunin.gat"
+    }
+   ],
+   "to": "chunin",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    44,
+    4
+   ]
   }
  },
  "payon_in03": {
@@ -1135,6 +1292,291 @@
     35,
     188
    ]
+  },
+  "10,29>yuno_in03>- Intermediário|- Ataque Surpresa|Sim, quero aprender o jutsu Ataque Surpresa": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "payon_in03.gat",
+     "position": [
+      10,
+      29
+     ],
+     "name": "Taijutsu"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Intermediário"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Ataque Surpresa"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "Sim, quero aprender o jutsu Ataque Surpresa"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "yuno_in03.gat"
+    }
+   ],
+   "to": "yuno_in03",
+   "name": "Taijutsu",
+   "arrival": [
+    35,
+    188
+   ]
+  },
+  "10,29>yuno_in03>- Intermediário|- Ataque Surpresa": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "payon_in03.gat",
+     "position": [
+      10,
+      29
+     ],
+     "name": "Taijutsu"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Intermediário"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Ataque Surpresa"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "yuno_in03.gat"
+    }
+   ],
+   "to": "yuno_in03",
+   "name": "Taijutsu",
+   "arrival": [
+    35,
+    188
+   ]
+  },
+  "10,29>yuno_in03>- Intermediário|- Hakkeshou Gutten|Sim, quero aprender o jutsu Hakkeshou Gutten": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "payon_in03.gat",
+     "position": [
+      10,
+      29
+     ],
+     "name": "Taijutsu"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Intermediário"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Hakkeshou Gutten"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "Sim, quero aprender o jutsu Hakkeshou Gutten"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "yuno_in03.gat"
+    }
+   ],
+   "to": "yuno_in03",
+   "name": "Taijutsu",
+   "arrival": [
+    35,
+    188
+   ]
+  },
+  "10,29>yuno_in03>- Intermediário|- Hakkeshou Gutten": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "payon_in03.gat",
+     "position": [
+      10,
+      29
+     ],
+     "name": "Taijutsu"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Intermediário"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Hakkeshou Gutten"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "yuno_in03.gat"
+    }
+   ],
+   "to": "yuno_in03",
+   "name": "Taijutsu",
+   "arrival": [
+    35,
+    188
+   ]
+  },
+  "10,29>yuno_in03>- Intermediário|- Punhos Intensos|Sim, quero aprender o jutsu Punhos Intensos": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "payon_in03.gat",
+     "position": [
+      10,
+      29
+     ],
+     "name": "Taijutsu"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Intermediário"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Punhos Intensos"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "Sim, quero aprender o jutsu Punhos Intensos"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "yuno_in03.gat"
+    }
+   ],
+   "to": "yuno_in03",
+   "name": "Taijutsu",
+   "arrival": [
+    35,
+    188
+   ]
+  },
+  "10,29>yuno_in03>- Intermediário|- Punhos Intensos": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "payon_in03.gat",
+     "position": [
+      10,
+      29
+     ],
+     "name": "Taijutsu"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Intermediário"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Punhos Intensos"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "yuno_in03.gat"
+    }
+   ],
+   "to": "yuno_in03",
+   "name": "Taijutsu",
+   "arrival": [
+    35,
+    188
+   ]
   }
  },
  "new_4-2": {
@@ -1166,8 +1608,8 @@
    "to": "bat_c02",
    "name": "Battleground 5x5",
    "arrival": [
-    53,
-    130
+    146,
+    55
    ]
   },
   "99,112>bat_c02>Ok": {
@@ -1194,8 +1636,8 @@
    "to": "bat_c02",
    "name": "Battleground 5x5",
    "arrival": [
-    53,
-    130
+    146,
+    56
    ]
   },
   "99,112>bat_c02>": {
@@ -1379,6 +1821,31 @@
    "arrival": [
     209,
     90
+   ]
+  }
+ },
+ "yuno_in03": {
+  "56,188>payon_in03>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "yuno_in03.gat",
+     "position": [
+      56,
+      188
+     ],
+     "name": "Localizações#1"
+    },
+    {
+     "kind": "wait_map",
+     "map": "payon_in03.gat"
+    }
+   ],
+   "to": "payon_in03",
+   "name": "Localizações#1",
+   "arrival": [
+    99,
+    130
    ]
   }
  }

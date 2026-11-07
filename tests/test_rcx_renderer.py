@@ -22,6 +22,7 @@ def test_only_received_cells_are_sent_and_stale_session_clears_them():
     renderer = RcxRenderer()
     renderer.shared = Shared()  # ordinary local buffer; no renderer/game connection in tests
     renderer.enabled = True
+    renderer.configure({'effects': {'157': dict(show_allies=True, show_enemies=True)}})  # RCX acts on this effect
     renderer.update({'ground_cells': {'map': 'kakashi.gat', 'cells': [[10, 20], [10, 20], [-1, 10], [11, 20]]}})
     renderer.feed()
     assert renderer.shared.count == 2 and renderer.shared.map_name == b'kakashi'

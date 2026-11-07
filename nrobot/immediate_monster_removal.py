@@ -6,9 +6,11 @@ from .packet_reader import message_length
 
 class ImmediateMonsterRemoval:
     MULTI_HIT = 8  # rAthena DMG_MULTI_HIT: the client draws one hit per div
-    def __init__(self, account, is_monster):
+    def __init__(self, account, is_monster, drop=None, rewrite=True):
         self.account = account
         self.is_monster = is_monster
+        self.drop = drop  # packet -> True: not forwarded to the client (the bot already read it)
+        self.rewrite = rewrite
         self.pending = bytearray()
         self.started = False
         self.passthrough = False
@@ -42,7 +44,12 @@ class ImmediateMonsterRemoval:
             if size is None or offset+size > len(self.pending):
                 break
             packet = self.pending[offset:offset+size]
-            if size == 7 and packet[:2] == b'\x80\x00' and packet[6] == 1:
+            if self.drop is not None and self.drop(packet):
+                offset += size
+                continue
+            if not self.rewrite:
+                pass
+            elif size == 7 and packet[:2] == b'\x80\x00' and packet[6] == 1:
                 entity_id = struct.unpack_from('<I', packet, 2)[0]
                 if self.is_monster(entity_id):
                     packet[6] = 0  # Client despawn, without the death animation.

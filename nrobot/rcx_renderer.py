@@ -120,6 +120,7 @@ class RcxRenderer:
             raise ValueError('Janela do NRO indisponivel')
         info = rcx_client.inspect(pid.value)
         record, dll = manifest()
+        self.game_pid, self.alive_checked_until = pid.value, 0
         k = C.WinDLL('kernel32', use_last_error=True)
         k.CreateMutexW.argtypes = [C.c_void_p, W.BOOL, W.LPCWSTR]
         k.CreateMutexW.restype = W.HANDLE
@@ -200,6 +201,7 @@ class RcxRenderer:
                         definition=(external_definitions.get((cast['skill_id'],max(1,cast.get('level') or 1))) if cast.get('external') else by_id.get(cast['skill_id']))
                         if definition is None or not definition.get('cast_preview',True):continue
                         if cast.get('external') and not rcx_settings.visible_source(definition,cast.get('source_id'),ground):continue
+                        if not cast.get('external') and not definition.get('show_allies',True):continue
                         for p in rcx_settings.footprint(*cast['position'],definition['radius'],definition['shape']):
                             points.setdefault(tuple(p),rcx_settings.preview_visual(self.config,definition))
                 name=rcx_client.map_key(ground.get('map')) if recent else ''
@@ -211,7 +213,7 @@ class RcxRenderer:
                 for i,((x,y),(fill,outline,symbol)) in enumerate(sorted(points.items())[:CAPACITY]):
                     s.cells[i]=Cell(x,y,fill,outline,symbol)
                 s.selection_preview=int(recent)
-                aim_definitions=[d for d in definitions if not d.get("self_centered") and d.get("selection_preview",True)]
+                aim_definitions=[d for d in definitions if not d.get("self_centered") and d.get("selection_preview",True) and d.get('show_allies',True)]
                 s.preview_count=len(aim_definitions) if recent else 0
                 for i,d in enumerate(aim_definitions):
                     fill,outline,symbol=rcx_settings.preview_visual(self.config,d)
@@ -222,6 +224,43 @@ class RcxRenderer:
                 self.prepared_key=key
             s.last_feed=C.windll.kernel32.GetTickCount()&0xffffffff
             s.enabled=int(self.enabled)
+            self.heartbeat(bool(self.enabled and s.attached and self.game_alive()))
+
+    STILL_ACTIVE = 259
+
+    def game_alive(self):
+        """The game this RCX was attached to is still running. A reopened game is another process:
+        the old drawing stays attached to the closed one (2026-11-07), so it must be started again."""
+        pid=getattr(self,'game_pid',None)
+        if not pid or os.name!='nt':return bool(pid)
+        now=time.monotonic()
+        if now<getattr(self,'alive_checked_until',0):return self.alive
+        k=C.WinDLL('kernel32',use_last_error=True)
+        k.OpenProcess.argtypes=[W.DWORD,W.BOOL,W.DWORD];k.OpenProcess.restype=W.HANDLE
+        k.GetExitCodeProcess.argtypes=[W.HANDLE,C.POINTER(W.DWORD)];k.CloseHandle.argtypes=[W.HANDLE]
+        handle=k.OpenProcess(0x1000,False,pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        code=W.DWORD()
+        alive=bool(handle) and bool(k.GetExitCodeProcess(handle,C.byref(code))) and code.value==self.STILL_ACTIVE
+        if handle:k.CloseHandle(handle)
+        self.alive,self.alive_checked_until=alive,now+1
+        return alive
+
+    def heartbeat_path(self):
+        return Path(self.stream_path).parent/'rcx_ativo' if self.stream_path else None
+
+    def heartbeat(self, drawing):
+        """Tells the relay RCX is drawing in the game: only then it may hide the game's own
+        effect of a skill (hide_native). A stale or missing file means RCX is off."""
+        path=self.heartbeat_path()
+        if path is None:return
+        now=time.monotonic()
+        if drawing and now-getattr(self,'heartbeat_at',0)>=1:
+            try:path.touch();self.heartbeat_at=now
+            except OSError:pass
+        elif not drawing and getattr(self,'heartbeat_at',0):
+            try:path.unlink(missing_ok=True)
+            except OSError:pass
+            self.heartbeat_at=0
 
     def snapshot(self):
         if self.shared is None:
@@ -245,6 +284,10 @@ class RcxRenderer:
             self.worker.join(timeout=1)
             self.worker=None
         self.stop()
+        if getattr(self,'heartbeat_at',0) and self.heartbeat_path() is not None:
+            try:self.heartbeat_path().unlink(missing_ok=True)
+            except OSError:pass
+            self.heartbeat_at=0
         if self.stream is not None:
             self.stream.close();self.stream=None
         self.stream_path=self.stream_value=None

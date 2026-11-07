@@ -9,8 +9,8 @@ NPC lines seen while recording are offered in both fields. "Gravar mensagem de e
 mensagem de sucesso" take the next line the NPC says in the game (talk to it after clicking).
 
 "Entrar na BG" replays the recording from wherever the character is and keeps trying, every few
-seconds, until it gets in: it stops when the queue message shows up (or, with only the error
-message set, when the NPC answers without the error). Only the player stops it before that.
+seconds, until it gets in: it stops only on a positive registration message.
+Only the player stops it before that.
 Saved per PC in data/rede/bg_entradas.json:
 {'entradas': {mode: {'steps', 'target_map', 'recorded_at'}},
  'mensagens': {'error', 'queue', 'retry_seconds', 'seen'}}.
@@ -20,19 +20,27 @@ from __future__ import annotations
 import copy
 from datetime import datetime
 import json
+import math
+import re
 from pathlib import Path
 import uuid
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import (QComboBox, QFormLayout, QHBoxLayout, QLabel, QPushButton, QSpinBox, QVBoxLayout,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QLabel, QPushButton, QDoubleSpinBox, QVBoxLayout,
                                QWidget)
 
 FILE = Path(__file__).resolve().parents[1]/'data'/'rede'/'bg_entradas.json'
 MODES = ('5x5', '4x4', '3x3')
-RETRY = 5  # s between two attempts while the NPC refuses
+RETRY = 2  # s between two attempts while the NPC refuses
 POLL_SECONDS = .05  # local state checks only; never the network retry interval
 RESPONSE_TIMEOUT = 10  # no answer after the recorded trip: stop rather than duplicate a registration
-MESSAGES = dict(error='', queue='', retry_seconds=RETRY, seen=[])
+MESSAGES = dict(error='', queue='', retry_seconds=RETRY, seen=[], stationary=False)
+
+
+def retry_interval(value):
+    try:value=float(value)
+    except (TypeError,ValueError):return RETRY
+    return round(max(.05,min(120,value)),2) if math.isfinite(value) else RETRY
 
 
 def plain(text):
@@ -61,6 +69,7 @@ def _read(path=None):
         text = next((e.get('success_text') for e in old.values() if e.get('success_text')), '')
         data = {'entradas': old, 'mensagens': dict(MESSAGES, queue=text)}
     data['mensagens'] = {**MESSAGES, **(data.get('mensagens') or {})}
+    data['mensagens']['retry_seconds']=retry_interval(data['mensagens']['retry_seconds'])
     return data
 
 
@@ -89,10 +98,11 @@ def save_entry(mode, entry, seen=(), path=None):
     _write(data, path)
 
 
-def save_messages(error, queue, retry_seconds, path=None):
+def save_messages(error, queue, retry_seconds, path=None, *, stationary=None):
     data = _read(path)
     data['mensagens'].update(error=(error or '').strip()[:200], queue=(queue or '').strip()[:200],
-                             retry_seconds=max(2, min(120, int(retry_seconds))))
+                             retry_seconds=retry_interval(retry_seconds))
+    if stationary is not None:data['mensagens']['stationary']=bool(stationary)
     _write(data, path)
 
 
@@ -145,9 +155,21 @@ def check_mode(mode):
     return mode
 
 
+def registered_mode(text):
+    match=re.search(r'voce ja se registrou no battleground\s+(3x3|4x4|5x5)\b',plain(text))
+    return match[1] if match else None
+
+
 def answer(text, config):
-    """'queue', 'error' or None for one NPC message."""
+    """Positive registration, temporary refusal, named registration or no known result."""
     line = plain(text)
+    # These are observed NRO replies shared by all three BG NPCs. Ignore accents,
+    # colour markup and terminal punctuation instead of requiring an exact capture.
+    if any(reply in line for reply in ('ha um evento em andamento','evento esta em espera','evento em espera')):
+        return 'error'
+    if registered_mode(text):return 'registered_mode'
+    if 'registro feito com sucesso' in line or 'voce ja se registrou no evento' in line:
+        return 'queue'
     if config.get('queue') and plain(config['queue']) in line:
         return 'queue'
     if config.get('error') and plain(config['error']) in line:
@@ -216,10 +238,15 @@ class BgPanel(QWidget):
             box.activated.connect(self.store_messages)
         form.addRow('Mensagem de erro (todas as BGs):', self.error)
         form.addRow('Mensagem de fila (todas as BGs):', self.queue)
-        self.retry = QSpinBox(); self.retry.setRange(2, 120); self.retry.setSuffix(' s'); self.retry.setValue(RETRY)
+        self.retry = QDoubleSpinBox(); self.retry.setDecimals(2); self.retry.setRange(.05, 120); self.retry.setSingleStep(.05); self.retry.setSuffix(' s'); self.retry.setValue(RETRY)
+        self.retry.setToolTip('Espera entre tentativas concluidas. A proxima so comeca apos a resposta e o fechamento do dialogo anterior.')
         self.retry.valueChanged.connect(self.store_messages)
         form.addRow('Tentar de novo a cada:', self.retry)
         layout.addLayout(form)
+        self.stationary=QCheckBox('Tentar da posicao atual, sem caminhar ate o NPC')
+        self.stationary.setToolTip('Requer o NPC da BG recebido no mapa atual. O servidor decide se a distancia permite interagir. Nao executa a viagem gravada.')
+        self.stationary.toggled.connect(self.store_messages)
+        layout.addWidget(self.stationary)
         polling = QLabel('Verificação local: 0,05 s. Uma inscrição por vez; novas tentativas aguardam a resposta e o intervalo acima.')
         polling.setWordWrap(True)
         layout.addWidget(polling)
@@ -244,7 +271,7 @@ class BgPanel(QWidget):
         self.command_requested.emit(command, values)
 
     def store_messages(self, *args):
-        save_messages(self.error.currentText(), self.queue.currentText(), self.retry.value())
+        save_messages(self.error.currentText(), self.queue.currentText(), self.retry.value(),stationary=self.stationary.isChecked())
         self.refresh()
 
     def refresh(self, *args):
@@ -258,6 +285,7 @@ class BgPanel(QWidget):
         self.retry.blockSignals(True)
         self.retry.setValue(config['retry_seconds'])
         self.retry.blockSignals(False)
+        self.stationary.blockSignals(True);self.stationary.setChecked(config['stationary']);self.stationary.blockSignals(False)
         self.mode.setEnabled(not self.recording)
         entry = load().get(self.mode.currentText())
         recorded = ', '.join(m for m in MODES if m in load()) or 'nenhuma'

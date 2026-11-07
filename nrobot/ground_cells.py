@@ -25,8 +25,9 @@ AREA_SKILLS = {
 # Area spells with their own unit type (Pantano dos Mortos/Quagmire 0x8E, Pneuma, Volcano,
 # Gravitation...): NRO may also send only the central unit. With the caster's announcement the
 # Ragnarok area is drawn around the cast cell; when every unit arrives the drawing is the same.
-# Sanctuary (own shape), Land Protector (never enlarged) and traps (0x91) keep the received cells.
-OWN_UNIT_EXCLUDED = {0x83, 0x9d, 0x91}
+# Sanctuary (own shape), Land Protector (never enlarged), traps (0x91) and Fire Pillar (0x87) keep
+# the received cells: the RCX draws the activation area of the last two around their own cell.
+OWN_UNIT_EXCLUDED = {0x83, 0x9d, 0x91, 0x87}
 
 
 def own_unit_skills():

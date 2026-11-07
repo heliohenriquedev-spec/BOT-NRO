@@ -149,6 +149,69 @@ def test_fifty_ms_checks_keep_configured_network_retry_interval(tmp_path):
     assert r.bg_attempt['tries']['5x5']==2 and r.quests.active
 
 
+def test_fifty_ms_retry_survives_save_ui_reload_and_does_not_overlap(tmp_path):
+    bg_entry.save_messages('fechadas','entrou na fila',.05)
+    assert bg_entry.messages()['retry_seconds']==.05
+    panel=bg_entry.BgPanel()
+    assert panel.retry.value()==.05 and panel.retry.minimum()==.05
+    panel.store_messages()
+    assert bg_entry.messages()['retry_seconds']==.05
+    panel.close()
+    r=relay(tmp_path);record(r,'5x5')
+    r.quest_control('quest_bg_enter',dict(mode='5x5'),lambda:True)
+    # No response yet: even 50 ms ticks cannot repeat an in-flight registration.
+    for i in range(10):r.bg_tick(99+i*.05)
+    assert r.bg_attempt['tries']['5x5']==1
+    r.bg_observe([dict(kind='npc_dialog',entity_id=9,text='Ha um evento em andamento!')])
+    r.quests.stop('dialogo fechado');r.quests.phase='done'
+    r.bg_tick(100)
+    assert r.bg_attempt['next_at']==pytest.approx(100.05)
+    r.bg_tick(100.02)
+    assert r.bg_attempt['tries']['5x5']==1
+    r.bg_tick(100.051)
+    assert r.bg_attempt['tries']['5x5']==2 and r.quests.active
+    for i in range(10):r.bg_tick(101+i*.05)
+    assert r.bg_attempt['tries']['5x5']==2
+
+
+def test_fifty_ms_retry_also_applies_between_different_bg_npcs(tmp_path):
+    r=relay(tmp_path)
+    for mode in ('3x3','4x4'):record(r,mode)
+    bg_entry.save_messages('fechadas','entrou na fila',.05)
+    r.quest_control('quest_bg_enter',dict(modes=['3x3','4x4']),lambda:True)
+    r.bg_observe([dict(kind='npc_dialog',entity_id=9,text='Ha um evento em andamento!')])
+    r.quests.stop('dialogo fechado');r.quests.phase='done'
+    r.bg_tick(100)
+    assert r.bg_attempt['next_at']==pytest.approx(100.05)
+    r.bg_tick(100.051)
+    assert r.bg_attempt['tries']['4x4']==1 and r.quests.active
+
+
+def test_stationary_entry_talks_to_received_npc_without_walk_or_collision(tmp_path):
+    r=relay(tmp_path);record(r,'5x5')
+    c=bg_entry.messages();bg_entry.save_messages('fechadas','entrou na fila',.05,stationary=True)
+    r.quest_control('quest_bg_enter',dict(mode='5x5'),lambda:True)
+    q=r.quests;now=time.monotonic()
+    assert [s['kind'] for s in q.steps]==['npc','select']
+    q.actors[110000001]=dict(position=[160,150],name='BG 5x5',species_id=100)
+    action=q.plan('kakashi',[150,150],None,r.portals,now)
+    assert action==dict(kind='npc',entity_id=110000001)
+    q.actors.clear()
+    assert q.plan('kakashi',[150,150],None,r.portals,now+.1) is None
+    panel=bg_entry.BgPanel();assert panel.stationary.isChecked();panel.close()
+
+
+def test_stationary_entry_requires_same_map_and_preserves_recorded_travel(tmp_path):
+    r=relay(tmp_path);record(r,'5x5')
+    before=bg_entry.load()
+    bg_entry.save_messages('fechadas','entrou na fila',.05,stationary=True)
+    r.tracker.observer.map_name='hospital2'
+    with pytest.raises(ValueError,match='mapa do NPC'):
+        r.quest_control('quest_bg_enter',dict(mode='5x5'),lambda:True)
+    assert r.bg_attempt is None and not r.quests.active
+    assert bg_entry.load()==before
+
+
 @pytest.mark.parametrize('dialog_action,opcode,choice',[('close',0x146,None),('next',0x146,None),('menu',0xb8,255)])
 def test_success_closes_only_dialog_and_never_selects_unregister(tmp_path,dialog_action,opcode,choice):
     r=relay(tmp_path);record(r,'3x3')
@@ -207,7 +270,7 @@ def test_event_in_progress_closes_refusal_and_retries_without_finishing_route(tm
     assert r.quests.active and r.bg_attempt['tries']['3x3']==2
 
 
-def test_only_the_error_message_set_means_registered_when_the_npc_answers_without_it(tmp_path):
+def test_error_only_configuration_does_not_treat_an_unrelated_reply_as_success(tmp_path):
     r = relay(tmp_path)
     record(r, '3x3')
     bg_entry.save_messages('fechadas', '', 2)
@@ -215,7 +278,66 @@ def test_only_the_error_message_set_means_registered_when_the_npc_answers_withou
     r.bg_observe([dict(kind='npc_dialog', entity_id=9, text='Bem-vindo a batalha!')])
     r.quests.stop('fim'); r.quests.phase = 'done'
     r.bg_tick(10.0)
-    assert r.bg_attempt is None and 'Inscrito' in r.quests.reason
+    assert r.bg_attempt is not None and 'inscricao nao confirmada' in r.quests.reason
+
+
+@pytest.mark.parametrize('mode',['3x3','4x4','5x5'])
+@pytest.mark.parametrize('reply',['^FF0000H\u00e1 um evento em andamento.^000000',
+                                 'O evento est\u00e1 em espera, aguarde!','Evento em espera'])
+def test_event_refusals_keep_retrying_until_actual_success_reply(tmp_path,mode,reply):
+    r=relay(tmp_path);record(r,mode)
+    # A previous capture differs from both the refusal punctuation and the success.
+    bg_entry.save_messages('Inscricoes fechadas','Voce ja se registrou no evento!',2)
+    r.quest_control('quest_bg_enter',dict(mode=mode),lambda:True)
+    class Writer:
+        def __init__(self):self.packets=[]
+        def write(self,p):self.packets.append(p)
+        async def drain(self):pass
+    r.upstream=Writer()
+    r.native_frames=SimpleNamespace(ready=True,fallback=lambda:{0x146:6})
+    for i in range(1,9):
+        r.bg_observe([dict(kind='npc_dialog',entity_id=9,text=reply)])
+        r.quests.dialog=dict(entity_id=9,action='close')
+        asyncio.run(r.close_bg_result_dialog(lambda:True))
+        assert r.bg_attempt['refused'] and not r.bg_attempt['queued']
+        r.bg_tick(100*i)
+        assert r.bg_attempt['tries'][mode]==i
+        r.bg_tick(100*i+1.9)
+        assert r.bg_attempt['tries'][mode]==i
+        r.bg_tick(100*i+2.1)
+        assert r.quests.active and r.bg_attempt['tries'][mode]==i+1
+    r.bg_observe([dict(kind='npc_dialog',entity_id=9,text='Registro feito com sucesso!')])
+    r.quests.dialog=dict(entity_id=9,action='close')
+    asyncio.run(r.close_bg_result_dialog(lambda:True))
+    r.bg_tick(999)
+    assert r.bg_attempt is None and not r.quests.active
+    assert 'Inscrito na BG' in r.quests.reason
+    assert len(r.upstream.packets)==9
+
+
+@pytest.mark.parametrize('reported_mode',['3x3','4x4','5x5'])
+def test_named_registration_reply_closes_and_distinguishes_other_queue(tmp_path,reported_mode):
+    r=relay(tmp_path);record(r,'5x5')
+    bg_entry.save_messages('Ha um evento em andamento!','Voce ja se registrou no evento!',.05,stationary=True)
+    r.quest_control('quest_bg_enter',dict(mode='5x5'),lambda:True)
+    class Writer:
+        def __init__(self):self.packets=[]
+        def write(self,p):self.packets.append(p)
+        async def drain(self):pass
+    r.upstream=Writer();r.native_frames=SimpleNamespace(ready=True,fallback=lambda:{0x146:6})
+    r.bg_observe([dict(kind='npc_dialog',entity_id=9,text='^FF0000Voc\u00ea ja se registrou no Battleground '+reported_mode+'!')])
+    if reported_mode=='5x5':assert r.bg_attempt['queued']
+    else:
+        assert not r.bg_attempt['queued'] and r.bg_attempt['other_queue']==reported_mode
+    r.quests.dialog=dict(entity_id=9,action='close')
+    asyncio.run(r.close_bg_result_dialog(lambda:True))
+    r.bg_tick(100)
+    assert r.bg_attempt is None and not r.quests.active
+    assert r.upstream.packets==[struct.pack('<HI',0x146,9)]
+    if reported_mode=='5x5':assert 'Inscrito na BG 5x5' in r.quests.reason
+    else:
+        assert 'inscricao existente na BG '+reported_mode in r.quests.reason
+        assert 'registro preservado' in r.quests.reason
 
 
 def test_old_file_with_messages_per_bg_is_read(tmp_path):
