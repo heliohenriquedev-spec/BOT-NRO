@@ -36,8 +36,8 @@ def edges(destinations, entries=()):
     graph = {}
     for map_name, cells in (destinations or {}).items():
         for cell, link in (cells or {}).items():
-            if not isinstance(link, dict) or not link.get('map'):
-                continue
+            if not isinstance(link, dict) or not link.get('map') or link.get('varies'):
+                continue  # 'varies': leads back to the map the character came from (portals.set_destination)
             here, there = PortalGuard.key(map_name), PortalGuard.key(link['map'])
             if here == there:
                 continue

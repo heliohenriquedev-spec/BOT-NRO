@@ -346,8 +346,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    125,
-    303
+    76,
+    177
    ]
   },
   "217,86>anthell01>Esconderijo do Clã Kamizuru Nível 2": {
@@ -1055,8 +1055,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    33,
-    50
+    47,
+    2
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [4] |Sim": {
@@ -1250,8 +1250,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    81,
-    15
+    49,
+    34
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [7] |Sim": {
@@ -1329,52 +1329,6 @@
    "arrival": [
     141,
     45
-   ]
-  },
-  "87,140>hospital2>Desistir de uma missão|#4 ^0000FFRank C-3^000000|Sim": {
-   "steps": [
-    {
-     "kind": "npc",
-     "map": "kakashi.gat",
-     "position": [
-      87,
-      140
-     ],
-     "name": "Quadro de missões#4"
-    },
-    {
-     "kind": "next",
-     "map": "kakashi.gat"
-    },
-    {
-     "kind": "select",
-     "map": "kakashi.gat",
-     "option": "Desistir de uma missão"
-    },
-    {
-     "kind": "select",
-     "map": "kakashi.gat",
-     "option": "#4 ^0000FFRank C-3^000000"
-    },
-    {
-     "kind": "next",
-     "map": "kakashi.gat"
-    },
-    {
-     "kind": "select",
-     "map": "kakashi.gat",
-     "option": "Sim"
-    },
-    {
-     "kind": "wait_map",
-     "map": "hospital2.gat"
-    }
-   ],
-   "to": "hospital2",
-   "name": "Quadro de missões#4",
-   "arrival": [
-    25,
-    92
    ]
   }
  },

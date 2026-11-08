@@ -45,7 +45,7 @@
    "sprite": 837
   },
   "106,253": {
-   "name": "",
+   "name": "Entrada do Esgoto",
    "sprite": 837
   },
   "101,234": {
@@ -53,7 +53,7 @@
    "sprite": 991
   },
   "92,235": {
-   "name": "",
+   "name": "Equipamentos",
    "sprite": 837
   },
   "204,73": {
@@ -253,19 +253,19 @@
    "sprite": 46
   },
   "79,175": {
-   "name": "",
+   "name": "Recompensa Boss",
    "sprite": 100
   },
   "83,175": {
-   "name": "",
+   "name": "Treinamento Jinchuuriki",
    "sprite": 882
   },
   "72,167": {
-   "name": "",
+   "name": "Gerente de Vilas",
    "sprite": 706
   },
   "72,170": {
-   "name": "",
+   "name": "Ladder 7 Zeny",
    "sprite": 123
   },
   "99,133": {
@@ -1079,6 +1079,10 @@
   "79,207": {
    "name": "Teleportador - Nuvem",
    "sprite": 846
+  },
+  "123,237": {
+   "name": "",
+   "sprite": 935
   }
  },
  "salakagex": {

@@ -36,8 +36,8 @@ class TravelCost:
         for step in steps:
             kind=step['kind']
             if kind=='wait_map':
-                there=PortalGuard.key(step['map']);arrival=None
-                if last:
+                there=PortalGuard.key(step['map']);arrival=step.get('arrival')
+                if last and not arrival:
                     label=','.join(str(v) for v in last)
                     links=self.destinations.get(here,self.destinations.get(here+'.gat',{}))
                     record=links.get(label,{})

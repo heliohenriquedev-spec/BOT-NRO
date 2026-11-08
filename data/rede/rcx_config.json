@@ -46,7 +46,7 @@
       "show_enemies": false
     },
     "146": {
-      "enabled": false,
+      "enabled": true,
       "fill": "#4c2894",
       "outline": "#303030",
       "opacity": 70,
@@ -63,7 +63,8 @@
       "preview_symbol": null,
       "preview_opacity": null,
       "show_allies": false,
-      "show_enemies": false
+      "show_enemies": true,
+      "hide_native": false
     },
     "131": {
       "enabled": false,

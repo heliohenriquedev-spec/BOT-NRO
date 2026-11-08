@@ -4,6 +4,13 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.08.2 (08/11/2026)
+
+- Rotas: o personagem não faz mais o desvio até kakashi e de volta antes de seguir para o destino. A escolha do caminho passou a considerar onde cada NPC de transporte deixa o personagem, então ele vai direto pelo portal quando é mais perto.
+- Rotas: a opção "Desistir de uma missão" do quadro de missões não é mais aprendida nem usada como transporte para o hospital. A que já tinha sido aprendida foi removida.
+- Rotas de quest: funcionam com o ponto salvo em qualquer hospital. Depois de falar com o Retorno, a fila segue em qualquer mapa onde o personagem estiver salvo (hospital2, hospital4...), e não para mais com "Mapa diferente do esperado". As rotas gravadas a partir do hospital2 continuam valendo. Saindo do hospital4, o bot escolhe sozinho o caminho por nuvem e Sala Vip para todas as quests que passam pela Sala Vip e para os dois quadros de missão.
+- Rotas: portais que levam de volta à vila de onde o personagem veio (como a saída de payon_in03) e NPCs que levam ao ponto salvo (Retorno) não são mais usados como caminho entre vilas.
+
 ## 2026.11.08.1 (08/11/2026)
 
 - Diagnostico: leitura passiva das barras de HP recebidas nos formatos de grupo e BG, com horario, idade e vinculos conhecidos. Valores de barra ficam separados do HP absoluto; a coleta nao consulta dados que o servidor deixou de enviar.

@@ -50,9 +50,23 @@ def add_discarded(known, discarded):
     return added
 
 
+def harmful(steps):
+    """A talk whose menu gives up a mission (the boards send the character away after it) is
+    never a transport: taking it would abandon the mission."""
+    return any(s.get('kind') == 'select' and 'desistir' in str(s.get('option', '')).casefold() for s in steps or [])
+
+
 def purge(known):
-    """Drops the transports listed as discarded (here or on another PC). Returns True if any."""
+    """Drops the transports listed as discarded (here or on another PC) and the harmful ones.
+    Returns True if any."""
     removed = False
+    for map_name, links in list((known or {}).items()):
+        if map_name == DISCARDED or not isinstance(links, dict):
+            continue
+        for key, value in list(links.items()):
+            if isinstance(value, dict) and harmful(value.get('steps')):
+                del links[key]
+                removed = True
     for map_name, keys in ((known or {}).get(DISCARDED) or {}).items():
         links = known.get(map_name)
         if not isinstance(links, dict) or not isinstance(keys, dict):
@@ -130,6 +144,8 @@ class NpcTransports:
 
     def learn(self, talk, to_map, arrival):
         steps = [s for s in talk['steps'] if s['kind'] != 'close']+[dict(kind='wait_map', map=gat(to_map))]
+        if harmful(steps):
+            return
         first = steps[0]
         choices = '|'.join(s.get('option', '') for s in steps if s['kind'] == 'select')
         key = '%d,%d>%s>%s' % (first['position'][0], first['position'][1], PortalGuard.key(to_map), choices)
@@ -172,12 +188,27 @@ class NpcTransports:
         self.dirty = False
 
 
+def talk_key(steps):
+    """The NPC cell and the options chosen, without the map reached."""
+    first = steps[0] if steps else {}
+    choices = '|'.join(s.get('option', '') for s in steps if s.get('kind') == 'select')
+    return (tuple(first.get('position') or ()), choices)
+
+
 def as_entries(known):
     """The learned transports in the shape of recorded paths, for auto_routes and the quests."""
     entries = []
     for links in (known or {}).values():
+        targets = {}
         for value in (links or {}).values():
             if isinstance(value, dict) and value.get('steps') and value.get('to'):
+                targets.setdefault(talk_key(value['steps']), set()).add(value['to'])
+        for value in (links or {}).values():
+            if isinstance(value, dict) and value.get('steps') and value.get('to'):
+                if len(targets.get(talk_key(value['steps']), ())) > 1:
+                    # The same talk took the character to different maps: Retorno and other save-point
+                    # NPCs (hospital2 or hospital4, depending on where it is saved). Not a fixed way.
+                    continue
                 steps = [dict(s) for s in value['steps']]
                 if value.get('arrival'):
                     steps.append(dict(kind='walk', map=gat(value['to']), position=list(value['arrival'])))

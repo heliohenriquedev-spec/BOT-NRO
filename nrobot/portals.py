@@ -200,6 +200,11 @@ class PortalGuard:
                 self.internal.pop(self.key(map_name), None)
             self.dirty = True
         value = {'map': self.key(to_map), 'arrival': [int(v) for v in arrival], 'confirmed': bool(confirmed)}
+        current = links.get(key) or {}
+        if current.get('varies') or (confirmed and current.get('confirmed') and self.key(current.get('map', '')) != value['map']):
+            # Crossed twice into different maps: the portal leads back to where the character came
+            # from (payon_in03 20,60: areia or nuvem). Never a way between two villages.
+            value['varies'] = True
         if links.get(key) != value:
             links[key] = value
             self.dirty = True

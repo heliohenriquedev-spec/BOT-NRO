@@ -666,7 +666,12 @@ class QuestRoutes:
         key=PortalGuard.key;origin=key(map_name)
         if self.phase=='return':
             from .quest_library import return_steps
-            return return_steps(self.library,self.return_board)
+            steps=return_steps(self.library,self.return_board)
+            # Retorno sends the character to its save point, whichever it is (hospital2, hospital4...):
+            # the map recorded after the talk is not required, the teleport itself ends the stage (2026-11-08).
+            cut=next((i for i,s in enumerate(steps) if s['kind'] in ('wait_map','wait_transfer')),None)
+            if cut is not None:steps=steps[:cut]+[dict(kind='wait_transfer',map=steps[cut]['map'])]
+            return steps
         if self.phase in ('pickup','delivery'):
             if self.current_mission:
                 from .quest_slots import effective_steps
@@ -741,6 +746,11 @@ class QuestRoutes:
         from .npc_transports import as_entries
         for entry in as_entries(self.learned_transports):
             steps=[s for s in entry['steps'] if s['kind']!='walk']
+            # Where the NPC leaves the character is not walked to, but it prices the next walk:
+            # without it every transport looked like it landed next to the goal, and a trip to
+            # kakashi and back beat walking to the portal (2026-11-08).
+            arrival=next((s['position'] for s in entry['steps'] if s['kind']=='walk' and s.get('position')),None)
+            if arrival and steps[-1]['kind']=='wait_map':steps[-1]=dict(steps[-1],arrival=list(arrival))
             edges.setdefault(key(steps[0]['map']),[]).append((key(entry['target_map']),steps))
         for here,links in learned_edges(self.learned_portals).items():
             for cost,there,steps,_ in sorted(links,key=lambda link:link[0]):

@@ -492,7 +492,8 @@
     219,
     241
    ],
-   "confirmed": true
+   "confirmed": true,
+   "varies": true
   },
   "99,133": {
    "map": "yuno_in03",

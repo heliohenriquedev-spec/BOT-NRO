@@ -250,8 +250,13 @@ def merge_destinations(mine, theirs):
     for map_name, cells in (theirs or {}).items():
         known = result.setdefault(map_name, {})
         for cell, value in (cells or {}).items():
+            if not isinstance(value, dict):
+                continue
             if cell not in known or (value.get('confirmed') and not known[cell].get('confirmed')):
                 known[cell] = copy.deepcopy(value)
+            elif value.get('varies') or (value.get('confirmed') and known[cell].get('confirmed')
+                                         and value.get('map') != known[cell].get('map')):
+                known[cell]['varies'] = True  # each PC saw it lead elsewhere: back to where one came from
     return result
 
 

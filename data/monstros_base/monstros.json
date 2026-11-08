@@ -199,7 +199,7 @@
    "arug_cas03": 0
   },
   "walk_speed_ms": 150,
-  "name": "Kakashi",
+  "name": "Sasori",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -259,11 +259,14 @@
     "Mula sem Cabesa",
     "Musashi",
     "Mymma Cetha",
+    "Raluco",
     "Sasori",
+    "Souzou Saisei",
     "Tobirama Senju",
     "Vagnerock",
     "Void",
     "Yoriichi",
+    "itachii",
     "neon"
    ],
    "new_4-2": [
@@ -277,9 +280,11 @@
     "Low profile",
     "Macaco Mico Meu",
     "Mula sem Cabesa",
+    "Musashi",
     "Mymma Cetha",
     "Void",
     "Yoriichi",
+    "itachii",
     "neon"
    ],
    "bat_c03": [
@@ -996,10 +1001,11 @@
    "bat_c01": 0,
    "bat_c03": 0,
    "bat_c02": 0,
-   "prt_fild00": 0
+   "prt_fild00": 0,
+   "new_4-2": 0
   },
-  "walk_speed_ms": 112,
-  "name": "Hisoka",
+  "walk_speed_ms": 150,
+  "name": "Doki",
   "max_hp": 2000000,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -1007,6 +1013,7 @@
     "Doki"
    ],
    "chunin": [
+    "Kaguya",
     "Ootsutsuki Kabuto",
     "Zelda"
    ],
@@ -1025,6 +1032,9 @@
    ],
    "prt_fild00": [
     "Doki"
+   ],
+   "new_4-2": [
+    "Hisoka"
    ]
   }
  },
@@ -1073,9 +1083,9 @@
    "um_dun02": 0,
    "prt_sewb4": 0
   },
-  "name": "Abelha Macho",
+  "name": "Shinobi Ladrão",
   "max_hp": 120000,
-  "walk_speed_ms": 150,
+  "walk_speed_ms": 200,
   "names_by_map": {
    "um_dun02": [
     "Abelha Macho"
@@ -1892,7 +1902,7 @@
    "chunin": 0,
    "bat_c02": 0
   },
-  "name": "Izuna",
+  "name": "Souzou Saisei",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -1913,7 +1923,8 @@
     "Natsu Dragneel"
    ],
    "bat_c02": [
-    "Izuna"
+    "Izuna",
+    "Souzou Saisei"
    ]
   }
  },
@@ -1925,7 +1936,8 @@
    "arenaflo": 0,
    "chunin": 0,
    "arug_cas03": 0,
-   "bat_c02": 0
+   "bat_c02": 0,
+   "new_4-2": 0
   },
   "names_by_map": {
    "arenaflo": [
@@ -1939,10 +1951,14 @@
     "Sakura"
    ],
    "bat_c02": [
-    "Izuna"
+    "Izuna",
+    "Souzou Saisei"
+   ],
+   "new_4-2": [
+    "Souzou Saisei"
    ]
   },
-  "name": "Izuna",
+  "name": "Souzou Saisei",
   "max_hp": 2000000,
   "walk_speed_ms": 150
  },
@@ -1954,7 +1970,8 @@
    "0015@tower": 0,
    "arenaflo": 0,
    "chunin": 0,
-   "arug_cas03": 0
+   "arug_cas03": 0,
+   "bat_c02": 0
   },
   "names_by_map": {
    "0015@tower": [
@@ -1969,11 +1986,14 @@
    ],
    "arug_cas03": [
     "Sakura"
+   ],
+   "bat_c02": [
+    "Souzou Saisei"
    ]
   },
-  "name": "Sakura",
+  "name": "Souzou Saisei",
   "max_hp": 2000000,
-  "walk_speed_ms": 225
+  "walk_speed_ms": 150
  },
  "1494": {
   "species_id": 1494,
@@ -2392,7 +2412,7 @@
   },
   "name": "Gangetsu Hozuki",
   "max_hp": 2000000,
-  "walk_speed_ms": 600,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
     "Black Yugan",
@@ -2408,6 +2428,7 @@
     "Hoshigaki Kisame"
    ],
    "kakashi": [
+    "Akasuna no Sasori",
     "Black Yugan"
    ],
    "arug_cas03": [
@@ -2444,7 +2465,7 @@
    "bat_c02": 0,
    "arug_cas03": 0
   },
-  "name": "Gangetsu Hozuki",
+  "name": "Marlombrissimo Kid",
   "max_hp": 2100000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -2458,11 +2479,14 @@
    ],
    "new_4-2": [
     "Gangetsu Hozuki",
+    "Marlombrissimo Kid",
     "Temari"
    ],
    "bat_c02": [
     "Black Yugan",
     "Gangetsu Hozuki",
+    "Kagura Hozuki",
+    "Marlombrissimo Kid",
     "Temari"
    ],
    "arug_cas03": [
@@ -2931,9 +2955,9 @@
    "kakashi": 0,
    "arug_cas03": 0
   },
-  "name": "Hisoka",
+  "name": "Kaguya",
   "max_hp": 2000000,
-  "walk_speed_ms": 112,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
     "Anko",
@@ -2976,9 +3000,10 @@
    "bat_c03": 0,
    "bat_c01": 0,
    "arug_cas03": 0,
-   "new_4-2": 0
+   "new_4-2": 0,
+   "kakashi": 0
   },
-  "name": "Hisoka",
+  "name": "Kaguya",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -3006,6 +3031,9 @@
     "Hisoka"
    ],
    "new_4-2": [
+    "Hisoka"
+   ],
+   "kakashi": [
     "Hisoka"
    ]
   },

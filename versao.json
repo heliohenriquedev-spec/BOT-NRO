@@ -1,6 +1,6 @@
 {
- "version": "2026.11.08.1",
- "published_at": "2026-11-08T00:18:54",
+ "version": "2026.11.08.2",
+ "published_at": "2026-11-08T20:12:16",
  "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
@@ -19,6 +19,7 @@
   "data/compartilhado/npc_transportes.json",
   "data/compartilhado/npcs.json",
   "data/compartilhado/portais.json",
+  "data/compartilhado/portais_ampliados.json",
   "data/compartilhado/portais_destinos.json",
   "data/compartilhado/portais_internos.json",
   "data/compartilhado/quadros_missoes.json",
@@ -2158,5 +2159,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "d8a42ac71b49"
+ "files_digest": "d4229ee17722"
 }
