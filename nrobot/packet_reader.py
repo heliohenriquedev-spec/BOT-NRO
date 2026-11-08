@@ -159,7 +159,7 @@ LENGTHS = {0x78: 55, 0x7c: 42, 0x22a: 58, 0x22b: 57, 0xc3: 8, 0x1d7: 11, 0x7f: 6
            0xc0: 7, 0x9c: 9, 0x13d: 6, 0x13a: 4, 0xbe: 5, 0x141: 14,
            0x11f: 16, 0x120: 6, 0x1de: 33,
            0xaf: 6, 0xa8: 7, 0xac: 7, 0x1c8: 13, 0x9d: 17, 0x9e: 17, 0xa1: 6,
-           0x73: 11, 0x2eb: 13, 0x43d: 8, 0x148: 8,
+           0x73: 11, 0x2eb: 13, 0x43d: 8, 0x148: 8, 0x106: 10, 0x2e0: 34,
            0x22e: 71, 0x22f: 5, 0x230: 12, 0x144: 23, 0x2dd: 32, 0x19a: 14, 0x104: 79, 0x105: 31}  # homunculus: status, feed answer, state
 
 # Chat-room information is unrelated to targeting but must be framed correctly.
@@ -438,6 +438,15 @@ def decode(message: bytes) -> dict:
         event.update(kind='inventory_removed', inventory_index=u16(2), amount=u16(4))
     elif op in (0xb0, 0xb1):
         event.update(kind='player_stat', stat_type=u16(2), value=u32(4))
+    elif op in (0x106,0x2e0):
+        # Legacy HP bars: servers may scale large HP pools to 0..100.
+        # Keep wire units distinct from confirmed absolute character HP.
+        offset=6 if op==0x106 else 30
+        current,maximum=u16(offset),u16(offset+2)
+        event.update(kind='actor_hp_bar',entity_id=u32(2),hp_units=current,max_hp_units=maximum,
+                     hp_percent=round(100*current/maximum,2) if maximum>0 and current<=maximum else None,
+                     absolute_hp_confirmed=False)
+        if op==0x2e0:event['name']=message[6:30].split(b'\0')[0].decode('cp1252','replace')
     elif op in (0x95, 0x195):
         event.update(kind='name', entity_id=u32(2),
                      name=message[6:30].split(b'\0')[0].decode('cp1252', 'replace'))

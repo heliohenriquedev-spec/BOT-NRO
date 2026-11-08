@@ -14,11 +14,13 @@ GRAY_STYLE = {'fill': '#808080', 'outline': '#303030', 'opacity': 1.0, 'outline_
 # skill_id: (centre, radius(level), seconds after the cast, max distance unit<->cast cell)
 # centre 'cast' = one area around the cast cell (unit Layout); 'unit' = area around each
 # received unit (unit Range, e.g. every meteor). rAthena db/pre-re/skill_db.yml.
+# A Layout cell with Range 1 also hits whoever stands next to it, so the area that deals damage
+# is Layout+Range: Storm Gust hit the character 5 cells from the centre (2026-11-07).
 AREA_SKILLS = {
     516: ('cast', lambda lv: 3, 2.0, 3),                    # GS_DESPERADO: self-centred unit layout 3
     83: ('unit', lambda lv: 3, 12.0, 4),                      # WZ_METEOR, Range 3 (7x7 per meteor)
-    89: ('cast', lambda lv: 4, 3.0, 4),                       # WZ_STORMGUST, Layout 4 (9x9)
-    85: ('cast', lambda lv: 7 if lv >= 11 else 5, 6.0, 7),    # WZ_VERMILION (Ira de Thor), Layout 5 (11x11)
+    89: ('cast', lambda lv: 5, 3.0, 4),                       # WZ_STORMGUST, Layout 4 + Range 1 (11x11)
+    85: ('cast', lambda lv: 8 if lv >= 11 else 6, 6.0, 7),    # WZ_VERMILION (Ira de Thor), Layout 5 + Range 1 (13x13)
     21: ('cast', lambda lv: 3 if lv >= 11 else 2, 3.0, 3),    # MG_THUNDERSTORM, Layout 2 (5x5)
     91: ('cast', lambda lv: 2, 3.0, 2),                       # WZ_HEAVENDRIVE, Layout 2 (5x5)
 }

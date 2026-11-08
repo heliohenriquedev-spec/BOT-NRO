@@ -21,6 +21,12 @@ SIDES_VERSION = 2  # files before it had both sides on by default for every save
 DEFAULTS = dict(selection_preview=True, cast_preview=True, preview_opacity=35, preview_color='#70d6ff', preview_symbol='outline', effects={}, skill_styles={})
 DEFAULTS['sides_version'] = SIDES_VERSION
 DEFAULTS['client_vision']=False
+# One-time delivery of the developer's RCX settings: publish writes them to SHARED_FILE with
+# SHARED_ID, and each user's file takes them once (shared_received). After that every user
+# customizes freely; a later publish ships them again only if SHARED_ID is raised.
+SHARED_FILE = ROOT/'data/recursos/rcx/config_enviada.json'
+SHARED_ID = 1
+DEFAULTS['shared_received']=0
 
 
 @lru_cache(maxsize=1)
@@ -33,6 +39,7 @@ def validate(value):
     result = copy.deepcopy(DEFAULTS)
     for name in ('selection_preview', 'cast_preview', 'client_vision'):
         result[name] = bool(value.get(name, result[name]))
+    result['shared_received'] = max(0, int(value.get('shared_received', 0) or 0))
     result['preview_opacity'] = max(10, min(100, int(value.get('preview_opacity', 35))))
     color=value.get('preview_color',result['preview_color'])
     if not re.fullmatch(r'#[0-9a-fA-F]{6}',str(color)):raise ValueError('Cor de prévia inválida')
@@ -78,20 +85,64 @@ def migrate_sides(value):
     return value, True
 
 
+def shared():
+    """(id, settings) shipped with the update, or (0, None)."""
+    try:
+        data=json.loads(SHARED_FILE.read_text(encoding='utf-8-sig'))
+        return int(data['id']), validate(data['config'])
+    except (OSError, ValueError, TypeError, KeyError):
+        return 0, None
+
+
+def receive_shared(raw):
+    """The settings shipped with the update replace this user's once; the old file is kept as
+    rcx_config.json.antes_envio_<id>. Returns (settings, replaced)."""
+    ident, config = shared()
+    received = int((raw or {}).get('shared_received', 0) or 0) if isinstance(raw, dict) else 0
+    if config is None or received >= ident:
+        return raw, False
+    if FILE.exists():
+        backup=FILE.with_name(f'{FILE.name}.antes_envio_{ident}')
+        if not backup.exists():backup.write_bytes(FILE.read_bytes())
+    value=copy.deepcopy(config);value['shared_received']=ident
+    return value, True
+
+
 def load():
     try:raw=json.loads(FILE.read_text(encoding='utf-8-sig'))
-    except (OSError, ValueError, TypeError):return copy.deepcopy(DEFAULTS)
+    except (OSError, ValueError, TypeError):raw=None
+    try:raw,replaced=receive_shared(raw)
+    except OSError:replaced=False
+    if raw is None:return copy.deepcopy(DEFAULTS)
     try:
         raw,migrated=migrate_sides(raw)
         value=validate(raw)
     except (ValueError, TypeError):return copy.deepcopy(DEFAULTS)
-    if migrated:
+    if migrated and not replaced:
         try:
             backup=FILE.with_name(FILE.name+'.antes_lados')
             if not backup.exists():backup.write_text(FILE.read_text(encoding='utf-8-sig'),encoding='utf-8')
-            save(value)
+        except OSError:pass
+    if migrated or replaced:
+        try:save(value)
         except OSError:pass
     return value
+
+
+def export_shared(log=print):
+    """At publish: ships this PC's RCX settings once (SHARED_ID). Later publishes keep the file
+    as it is, so later edits here stay local."""
+    ident, _config = shared()
+    if ident >= SHARED_ID:
+        return False
+    value = load()
+    value['shared_received'] = SHARED_ID  # this PC already has them
+    save(value)
+    payload = {k: v for k, v in value.items() if k != 'shared_received'}
+    SHARED_FILE.parent.mkdir(parents=True, exist_ok=True)
+    SHARED_FILE.write_text(json.dumps({'id': SHARED_ID, 'config': payload}, ensure_ascii=False, indent=1)+'\n', encoding='utf-8')
+    log(f'RCX: configuracoes deste PC enviadas uma vez para os outros usuarios (envio {SHARED_ID}).')
+    return True
 
 
 def save(value):
@@ -168,7 +219,9 @@ def style_for(config, unit_type, skill_id=None):
     result={**DEFAULT_STYLE, 'hide_native':False, 'selection_preview':config.get('selection_preview',True), 'cast_preview':config.get('cast_preview',True), **general, **skill}
     # A side checked on the general effect covers all of its skills; one checked on the skill
     # covers that skill. RCX acts on the skill when any side applies.
-    for field in ('show_allies','show_enemies'):
+    # The same for hiding the game's own effect: checked on the general effect or on the skill
+    # (a skill saved with it unchecked kept Fire Pillar's effect visible, 2026-11-07).
+    for field in ('show_allies','show_enemies','hide_native'):
         result[field]=bool(general.get(field,False) or skill.get(field,False))
     result['enabled']=result['show_allies'] or result['show_enemies']
     return result

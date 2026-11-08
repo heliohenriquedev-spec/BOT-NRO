@@ -156,6 +156,8 @@ class SessionRelay(QuestRelay):
         self.allow_commands = allow_commands
         self.tracker = ContinuousTracker(species or {1051}, player_ttl=None, idle_timeout=None, entity_ttl=None)
         self.tracker.observer.collision_provider = self.server_collision_map
+        from .player_hp import PlayerHp
+        self.received_player_hp=PlayerHp()
         self.mirror = bytearray()
         self.mirror_ready = False
         self.mirror_sequence = 0
@@ -204,6 +206,7 @@ class SessionRelay(QuestRelay):
         from .npc_transports import NpcTransports
         self.npc_transports = NpcTransports()  # NPCs that change the map (VIP room, returns), learned playing
         self.quests.learned_transports = self.npc_transports.known
+        self.quests.forget_transport = self.npc_transports.forget
         from .npc_map import NpcMap
         self.npc_map = NpcMap()  # NPCs on the minimap, with names, remembered per map
         try:
@@ -1954,6 +1957,14 @@ class SessionRelay(QuestRelay):
             self.record_test()
             print('O ataque de teste foi enviado, mas não houve confirmação de dano no prazo. Não repetirei automaticamente.')
         state = self.tracker.snapshot(time.monotonic())
+        hp_observations=self.received_player_hp.snapshot(self.tracker.observer.player_id,self.registry.players,
+                            {**self.own_look,**self.rcx_sides.guild},party_ids=self.rcx_sides.party)
+        state['received_player_hp']=hp_observations
+        if time.monotonic()-getattr(self,'hp_diagnostic_saved',0)>1:
+            self.hp_diagnostic_saved=time.monotonic()
+            try:
+                (self.folder/'hp_recebido.json').write_text(json.dumps(hp_observations,ensure_ascii=False,indent=2),encoding='utf-8')
+            except OSError:pass
         if self.hunt is not None and self.hunt.patrol is not None and state.get('player_position_recent'):
             self.hunt.patrol.observe_position(state.get('player_position'),time.monotonic(),self.tracker.observer.map_name)
         state.update(login_phase=self.login_phase)
@@ -2145,6 +2156,7 @@ class SessionRelay(QuestRelay):
                 data = bytes(self.mirror)
                 self.mirror.clear()
             events = self.tracker.feed(self.mirror_sequence, data, time.monotonic())
+            self.received_player_hp.observe(events,self.tracker.observer.map_name)
             rcx_changed=False
             rcx_now=time.monotonic()
             for event in events:
@@ -2250,6 +2262,7 @@ class SessionRelay(QuestRelay):
             self.announce_presence()
             self.observe_chat_alerts(events)
             self.check_emergency()
+            self.record_damage_taken(events)
             for event in events:
                 if event['kind'] == 'stream_resync':
                     self.record_hunt(event)
@@ -2375,6 +2388,7 @@ class SessionRelay(QuestRelay):
         self.character_id = identity
 
     def begin_map_observation(self):
+        self.received_player_hp.rows.clear()
         self.ground_cells.reset()
         self.publish_ground_cells()
         self.drops.reset()
@@ -2994,6 +3008,32 @@ class SessionRelay(QuestRelay):
                 self.rcx_native_config = (stamp, config)
         self.rcx_native_cache = (now+.5, active, config)
         return active, config
+
+    def record_damage_taken(self, events):
+        """Every hit the character takes, with the body armor worn at that moment, goes to
+        dano_recebido.jsonl: lets the player compare damage with and without a piece of gear.
+        Equipment changes and the character's status effects are written too."""
+        own = self.tracker.observer.player_id
+        if own is None or not hasattr(self, 'folder'):
+            return
+        lines = []
+        for e in events:
+            kind = e['kind']
+            if kind in ('skill_damage', 'normal_attack') and e.get('target_id') == own and e.get('source_id') != own:
+                lines.append({k: e[k] for k in ('kind', 'skill_id', 'level', 'source_id', 'damage_raw', 'action_type') if k in e})
+            elif kind in ('equipment_ack', 'inventory_list') or (kind == 'status_effect' and e.get('entity_id') == own):
+                lines.append({k: e[k] for k in ('kind', 'index', 'position', 'success', 'equipped', 'effect_id', 'active', 'duration_ms') if k in e})
+        if not lines:
+            return
+        gear = getattr(getattr(self.quests, 'body', None), 'gear', {}) or {}
+        armor = next((v['item_id'] for v in gear.values() if v.get('worn', 0) & 16), 0)
+        stamp = datetime.now().isoformat()
+        try:
+            with (self.folder/'dano_recebido.jsonl').open('a', encoding='utf-8') as log:
+                for line in lines:
+                    log.write(json.dumps({'at': stamp, 'map': self.tracker.observer.map_name, 'armor': armor, **line}, ensure_ascii=False)+'\n')
+        except OSError:
+            pass
 
     def hide_native_effect(self, packet):
         """A skill unit on the floor (011F) or a ground skill's animation (0117) that RCX acts on

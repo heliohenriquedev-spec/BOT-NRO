@@ -195,22 +195,26 @@ class RcxRenderer:
                                 radius=style['radius'] if style['area_override'] else model['radius']
                                 shape=style['shape'] if style['area_override'] else model['shape']
                                 covered=rcx_settings.footprint(*p,radius,shape)
+                            visual=(rcx_settings.argb(style['fill'],style['opacity']),rcx_settings.argb(style['outline'],style['opacity']),list(rcx_settings.SYMBOLS).index(style['symbol']))
                             for cell in covered:
-                                points[tuple(cell)]=(rcx_settings.argb(style['fill'],style['opacity']),rcx_settings.argb(style['outline'],style['opacity']),list(rcx_settings.SYMBOLS).index(style['symbol']))
+                                # One entry per cell AND look: overlapping effects are drawn one over the
+                                # other (the native side blends every entry); only an identical one merges.
+                                points[(cell[0],cell[1],*visual)]=None
                     for cast in casts:
                         definition=(external_definitions.get((cast['skill_id'],max(1,cast.get('level') or 1))) if cast.get('external') else by_id.get(cast['skill_id']))
                         if definition is None or not definition.get('cast_preview',True):continue
                         if cast.get('external') and not rcx_settings.visible_source(definition,cast.get('source_id'),ground):continue
                         if not cast.get('external') and not definition.get('show_allies',True):continue
+                        visual=rcx_settings.preview_visual(self.config,definition)
                         for p in rcx_settings.footprint(*cast['position'],definition['radius'],definition['shape']):
-                            points.setdefault(tuple(p),rcx_settings.preview_visual(self.config,definition))
+                            points[(p[0],p[1],*visual)]=None
                 name=rcx_client.map_key(ground.get('map')) if recent else ''
                 encoded=name.encode('cp1252','replace')
                 if len(encoded)>=40:points,encoded={},b''
                 s.sequence=(s.sequence+1)|1
                 s.map_name=encoded
                 s.count=min(CAPACITY,len(points))
-                for i,((x,y),(fill,outline,symbol)) in enumerate(sorted(points.items())[:CAPACITY]):
+                for i,(x,y,fill,outline,symbol) in enumerate(sorted(points)[:CAPACITY]):
                     s.cells[i]=Cell(x,y,fill,outline,symbol)
                 s.selection_preview=int(recent)
                 aim_definitions=[d for d in definitions if not d.get("self_centered") and d.get("selection_preview",True) and d.get('show_allies',True)]

@@ -109,3 +109,32 @@ def test_relay_ignores_map_changes_it_expects(tmp_path):
     relay.quests.phase = 'travel'
     assert not relay.check_recall(recall, time.monotonic())  # quest route travelling between maps
     assert relay.hunt.enabled and not relay.commands_blocked
+
+
+def test_a_step_off_the_planned_cell_rejoins_the_same_route_and_counts_progress():
+    collision = CollisionMap(60, 60, [1]*3600)
+    patrol = PacketPatrol(8, random.Random(1), spacing=14)
+    patrol.GOAL_TIMEOUT = 10  # the user's "desistir apos 10 s"
+    patrol.plan((5, 5), 0, 150, collision)
+    block = next(iter(patrol.remaining))
+    goal = tuple(patrol.tour.points[block])
+    detour = [(5, 5)]+[(5, y) for y in range(6, 50)]+[(x, 49) for x in range(6, 50)]
+    detour += [(49, y) for y in range(48, goal[1]-1, -1)] if goal[1] < 49 else []
+    calls = []
+
+    def route(start, target, blocked=frozenset(), **kwargs):
+        calls.append(tuple(start))
+        return [tuple(start)]+detour[1:]+[goal] if tuple(target) == goal else None
+    collision.route = route
+    patrol.goal_block, patrol.goal, patrol.goal_at = block, goal, 1
+    patrol.plan((5, 5), 1, 150, collision)
+    searches = len(calls)
+    patrol.plan((6, 14), 2, 150, collision)  # the server stopped one cell beside the route
+    assert len(calls) == searches and patrol.route_cache[0] == (6, 14)
+    # Walking the long way round: the straight line to the goal grows, the cells left shrink.
+    now = 2
+    for y in range(18, 49, 4):  # more than GOAL_TIMEOUT seconds on the way round
+        now += 1.5
+        patrol.plan((5, y), now, 150, collision)
+    assert now-2 > patrol.GOAL_TIMEOUT
+    assert patrol.goal_block == block and block not in patrol.deferred

@@ -5,6 +5,10 @@ after, that conversation becomes a link between the two maps, with the same step
 has (npc, next, select ..., wait_map). auto_routes joins these links with the portals crossed, so
 the quests, the BG entry and the database hunt reach maps through NPCs too, without recording.
 Saved in data/mapas/npc_transportes.json: {map: {key: {'steps', 'to', 'arrival', 'name'}}}.
+Walking after the talk means the map changed through a portal, not the NPC: nothing is learned
+(the hospital healers became "transports" to areia that way, 2026-11-07). A transport that does
+not change the map when used is discarded: DISCARDED lists it, and the list travels with the
+shared data so the other PCs drop it too.
 """
 from __future__ import annotations
 
@@ -17,8 +21,47 @@ import time
 from .portals import PortalGuard
 
 FILE = Path(__file__).resolve().parents[1]/'data'/'mapas'/'npc_transportes.json'
+SHARED_FILE = Path(__file__).resolve().parents[1]/'data'/'compartilhado'/'npc_transportes.json'
 WINDOW = 15.0  # s between the last dialog action and the map change
 ROUTES_ONLY = {0x90, 0xb8, 0xb9, 0x146}  # click NPC, menu choice, next, close
+WALK = 0xa7  # the player's own walk request: a map change after it came from a portal
+DISCARDED = '_descartados'  # {map: {key: reason}}: transports that proved false
+
+
+def read_discarded(path):
+    try:
+        value = json.loads(Path(path).read_text(encoding='utf-8-sig')).get(DISCARDED)
+    except (OSError, ValueError, AttributeError):
+        return {}
+    return value if isinstance(value, dict) else {}
+
+
+def add_discarded(known, discarded):
+    """Union of discard lists. Returns True if something new was added."""
+    added = False
+    for map_name, keys in (discarded or {}).items():
+        if not isinstance(keys, dict):
+            continue
+        mine = known.setdefault(DISCARDED, {}).setdefault(map_name, {})
+        for key, reason in keys.items():
+            if key not in mine:
+                mine[key] = reason
+                added = True
+    return added
+
+
+def purge(known):
+    """Drops the transports listed as discarded (here or on another PC). Returns True if any."""
+    removed = False
+    for map_name, keys in ((known or {}).get(DISCARDED) or {}).items():
+        links = known.get(map_name)
+        if not isinstance(links, dict) or not isinstance(keys, dict):
+            continue
+        for key in keys:
+            if key in links:
+                del links[key]
+                removed = True
+    return removed
 
 
 def gat(map_name):
@@ -34,11 +77,17 @@ class NpcTransports:
             self.known = {}
         self.talk = None  # conversation in progress: {'map', 'npc', 'steps', 'at'}
         self.options = {}  # NPC id -> menu options last shown
-        self.dirty = False
+        # The published discard list counts here too: an older connection rewrote this file with
+        # the hospital healers back in it and no list (2026-11-07).
+        added = add_discarded(self.known, read_discarded(SHARED_FILE)) if self.path == FILE else False
+        self.dirty = purge(self.known) or added
 
     def client(self, opcode, frame, map_name, actors, now=None):
         """A frame the game client sent (the player's own clicks)."""
         now = time.monotonic() if now is None else now
+        if opcode == WALK:
+            self.talk = None  # walked away: a map change now is a portal's
+            return
         if opcode not in ROUTES_ONLY or not map_name:
             return
         identity = struct.unpack_from('<I', frame, 2)[0] if len(frame) >= 6 else None
@@ -85,16 +134,38 @@ class NpcTransports:
         choices = '|'.join(s.get('option', '') for s in steps if s['kind'] == 'select')
         key = '%d,%d>%s>%s' % (first['position'][0], first['position'][1], PortalGuard.key(to_map), choices)
         links = self.known.setdefault(PortalGuard.key(talk['map']), {})
+        discarded = (self.known.get(DISCARDED) or {}).get(PortalGuard.key(talk['map'])) or {}
+        if key in discarded:
+            del discarded[key]  # really seen changing the map again (no walk in between)
+            self.dirty = True
         value = dict(steps=steps, to=PortalGuard.key(to_map), name=first.get('name', ''),
                      arrival=list(arrival) if arrival else None)
         if links.get(key) != value:
             links[key] = value
             self.dirty = True
 
+    def forget(self, map_name, position, to_map, reason='nao trocou de mapa'):
+        """The NPC at this cell did not take the character to to_map: the transport is dropped and
+        listed as discarded. Returns the NPC names dropped."""
+        here, there = PortalGuard.key(map_name), PortalGuard.key(to_map)
+        links = self.known.get(here) or {}
+        names = []
+        for key, value in list(links.items()):
+            first = (value.get('steps') or [{}])[0] if isinstance(value, dict) else {}
+            if value.get('to') == there and list(first.get('position') or []) == list(position):
+                del links[key]
+                self.known.setdefault(DISCARDED, {}).setdefault(here, {})[key] = reason
+                names.append(value.get('name') or 'NPC')
+                self.dirty = True
+        return names
+
     def save(self):
         if not self.dirty:
             return
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        # Discards written meanwhile by another connection are kept, and never written back.
+        add_discarded(self.known, read_discarded(self.path))
+        purge(self.known)
         temporary = self.path.with_suffix('.tmp')
         temporary.write_text(json.dumps(self.known, ensure_ascii=False, indent=1), encoding='utf-8')
         os.replace(temporary, self.path)

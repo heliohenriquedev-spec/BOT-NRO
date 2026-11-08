@@ -138,22 +138,23 @@
           "skill_id": 85,
           "code": "WZ_VERMILION",
           "name": "Lord of Vermilion",
-          "radius": 7,
+          "radius": 8,
           "shape": "square",
           "ground": true,
           "radius_by_level": {
-            "1": 5,
-            "2": 5,
-            "3": 5,
-            "4": 5,
-            "5": 5,
-            "6": 5,
-            "7": 5,
-            "8": 5,
-            "9": 5,
-            "10": 5,
-            "11": 7
-          }
+            "1": 6,
+            "2": 6,
+            "3": 6,
+            "4": 6,
+            "5": 6,
+            "6": 6,
+            "7": 6,
+            "8": 6,
+            "9": 6,
+            "10": 6,
+            "11": 8
+          },
+          "preview_basis": "Ragnarok Layout 5 (7 at level 11) + Unit.Range=1: each cell also hits the cells next to it"
         },
         {
           "skill_id": 86,
@@ -179,9 +180,10 @@
           "skill_id": 89,
           "code": "WZ_STORMGUST",
           "name": "Storm Gust",
-          "radius": 4,
+          "radius": 5,
           "shape": "square",
-          "ground": true
+          "ground": true,
+          "preview_basis": "Ragnarok Layout 4 + Unit.Range=1: each cell also hits the cells next to it (11x11)"
         },
         {
           "skill_id": 91,

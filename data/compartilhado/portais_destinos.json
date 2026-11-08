@@ -393,6 +393,14 @@
     23
    ],
    "confirmed": true
+  },
+  "163,31": {
+   "map": "yuno_fild11",
+   "arrival": [
+    299,
+    119
+   ],
+   "confirmed": true
   }
  },
  "tur_dun02": {
@@ -465,6 +473,14 @@
    "arrival": [
     353,
     220
+   ],
+   "confirmed": true
+  },
+  "186,354": {
+   "map": "hospital2",
+   "arrival": [
+    25,
+    92
    ],
    "confirmed": true
   }
@@ -585,6 +601,102 @@
     212
    ],
    "confirmed": true
+  }
+ },
+ "lhz_fild02": {
+  "164,38": {
+   "map": "ra_fild03",
+   "arrival": [
+    186,
+    351
+   ],
+   "confirmed": true
+  }
+ },
+ "mjolnir_08": {
+  "188,28": {
+   "map": "prt_fild00",
+   "arrival": [
+    158,
+    380
+   ],
+   "confirmed": true
+  }
+ },
+ "prt_fild00": {
+  "158,383": {
+   "map": "mjolnir_08",
+   "arrival": [
+    188,
+    28
+   ],
+   "confirmed": false
+  }
+ },
+ "yuno_fild11": {
+  "299,116": {
+   "map": "tur_dun01",
+   "arrival": [
+    161,
+    34
+   ],
+   "confirmed": true
+  }
+ },
+ "ein_fild01": {
+  "350,372": {
+   "map": "hu_fild07",
+   "arrival": [
+    59,
+    39
+   ],
+   "confirmed": true
+  }
+ },
+ "hu_fild07": {
+  "57,37": {
+   "map": "ein_fild01",
+   "arrival": [
+    350,
+    372
+   ],
+   "confirmed": false
+  },
+  "81,370": {
+   "map": "yuno_fild05",
+   "arrival": [
+    61,
+    32
+   ],
+   "confirmed": true
+  }
+ },
+ "yuno_fild05": {
+  "60,29": {
+   "map": "hu_fild07",
+   "arrival": [
+    81,
+    370
+   ],
+   "confirmed": false
+  },
+  "41,351": {
+   "map": "ein_fild08",
+   "arrival": [
+    360,
+    130
+   ],
+   "confirmed": true
+  }
+ },
+ "ein_fild08": {
+  "363,128": {
+   "map": "yuno_fild05",
+   "arrival": [
+    41,
+    351
+   ],
+   "confirmed": false
   }
  }
 }

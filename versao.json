@@ -1,6 +1,6 @@
 {
- "version": "2026.11.07.2",
- "published_at": "2026-11-07T17:30:28",
+ "version": "2026.11.08.1",
+ "published_at": "2026-11-08T00:18:54",
  "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
@@ -49,6 +49,7 @@
   "data/monstros_base/sprites/1210.png",
   "data/monstros_base/sprites/1212.png",
   "data/monstros_base/sprites/1214.png",
+  "data/monstros_base/sprites/1288.png",
   "data/monstros_base/sprites/1296.png",
   "data/monstros_base/sprites/1315.png",
   "data/monstros_base/sprites/1324.png",
@@ -259,7 +260,9 @@
   "data/recursos/itens.json",
   "data/recursos/municao.json",
   "data/recursos/prioridade.tsv",
+  "data/recursos/rcx/config_enviada.json",
   "data/recursos/rcx/nro_rcx_0523d0bf3f4b.dll",
+  "data/recursos/rcx/nro_rcx_07b58f0c8129.dll",
   "data/recursos/rcx/nro_rcx_be4d5efec895.dll",
   "data/recursos/rcx/renderer.json",
   "data/recursos/rcx/skills.json",
@@ -1442,6 +1445,7 @@
   "docs/DATABASE_COMPARTILHADO.md",
   "docs/DATABASE_ITENS_DROPS.md",
   "docs/HOMUNCULO.md",
+  "docs/HP_RECEBIDO.md",
   "docs/OBSERVACAO_JOGADORES.md",
   "docs/PATRULHA_E_FILA.md",
   "docs/PROGRESSO_MISSOES.md",
@@ -1514,6 +1518,7 @@
   "nrobot/packet_reader.py",
   "nrobot/packet_settings.py",
   "nrobot/patrol_tour.py",
+  "nrobot/player_hp.py",
   "nrobot/player_panel.py",
   "nrobot/player_registry.py",
   "nrobot/port_guard.py",
@@ -2153,5 +2158,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "a4e016905759"
+ "files_digest": "d8a42ac71b49"
 }

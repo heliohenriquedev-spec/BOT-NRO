@@ -139,6 +139,110 @@
     29,
     53
    ]
+  },
+  "161,25>tur_dun01>Garganta da Nuvem": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "areia.gat",
+     "position": [
+      161,
+      25
+     ],
+     "name": "Viajante Ninja#h2-4"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "select",
+     "map": "areia.gat",
+     "option": "Garganta da Nuvem"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "tur_dun01.gat"
+    }
+   ],
+   "to": "tur_dun01",
+   "name": "Viajante Ninja#h2-4",
+   "arrival": [
+    116,
+    94
+   ]
+  },
+  "161,25>ein_fild01>Mamutes da Nuvem": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "areia.gat",
+     "position": [
+      161,
+      25
+     ],
+     "name": "Viajante Ninja#h2-4"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "select",
+     "map": "areia.gat",
+     "option": "Mamutes da Nuvem"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "ein_fild01.gat"
+    }
+   ],
+   "to": "ein_fild01",
+   "name": "Viajante Ninja#h2-4",
+   "arrival": [
+    182,
+    331
+   ]
   }
  },
  "ra_in01": {
@@ -242,8 +346,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    96,
-    245
+    125,
+    303
    ]
   },
   "217,86>anthell01>Esconderijo do Clã Kamizuru Nível 2": {
@@ -486,8 +590,8 @@
    "to": "mjolnir_08",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    89,
-    204
+    320,
+    258
    ]
   },
   "213,80>hospital4>Sim": {
@@ -711,52 +815,6 @@
     102,
     143
    ]
-  },
-  "25,70>areia>": {
-   "steps": [
-    {
-     "kind": "npc",
-     "map": "hospital2.gat",
-     "position": [
-      25,
-      70
-     ],
-     "name": "Médica#h1-2"
-    },
-    {
-     "kind": "wait_map",
-     "map": "areia.gat"
-    }
-   ],
-   "to": "areia",
-   "name": "Médica#h1-2",
-   "arrival": [
-    179,
-    162
-   ]
-  },
-  "35,76>areia>": {
-   "steps": [
-    {
-     "kind": "npc",
-     "map": "hospital2.gat",
-     "position": [
-      35,
-      76
-     ],
-     "name": "Enfermeira#8"
-    },
-    {
-     "kind": "wait_map",
-     "map": "areia.gat"
-    }
-   ],
-   "to": "areia",
-   "name": "Enfermeira#8",
-   "arrival": [
-    179,
-    162
-   ]
   }
  },
  "kakashi": {
@@ -874,8 +932,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    14,
-    32
+    83,
+    11
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [3] |Sim": {
@@ -915,8 +973,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    28,
-    43
+    17,
+    27
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [5] |Sim": {
@@ -956,8 +1014,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    50,
-    9
+    31,
+    34
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [1] |Sim": {
@@ -997,8 +1055,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    45,
-    28
+    33,
+    50
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [4] |Sim": {
@@ -1038,8 +1096,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    68,
-    43
+    58,
+    27
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [6] |Sim": {
@@ -1079,8 +1137,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    65,
-    7
+    57,
+    34
    ]
   },
   "78,121>new_4-2>- Sim": {
@@ -1192,8 +1250,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    66,
-    31
+    81,
+    15
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [7] |Sim": {
@@ -1235,6 +1293,88 @@
    "arrival": [
     44,
     4
+   ]
+  },
+  "115,140>arug_cas03>- Sim, quero lutar": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      115,
+      140
+     ],
+     "name": "Teleportador - Guerra"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "- Sim, quero lutar"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "arug_cas03.gat"
+    }
+   ],
+   "to": "arug_cas03",
+   "name": "Teleportador - Guerra",
+   "arrival": [
+    141,
+    45
+   ]
+  },
+  "87,140>hospital2>Desistir de uma missão|#4 ^0000FFRank C-3^000000|Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      87,
+      140
+     ],
+     "name": "Quadro de missões#4"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Desistir de uma missão"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "#4 ^0000FFRank C-3^000000"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "hospital2.gat"
+    }
+   ],
+   "to": "hospital2",
+   "name": "Quadro de missões#4",
+   "arrival": [
+    25,
+    92
    ]
   }
  },
@@ -1660,7 +1800,7 @@
    "name": "Battleground 5x5",
    "arrival": [
     146,
-    53
+    57
    ]
   },
   "83,114>bat_c01>Sim": {
@@ -1847,6 +1987,12 @@
     99,
     130
    ]
+  }
+ },
+ "_descartados": {
+  "hospital2": {
+   "25,70>areia>": "curandeira: nao troca de mapa",
+   "35,76>areia>": "curandeira: nao troca de mapa"
   }
  }
 }

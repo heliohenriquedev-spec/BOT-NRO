@@ -348,6 +348,8 @@ def merge(root=ROOT, log=print, force=False):
     if shared.get('npc_transportes.json') is not None:
         # NPCs that change the map: what this PC learned stays, the others' are added.
         result['npc_transportes.json'] = merge_portals(own.get('npc_transportes.json'), shared['npc_transportes.json'])
+        from .npc_transports import purge
+        purge(result['npc_transportes.json'])  # a transport found false on any PC goes everywhere
     if shared.get('npcs.json') is not None:
         result['npcs.json'] = merge_npcs(own.get('npcs.json'), shared['npcs.json'])
     if shared['quest_extras.json'] is not None:

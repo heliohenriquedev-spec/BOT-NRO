@@ -258,6 +258,11 @@ def publish(message, log=print, run_tests=True):
     except (OSError, ValueError) as exc:
         raise UpdateError(f'Falha ao preparar os recursos: {exc}') from exc
     export_base(log)  # custom monsters learned here reach every user with this version
+    from .rcx_settings import export_shared as export_rcx
+    try:
+        export_rcx(log)  # once: this PC's RCX settings for every user (each one customizes after)
+    except (OSError, ValueError) as exc:
+        raise UpdateError(f'Falha ao preparar as configuracoes do RCX: {exc}') from exc
     from .shared_data import export as export_shared
     try:
         export_shared(log)  # quests, boards, missions, map routes and portals too

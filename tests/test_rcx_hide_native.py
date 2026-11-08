@@ -28,8 +28,12 @@ def test_style_asks_and_rcx_must_draw_it():
     # A skill style saved without the field follows its general effect; an explicit one wins.
     general = rcx_settings.validate({'effects': {'134': dict(hide_native=True, show_enemies=True)}, 'skill_styles': {'89': dict(fill='#123456')}})
     assert rcx_settings.hides_native(general, 134, 89, FOE, {})
-    own = rcx_settings.validate({'effects': {'134': dict(hide_native=True, show_enemies=True)}, 'skill_styles': {'89': dict(hide_native=False)}})
-    assert not rcx_settings.hides_native(own, 134, 89, FOE, {}) and rcx_settings.hides_native(own, 134, 83, FOE, {})
+    # Checked on the general effect, it covers a skill saved with the box unchecked (Fire Pillar).
+    own = rcx_settings.validate({'effects': {'135': dict(hide_native=True, show_enemies=True)},
+                                 'skill_styles': {'80': dict(hide_native=False, show_enemies=True)}})
+    assert rcx_settings.hides_native(own, 135, 80, FOE, {}) and rcx_settings.hides_native(own, 135, None, FOE, {})
+    skill_only = rcx_settings.validate({'skill_styles': {'89': dict(hide_native=True, show_enemies=True)}})
+    assert rcx_settings.hides_native(skill_only, 134, 89, FOE, {}) and not rcx_settings.hides_native(skill_only, 134, 83, FOE, {})
 
 
 def test_dropped_packets_never_reach_the_client_and_others_pass():
@@ -118,3 +122,18 @@ def test_closed_game_stops_the_heartbeat_and_the_panel_waits_for_the_new_one(tmp
     assert panel.follow_game() and 'reconectando' in panel.status.text() and not panel.waiting_game
     assert not panel.follow_game()  # attached to the running game again
     panel.renderer = RcxRenderer(); panel.close()
+
+
+def test_overlapping_effects_are_both_drawn_on_the_shared_cells():
+    from test_rcx_customization import renderer
+    ground = {'map': 'test', 'own_id': ME, 'allied_ids': [],
+              'effects': [dict(position=[50, 50], effect_type=135, source_id=FOE),  # Fire Pillar 3x3
+                          dict(position=[51, 50], effect_type=135, source_id=FOE),  # same look, overlapping
+                          dict(position=[50, 50], effect_type=146, source_id=FOE)]}  # Venom Dust on top
+    config = {'skill_styles': {'80': dict(show_enemies=True, fill='#ff0000'), '140': dict(show_enemies=True, fill='#00ff00')}}
+    r = renderer({'ground_cells': ground}, config, sides=False)
+    cells = [(r.shared.cells[i].x, r.shared.cells[i].y, r.shared.cells[i].fill) for i in range(r.shared.count)]
+    at_centre = [c for c in cells if c[:2] == (50, 50)]
+    assert len(at_centre) == 2 and len({c[2] for c in at_centre}) == 2  # both looks kept
+    assert len([c for c in cells if c[:2] == (51, 50)]) == 1  # identical pillars merge
+    r.close()

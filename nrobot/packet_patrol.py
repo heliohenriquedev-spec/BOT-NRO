@@ -20,6 +20,7 @@ class PacketPatrol:
     FOCUS_CLUSTER_RADIUS = 12  # suppress tiny @showmobs marker shifts around the same group
     ROUTE_NODES = 4000  # cell search budget per plan (~0.1 s); longer trips go by stepping stones
     ROUTE_GREED = 1.5
+    REJOIN_CELLS = 3  # off the planned cell by this much: back onto the same route
     MAP_FIELDS = ('tour', 'remaining', 'done', 'walked', 'cycle_number', 'sweep_order', 'corridor_plan', 'last_passage')
     # Mazes where the planned walk measured worse than the nearest pending waypoint
     # (tools/validar_patrulha.py, 6 starts each, 2026-11-05: gl_sew02 +16% steps).
@@ -437,6 +438,18 @@ class PacketPatrol:
         self.last_plan_position, self.last_plan_at = tuple(position), now
         if self.goal is not None:
             distance = math.dist(position, self.goal)
+            cache = self.route_cache
+            measure = ('line', self.goal)
+            if cache and tuple(position) in cache:
+                # Progress is what is left to walk on the route, not the straight line: around a wall
+                # the straight distance grows for a while, the goal was taken as stuck after
+                # patrol_give_up and the patrol turned back, over and over (um_dun02, 2026-11-07).
+                distance = len(cache)-1-cache.index(tuple(position))
+                measure = ('route', self.goal, tuple(cache[-1]))
+            if measure != getattr(self, 'goal_measure', None):
+                # Another yardstick (straight line -> cells left on a route, or a new route): the
+                # reference restarts in it, without counting as progress or as a stall.
+                self.goal_measure, self.goal_distance = measure, distance
             if self.goal_distance is None or distance < self.goal_distance-1:
                 self.goal_at, self.goal_distance = now, distance
             elif self.focus is not None and now-self.goal_at > self.GOAL_TIMEOUT:
@@ -484,6 +497,16 @@ class PacketPatrol:
                 if self.heading == (0, 0):
                     self.heading = self.rng.choice(self.DIRECTIONS)
                 cache_key = (self.cycle_number, self.goal, self.search_destination is None)
+                if (cache_key == self.route_cache_key and self.route_cache and tuple(position) not in self.route_cache
+                        and tuple(self.route_cache[-1]) == tuple(self.goal)):  # never a partial route into a dead end
+                    # The server stops a cell or two off the planned one: rejoin the same route instead of
+                    # a new search, which may pick the way round the other side and turn back
+                    # (um_dun02 2026-11-07, east-west for 90 s with one goal).
+                    old = self.route_cache
+                    close = [i for i, cell in enumerate(old)
+                             if max(abs(cell[0]-position[0]), abs(cell[1]-position[1])) <= self.REJOIN_CELLS]
+                    if close and collision.segment(position, old[close[-1]], max_steps=self.REJOIN_CELLS):
+                        self.route_cache = [tuple(position)]+[tuple(cell) for cell in old[close[-1]:]]
                 cached = (cache_key == self.route_cache_key and self.route_cache and tuple(position) in self.route_cache
                           and (tuple(position) != tuple(self.route_cache[-1]) or tuple(self.route_cache[-1]) == tuple(self.goal)))
                 portal = None

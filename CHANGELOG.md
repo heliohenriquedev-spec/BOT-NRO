@@ -4,6 +4,16 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.08.1 (08/11/2026)
+
+- Diagnostico: leitura passiva das barras de HP recebidas nos formatos de grupo e BG, com horario, idade e vinculos conhecidos. Valores de barra ficam separados do HP absoluto; a coleta nao consulta dados que o servidor deixou de enviar.
+
+- RCX: esta atualização traz uma configuração do RCX pronta (cores, símbolos, lados aliado/inimigo e ocultar efeito de cada habilidade), aplicada uma única vez. A configuração anterior fica guardada como rcx_config.json.antes_envio_1 na pasta data/rede. Depois disso, cada um personaliza como preferir, e as próximas atualizações não mexem mais nas suas escolhas.
+
+- RCX: a área da Suiton Suishouha (Storm Gust) passou de 9x9 para 11x11, e a da Raiton Shichuu Shibarai (Ira de Thor) de 11x11 para 13x13 (15x15 no nível 11). Cada célula dessas magias também atinge quem está ao lado dela, então antes o golpe podia acertar fora do desenho. A esquiva de efeitos no chão usa a mesma área.
+
+- Registro de dano recebido: com a conexão ativa, todo golpe que o personagem leva (habilidade, nível, quem usou e dano) fica gravado junto com a armadura vestida naquele momento, além das trocas de equipamento e dos efeitos de status recebidos. Permite comparar o dano com e sem um equipamento.
+
 ## 2026.11.07.2 (07/11/2026)
 
 - BG: reconhece a resposta de inscricao existente que informa a modalidade (3x3, 4x4 ou 5x5), fecha o dialogo e encerra as tentativas. Quando o servidor informa outra modalidade, mostra o motivo sem cancelar o registro nem indicar sucesso na modalidade solicitada.
@@ -20,11 +30,17 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 - RCX: a caixa "Mostrar este efeito" foi removida. Agora o RCX age numa habilidade somente para o lado marcado: "RCX nas habilidades aliadas" (inclui as suas), "RCX nas habilidades inimigas", ou nenhum. Todas as habilidades comecam desmarcadas e voce escolhe as que quer. Marcar no efeito geral vale para todas as habilidades daquele efeito. Nas configuracoes salvas antes, as entradas que estavam com os dois lados ligados (o padrao antigo) ficam desmarcadas; as que voce tinha ajustado mantem a escolha.
 
-- RCX: nova opcao "Ocultar o efeito original do jogo" em cada habilidade ou efeito. Com o RCX ativo, o efeito da GRF (o desenho da habilidade no chao e a animacao da magia no local) deixa de aparecer e fica so o desenho do RCX. Vale apenas para o lado em que o RCX age: com so inimigas marcado, o efeito some nas habilidades inimigas e continua aparecendo nas aliadas. O dano e o efeito real nao mudam. Ao desativar o RCX, as proximas habilidades voltam a aparecer normalmente.
+- RCX: nova opcao "Ocultar o efeito original do jogo" em cada habilidade ou efeito. Com o RCX ativo, o efeito da GRF (o desenho da habilidade no chao e a animacao da magia no local) deixa de aparecer e fica so o desenho do RCX. Vale apenas para o lado em que o RCX age: com so inimigas marcado, o efeito some nas habilidades inimigas e continua aparecendo nas aliadas. O dano e o efeito real nao mudam. Ao desativar o RCX, as proximas habilidades voltam a aparecer normalmente. Marcar "Ocultar o efeito original" no efeito geral vale para todas as habilidades daquele efeito, como os lados aliadas/inimigas (antes uma habilidade salva com a caixa desmarcada, como o Fire Pillar, continuava mostrando o efeito do jogo).
 
 - RCX: o Fire Pillar passa a ser desenhado com a area 3x3 em volta da coluna de fogo, onde ela dispara, e nao so na celula central. Em "Personalizar area" e possivel ajustar o tamanho.
 
+- RCX: quando duas habilidades ocupam as mesmas celulas, as duas aparecem ao mesmo tempo, uma sobre a outra, em vez de uma esconder a outra. Cada simbolo marca so o proprio desenho (o resto da celula fica transparente), e o Preenchido fica sempre por baixo dos outros simbolos, inclusive do Centro: um X com 100% de opacidade aparece inteiro por cima de um preenchimento sem alterar o resto dele. Para carregar este desenho, reinicie o jogo uma vez.
+
 - RCX: ao fechar e reabrir o jogo com o RCX ativado, o desenho ficava preso ao jogo fechado e nada aparecia no novo. Agora o RCX percebe o jogo fechado e volta a ligar sozinho quando o jogo e reaberto e entra no mapa. Enquanto o jogo estiver fechado, nenhum efeito do jogo e ocultado.
+
+- Patrulha: em mapas tipo labirinto o personagem podia ficar indo e voltando pelo mesmo corredor. O caminho ate o proximo ponto dava a volta por outro lado e, como a distancia em linha reta aumentava, a patrulha achava que tinha empacado e trocava de ponto. Agora o progresso e medido pelo que falta andar no caminho, e um passo que o servidor termina uma ou duas celulas fora do previsto continua no mesmo caminho em vez de recalcular outro.
+
+- Rotas de quest: ao iniciar a fila no hospital, o bot falava com a Medica ou a Enfermeira e parava ali. Elas tinham sido aprendidas por engano como NPCs que levam para areia (alguem falou com elas e saiu pelo portal logo depois). Esses dois registros foram removidos para todos. Agora andar depois de falar com um NPC nao conta mais como transporte. Se um NPC aprendido nao trocar o mapa quando usado, ele e descartado (tambem para os outros jogadores) e a fila para pedindo para iniciar de novo, que segue pelo caminho normal. Um transporte descartado nao volta mais, mesmo que uma conexao aberta antes da correcao regrave o arquivo.
 
 ## 2026.11.07.1 (07/11/2026)
 

@@ -30,6 +30,7 @@ def isolated_monster_data(tmp_path, monkeypatch):
     from nrobot import watchlist
     from nrobot import rcx_settings
     monkeypatch.setattr(rcx_settings, "FILE", tmp_path/"rede"/"rcx_config.json")
+    monkeypatch.setattr(rcx_settings, "SHARED_FILE", tmp_path/"recursos"/"rcx"/"config_enviada.json")
     from nrobot import npc_map, map_routes, bg_entry
     from nrobot import auto_routes
     from nrobot import npc_transports
@@ -38,6 +39,7 @@ def isolated_monster_data(tmp_path, monkeypatch):
     from nrobot import hunt_share
     monkeypatch.setattr(hunt_share, "FILE", tmp_path/"rede"/"caca_patrulha.json")
     monkeypatch.setattr(npc_transports, "FILE", tmp_path/"mapas"/"npc_transportes.json")
+    monkeypatch.setattr(npc_transports, "SHARED_FILE", tmp_path/"compartilhado"/"npc_transportes.json")
     monkeypatch.setattr(auto_routes, "FILE", tmp_path/"mapas"/"portais_destinos.json")
     monkeypatch.setattr(bg_entry, "FILE", tmp_path/"rede"/"bg_entradas.json")
     monkeypatch.setattr(npc_map, "FILE", tmp_path/"mapas"/"npcs.json")

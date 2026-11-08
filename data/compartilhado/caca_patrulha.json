@@ -6,7 +6,7 @@
   "patrol_step": 8,
   "patrol_spacing": 20,
   "patrol_coverage": 80,
-  "patrol_wall_margin": 5,
+  "patrol_wall_margin": 1,
   "patrol_avoid_walls": true,
   "patrol_give_up": 10,
   "ignore_attackers": 3,

@@ -82,10 +82,10 @@ def test_ground_skill_packet_is_decoded():
     assert event['source_id'] == 2000556 and event['level'] == 10 and event['position'] == [50, 60]
 
 
-def test_storm_gust_single_unit_draws_its_9x9_area_until_removed():
+def test_storm_gust_single_unit_draws_its_11x11_area_until_removed():
     ground = GroundCells()
     ground.observe([ground_skill(89, [50, 60]), entry(5, [50, 60], effect_type=0x86)], now=100)
-    assert ground.snapshot()['cells'] == square(50, 60, 4)
+    assert ground.snapshot()['cells'] == square(50, 60, 5)
     ground.observe([dict(kind='ground_effect_removed', effect_id=5)], now=104)
     assert ground.snapshot()['cells'] == []
 
@@ -94,7 +94,7 @@ def test_storm_gust_sent_as_many_units_is_not_enlarged():
     ground = GroundCells()
     units = [entry(10+i, [48+i, 60], effect_type=0x86) for i in range(5)]
     ground.observe([ground_skill(89, [50, 60])] + units, now=100)
-    assert ground.snapshot()['cells'] == square(50, 60, 4)
+    assert ground.snapshot()['cells'] == square(50, 60, 5)
 
 
 def test_each_meteor_draws_7x7_around_where_it_fell():
@@ -111,7 +111,7 @@ def test_cast_bar_packet_is_a_backup_and_waits_for_the_cast_time():
     ground.observe([dict(kind='skill_cast', source_id=2000556, target_id=0, skill_id=89,
                          duration_ms=6000, position=[50, 60])], own_id=1, now=100)
     ground.observe([entry(5, [50, 60], effect_type=0x86)], own_id=1, now=106.2)
-    assert ground.snapshot()['cells'] == square(50, 60, 4)
+    assert ground.snapshot()['cells'] == square(50, 60, 5)
 
 
 def test_dummy_unit_without_matching_spell_stays_a_single_cell():
@@ -138,7 +138,7 @@ def test_area_is_given_when_the_spell_announcement_comes_after_its_unit():
     assert ground.snapshot()['cells'] == [[50, 60]]
     assert ground.trace[-1]['what'] == 'sem_anuncio'
     ground.observe([ground_skill(85, [50, 60])], now=100.4)  # Ira de Thor (Lord of Vermilion)
-    assert ground.snapshot()['cells'] == square(50, 60, 5)
+    assert ground.snapshot()['cells'] == square(50, 60, 6)
     assert ground.trace[-1]['what'] == 'area_tardia' and ground.trace[-1]['skill_id'] == 85
 
 

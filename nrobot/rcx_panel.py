@@ -185,10 +185,10 @@ class RcxPanel(QWidget):
         section='skill_styles' if self.current.startswith('skill:') else 'effects'
         own=self.config[section].get(self.current.split(':')[1],{})
         self.show_allies.setChecked(bool(own.get('show_allies')));self.show_enemies.setChecked(bool(own.get('show_enemies')))
-        self.hide_native.setChecked(style['hide_native'])
+        self.hide_native.setChecked(bool(own.get('hide_native')))
         general=self.config['effects'].get(str(row['unit_type']),{}) if section=='skill_styles' else {}
-        covered=[label for field,label in (('show_allies','aliadas'),('show_enemies','inimigas')) if general.get(field)]
-        self.side_note.setText('O efeito geral deste tipo ja esta marcado para '+' e '.join(covered)+': vale tambem para esta habilidade.' if covered else '')
+        covered=[label for field,label in (('show_allies','aliadas'),('show_enemies','inimigas'),('hide_native','ocultar o efeito original')) if general.get(field)]
+        self.side_note.setText('O efeito geral deste tipo ja esta marcado para '+', '.join(covered)+': vale tambem para esta habilidade.' if covered else '')
         self.set_color(self.preview_color,style['preview_fill'] or style['fill'])
         self.set_color(self.preview_outline,style['preview_outline'] or style['outline'])
         self.preview_symbol.setCurrentIndex(self.preview_symbol.findData(style['preview_symbol'] or style['symbol']))

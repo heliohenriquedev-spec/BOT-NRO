@@ -123,7 +123,7 @@
    "sprite": 99
   },
   "226,95": {
-   "name": "",
+   "name": "FidelidadeV",
    "sprite": 47
   }
  },
@@ -157,11 +157,11 @@
    "sprite": 715
   },
   "78,141": {
-   "name": "",
+   "name": "Chunin Shiken",
    "sprite": 882
   },
   "78,145": {
-   "name": "",
+   "name": "Jounin Shiken",
    "sprite": 882
   },
   "78,125": {
@@ -221,7 +221,7 @@
    "sprite": 831
   },
   "126,143": {
-   "name": "",
+   "name": "Recompensas WoE Draft",
    "sprite": 100
   },
   "72,158": {
@@ -1097,6 +1097,160 @@
   "26,8": {
    "name": "",
    "sprite": 434
+  }
+ },
+ "arug_cas03": {
+  "138,298": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "137,297": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "139,299": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "137,301": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "143,286": {
+   "name": "",
+   "sprite": 14
+  },
+  "141,286": {
+   "name": "",
+   "sprite": 14
+  },
+  "140,287": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "137,295": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "137,294": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "135,293": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "137,296": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "139,293": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "138,295": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "138,294": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "139,296": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "140,297": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "138,296": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "140,296": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "138,293": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "138,292": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "134,289": {
+   "name": "",
+   "sprite": 14
+  },
+  "141,291": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "142,290": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "142,289": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "149,296": {
+   "name": "",
+   "sprite": 14
+  },
+  "147,297": {
+   "name": "",
+   "sprite": 14
+  },
+  "124,270": {
+   "name": "",
+   "sprite": 14
+  },
+  "120,271": {
+   "name": "",
+   "sprite": 14
+  },
+  "115,272": {
+   "name": "",
+   "sprite": 14
+  },
+  "112,270": {
+   "name": "",
+   "sprite": 14
+  },
+  "143,287": {
+   "name": "",
+   "sprite": 14
+  },
+  "144,286": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "146,285": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "144,285": {
+   "name": "",
+   "sprite": 14
+  },
+  "146,286": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "149,285": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "150,286": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "150,285": {
+   "name": "Night Star",
+   "sprite": 14
   }
  }
 }

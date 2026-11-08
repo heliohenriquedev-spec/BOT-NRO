@@ -47,7 +47,9 @@ static LONG started,in_draw;
 static Binding bindings[8];
 static LONG binding_count;
 #define DRAW_CAP (CAP+1024)
-static Vertex fills[DRAW_CAP*6],lines[DRAW_CAP*16];
+/* Layers, always in this order: full fills, then the centre dots, then every line symbol. A
+   symbol only paints its own mark, so a fill never covers another effect's symbol. */
+static Vertex fills[DRAW_CAP*6],marks[DRAW_CAP*6],lines[DRAW_CAP*16];
 static Cell cells[DRAW_CAP];
 static Preview previews[256];
 static int copy_memory(uintptr_t address,void *out,SIZE_T size);
@@ -185,7 +187,7 @@ static void draw_cells(IDirect3DDevice7 *device) {
             break;
         }
     }
-    DWORD accepted=0,fill_vertices=0,line_vertices=0;
+    DWORD accepted=0,fill_vertices=0,mark_vertices=0,line_vertices=0;
     const int tri[6]={0,1,2,2,1,3},edges[8]={0,1,1,3,3,2,2,0};
     for(DWORD i=0;i<count;i++) {
         int cx=cells[i].x,cy=cells[i].y;
@@ -209,7 +211,7 @@ static void draw_cells(IDirect3DDevice7 *device) {
             if(symbol==2){lines[line_vertices++]=mid[0];lines[line_vertices++]=mid[2];lines[line_vertices++]=mid[1];lines[line_vertices++]=mid[3];}
             if(symbol==3){for(int j=0;j<4;j++){const int k[4]={0,3,1,2};lines[line_vertices]=quad[k[j]];lines[line_vertices++].color=outline;}}
             if(symbol==4)for(int j=0;j<4;j++){lines[line_vertices++]=mid[j];lines[line_vertices++]=mid[(j+1)%4];}
-            if(symbol==5){Vertex centre=mix(quad[0],quad[3],.5f,fill),dot[4];for(int j=0;j<4;j++)dot[j]=mix(centre,quad[j],.18f,fill);for(int j=0;j<6;j++)fills[fill_vertices++]=dot[tri[j]];}
+            if(symbol==5){Vertex centre=mix(quad[0],quad[3],.5f,fill),dot[4];for(int j=0;j<4;j++)dot[j]=mix(centre,quad[j],.18f,fill);for(int j=0;j<6;j++)marks[mark_vertices++]=dot[tri[j]];}
         }
         accepted++;
     }
@@ -238,6 +240,7 @@ static void draw_cells(IDirect3DDevice7 *device) {
     IDirect3DDevice7_SetRenderState(device,D3DRENDERSTATE_DESTBLEND,D3DBLEND_INVSRCALPHA);
     HRESULT result=S_OK;
     if(fill_vertices)result=IDirect3DDevice7_DrawPrimitive(device,D3DPT_TRIANGLELIST,D3DFVF_XYZRHW|D3DFVF_DIFFUSE,fills,fill_vertices,0);
+    if(mark_vertices&&SUCCEEDED(result))result=IDirect3DDevice7_DrawPrimitive(device,D3DPT_TRIANGLELIST,D3DFVF_XYZRHW|D3DFVF_DIFFUSE,marks,mark_vertices,0);
     if(line_vertices)IDirect3DDevice7_DrawPrimitive(device,D3DPT_LINELIST,D3DFVF_XYZRHW|D3DFVF_DIFFUSE,lines,line_vertices,0);
     IDirect3DDevice7_ApplyStateBlock(device,state);
     IDirect3DDevice7_DeleteStateBlock(device,state);

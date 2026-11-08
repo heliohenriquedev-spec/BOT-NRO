@@ -124,6 +124,7 @@ class QuestRoutes:
         self.body=Body();self.extras=None;self.errands=[];self.mount_displaced=None
         self.learned_portals={}  # portals.PortalGuard.destinations: ways learned crossing portals
         self.learned_transports={}  # npc_transports.NpcTransports.known: NPCs that change the map
+        self.forget_transport=None  # npc_transports.NpcTransports.forget, set by the relay
         self.learning=None;self.learned_extras=None;self.aggressors=set();self.printed_notice=''
         self.voltar_sent_at=-1e9  # the server answers to @voltar are traced for 15 s
         self.borrow=None;self.prefetched={};self.skipped_ids=set()
@@ -848,6 +849,7 @@ class QuestRoutes:
                     if any(chebyshev(step['position'],p)<=m for p,m in zones):
                         self.step=portal_index;step=portal;kind='portal'
         if PortalGuard.key(map_name)!=PortalGuard.key(step['map']):
+            if kind=='wait_map' and now-self.progress_at>15 and self.false_transport(step,map_name):return None
             if now-self.progress_at>30:self.stop('Mapa diferente do esperado: '+step['map'])
             return None
         if kind=='wait_map': self.step+=1;self.progress_at=now;return None
@@ -1260,6 +1262,17 @@ class QuestRoutes:
 
     def skipped_note(self):
         return ('. Puladas: '+'; '.join(self.skipped)) if self.skipped else ''
+
+    def false_transport(self, step, map_name):
+        """Waiting for a map change after talking to an NPC learned as a transport, and the map did
+        not change: it was not a transport (a healer clicked before walking through a portal).
+        It is forgotten and the queue stops so the next start takes another way."""
+        npc=next((s for s in reversed(self.steps[:self.step]) if s['kind']=='npc'),None)
+        if npc is None or PortalGuard.key(npc['map'])!=PortalGuard.key(map_name) or self.forget_transport is None:return False
+        names=self.forget_transport(map_name,npc['position'],step['map'])
+        if not names:return False
+        self.stop('NPC '+', '.join(names)+' nao levou a '+PortalGuard.key(step['map'])+': transporte aprendido descartado. Inicie a fila de novo')
+        return True
 
     def npc_said(self):
         """What the NPC answered, without the "[Quadro de missoes]" speaker lines."""
