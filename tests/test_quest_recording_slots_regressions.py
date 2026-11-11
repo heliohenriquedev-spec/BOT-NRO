@@ -122,6 +122,25 @@ def test_delivery_still_in_slot_stops_and_says_monsters_are_missing(engine):
     assert q.phase=='paused' and not q.stage_confirmed and 'faltam monstros' in q.reason
 
 
+def test_board_counting_fewer_kills_takes_its_numbers_and_hunts_again(engine):
+    """Kakashi: Rank A-5 counted 50/50 by the bot, the board said Prisioneiro Fugitivo [48/50] and
+    "precisa matar"; the queue stopped at the board (2026-11-10)."""
+    q,p=engine;q.enter_stage('delivery',0)
+    q.route['kill_targets']=[dict(name='Prisioneiro Fugitivo',count=50,species=[1034]),
+                             dict(name='Shinobi Prisioneiro',count=50,species=[1035])]
+    q.name_counts={'prisioneiro fugitivo':50,'shinobi prisioneiro':50};q.kill_counts={1034:3}
+    put_menu(q,'select_mission_slot',['#3 Rank D-4','#5 Rank S-11'])
+    q.plan('ra_in01',[219,95],None,p,1)
+    q.npc_texts=['Rank D-4','Monstros : Prisioneiro Fugitivo [48/50]','Completar missão ?',
+                 'Você precisa matar todos os monstros da lista']
+    put_menu(q,'verify_slot_absent',['#3 Rank D-4','#5 Rank S-11'])
+    action=q.plan('ra_in01',[219,95],None,p,2)
+    assert action['kind']=='cancel'  # closes the board
+    assert q.phase=='travel' and 'voltando para cacar' in q.reason
+    assert q.name_counts['prisioneiro fugitivo']==48 and 1034 not in q.kill_counts
+    assert q.name_counts['shinobi prisioneiro']==50 and not q.hunt_complete()
+
+
 def test_return_recording_survives_npc_disappearance_and_late_close(tmp_path,monkeypatch):
     from nrobot.session_relay import SessionRelay
     monkeypatch.setattr(lib,'FILE',tmp_path/'library.json')

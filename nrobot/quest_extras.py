@@ -19,7 +19,8 @@ FILE = Path(__file__).resolve().parents[1]/'data/rede/quest_extras.json'
 DEFAULTS = dict(voltar_enabled=False, voltar_frame='', voltar_name='', calm_seconds=10, clear_radius=8,
                 cast_timeout=15, attempts=6, mount_enabled=False, mount=None,
                 characters={},  # name -> {'mount_item': id, 'combat_items': [ids]} chosen in the panel
-                revive_enabled=False, revive_attempts=4, heal_steps=[], heal_map='')
+                revive_enabled=False, revive_attempts=4, heal_steps=[], heal_map='',
+                repair_enabled=False, repair_steps=[], repair_map='')
 AMMO = 0x8000
 
 
@@ -129,6 +130,7 @@ class Body:
         self.notice_at = -1e9; self.notice = ''; self.left_combat_at = -1e9; self.combat_until = -1e9
         self.attackers = {}  # monster id -> last time it attacked the character
         self.skill_failed_at = -1e9; self.cast_at = -1e9; self.cast_ms = 0  # @voltar casts skill 960
+        self.broken = None  # {'at', 'location', 'item_id'}: an equipment broke and waits for the repairer
 
     def observe(self, events, own, now):
         for e in events:
@@ -148,7 +150,22 @@ class Body:
                 for item in e['items']:
                     self.gear[item['index']] = dict(item_id=item['item_id'], equip_location=item.get('equip_location', 0),
                                                     worn=item.get('equipped', 0), type=item.get('type'),
-                                                    amount=item.get('amount', 1), stackable=stackable)
+                                                    amount=item.get('amount', 1), stackable=stackable,
+                                                    damaged=bool(item.get('damaged')))
+                damaged = [v for v in self.gear.values() if v.get('damaged')]
+                if damaged and self.broken is None and not stackable:
+                    # Any broken equipment in the list (worn or not: the server takes a broken one off),
+                    # also one that was already broken when the character logged in.
+                    first = next((v for v in damaged if v.get('worn')), damaged[0])
+                    self.broken = dict(at=now, location=first.get('worn') or first.get('equip_location', 0),
+                                       item_id=first['item_id'], items=[v['item_id'] for v in damaged])
+            elif kind == 'equip_damaged':
+                # The item that sat where it broke (the server then takes it off the character).
+                worn = [v for v in self.gear.values() if v.get('worn', 0) & e['location']]
+                taken = [self.gear.get(i) for at, i, position in reversed(self.unequipped)
+                         if position & e['location'] and now-at < 2]
+                item = (worn or [t for t in taken if t])[:1]
+                self.broken = dict(at=now, location=e['location'], item_id=item[0]['item_id'] if item else None)
             elif kind == 'inventory_added' and e.get('success'):
                 old = self.gear.get(e['index'])
                 if old and old['item_id'] == e['item_id']:
@@ -200,8 +217,11 @@ class Body:
     def items(self):
         """Inventory for the panel: what the server listed for this character."""
         return [dict(index=i, item_id=v['item_id'], type=v.get('type'), amount=v.get('amount', 1),
-                     worn=v.get('worn', 0), equip_location=v.get('equip_location', 0))
+                     worn=v.get('worn', 0), equip_location=v.get('equip_location', 0), damaged=bool(v.get('damaged')))
                 for i, v in sorted(self.gear.items())]
+
+    def damaged_items(self):
+        return [v['item_id'] for v in self.gear.values() if v.get('damaged')]
 
     def position_of(self, index):
         item = self.gear.get(index, {})

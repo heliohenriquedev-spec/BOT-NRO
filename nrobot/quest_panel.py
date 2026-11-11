@@ -141,7 +141,7 @@ class RouteEditor(QDialog):
         from .responsive_ui import WrappingCheckBox
         self.ignore_finished=WrappingCheckBox('Ignorar os monstros que ja completaram a quantidade e os que nao sao da quest '
                                               '(so ataca o que ainda falta, mais os marcados abaixo)')
-        self.ignore_finished.setChecked(route.get('ignore_finished',False));layout.addWidget(self.ignore_finished)
+        self.ignore_finished.setChecked(route.get('ignore_finished',True));layout.addWidget(self.ignore_finished)
         self.chain_next=WrappingCheckBox('Encadear com a proxima rota da fila: pega as missoes de todas juntas, caca um mapa de '
                                          'cada vez (ate fechar os monstros daquele mapa) e no fim entrega todas juntas')
         self.chain_next.setChecked(route.get('chain_next',False));layout.addWidget(self.chain_next)
@@ -517,6 +517,13 @@ class ExtrasBox(QGroupBox):
                               ('Testar cura','quest_heal_test'),
                               ('Descartar gravacao da cura','quest_heal_cancel')):
             button=QPushButton(label);button.clicked.connect(lambda checked=False,c=command:self.request(c));heal.addWidget(button)
+        self.repair=WrappingCheckBox('Se a arma ou outro equipamento quebrar: ir ate o Reparador (conversa gravada), consertar, '
+                                     'voltar ao mapa onde estava, recolocar o item e continuar cacando')
+        repair=FlowLayout()
+        for label,command in (('Gravar reparo (Reparador)','quest_repair_record'),('Salvar reparo','quest_repair_save'),
+                              ('Testar reparo','quest_repair_test'),
+                              ('Descartar gravacao do reparo','quest_repair_cancel')):
+            button=QPushButton(label);button.clicked.connect(lambda checked=False,c=command:self.request(c));repair.addWidget(button)
         learn=FlowLayout()
         self.learn_voltar=QPushButton('Aprender @voltar');self.learn_voltar.clicked.connect(lambda:self.request('quest_extras_learn',what='voltar'))
         self.learn_mount=QPushButton('Aprender montaria');self.learn_mount.clicked.connect(lambda:self.request('quest_extras_learn',what='mount'))
@@ -545,16 +552,18 @@ class ExtrasBox(QGroupBox):
         for widget in (self.voltar,self.mount):layout.addWidget(widget)
         layout.addLayout(learn);layout.addLayout(form)
         layout.addWidget(self.revive);layout.addLayout(revive_form);layout.addLayout(heal)
+        layout.addWidget(self.repair);layout.addLayout(repair)
         layout.addWidget(self.status)
         self.show_config()
-        for widget in (self.voltar,self.mount,self.revive):widget.toggled.connect(self.store)
+        for widget in (self.voltar,self.mount,self.revive,self.repair):widget.toggled.connect(self.store)
         for widget in (self.calm,self.radius,self.timeout,self.revive_attempts):widget.valueChanged.connect(self.store)
 
     def request(self,command,**values):self.command_requested.emit(command,values)
 
     def show_config(self):
         c=self.config
-        for widget,value in ((self.voltar,c['voltar_enabled']),(self.mount,c['mount_enabled']),(self.revive,c.get('revive_enabled'))):
+        for widget,value in ((self.voltar,c['voltar_enabled']),(self.mount,c['mount_enabled']),(self.revive,c.get('revive_enabled')),
+                             (self.repair,c.get('repair_enabled'))):
             widget.blockSignals(True);widget.setChecked(bool(value));widget.blockSignals(False)
         for widget,value in ((self.calm,c['calm_seconds']),(self.radius,c['clear_radius']),(self.timeout,c['cast_timeout']),
                              (self.revive_attempts,c.get('revive_attempts',4))):
@@ -568,7 +577,8 @@ class ExtrasBox(QGroupBox):
         self.learned=('@voltar: '+('aprendido'+(' ('+c['voltar_name']+')' if c.get('voltar_name') else '') if c.get('voltar_frame') else 'nao aprendido')+
                       ' • Montaria: '+(f"item {mount['item_id']}, tira {len(mount.get('displaced',[]))} equipamento(s)" if mount else 'nao aprendida')+
                       ' • Cura: '+(f"gravada em {c.get('heal_map')} (NPC: "+', '.join(s.get('name') or 'NPC' for s in c['heal_steps'] if s['kind']=='npc')+')'
-                                    if c.get('heal_steps') else 'nao gravada (ao morrer, so volta ao mapa)'))
+                                    if c.get('heal_steps') else 'nao gravada (ao morrer, so volta ao mapa)')+
+                      ' • Reparo: '+(f"gravado em {c.get('repair_map')}" if c.get('repair_steps') else 'nao gravado'))
         self.status.setText(self.learned)
 
     def choose_items(self):
@@ -608,6 +618,7 @@ class ExtrasBox(QGroupBox):
         try:
             self.config=quest_extras.load()
             self.config.update(voltar_enabled=self.voltar.isChecked(),mount_enabled=self.mount.isChecked(),revive_enabled=self.revive.isChecked(),
+                               repair_enabled=self.repair.isChecked(),
                                calm_seconds=self.calm.value(),clear_radius=self.radius.value(),cast_timeout=self.timeout.value(),
                                revive_attempts=self.revive_attempts.value())
             quest_extras.save(self.config)
@@ -633,10 +644,20 @@ class ExtrasBox(QGroupBox):
         for b in (self.learn_voltar,self.learn_mount,self.switch):b.setEnabled(not busy)
         self.cancel.setEnabled(bool(learning))
         if learning:self.status.setText('Aprendendo: '+q.get('reason',''))
-        elif q.get('recording_scope')=='heal' or 'Revivido' in (q.get('reason') or '') or 'morreu' in (q.get('reason') or ''):
+        elif (q.get('recording_scope') in ('heal','repair') or any(w in (q.get('reason') or '') for w in ('Revivido','morreu','quebrou','reparo'))):
             self.status.setText(self.learned+' • Agora: '+q.get('reason',''))
         elif q.get('errand'):self.status.setText(self.learned+' • Agora: '+q.get('reason',''))
         else:self.status.setText(self.learned)
+        broken=[i['item_id'] for i in q.get('inventory') or [] if i.get('damaged')]
+        if broken:
+            names=getattr(self,'item_names',None)
+            if names is None:
+                import json as _json
+                from pathlib import Path as _Path
+                try:names=_json.loads((_Path(__file__).resolve().parents[1]/'data/recursos/itens.json').read_text(encoding='utf-8'))
+                except (OSError,ValueError):names={}
+                self.item_names=names
+            self.status.setText(self.status.text()+' • QUEBRADO(S): '+', '.join(names.get(str(i)) or f'item {i}' for i in broken))
 
 
 def route_done_today(route,missions,daily):

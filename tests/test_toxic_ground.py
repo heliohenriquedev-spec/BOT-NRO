@@ -129,3 +129,52 @@ def test_quest_collision_does_not_drop_hazards_when_allowing_portal(tmp_path,con
     c.set_forbidden(c.hazard_cells)
     nav=relay.quests.navigation('ra_fild03',c,relay.portals,dict(kind='move',position=[24,20]))
     assert not nav.walkable((22,20))
+
+def test_same_escape_without_moving_is_given_up_for_a_while(tmp_path,config):
+    relay,now=relay_for(tmp_path,config)
+    relay.toxic_ground.observe([ground()],relay.inventory,now)
+    sent=0
+    for i in range(8):
+        relay.toxic_hold_until=0
+        if asyncio.run(relay.avoid_toxic_ground(lambda:True)):sent+=1
+        if relay.toxic_repeat:relay.toxic_repeat=(relay.toxic_repeat[0],relay.toxic_repeat[1],relay.toxic_repeat[2]-1)  # time passes
+    assert sent==3  # the fourth identical escape without moving is not sent
+    assert getattr(relay,'toxic_suspended_until',0)>now
+    events=[json.loads(l)['kind'] for l in (tmp_path/'caca_eventos.jsonl').read_text(encoding='utf-8').splitlines()]
+    assert 'toxic_ground_escape_suspended' in events
+
+def test_route_crosses_ground_skills_when_they_close_every_way(tmp_path,config):
+    relay,now=relay_for(tmp_path,config)
+    c=relay.collision_map()
+    wall={(22,y) for y in range(0,c.height)}
+    c.hazard_cells=frozenset(wall);c.set_forbidden(c.hazard_cells)
+    q=relay.quests
+    step=dict(kind='walk',map='ra_fild03.gat',position=[24,20])
+    blocked=q.navigation('ra_fild03',c,relay.portals,step)
+    assert not q.path_to(blocked,[20,20],[24,20],True)
+    open_=q.navigation('ra_fild03',c,relay.portals,step,hazards=False)
+    assert q.path_to(open_,[20,20],[24,20],True)
+
+def test_route_keeps_its_path_when_only_ground_skills_change(tmp_path,config):
+    relay,now=relay_for(tmp_path,config)
+    c=relay.collision_map();q=relay.quests
+    step=dict(kind='walk',map='ra_fild03.gat',position=[24,20])
+    c.hazard_cells=frozenset({(5,5)})
+    first=q.navigation('ra_fild03',c,relay.portals,step,hazards=False)
+    path=q.path_to(first,[20,20],[24,20],True)
+    c.hazard_cells=frozenset({(6,6),(7,7)})  # areas elsewhere changed
+    again=q.navigation('ra_fild03',c,relay.portals,step,hazards=False)
+    assert again is first and q.path_to(again,[20,20],[24,20],True)==path  # no new search
+
+def test_long_route_search_runs_in_the_background():
+    import time as _time
+    from nrobot.quest_routes import QuestRoutes, PATH_PENDING
+    q=QuestRoutes();q.async_paths=True;q.ASYNC_WAIT=0
+    c=CollisionMap(300,300,bytes([1])*90000)
+    first=q.path_to(c,[5,5],[290,290],True)
+    assert first is PATH_PENDING  # the relay loop is not held while it searches
+    for _ in range(200):
+        path=q.path_to(c,[5,5],[290,290],True)
+        if path is not PATH_PENDING:break
+        _time.sleep(.02)
+    assert path and tuple(path[-1])==(290,290)

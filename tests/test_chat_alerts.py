@@ -28,7 +28,7 @@ def test_public_or_private_message_triggers_for_watched_senders(tmp_path):
     assert 'mensagem de teste' not in str(alert) and 'mensagem privada de teste' not in str(alert)
     relay.observe_chat_alerts([decode(private_packet())])
     assert relay.chat_alert['id'] != alert['id']  # same sender/message still emits another alert
-    assert relay.emergency is None and not relay.commands_blocked
+    assert relay.emergency is not None and relay.commands_blocked
 
 
 def test_unwatched_messages_and_empty_watchlist_do_not_alert(tmp_path):

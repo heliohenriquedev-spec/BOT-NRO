@@ -99,3 +99,47 @@ def test_plain_hunt_death_revives_heals_and_hunts_again_on_the_same_map(tmp_path
     r.quests.complete_validation()  # arrived back on campo
     asyncio.run(r.quest_tick(lambda: True))
     assert r.hunt.enabled and r.hunt_revive is None
+
+
+def test_plain_hunt_death_puts_the_combat_items_back_on_before_hunting(tmp_path, monkeypatch):
+    r = relay(tmp_path, monkeypatch)
+    quest_extras.save(dict(quest_extras.load(), revive_enabled=True, characters={'Saga': dict(combat_items=[501])}))
+    r.own_look = dict(name='Saga')
+    map_routes.save([dict(id='r1', name='Campo', target_map='campo.gat',
+                          steps=[dict(kind='portal', map='hospital2.gat', position=[103, 3]), dict(kind='wait_map', map='campo.gat'),
+                                 dict(kind='walk', map='campo.gat', position=[10, 10])])])
+    o = r.tracker.observer; o.map_name = 'campo'; o.player = [40, 40]
+    r.hunt.start()
+    up = r.upstream = Upstream()
+    o.player_alive = False
+    asyncio.run(r.quest_tick(lambda: True))
+    o.player_alive = True; o.map_name = 'hospital2'; o.player = [60, 60]; o.player_at = time.monotonic()
+    asyncio.run(r.quest_tick(lambda: True))
+    r.quests.complete_validation()  # arrived back on campo, mounted
+    r.quests.body.gear = {7: dict(item_id=501, type=4, amount=1, worn=0, equip_location=2)}
+    asyncio.run(r.quest_tick(lambda: True))
+    assert not r.hunt.enabled and r.hunt_revive['stage'] == 'gear'
+    assert 'Equipamentos' in r.quests.reason  # the item goes on before the hunt starts
+    r.quests.body.gear[7]['worn'] = 2
+    r.quests.errands[0].pending = None
+    asyncio.run(r.quest_tick(lambda: True))  # equipped: errand done
+    asyncio.run(r.quest_tick(lambda: True))
+    assert r.hunt.enabled and r.hunt_revive is None
+
+
+def test_plain_hunt_death_trip_back_is_made_mounted(tmp_path, monkeypatch):
+    r = relay(tmp_path, monkeypatch)
+    quest_extras.save(dict(quest_extras.load(), revive_enabled=True,
+                           mount_enabled=True, characters={'Saga': dict(mount_item=12622)}))
+    r.own_look = dict(name='Saga')
+    map_routes.save([dict(id='r1', name='Campo', target_map='campo.gat',
+                          steps=[dict(kind='portal', map='hospital2.gat', position=[103, 3]), dict(kind='wait_map', map='campo.gat'),
+                                 dict(kind='walk', map='campo.gat', position=[10, 10])])])
+    o = r.tracker.observer; o.map_name = 'campo'; o.player = [40, 40]
+    r.hunt.start()
+    r.upstream = Upstream()
+    o.player_alive = False
+    asyncio.run(r.quest_tick(lambda: True))
+    o.player_alive = True; o.map_name = 'hospital2'; o.player = [60, 60]; o.player_at = time.monotonic()
+    asyncio.run(r.quest_tick(lambda: True))
+    assert [e.kind for e in r.quests.errands] == ['mount']  # the mount goes on before walking back

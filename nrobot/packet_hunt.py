@@ -496,6 +496,11 @@ class PacketHunt:
     HAZARD_RETURN = 1.0  # s: a monster cut off by a skill area on the floor is taken again this soon
     HAZARD_SWITCH_GAP = 3.0  # s between two switches caused by skill areas on the floor
     hazard_switch_at = -1e9
+    hazard_cross_cache = None  # path kept while walking across skill areas to the same target
+    hazard_chase = None  # (target, since): trying to reach a monster beyond/on a skill area
+    HAZARD_REACH_LIMIT = 1.0  # s to reach it before another monster is taken (if there is one)
+    HAZARD_COMEBACK = 3.0  # s before that monster is a target again
+    hazard_crossing_until = -1e9  # the escape from skill areas waits while the hunt crosses one
 
     def abandon(self, now, reason, defer=None, *, force=False, exact=False):
         if not force and self.target is not None and self.target == self.engaged:
@@ -699,7 +704,9 @@ class PacketHunt:
         # Three separate choices: basic attacks between skills (auto_attacks), walking up to the
         # basic-attack range (melee_approach) and running back to keep the skills' distance (kite).
         # Approach and kite exclude each other; with both off the bot stops at the skills' range.
-        melee = self.melee_approach and not wants_skill  # the old Kunai-only mode keeps its range
+        # The old Kunai-only mode keeps its range; a map behavior asking for melee goes hand to
+        # hand anyway, the rotation's skills firing on the way in (yuno_fild07).
+        melee = self.melee_approach and (not wants_skill or bool(state.get('melee_with_skills')))
         if melee:
             combat_range = self.MELEE_RANGE  # go hand to hand: basic attacks between the skills
         # The configured rotation supplies engagement_range and handles shooting while
@@ -718,8 +725,9 @@ class PacketHunt:
             in_range = in_range and all(collision.melee_reachable(player, point) for point in range_positions)
         # With collision data, retain adjacent-cell combat until ranged line-of-sight is supported.
         if in_range and (collision is None or all(collision.line_clear(player, point) for point in range_positions)):
+            self.hazard_chase = None  # in reach: the 1 s allowance for a monster on a skill area restarts
             skill_action = self.skill_action(state, self.target, now)
-            if wants_skill:
+            if wants_skill and not state.get('melee_with_skills'):
                 if entity.get('position_age_seconds', 0) > 1.5 and not entity.get('position_usable', False):
                     self.skill_reason = 'posição do alvo antiga; procurando alvo atualizado'
                     self.abandon(now, self.skill_reason)
@@ -747,28 +755,35 @@ class PacketHunt:
             self.reason = 'rota temporariamente bloqueada; mantendo alvo'
             self.ready_at = now+.5
             return None
-        if (collision and not path and getattr(collision, 'hazard_cells', None)
-                and collision.plain().route(player, chase_position, blocked, max_nodes=8000)):
-            # Enemy skill areas on the floor (poison...) are what close the way: another monster
-            # really reachable is taken now and this one again a second later; otherwise get as close
-            # as the area allows. One switch every few seconds at most: monsters all beyond the
-            # area made it hop between them without hitting anything (ra_fild03 2026-11-06).
-            if now-self.hazard_switch_at >= self.HAZARD_SWITCH_GAP:
-                others = sorted((e for e in state['recent_entities'] if e['entity_id'] != self.target
-                                 and self.excluded_until.get(e['entity_id'], 0) <= now and not self.walled(e['entity_id'], now)
-                                 and math.dist(player, e.get('effective_position', e['position'])) <= self.SEARCH_RADIUS),
-                                key=lambda e: math.dist(player, e.get('effective_position', e['position'])))[:3]
-                if any(collision.route(player, e.get('effective_position', e['position']), blocked, max_nodes=4000)
-                       for e in others):
-                    self.hazard_switch_at = now
-                    self.abandon(now, 'alvo atras de area de habilidade no chao; trocando de alvo',
-                                 defer=self.HAZARD_RETURN, force=True, exact=True)
+        crossing = False
+        if collision and not path and getattr(collision, 'hazard_cells', None):
+            # Enemy skill areas on the floor (Quagmire, poison...) are all that close the way: walk
+            # across them. Searching other monsters and partial paths every tick cost up to ~1 s per
+            # cycle and the character stood still being hit (yuno_fild07 2026-11-09).
+            cached = self.hazard_cross_cache
+            if (cached and cached['target'] == self.target and math.dist(cached['goal'], chase_position) <= 2
+                    and tuple(player) in cached['path'][:-1]):
+                path = cached['path'][cached['path'].index(tuple(player)):]
+            else:
+                path = collision.plain().route(player, chase_position, blocked, max_nodes=8000)
+                self.hazard_cross_cache = (dict(target=self.target, goal=tuple(chase_position), path=path)
+                                           if path else None)
+            if path:
+                # One second to get there; then another monster while this one stays on the area,
+                # back to it shortly after (never left aside for long).
+                chase = self.hazard_chase
+                if not chase or chase[0] != self.target:
+                    self.hazard_chase = (self.target, now)
+                elif now-chase[1] > self.HAZARD_REACH_LIMIT and any(
+                        e['entity_id'] != self.target and self.excluded_until.get(e['entity_id'], 0) <= now
+                        for e in state['recent_entities']):
+                    self.hazard_chase = None
+                    self.abandon(now, 'alvo em area de habilidade no chao fora de alcance; outro alvo por enquanto',
+                                 defer=self.HAZARD_COMEBACK, force=True, exact=True)
                     return None
-            path = collision.route(player, chase_position, blocked, max_nodes=8000, partial=True)
-            if not path or len(path) < 2:
-                self.reason = 'alvo cercado por area de habilidade no chao; aguardando'
-                self.ready_at = now+.3
-                return None
+                crossing = True
+                self.hazard_crossing_until = now+2
+                self.reason = 'atravessando area de habilidade no chao ate o alvo'
         if collision and not path:
             # The engaged-target hold is useful for transient packet/path failures, but
             # an impossible route is terminal for this attempt: clear the lock so the
@@ -796,16 +811,17 @@ class PacketHunt:
         reach = min(4, max(1, distance-combat_range))
         destination = [round(player[0]+dx/distance*reach), round(player[1]+dy/distance*reach)]
         if collision:
+            walk = collision.plain() if crossing else collision
             # REDE-51: pull the path across free ground instead of emitting every A* bend.
             index = 1
             for candidate in range(2, min(12, len(path))):
-                if collision.segment(player, path[candidate], blocked, max_steps=4, wall_margin=min(3, collision.clearance(path[1]))):
+                if walk.segment(player, path[candidate], blocked, max_steps=4, wall_margin=min(3, walk.clearance(path[1]))):
                     index = candidate
             # Stop the current segment when ranged combat becomes possible.
             for step in range(1, index+1):
                 if (max(math.dist(path[step], point) for point in range_positions) <= combat_range
-                    and (not melee or all(collision.melee_reachable(path[step], point) for point in range_positions))
-                    and collision.segment(player, path[step], blocked, max_steps=4)
+                    and (not melee or all(walk.melee_reachable(path[step], point) for point in range_positions))
+                    and walk.segment(player, path[step], blocked, max_steps=4)
                     and collision.line_clear(path[step], actual_position) and collision.line_clear(path[step], chase_position)):
                     index = step
                     break
@@ -819,6 +835,6 @@ class PacketHunt:
         # response is required; failure to reach attack range is bounded.
         diagonal_factor = 1+.4*min(abs(destination[i]-player[i]) for i in (0, 1))/steps
         duration = steps*max(50, min(walk_speed_ms, 2000))/1000*diagonal_factor
-        return {'kind': 'move', 'target_id': self.target, 'destination': destination,
+        return {'kind': 'move', 'target_id': self.target, 'destination': destination, **({'cross_hazards': True} if crossing else {}),
                 'wait_seconds': duration, 'origin': list(player), 'collision_route': collision is not None,
                 'seconds_per_step': max(50, min(walk_speed_ms, 2000))/1000*diagonal_factor}

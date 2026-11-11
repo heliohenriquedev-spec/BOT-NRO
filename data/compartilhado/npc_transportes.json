@@ -84,8 +84,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-4",
    "arrival": [
-    289,
-    164
+    282,
+    184
    ]
   },
   "161,25>um_dun01>Esconderijo do Clã Kamizuru": {
@@ -240,8 +240,60 @@
    "to": "ein_fild01",
    "name": "Viajante Ninja#h2-4",
    "arrival": [
-    182,
-    331
+    66,
+    137
+   ]
+  },
+  "161,25>mjolnir_08>Mamutes de Konoha": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "areia.gat",
+     "position": [
+      161,
+      25
+     ],
+     "name": "Viajante Ninja#h2-4"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "select",
+     "map": "areia.gat",
+     "option": "Mamutes de Konoha"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "next",
+     "map": "areia.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "mjolnir_08.gat"
+    }
+   ],
+   "to": "mjolnir_08",
+   "name": "Viajante Ninja#h2-4",
+   "arrival": [
+    105,
+    290
    ]
   }
  },
@@ -346,8 +398,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    76,
-    177
+    263,
+    269
    ]
   },
   "217,86>anthell01>Esconderijo do Clã Kamizuru Nível 2": {
@@ -502,8 +554,8 @@
    "to": "tur_dun01",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    170,
-    176
+    169,
+    198
    ]
   },
   "213,80>hospital2>Sim": {
@@ -628,6 +680,58 @@
    "arrival": [
     25,
     92
+   ]
+  },
+  "217,86>ein_fild01>Mamutes da Nuvem": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "ra_in01.gat",
+     "position": [
+      217,
+      86
+     ],
+     "name": "Viajante Ninja#h2-8"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "select",
+     "map": "ra_in01.gat",
+     "option": "Mamutes da Nuvem"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "next",
+     "map": "ra_in01.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "ein_fild01.gat"
+    }
+   ],
+   "to": "ein_fild01",
+   "name": "Viajante Ninja#h2-8",
+   "arrival": [
+    278,
+    299
    ]
   }
  },
@@ -932,8 +1036,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    83,
-    11
+    67,
+    3
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [3] |Sim": {
@@ -973,8 +1077,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    17,
-    27
+    62,
+    47
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [5] |Sim": {
@@ -1014,8 +1118,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    31,
-    34
+    69,
+    35
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [1] |Sim": {
@@ -1055,8 +1159,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    47,
-    2
+    33,
+    49
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [4] |Sim": {
@@ -1096,8 +1200,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    58,
-    27
+    62,
+    7
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [6] |Sim": {
@@ -1250,8 +1354,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    49,
-    34
+    47,
+    56
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [7] |Sim": {
@@ -1329,6 +1433,106 @@
    "arrival": [
     141,
     45
+   ]
+  },
+  "78,117>poring_c01>Entrar na Fila": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      78,
+      117
+     ],
+     "name": "Dojo"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Entrar na Fila"
+    },
+    {
+     "kind": "wait_map",
+     "map": "poring_c01.gat"
+    }
+   ],
+   "to": "poring_c01",
+   "name": "Dojo",
+   "arrival": [
+    106,
+    114
+   ]
+  },
+  "92,127>que_moc_16>- Sim, claro": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      92,
+      127
+     ],
+     "name": "Loja ROPs"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "- Sim, claro"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "que_moc_16.gat"
+    }
+   ],
+   "to": "que_moc_16",
+   "name": "Loja ROPs",
+   "arrival": [
+    87,
+    50
+   ]
+  },
+  "123,140>arug_cas01>- Sim, quero lutar": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      123,
+      140
+     ],
+     "name": "Teleportador - Guerra"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "- Sim, quero lutar"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "arug_cas01.gat"
+    }
+   ],
+   "to": "arug_cas01",
+   "name": "Teleportador - Guerra",
+   "arrival": [
+    55,
+    143
    ]
   }
  },
@@ -1844,6 +2048,66 @@
     96,
     130
    ]
+  },
+  "115,114>bat_c03>Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "new_4-2.gat",
+     "position": [
+      115,
+      114
+     ],
+     "name": "Battleground 4x4"
+    },
+    {
+     "kind": "select",
+     "map": "new_4-2.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "next",
+     "map": "new_4-2.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "bat_c03.gat"
+    }
+   ],
+   "to": "bat_c03",
+   "name": "Battleground 4x4",
+   "arrival": [
+    53,
+    127
+   ]
+  },
+  "115,114>bat_c03>Ok": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "new_4-2.gat",
+     "position": [
+      115,
+      114
+     ],
+     "name": "Battleground 4x4"
+    },
+    {
+     "kind": "select",
+     "map": "new_4-2.gat",
+     "option": "Ok"
+    },
+    {
+     "kind": "wait_map",
+     "map": "bat_c03.gat"
+    }
+   ],
+   "to": "bat_c03",
+   "name": "Battleground 4x4",
+   "arrival": [
+    146,
+    56
+   ]
   }
  },
  "hospital4": {
@@ -1945,8 +2209,117 @@
  },
  "_descartados": {
   "hospital2": {
-   "25,70>areia>": "curandeira: nao troca de mapa",
-   "35,76>areia>": "curandeira: nao troca de mapa"
+   "35,76>areia>": "curandeira: nao troca de mapa",
+   "25,70>areia>": "curandeira: nao troca de mapa"
+  }
+ },
+ "poring_w01": {},
+ "poring_c01": {
+  "103,110>kakashi>Sair": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "poring_c01.gat",
+     "position": [
+      103,
+      110
+     ],
+     "name": "Juiz#DJ"
+    },
+    {
+     "kind": "select",
+     "map": "poring_c01.gat",
+     "option": "Sair"
+    },
+    {
+     "kind": "wait_map",
+     "map": "kakashi.gat"
+    }
+   ],
+   "to": "kakashi",
+   "name": "Juiz#DJ",
+   "arrival": [
+    148,
+    152
+   ]
+  }
+ },
+ "que_moc_16": {
+  "87,46>kakashi>- Sim, por favor": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "que_moc_16.gat",
+     "position": [
+      87,
+      46
+     ],
+     "name": "Retorno"
+    },
+    {
+     "kind": "next",
+     "map": "que_moc_16.gat"
+    },
+    {
+     "kind": "select",
+     "map": "que_moc_16.gat",
+     "option": "- Sim, por favor"
+    },
+    {
+     "kind": "next",
+     "map": "que_moc_16.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "kakashi.gat"
+    }
+   ],
+   "to": "kakashi",
+   "name": "Retorno",
+   "arrival": [
+    86,
+    135
+   ]
+  }
+ },
+ "moc_fild06": {
+  "196,364>0012@caves>Entrar na Dungeon|Entrar com grupo existente|Mestre das Marionetes    [0/1]": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "moc_fild06.gat",
+     "position": [
+      196,
+      364
+     ],
+     "name": "Mestre das Marionetes#6"
+    },
+    {
+     "kind": "select",
+     "map": "moc_fild06.gat",
+     "option": "Entrar na Dungeon"
+    },
+    {
+     "kind": "select",
+     "map": "moc_fild06.gat",
+     "option": "Entrar com grupo existente"
+    },
+    {
+     "kind": "select",
+     "map": "moc_fild06.gat",
+     "option": "Mestre das Marionetes    [0/1]"
+    },
+    {
+     "kind": "wait_map",
+     "map": "0012@caves.gat"
+    }
+   ],
+   "to": "0012@caves",
+   "name": "Mestre das Marionetes#6",
+   "arrival": [
+    9,
+    195
+   ]
   }
  }
 }

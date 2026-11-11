@@ -32,7 +32,8 @@
     235,
     379
    ],
-   "confirmed": true
+   "confirmed": true,
+   "varies": true
   },
   "206,53": {
    "map": "biju_pri2",
@@ -63,6 +64,14 @@
    "arrival": [
     20,
     63
+   ],
+   "confirmed": true
+  },
+  "153,240": {
+   "map": "salakage",
+   "arrival": [
+    31,
+    8
    ],
    "confirmed": true
   }
@@ -125,10 +134,10 @@
   "43,23": {
    "map": "gl_sew02",
    "arrival": [
-    299,
+    297,
     293
    ],
-   "confirmed": false
+   "confirmed": true
   },
   "123,170": {
    "map": "gl_prison",
@@ -269,6 +278,14 @@
    "arrival": [
     153,
     24
+   ],
+   "confirmed": true
+  },
+  "22,242": {
+   "map": "moc_fild17",
+   "arrival": [
+    364,
+    272
    ],
    "confirmed": true
   }
@@ -477,12 +494,13 @@
    "confirmed": true
   },
   "186,354": {
-   "map": "hospital2",
+   "map": "lhz_fild02",
    "arrival": [
-    25,
-    92
+    164,
+    41
    ],
-   "confirmed": true
+   "confirmed": true,
+   "varies": true
   }
  },
  "payon_in03": {
@@ -632,6 +650,14 @@
     28
    ],
    "confirmed": false
+  },
+  "383,250": {
+   "map": "mjolnir_11",
+   "arrival": [
+    23,
+    221
+   ],
+   "confirmed": true
   }
  },
  "yuno_fild11": {
@@ -642,6 +668,22 @@
     34
    ],
    "confirmed": true
+  },
+  "29,267": {
+   "map": "yuno_fild07",
+   "arrival": [
+    347,
+    287
+   ],
+   "confirmed": true
+  },
+  "91,370": {
+   "map": "ein_fild01",
+   "arrival": [
+    109,
+    37
+   ],
+   "confirmed": true
   }
  },
  "ein_fild01": {
@@ -650,6 +692,14 @@
    "arrival": [
     59,
     39
+   ],
+   "confirmed": true
+  },
+  "109,34": {
+   "map": "yuno_fild11",
+   "arrival": [
+    91,
+    367
    ],
    "confirmed": true
   }
@@ -698,6 +748,104 @@
     351
    ],
    "confirmed": false
+  }
+ },
+ "salakage": {
+  "31,2": {
+   "map": "areia",
+   "arrival": [
+    153,
+    237
+   ],
+   "confirmed": true
+  }
+ },
+ "spl_fild03": {
+  "373,366": {
+   "map": "spl_in01",
+   "arrival": [
+    30,
+    214
+   ],
+   "confirmed": true
+  }
+ },
+ "spl_in01": {
+  "30,212": {
+   "map": "spl_fild03",
+   "arrival": [
+    373,
+    364
+   ],
+   "confirmed": true
+  }
+ },
+ "yuno_fild07": {
+  "349,289": {
+   "map": "yuno_fild11",
+   "arrival": [
+    29,
+    267
+   ],
+   "confirmed": false
+  }
+ },
+ "mjolnir_11": {
+  "20,221": {
+   "map": "prt_fild00",
+   "arrival": [
+    383,
+    250
+   ],
+   "confirmed": false
+  }
+ },
+ "umbala": {
+  "129,78": {
+   "map": "cmd_fild03",
+   "arrival": [
+    150,
+    373
+   ],
+   "confirmed": true
+  }
+ },
+ "cmd_fild03": {
+  "150,376": {
+   "map": "umbala",
+   "arrival": [
+    130,
+    82
+   ],
+   "confirmed": true
+  }
+ },
+ "prt_fild08": {
+  "260,57": {
+   "map": "kakashi",
+   "arrival": [
+    121,
+    134
+   ],
+   "confirmed": true
+  }
+ },
+ "moc_fild17": {
+  "369,272": {
+   "map": "moc_fild01",
+   "arrival": [
+    22,
+    242
+   ],
+   "confirmed": false
+  },
+  "30,301": {
+   "map": "moc_fild06",
+   "arrival": [
+    368,
+    311
+   ],
+   "confirmed": true
   }
  }
 }

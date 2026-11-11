@@ -61,7 +61,7 @@
    "sprite": 991
   },
   "228,242": {
-   "name": "",
+   "name": "Genin",
    "sprite": 106
   },
   "224,237": {
@@ -83,6 +83,10 @@
   "213,167": {
    "name": "",
    "sprite": 47
+  },
+  "158,239": {
+   "name": "Teleportador - Suna",
+   "sprite": 991
   }
  },
  "ra_in01": {
@@ -197,7 +201,7 @@
    "sprite": 423
   },
   "73,155": {
-   "name": "",
+   "name": "Troca - PB",
    "sprite": 99
   },
   "115,140": {
@@ -229,7 +233,7 @@
    "sprite": 869
   },
   "72,161": {
-   "name": "",
+   "name": "Loja NRO",
    "sprite": 57
   },
   "78,113": {
@@ -237,11 +241,11 @@
    "sprite": 935
   },
   "78,109": {
-   "name": "",
+   "name": "Evento Sobrevivente",
    "sprite": 734
   },
   "83,107": {
-   "name": "",
+   "name": "Torneio Ninja 1x1",
    "sprite": 56
   },
   "87,107": {
@@ -249,7 +253,7 @@
    "sprite": 55
   },
   "87,175": {
-   "name": "",
+   "name": "Kage Dungeon",
    "sprite": 46
   },
   "79,175": {
@@ -397,12 +401,20 @@
    "sprite": 7
   },
   "72,176": {
-   "name": "",
+   "name": "Mestre de Dungeons",
    "sprite": 745
   },
   "76,93": {
    "name": "",
    "sprite": 837
+  },
+  "65,74": {
+   "name": "",
+   "sprite": 55
+  },
+  "65,63": {
+   "name": "",
+   "sprite": 55
   }
  },
  "hospital2": {
@@ -447,8 +459,12 @@
    "sprite": 931
   },
   "72,22": {
-   "name": "",
+   "name": "Enfermeira",
    "sprite": 91
+  },
+  "101,176": {
+   "name": "",
+   "sprite": 931
   }
  },
  "yuno_fild07": {
@@ -841,7 +857,7 @@
  },
  "moc_fild01": {
   "239,382": {
-   "name": "",
+   "name": "Entrada Areia",
    "sprite": 119
   }
  },
@@ -1255,6 +1271,202 @@
   "150,285": {
    "name": "Night Star",
    "sprite": 14
+  }
+ },
+ "salakage": {
+  "39,16": {
+   "name": "",
+   "sprite": 57
+  },
+  "32,22": {
+   "name": "Kage",
+   "sprite": 746
+  },
+  "19,20": {
+   "name": "Mudança de Graduação",
+   "sprite": 843
+  },
+  "26,8": {
+   "name": "Recompensas",
+   "sprite": 434
+  },
+  "25,24": {
+   "name": "Central de Missoes",
+   "sprite": 984
+  },
+  "40,29": {
+   "name": "",
+   "sprite": 843
+  },
+  "22,30": {
+   "name": "Investir na saúde",
+   "sprite": 843
+  },
+  "27,33": {
+   "name": "",
+   "sprite": 843
+  },
+  "18,35": {
+   "name": "",
+   "sprite": 843
+  },
+  "11,27": {
+   "name": "",
+   "sprite": 843
+  }
+ },
+ "poring_w01": {
+  "100,127": {
+   "name": "Poring Catcher",
+   "sprite": 715
+  },
+  "100,114": {
+   "name": "Retorno",
+   "sprite": 706
+  }
+ },
+ "poring_c01": {
+  "104,110": {
+   "name": "Juiz",
+   "sprite": 953
+  },
+  "103,110": {
+   "name": "Juiz",
+   "sprite": 953
+  }
+ },
+ "ayo_fild01": {
+  "32,238": {
+   "name": "Retorno",
+   "sprite": 706
+  }
+ },
+ "spl_fild03": {
+  "105,202": {
+   "name": "Homem Ferido",
+   "sprite": 457
+  }
+ },
+ "spl_in01": {
+  "29,228": {
+   "name": "Kowari",
+   "sprite": 840
+  },
+  "31,228": {
+   "name": "Assistente",
+   "sprite": 71
+  }
+ },
+ "yuno_fild11": {
+  "139,196": {
+   "name": "Jiraya",
+   "sprite": 69
+  }
+ },
+ "ein_fild01": {
+  "228,252": {
+   "name": "",
+   "sprite": 445
+  }
+ },
+ "0032@cata": {
+  "80,140": {
+   "name": "Sabio de Dungeon",
+   "sprite": 55
+  }
+ },
+ "0011@tower": {
+  "384,16": {
+   "name": "",
+   "sprite": 100
+  }
+ },
+ "0015@tower": {
+  "71,72": {
+   "name": "Assistente da Torre",
+   "sprite": 100
+  }
+ },
+ "que_moc_16": {
+  "87,46": {
+   "name": "Retorno",
+   "sprite": 49
+  },
+  "91,59": {
+   "name": "",
+   "sprite": 940
+  },
+  "84,63": {
+   "name": "Servicos",
+   "sprite": 940
+  },
+  "96,54": {
+   "name": "",
+   "sprite": 894
+  },
+  "91,63": {
+   "name": "Vendedora de Montarias",
+   "sprite": 940
+  },
+  "84,59": {
+   "name": "Amuletos",
+   "sprite": 940
+  },
+  "84,66": {
+   "name": "",
+   "sprite": 940
+  },
+  "91,66": {
+   "name": "",
+   "sprite": 940
+  },
+  "88,69": {
+   "name": "Vendedora de Itens",
+   "sprite": 940
+  }
+ },
+ "umbala": {
+  "130,100": {
+   "name": "",
+   "sprite": 703
+  }
+ },
+ "prt_fild08": {
+  "268,87": {
+   "name": "Velocidade",
+   "sprite": 67
+  },
+  "275,87": {
+   "name": "",
+   "sprite": 70
+  },
+  "254,87": {
+   "name": "Genjutsu",
+   "sprite": 51
+  },
+  "261,87": {
+   "name": "Taijutsu",
+   "sprite": 60
+  },
+  "247,87": {
+   "name": "Medicina",
+   "sprite": 63
+  }
+ },
+ "moc_fild06": {
+  "196,364": {
+   "name": "Mestre das Marionetes",
+   "sprite": 64
+  },
+  "196,362": {
+   "name": "ATENÇÃO LEIA AQUI ANTES",
+   "sprite": 57
+  }
+ },
+ "0012@caves": {
+  "9,195": {
+   "name": "Mestre",
+   "sprite": 55
   }
  }
 }

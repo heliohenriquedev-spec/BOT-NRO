@@ -50,10 +50,26 @@ def add_discarded(known, discarded):
     return added
 
 
+EVENT_MAPS = {'poring_w01'}  # timed event rooms (Capture o Bikouchuu)
+
+
+def event_talk(steps):
+    """An event NPC (#evnt, the Bikouchuu entrance) or a talk into an event room: it only works
+    while the event runs. Taken as a way home, a repair trip ended there after the event (2026-11-09)."""
+    for s in steps or []:
+        name = str(s.get('name', '')).casefold()
+        if s.get('kind') == 'npc' and ('#evnt' in name or 'bikouchuu' in name):
+            return True
+        if s.get('kind') == 'wait_map' and PortalGuard.key(s.get('map', '')) in EVENT_MAPS:
+            return True
+    return False
+
+
 def harmful(steps):
     """A talk whose menu gives up a mission (the boards send the character away after it) is
-    never a transport: taking it would abandon the mission."""
-    return any(s.get('kind') == 'select' and 'desistir' in str(s.get('option', '')).casefold() for s in steps or [])
+    never a transport: taking it would abandon the mission. Event NPCs are not either."""
+    return (any(s.get('kind') == 'select' and 'desistir' in str(s.get('option', '')).casefold() for s in steps or [])
+            or event_talk(steps))
 
 
 def purge(known):
@@ -205,6 +221,8 @@ def as_entries(known):
                 targets.setdefault(talk_key(value['steps']), set()).add(value['to'])
         for value in (links or {}).values():
             if isinstance(value, dict) and value.get('steps') and value.get('to'):
+                if harmful(value['steps']):
+                    continue
                 if len(targets.get(talk_key(value['steps']), ())) > 1:
                     # The same talk took the character to different maps: Retorno and other save-point
                     # NPCs (hospital2 or hospital4, depending on where it is saved). Not a fixed way.

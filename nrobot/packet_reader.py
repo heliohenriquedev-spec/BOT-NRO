@@ -386,13 +386,18 @@ def decode(message: bytes) -> dict:
             items = [{'index':u16(offset), 'item_id':u16(offset+2), 'type':message[offset+4],
                       'amount':u16(offset+6) if stackable else 1,
                       'equipped':u16(offset+8), 'location':0x8000 if message[offset+4] == 10 else 0,
-                      'equip_location':0 if stackable else u16(offset+6)}
+                      'equip_location':0 if stackable else u16(offset+6),
+                      # EQUIPITEM_INFO.IsDamaged: a broken weapon/armor waiting for a repair.
+                      **({} if stackable else {'damaged': bool(message[offset+10])})}
                      for offset in range(4, len(message), stride)]
             if (len({item['index'] for item in items}) == len(items)
                 and not any(item['index'] == 0 or item['item_id'] == 0 or not 0 <= item['type'] <= 12 or item['amount'] <= 0 for item in items)):
                 event.update(kind='inventory_list', stackable=stackable, items=items)
                 del event['length']
                 break
+    elif op == 0x2bb and len(message) == 8:
+        # ZC_EQUIPITEM_DAMAGED: an equipment of the character broke (weapon, armor...).
+        event.update(kind='equip_damaged', location=u16(2), account_id=u32(4))
     elif op in (0xa0, 0x29a, 0x2d4) and len(message) in (23, 27, 29):
         # 00A0/029A/02D4: ... cards 11-18, equip location 19 (where it is worn), type 21, result 22.
         event.update(kind='inventory_added', index=u16(2), amount=u16(4), item_id=u16(6),

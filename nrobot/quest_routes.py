@@ -11,6 +11,15 @@ import time
 import uuid
 from pathlib import Path
 from .portals import PortalGuard, chebyshev
+
+
+class _PathPending:
+    """A long path search still running in the background: falsy, but not 'no path'."""
+    def __bool__(self):
+        return False
+
+
+PATH_PENDING = _PathPending()
 from .npc_labels import clean
 
 FILE = Path(__file__).resolve().parents[1]/'data/rede/rotas_quests.json'
@@ -49,7 +58,7 @@ def validate_routes(data):
         # Contador por monstro: [{'name', 'count', 'species': [ids]}]; empty = total in 'kills'.
         route.setdefault('chain_next',False)
         if type(route['chain_next']) is not bool:raise ValueError('Encadeamento de rota invalido')
-        route.setdefault('ignore_finished',False);route.setdefault('always_attack',[])
+        route.setdefault('ignore_finished',True);route.setdefault('always_attack',[])
         # Order in which the "atacar sempre" monsters are finished (1 first): strong ones before the rest.
         route.setdefault('attack_priority',{})
         if (not isinstance(route['attack_priority'],dict) or any(not str(k).isdigit() or type(v) is not int or not 1<=v<=99
@@ -119,6 +128,7 @@ class QuestRoutes:
         self.extra_pages=0;self.deferred_check=None;self.npc_texts=[];self.skipped=[];self.skip_current=False
         self.map_routes=[];self.daily_marks=[];self.direct_failed=set();self.learned=[]
         self.nav_cache={};self.path_cache=None
+        self.async_paths=False;self.path_jobs={}  # the relay searches long paths in a worker thread
         self.slot_owner={};self.slots_dirty=False  # slot number -> mission id (both boards share the 8 slots)
         from .quest_extras import Body
         self.body=Body();self.extras=None;self.errands=[];self.mount_displaced=None
@@ -372,15 +382,19 @@ class QuestRoutes:
         mount=extras.get('mount_enabled') and extras.get('mount')
         if kind=='voltar' and not (extras.get('voltar_enabled') or force and extras.get('voltar_frame')):return
         if kind=='mount' and not mount:return
-        if kind=='gear' and not (mount or extras.get('combat_items')):return
+        reequip=list(getattr(self,'reequip',None) or [])  # repaired items that broke while worn
+        if kind=='gear' and not (mount or extras.get('combat_items') or reequip):return
         if any(e.kind==kind for e in self.errands):return
         if kind=='mount':self.errands=[e for e in self.errands if e.kind!='gear']
         from .quest_extras import Errand
         config=dict(extras,displaced=self.mount_displaced or (mount or {}).get('displaced') or [])
+        if kind=='gear' and reequip:
+            config['combat_items']=list(dict.fromkeys(list(extras.get('combat_items') or [])+reequip))
         self.errands.append(Errand(kind,config,now))
 
     def errand_done(self):
         errand=self.errands.pop(0)
+        if errand.kind=='gear':self.reequip=[]
         if errand.kind=='mount' and errand.displaced:self.mount_displaced=errand.displaced
         if not self.errands and self.route and self.phase in STAGES:
             self.reason=STAGES[self.phase]+': '+self.route['name']+(' / '+self.current_mission['name'] if self.current_mission else '')
@@ -769,7 +783,8 @@ class QuestRoutes:
         self.route_current_collision=(PortalGuard.key(map_name or ''),collision)
         if self.phase not in STAGES: return None
         if self.pending:
-            if position and (chebyshev(position,self.pending['position'])==0 or now-self.sent_at>4):
+            # Within 2 cells of the leg's end (estimated while walking) the next leg may be planned.
+            if position and (chebyshev(position,self.pending['position'])<=2 or now-self.sent_at>4):
                 self.pending=None
             else:return None
         if not position or not map_name: return None
@@ -881,10 +896,33 @@ class QuestRoutes:
                     return None
                 return dict(kind='npc',entity_id=matches[0][0])
             if collision is None:self.stop('Mapa sem colisao valida; rota nao executada');return None
-            if kind=='portal' and sum(chebyshev(p,goal)<=m for p,m in portals.portals(map_name))>1:
+            near=[p for p,m in portals.portals(map_name) if chebyshev(p,goal)<=m]
+            # The same warp learned on two neighbouring cells (tur_dun01 163,31 and 164,31) is one
+            # portal; only portals apart from each other make the recorded cell ambiguous.
+            if kind=='portal' and any(chebyshev(a,b)>2 for a in near for b in near):
                 self.stop('Portal ambiguo; grave a celula central do portal');return None
-            c=self.navigation(map_name,collision,portals,step)
+            # The way itself (walls and portals) is searched once and kept: the skill areas on the
+            # floor change all the time, and folding them into the map made every change throw the
+            # path away and search the whole map again, seconds of a frozen relay and game while
+            # traveling (2026-11-09). A detour is searched only when the next leg crosses an area.
+            c=self.navigation(map_name,collision,portals,step,hazards=False)
             path=self.path_to(c,position,goal,kind!='npc',portals.links(map_name))
+            if path is PATH_PENDING:
+                self.progress_at=now;return None  # still searching, without freezing the game
+            hazards=frozenset(getattr(collision,'hazard_cells',None) or ())
+            failed=getattr(self,'detour_failed',None) or {}
+            crosses=bool(path and len(path)>=2 and hazards and any(tuple(p) in hazards for p in path[1:10]))
+            if crosses and now-failed.get(tuple(goal),-1e9)>=self.DETOUR_RETRY:
+                around=self.path_to(self.navigation(map_name,collision,portals,step),position,goal,kind!='npc',portals.links(map_name),
+                                    budget=self.DETOUR_NODES,flood=False)
+                if around and len(around)>=2:
+                    c,path,crosses=self.navigation(map_name,collision,portals,step),around,False
+                else:
+                    self.detour_failed={tuple(goal):now}  # cross for a while instead of searching every tick
+            if crosses:
+                # Enemy skills on the floor close every way to the portal/NPC: cross them instead of
+                # stopping the trip (yuno_fild11 2026-11-09). Walls and other portals still count.
+                self.hazards_ignored_until=now+3
             if not path or len(path)<2:self.stop('Caminho bloqueado na etapa '+str(self.step+1));return None
             if now-self.progress_at>15:self.stop('Movimento sem progresso; revise a etapa');return None
             end=path[1]
@@ -985,6 +1023,10 @@ class QuestRoutes:
                 # Delivered = gone from its slot; no success message is needed (nor trusted).
                 from .npc_labels import plain
                 missing=any('precisa matar' in plain(t) for t in self.npc_texts)
+                if missing and self.board_counts(now):
+                    # The board counts fewer kills than we did (Prisioneiro Fugitivo 48/50 counted as
+                    # 50/50, 2026-11-10): its numbers are kept and the hunt goes on, instead of a stop.
+                    return dict(kind='cancel',entity_id=dialog['entity_id'],choice=255,extra=True)
                 self.stop(('Missao '+step['option']+' ainda nao concluida (faltam monstros)' if missing else
                            'Entrega nao confirmada: '+step['option']+' continua no slot')+self.npc_said());return None
             else:
@@ -1029,8 +1071,10 @@ class QuestRoutes:
         marker=(here,id(self.steps),end)
         if marker not in self.direct_failed:
             target=self.steps[end]
-            if self.path_to(self.navigation(map_name,collision,portals,target),position,target['position'],target['kind']!='npc',
-                            portals.links(map_name)):return end
+            direct=self.path_to(self.navigation(map_name,collision,portals,target),position,target['position'],target['kind']!='npc',
+                                portals.links(map_name))
+            if direct is PATH_PENDING:return None  # asked again on the next tick
+            if direct:return end
             self.direct_failed.add(marker)
         points=[i for i in range(self.step,end+1) if self.steps[i].get('position')]
         nearest=min(points,key=lambda i:(chebyshev(position,self.steps[i]['position']),-i))
@@ -1049,13 +1093,20 @@ class QuestRoutes:
             if k>=len(self.steps) or PortalGuard.key(self.steps[k].get('map',''))!=here or 'position' not in self.steps[k]:return
             target=self.steps[k]
             c=self.navigation(map_name,collision,portals,target)
-            if self.path_to(c,position,target['position'],target['kind']!='npc',portals.links(map_name)):
+            reach=self.path_to(c,position,target['position'],target['kind']!='npc',portals.links(map_name))
+            if reach is PATH_PENDING:return
+            if reach:
                 maps=[s['map'] for s in self.steps[self.step+1:j] if s['kind']=='wait_map']
                 print('[ROTA] Desvio da gravacao pulado ('+' -> '.join([map_name,*maps,map_name])+'): o ponto seguinte e alcancavel andando')
                 self.step=k
             return
 
-    def navigation(self,map_name,collision,portals,step):
+    DETOUR_NODES=20000  # a detour around skill areas is a local search; past it the areas are crossed
+    DETOUR_RETRY=1.0  # s before another detour search after one found nothing
+    ASYNC_NODES=100000  # searches allowed this many nodes run in a worker thread in the relay
+    ASYNC_WAIT=.05  # s the relay waits for such a search before letting it finish in the background
+
+    def navigation(self,map_name,collision,portals,step,hazards=True):
         """Collision map with the portals forbidden (but the one this step enters), kept between ticks.
 
         Rebuilding it on every tick threw away its caches and made each path search start cold."""
@@ -1064,7 +1115,7 @@ class QuestRoutes:
         if step['kind']=='portal':
             allowed=frozenset((p[0]+x,p[1]+y) for p,m in portals.portals(map_name) if chebyshev(p,step['position'])<=m
                               for x in range(-m,m+1) for y in range(-m,m+1))
-        forbidden=(frozenset(portals.cells(map_name))-allowed)|frozenset(getattr(collision,'hazard_cells',()))
+        forbidden=(frozenset(portals.cells(map_name))-allowed)|(frozenset(getattr(collision,'hazard_cells',())) if hazards else frozenset())
         # Keep the CollisionMap object itself in the key: Python may reuse id() after a temporary
         # map is collected, which could make a new collision layout reuse stale navigation data.
         key=(PortalGuard.key(map_name),collision,forbidden)
@@ -1074,30 +1125,57 @@ class QuestRoutes:
             c=CollisionMap(collision.width,collision.height,collision.cells);c.set_forbidden(forbidden);self.nav_cache[key]=c
         return c
 
-    def path_to(self,c,position,goal,exact,links=()):
+    def path_to(self,c,position,goal,exact,links=(),budget=300000,flood=True):
         """Path to goal, searched once and followed while the character stays on it.
 
         After a teleport far away the search runs once (unreachable goals are refused at once
         through the connected area), instead of on every tick, which froze the relay and the game."""
         here=tuple(position);key=(id(c),tuple(goal),exact)
-        if self.path_cache and self.path_cache[0]==key:
-            path=self.path_cache[1]
-            if path is None and self.path_cache[2]==here:return None
+        cached=(self.path_cache or {}).get(key)
+        if cached:
+            path=cached[0]
+            if path is None and cached[1]==here:return None
             if path:
                 index=min(range(len(path)),key=lambda i:chebyshev(path[i],here))
                 if chebyshev(path[index],here)<=1:
                     rest=path[index:] if path[index]==here else [here]+path[index:]
                     return rest if len(rest)>1 or tuple(goal)==here else None
-        area=c.reachable(here);goal=tuple(goal)
-        near=[goal] if exact else [goal]+[(goal[0]+dx,goal[1]+dy) for dx in (-1,0,1) for dy in (-1,0,1)]
-        if any(p in area for p in near):
-            path=c.route(here,goal,exact=exact,max_nodes=300000,greed=1.2)
-        else:
+        goal=tuple(goal)
+        def search():
+            if not flood:return c.route(here,goal,exact=exact,max_nodes=budget,greed=1.2)  # local detour
+            area=c.reachable(here)
+            near=[goal] if exact else [goal]+[(goal[0]+dx,goal[1]+dy) for dx in (-1,0,1) for dy in (-1,0,1)]
+            if any(p in area for p in near):
+                return c.route(here,goal,exact=exact,max_nodes=budget,greed=1.2)
             # Walled off on this map (sewers): the goal lies past inner portals. Walk onto the first
             # portal of the shortest chain; after the warp the search runs again from the arrival.
             portal=self.inner_portal_towards(c,area,near,links)
-            path=c.route(here,portal,exact=True,max_nodes=300000,greed=1.2) if portal else None
-        self.path_cache=(key,path,here)
+            return c.route(here,portal,exact=True,max_nodes=budget,greed=1.2) if portal else None
+        if getattr(self,'async_paths',False) and budget>=self.ASYNC_NODES:
+            # A whole-map search takes 0.4-2 s in Python (yuno_fild11: 2.1 s); on the relay's loop it
+            # froze the game traffic too. In a worker thread the loop keeps forwarding packets.
+            jobs=self.__dict__.setdefault('path_jobs',{})
+            job=jobs.get(key)
+            if job is None or job['here']!=here and job['done']:
+                import threading
+                job=dict(here=here,done=False,path=None)
+                def run(job=job):
+                    try:job['path']=search()
+                    except Exception:job['path']=None
+                    job['done']=True
+                if len(jobs)>8:
+                    for k in [k for k,j in jobs.items() if j['done']]:del jobs[k]
+                jobs[key]=job
+                worker=threading.Thread(target=run,daemon=True,name='rota-caminho')
+                worker.start();worker.join(self.ASYNC_WAIT)  # a short search is simply waited for
+            if not job['done']:return PATH_PENDING
+            del jobs[key]
+            path,here=job['path'],job['here']
+        else:
+            path=search()
+        if not isinstance(self.path_cache,dict) or len(self.path_cache)>=4:self.path_cache={}
+        self.path_cache[key]=(path,here)  # a few kept: the plain and the detour searches take turns
+        if here!=tuple(position):return self.path_to(c,position,goal,exact,links,budget,flood)  # moved meanwhile
         return path
 
     @staticmethod
@@ -1248,6 +1326,30 @@ class QuestRoutes:
             done=self.name_counts.get(plain(t['name']),0)+sum(self.kill_counts.get(s,0) for s in t['species'])
             result.append(dict(name=t['name'],count=t['count'],done=min(done,t['count']),complete=done>=t['count']))
         return result
+
+    def board_counts(self,now):
+        """The board refused a delivery and showed its progress ("Monstros : Prisioneiro Fugitivo [48/50]"):
+        its numbers replace ours and the character goes back to hunt what is missing. False when
+        the texts show nothing the hunt can use (then the queue stops as before)."""
+        from .npc_labels import plain
+        found={}
+        for line in self.npc_texts:
+            for name,done,_ in re.findall(r'([^:,\[\]]+?)\s*\[\s*(\d+)\s*/\s*(\d+)\s*\]',line):
+                key=self.target_named(name.strip())
+                if key:found[key]=int(done)
+        if not found:return False
+        for t in self.route['kill_targets']:
+            key=plain(t['name'])
+            if key in found:
+                self.name_counts[key]=found[key]
+                for s in t['species']:self.kill_counts.pop(s,None)
+        self.kills=sum(self.name_counts.values())+sum(self.kill_counts.values())
+        if self.hunt_complete():return False
+        missing=', '.join(f"{p['name']} {p['done']}/{p['count']}" for p in self.progress() if not p['complete'])
+        self.enter_stage('travel',now)
+        self.reason='O quadro conta menos monstros ('+missing+'); voltando para cacar: '+self.route['name']
+        print('[ROTA] '+self.reason)
+        return True
 
     def hunt_complete(self):
         return all(p['complete'] for p in self.progress())

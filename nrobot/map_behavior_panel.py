@@ -17,6 +17,14 @@ class MapBehaviorPanel(QWidget):
         self.details.setReadOnly(True)
         layout.addWidget(self.details, 3)
         buttons = QHBoxLayout()
+        go = QPushButton('Ir ao mapa e cacar')
+        go.setToolTip('O personagem viaja ate o mapa do perfil selecionado (caminho gravado ou portais ja aprendidos) '
+                      'e caca la os monstros do perfil, com as regras dele, sem meta de parada.')
+        go.clicked.connect(self.go_hunt)
+        layout.addWidget(go)
+        self.status = QLabel('')
+        self.status.setWordWrap(True)
+        layout.addWidget(self.status)
         for title, callback in [('Importar perfil', self.import_file), ('Exportar selecionado', self.export_file), ('Ativar / desativar', self.toggle), ('Remover', self.remove)]:
             button = QPushButton(title)
             button.clicked.connect(callback)
@@ -42,6 +50,25 @@ class MapBehaviorPanel(QWidget):
     def describe(self, row):
         p = self.selected()
         self.details.setPlainText((p['description']+'\n'+json.dumps({k:p[k] for k in ('settings','combat') if k in p}, ensure_ascii=False, indent=2)) if p else '')
+
+    def go_hunt(self):
+        """Database hunt on the profile's map: travel there, then hunt its monsters until stopped."""
+        p = self.selected()
+        if not p:
+            self.status.setText('Selecione um perfil.')
+            return
+        request = hunt_request(p)
+        if not request['species']:
+            self.status.setText('Este perfil nao tem lista de monstros (combat.kill_priority).')
+            return
+        if not p['enabled']:
+            self.status.setText('Perfil desativado: ative antes para as regras dele valerem no mapa.')
+            return
+        from .hunt_dialog import send_command
+        if not send_command(self, 'quest_hunt_database', **request):
+            self.status.setText('Abra a conexao pelo painel principal para cacar.')
+            return
+        self.status.setText('Pedido enviado: indo para '+p['map']+'. Acompanhe na aba Rotas.')
 
     def import_file(self):
         path, _ = QFileDialog.getOpenFileName(self, 'Importar comportamento', '', 'Perfil JSON (*.json)')
@@ -93,3 +120,10 @@ class MapBehaviorPanel(QWidget):
     def remove(self):
         if self.selected() and QMessageBox.question(self, 'Remover perfil?', 'Remover o perfil selecionado?') == QMessageBox.Yes:
             self.modify(True)
+
+
+def hunt_request(profile):
+    """The database-hunt command for a map profile: its map and its kill list, no goal (endless)."""
+    rows = (profile.get('combat') or {}).get('kill_priority') or []
+    return dict(target_map=profile['map'], map_route_id='', species=[r['species_id'] for r in rows], priority={},
+                showmobs=[], kills=0, goal_minutes=0, goal_item_id=0, goal_item_amount=0, goal_item_name='')

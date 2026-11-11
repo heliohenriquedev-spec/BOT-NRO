@@ -117,3 +117,24 @@ def test_gm_identification_can_be_switched_off(tmp_path, monkeypatch):
         relay.apply_settings({**DEFAULTS, 'species': [1037], 'gm_detection': True})
         assert relay.gm_signs_found(time.monotonic())  # on again: the staff name is caught
     asyncio.run(scenario())
+
+
+def test_observation_stop_pauses_active_quest_and_cancels_automatic_returns(tmp_path, monkeypatch):
+    async def scenario():
+        for chat in (False, True):
+            relay = relay_for(tmp_path, monkeypatch, watch=[str(WATCHED)])
+            relay.quests.phase = 'hunt'
+            relay.hunt_revive = {'stage': 'dead'}
+            relay.bg_attempt = {'pending': []}
+            if chat:
+                relay.registry.players[str(WATCHED)] = {'name': 'Observado'}
+                relay.observe_chat_alerts([dict(kind='chat_received', channel='private', name='Observado')])
+            else:
+                see(relay, [dict(kind='appearance', entity_id=WATCHED, species_id=25,
+                                 position=[12, 10], option=0)], 0)
+            assert relay.commands_blocked and not relay.hunt.enabled
+            assert not relay.quests.active and relay.quests.resume is None
+            assert relay.hunt_revive is None and relay.bg_attempt is None
+            relay.check_emergency()
+            assert relay.commands_blocked and not relay.hunt.enabled
+    asyncio.run(scenario())

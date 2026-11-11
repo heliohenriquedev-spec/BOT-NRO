@@ -91,3 +91,22 @@ O caminho de combate e de quest bloqueia celulas de habilidades hostis de terren
 Campos de suporte conhecidos, como Pneuma, Santuario e buffs elementais, nao sao considerados ameacas. Para uma habilidade sem modelo de area ou sem celula/origem identificavel, o bot nao inventa o raio: bloqueia somente as unidades/celulas efetivamente recebidas do servidor. A previsao so inclui conjuracoes de outros personagens; o bot nao foge do proprio efeito de terreno.
 
 Namekuji (729) exige HP e HP maximo recentes informados pelo servidor, HP estritamente abaixo de 60% e nenhum monstro visivel no raio de 4 celulas. Se o servidor nao informou os valores de HP, nao invoca por seguranca. Com 4 ou mais Jounin (1634) no raio configurado de 9 celulas, a emergencia tem prioridade sobre buffs e ofensivas: Coelho (500) tres vezes confirmados, Fukai Kemuri (668) quando liberada pelo servidor e retirada ate os Jounin sairem da visibilidade recebida.
+
+## Perfil yuno_fild07 (schema 2)
+
+Arquivo pronto para importar: `exemplos/comportamentos/yuno_fild07.json`. Monstros: Baru (1032), Enma (1057), Katsuyo (1381), Manda (1418), Gama-Bunta (1788) e Anbu (1635), os registrados neste mapa.
+
+- Dano: Kunai (524), Shuriken (523), Punhos Intensos (1016) e ataque basico, um monstro por vez. `focus.melee: true` faz a caca ir corpo a corpo mesmo com a Kunai aprendida (antes ficava parada no alcance de 6 celulas e o ataque basico nunca saia).
+- `focus.lowest_hp: true`: ataca primeiro o de menor HP (ultima resposta "HP: x/y" do servidor ou HP maximo conhecido da especie, menos o dano observado). Empate: o alvo atual, depois o mais proximo.
+- Buffs mantidos: Concentrar Chakra nos Pes (29, efeito 12), Dai Senkou (357, efeito 105), Shinkirou (532, efeito 207) e Sogu: Baku Ryusei (775, 15 s). Somente os aprendidos.
+- `area_sleep` com `keep_others_asleep: true`: os outros monstros a ate 4 celulas, alem do alvo atual, ficam dormindo. Um so acordado (silenciado ou nao) recebe Fukai Yasumi (182; stun e silencio como alternativa). Dois ou mais: Selo de Mao: Coelho (500) em si ate 3 confirmados; o proprio servidor responde ao terceiro selo com a Fukai Kemuri (668), que o bot nao envia (aparece com nivel 0 na lista). Monstros dormindo nao recebem stun nem silencio, que causam dano e acordariam o monstro.
+- Durante os selos o personagem fica parado e sem ataque basico. Selo recusado ou sem resposta em 1 s cancela a sequencia e volta ao combate normal por 15 s. Selos concluidos sem Kemuri em 1 s contam como recarga; nova sequencia so apos `rearm_seconds` (3 s) e a recarga informada pelo servidor.
+- Alvo atual: dormindo pela Kemuri, apanha direto. Nos 20 s seguintes a uma Kemuri, recebe somente silencio, e so se estiver atacando o personagem. Fora disso: stun, sono se o stun nao entrar e silencio antes do dano.
+- `control_limit`: se o controle de um monstro nao entra em 5 s, ele e atacado sem controle por 15 s, em vez de o personagem ficar alternando controles de longe.
+- Baru (1032) e Anbu (1635, passivo): fora de `control_species` (sem stun, sono ou silencio) e em `focus.last_species: [1032, 1635]`: primeiro todos os outros, depois Baru, por ultimo Anbu, mesmo com HP menor.
+- Kemuri tambem com **2 ou mais monstros batendo no personagem** a ate 4 celulas (ataque ou habilidade nele nos ultimos 5 s, qualquer especie, inclusive o alvo atual), alem de 2 ou mais outros acordados.
+- `idle_summon` (Kuchiyose: Namekuji, 729): `combat_below_percent: 60` invoca antes do dano mesmo com monstros por perto. `recover_below_percent: 20` / `recover_until_percent: 60`: abaixo de 20% o personagem para de lutar e senta; quando a Namekuji esta pronta, levanta e invoca; volta a lutar ao chegar a 60%. HP sempre o informado pelo servidor; sem ele, nada disso dispara.
+- Prioridade: Kemuri, depois Fukai Yasumi nos outros, depois a Namekuji por HP baixo, depois o controle do alvo e o dano. A recuperacao sentada (`recover_below_percent`) so acontece sem monstro a ate `control_radius` (9) celulas; com monstros perto, o combate continua.
+- `focus.buffs_during_control: true`: um buff que caiu (Dai Senkou...) e renovado entre os controles; antes, com controles quase continuos, os buffs nao voltavam.
+
+O botao **Ir ao mapa e cacar** usa a caca pela database: viaja ate o mapa do perfil selecionado (rota gravada em Rotas > Mapas de caca ou portais aprendidos) e caca os monstros de `combat.kill_priority`, sem meta. O perfil precisa estar ativo.

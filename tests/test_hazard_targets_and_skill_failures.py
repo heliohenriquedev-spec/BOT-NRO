@@ -65,17 +65,19 @@ def test_final_skill_send_allows_ground_hazards_but_keeps_real_walls(tmp_path):
     asyncio.run(scenario(True))
 
 
-def test_monster_cut_off_by_poison_gives_way_to_another_close_by_for_one_second():
+def test_monster_cut_off_by_poison_is_reached_across_the_area():
+    # Searching other monsters and partial paths every tick left the character standing still,
+    # hit, for seconds (yuno_fild07 2026-11-09): with no way around, it walks across.
     ring = {(x, y) for x in range(16, 25) for y in range(16, 25)} - {(20, 20)}
     collision = poisoned(ring)
     hunt = PacketHunt()
     hunt.start()
-    hunt.TARGET_DEFER = 2
-    seen = state([10, 10], [(1, [20, 20]), (2, [6, 10])])
+    seen = state([14, 14], [(1, [20, 20]), (2, [6, 10])])
     hunt.target = 1
-    hunt.plan(seen, 100, collision=collision)
-    assert hunt.target != 1
-    assert hunt.excluded_until[1] == 101  # back to it a second later
+    action = hunt.plan(seen, 100, collision=collision)
+    assert hunt.target == 1 and action['kind'] == 'move' and action.get('cross_hazards')
+    assert tuple(action['destination']) in ring  # into the area, toward the monster
+    assert hunt.hazard_crossing_until > 100
 
 
 def test_alone_in_poison_the_character_gets_as_close_as_the_area_allows():
@@ -198,3 +200,44 @@ def test_boxed_in_by_skill_areas_lets_routes_cross_them():
     open_field = {(x, 20) for x in range(14, 27)}
     relay.cornered_cache = None
     assert not SessionRelay.cornered(relay, collision, (20, 25), frozenset(open_field))
+
+
+def test_monster_on_a_skill_area_not_reached_in_one_second_gives_way_and_comes_back_soon():
+    ring = {(x, y) for x in range(16, 25) for y in range(16, 25)} - {(20, 20)}
+    collision = poisoned(ring)
+    hunt = PacketHunt()
+    hunt.start()
+    seen = state([14, 14], [(1, [20, 20]), (2, [6, 10])])
+    hunt.target = 1
+    assert hunt.plan(seen, 100, collision=collision)['kind'] == 'move'  # first second: goes for it
+    hunt.pending = None; hunt.ready_at = 0
+    assert hunt.plan(seen, 100.5, collision=collision)['kind'] == 'move'
+    hunt.pending = None; hunt.ready_at = 0
+    hunt.plan(seen, 101.2, collision=collision)  # not there after 1 s: another one meanwhile
+    assert hunt.target != 1 and hunt.excluded_until[1] == 104.2  # back to it 3 s later
+
+
+def test_alone_on_a_skill_area_the_monster_is_not_given_up():
+    ring = {(x, y) for x in range(16, 25) for y in range(16, 25)} - {(20, 20)}
+    collision = poisoned(ring)
+    hunt = PacketHunt()
+    hunt.start()
+    seen = state([14, 14], [(1, [20, 20])])
+    hunt.target = 1
+    hunt.plan(seen, 100, collision=collision)
+    hunt.pending = None; hunt.ready_at = 0
+    assert hunt.plan(seen, 102, collision=collision)['kind'] == 'move' and hunt.target == 1
+
+
+def test_basic_attacks_go_on_during_the_coelho_seals():
+    from nrobot.map_navigation import CollisionMap as Map
+    stub = SimpleNamespace(hunt=PacketHunt())
+    stub.hunt.start()
+    seen = dict(state([10, 10], [(1, [11, 10]), (2, [15, 10])]), player_sp=100,
+                learned_skills=[dict(skill_id=524, level=20, range=6, sp_cost=1)])
+    seen['recent_entities'] = [dict(e, position_age_seconds=.1) for e in seen['recent_entities']]
+    collision = Map(30, 30, bytes([1])*900)
+    act = SessionRelay.area_sleep_basic_attack(stub, dict(mode='area_sleep', target_id=1), seen, 100, 150, collision)
+    assert act == dict(kind='attack', target_id=1)
+    far = SessionRelay.area_sleep_basic_attack(stub, dict(mode='area_sleep', target_id=2), seen, 101, 150, collision)
+    assert far is None  # not next to it: no walking during the seals

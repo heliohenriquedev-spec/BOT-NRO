@@ -1,0 +1,155 @@
+{
+ "schema": 2,
+ "name": "yuno_fild07 - silencio, Kemuri e menor HP",
+ "map": "yuno_fild07",
+ "description": "Mata um monstro por vez, sempre o de menor HP, indo corpo a corpo: ataque basico entre Kunai, Shuriken e Punhos Intensos. Ordem: todos os outros, depois Baru, por ultimo Anbu; Baru sem controle; Anbu so leva silencio antes de morrer. Mantem os outros a ate 4 celulas dormindo: um acordado leva Fukai Yasumi; dois ou mais acordados, ou dois ou mais batendo no personagem, Coelho 3 vezes para o servidor soltar a Fukai Kemuri. Os outros monstros dormindo nao levam stun nem silencio; o alvo a ser morto sempre recebe silencio antes do primeiro dano, mesmo dormindo. Sem Kemuri: stun, sono se falhar e silencio antes do dano; se o silencio nao entrar em 10 s, ataca assim mesmo. HP abaixo de 60%: Kuchiyose Namekuji antes do dano. HP abaixo de 20%: senta, levanta para invocar a Namekuji e fica nisso ate voltar a 60%. Alvo em cima de area de habilidade no chao: so Kunai e Shuriken de fora, em rajada, sem entrar na area. Mantem os buffs ativos, renovando-os tambem entre os controles. O silencio e usado a ate 2 celulas do monstro (aproxima antes).",
+ "enabled": true,
+ "settings": {
+  "skills": true,
+  "auto_attacks": true,
+  "melee_approach": true,
+  "kite": false
+ },
+ "combat": {
+  "kill_priority": [
+   {
+    "species_id": 1057,
+    "name": "Enma"
+   },
+   {
+    "species_id": 1381,
+    "name": "Katsuyo"
+   },
+   {
+    "species_id": 1418,
+    "name": "Manda"
+   },
+   {
+    "species_id": 1788,
+    "name": "Gama-Bunta"
+   },
+   {
+    "species_id": 1032,
+    "name": "Baru"
+   },
+   {
+    "species_id": 1635,
+    "name": "Anbu"
+   }
+  ],
+  "control_species": [
+   {
+    "species_id": 1057,
+    "name": "Enma"
+   },
+   {
+    "species_id": 1381,
+    "name": "Katsuyo"
+   },
+   {
+    "species_id": 1418,
+    "name": "Manda"
+   },
+   {
+    "species_id": 1788,
+    "name": "Gama-Bunta"
+   }
+  ],
+  "passive_species": [],
+  "control_radius": 9,
+  "skills": {
+   "stun": {
+    "skill_id": 179,
+    "name": "Shikumi no Jutsu"
+   },
+   "sleep": {
+    "skill_id": 182,
+    "name": "Fukai Yasumi"
+   },
+   "silence": {
+    "skill_id": 76,
+    "name": "Jigyaku no Chakra"
+   },
+   "offensives": [
+    {
+     "skill_id": 524,
+     "name": "Arremessar Kunai"
+    },
+    {
+     "skill_id": 523,
+     "name": "Arremessar Shuriken"
+    },
+    {
+     "skill_id": 1016,
+     "name": "Punhos Intensos"
+    }
+   ],
+   "buffs": [
+    {
+     "skill_id": 29,
+     "name": "Concentrar Chakra nos Pes",
+     "effect_id": 12
+    },
+    {
+     "skill_id": 357,
+     "name": "Dai Senkou",
+     "effect_id": 105
+    },
+    {
+     "skill_id": 532,
+     "name": "Shinkirou no Genjutsu",
+     "effect_id": 207
+    },
+    {
+     "skill_id": 775,
+     "name": "Sogu: Baku Ryusei",
+     "effect_id": 0,
+     "duration": 15
+    }
+   ]
+  },
+  "area_sleep": {
+   "prepare_skill": {
+    "skill_id": 500,
+    "name": "Selo de Mao: Coelho"
+   },
+   "prepare_casts": 3,
+   "area_skill": {
+    "skill_id": 668,
+    "name": "Fukai Kemuri"
+   },
+   "minimum_count": 2,
+   "radius": 4,
+   "rearm_seconds": 3,
+   "keep_others_asleep": true
+  },
+  "focus": {
+   "lowest_hp": true,
+   "melee": true,
+   "last_species": [
+    1032,
+    1635
+   ],
+   "buffs_during_control": true,
+   "hazard_throws": true,
+   "silence_range": 2,
+   "silence_only_species": [
+    1635
+   ]
+  },
+  "control_limit": {
+   "give_up_seconds": 10,
+   "release_seconds": 15
+  },
+  "idle_summon": {
+   "skill_id": 729,
+   "name": "Kuchiyose: Namekuji!",
+   "clear_radius": 4,
+   "cooldown": 30,
+   "hp_below_percent": 60,
+   "combat_below_percent": 60,
+   "recover_below_percent": 20,
+   "recover_until_percent": 60
+  }
+ }
+}

@@ -184,6 +184,7 @@ class SessionRelay(QuestRelay):
         self.last_combat_packet = None  # 'skill' / 'attack': basic attacks alternate with skills
         self.hunt_key, self.hunt_key_name = 0x24, 'Home'
         self.sitting = False  # REDE-82: the bot sat down while a player is near
+        self.recover_sitting = False  # map behavior: sitting while HP recovers for the next summon
         self.capture_armed_until = 0
         self.captured_player = None
         # REDE-72: other characters' server paths.
@@ -831,7 +832,14 @@ class SessionRelay(QuestRelay):
                          or all(collision.line_clear(own,point) for own in (state.get('combat_player_positions') or [state['player_position']])
                                 for point in (e.get('attack_positions') or [e.get('effective_position',e['position'])])))]
             return self.hunt.reachable_targets(rows,collision,state['player_position'],now)
-        return combat.decide(state,self.rotation,now,current=self.hunt.target,reachable=reachable)
+        intent = combat.decide(state,self.rotation,now,current=self.hunt.target,reachable=reachable)
+        # What the map behavior decided, each time it changes: tells why the character stands still.
+        signature = (intent or {}).get('mode'), (intent or {}).get('target_id'), (intent or {}).get('skill_id'), (intent or {}).get('reason')
+        if signature != getattr(self, 'map_decision_logged', None):
+            self.map_decision_logged = signature
+            self.record_hunt({'kind': 'map_combat_decision', 'mode': signature[0], 'target_id': signature[1],
+                              'skill_id': signature[2], 'reason': signature[3] or combat.reason})
+        return intent
 
     def plan_map_rotation(self, state, now, target_id=None):
         combat = self.active_map_combat()
@@ -846,6 +854,21 @@ class SessionRelay(QuestRelay):
             return combat.plan(safe,self.rotation,now,None)
         return combat.plan(state,self.rotation,now,target_id,intent=intent)
 
+    def area_sleep_basic_attack(self, intent, state, now, speed, collision):
+        target = next((e for e in state['recent_entities'] if e['entity_id'] == intent['target_id']), None)
+        self.hunt.priority_target = intent['target_id']
+        if target is None:
+            return None
+        if self.hunt.target != intent['target_id']:
+            self.hunt.target, self.hunt.engaged, self.hunt.approach_cache = intent['target_id'], None, None
+        old = (self.hunt.auto_movement, self.hunt.melee_approach, self.hunt.kite)
+        self.hunt.auto_movement, self.hunt.melee_approach, self.hunt.kite = False, True, False
+        try:
+            action = self.hunt.plan({**state, 'recent_entities': [target], 'melee_with_skills': True}, now, speed, collision=collision)
+        finally:
+            self.hunt.auto_movement, self.hunt.melee_approach, self.hunt.kite = old
+        return action if action and action['kind'] == 'attack' else None
+
     def map_damage_allowed(self, identity, state, now, *, basic=False):
         combat = self.active_map_combat()
         if combat is None:
@@ -855,6 +878,8 @@ class SessionRelay(QuestRelay):
         if basic and not combat.basic_allowed(identity,state):
             return False
         intent = self.map_combat_intent(combat,state,now)
+        if basic and intent and intent['mode']=='area_sleep' and intent['target_id']==identity:
+            return True  # basic attacks go on during the Coelho seals
         return bool(intent and intent['mode']=='kill' and intent['target_id']==identity)
 
     def plan_group_or_hunt(self, state, now, speed, collision):
@@ -862,6 +887,14 @@ class SessionRelay(QuestRelay):
         combat = self.active_map_combat()
         if combat and self.rotation is not None and state.get('player_position'):
             intent = self.map_combat_intent(combat,state,now)
+            if intent and intent['mode']=='area_sleep':
+                # Coelho seals: no step (the sequence must not be cut), but the basic attacks go on
+                # against the monster already next to the character.
+                return self.area_sleep_basic_attack(intent,state,now,speed,collision)
+            if intent and intent['mode'] in ('summon','recover'):
+                # A low-HP summon or the low-HP recovery: no step or basic attack.
+                self.hunt.priority_target = None
+                return None
             recent=state['recent_entities']
             candidates=combat.candidates(state,self.rotation,now)
             if intent and intent['mode']=='control':
@@ -871,6 +904,13 @@ class SessionRelay(QuestRelay):
                     # filter, but still needs to be followed into silence range.
                     candidates.append(control_target)
             state={**state,'recent_entities':candidates}
+            hazard_throws = bool(intent and intent['mode']=='kill' and combat.target_on_hazard(intent['target_id'],state))
+            if hazard_throws:
+                # The target stands on an area skill: Kunai/Shuriken from outside, no walking in.
+                reach = combat.throw_range(state)
+                if reach:state['engagement_range'] = reach
+            elif intent and intent['mode']=='kill' and combat.config.get('focus',{}).get('melee'):
+                state['melee_with_skills']=True  # basic attacks between the skills, next to the target
             if intent is None:
                 state={**state,'recent_entities':[]}
                 self.hunt.target=self.hunt.engaged=None
@@ -1366,7 +1406,10 @@ class SessionRelay(QuestRelay):
             if collision.cornered_by_hazards:
                 hazards=frozenset()  # boxed in by skill areas: routes may cross them
             collision.hazard_cells=hazards
-            collision.set_forbidden(set(self.portals.cells(name))|set(hazards))
+            # The ring right outside each portal area is forbidden too: the hunt steps out of it
+            # (leave_portal_area), so a patrol sent there was pulled back over and over, standing
+            # still next to the arrival portal of alde_dun02 (2026-11-09).
+            collision.set_forbidden(set(self.portals.cells(name, edge=self.PORTAL_EDGE))|set(hazards))
             collision.links = tuple(self.portals.links(name))
         if name not in self.reported_maps:
             self.reported_maps.add(name)
@@ -1433,6 +1476,9 @@ class SessionRelay(QuestRelay):
         self.physical_collision_cache=(key,physical)
         return physical
 
+    TOXIC_REPEAT_LIMIT = 4  # identical escapes without moving before giving up for a while
+    TOXIC_SUSPEND = 3.0
+
     async def avoid_toxic_ground(self, game_gate):
         now=time.monotonic();o=self.tracker.observer
         if (not self.allow_commands or self.commands_blocked or self.upstream is None or not game_gate()
@@ -1442,6 +1488,11 @@ class SessionRelay(QuestRelay):
             return False
         if not self.observation_suspended_for_route() and self.presence.reason(o.player,now):return False
         if now<self.toxic_hold_until:return True
+        if self.quests.active and getattr(self.quests,'hazards_ignored_until',0)>now:
+            return False  # the route found no way around the areas and is crossing them
+        if now<getattr(self,'toxic_suspended_until',0):return False
+        if self.hunt is not None and now<getattr(self.hunt,'hazard_crossing_until',-1e9):
+            return False  # the hunt is walking across the area on purpose: no way around it
         hazards=self.ground_hazards(now)
         if not hazards:return False
         positions=o.combat_positions(now)
@@ -1469,6 +1520,19 @@ class SessionRelay(QuestRelay):
                 if self.hunt:self.hunt.reason='area de habilidade no chao sem saida: atravessando'
                 return False
             destination=destination or origin  # stop an already sent path before it enters the cloud
+            # The same escape sent again and again without moving (hit and held in place): each one
+            # also cancelled the hunt/route step, so the character lagged on the spot (2026-11-09).
+            last=getattr(self,'toxic_repeat',None)
+            if last and last[0]==(origin,destination):
+                self.toxic_repeat=(last[0],last[1]+1,last[2])
+                if last[1]+1>=self.TOXIC_REPEAT_LIMIT and now-last[2]>=.6:
+                    self.toxic_suspended_until=now+self.TOXIC_SUSPEND
+                    self.toxic_repeat=None
+                    self.record_hunt({'kind':'toxic_ground_escape_suspended','origin':list(origin)})
+                    if self.hunt:self.hunt.reason='fuga da area no chao sem efeito; seguindo'
+                    return False
+            else:
+                self.toxic_repeat=((origin,destination),1,now)
             payload=move(*destination)
             self.trace_map_send('bot',struct.unpack_from('<H',payload)[0],len(payload))
             self.upstream.write(payload);await self.upstream.drain()
@@ -1477,7 +1541,6 @@ class SessionRelay(QuestRelay):
                 self.hunt.pending=None;self.hunt.approach_cache=None;self.hunt.ready_at=now
                 self.hunt.reason='desviando da nevoa toxica'
             if self.quests.pending and self.quests.pending.get('kind')=='move':self.quests.pending=None
-            self.quests.path_cache=None
             self.record_hunt({'kind':'toxic_ground_escape' if destination!=origin else 'toxic_ground_stop',
                               'origin':list(origin),'destination':list(destination)})
         return True
@@ -1881,7 +1944,8 @@ class SessionRelay(QuestRelay):
                     return False
                 if action['role'] == 'summon' and (entity.kind != 'monster' or max(math.dist(own, p) for own in observer.combat_positions(now) for p in entity.combat_bounds(now)[0]) > 12):
                     return False
-                if collision is not None and action['role'] == 'offensive':
+                if collision is not None and action['role'] == 'offensive' and not action.get('area_sleep_stage'):
+                    # A Coelho seal is cast on the player: a wall before the monster does not matter.
                     # Ground-skill/portal reservations constrain walking, not shooting. Keep
                     # actual walls in the final range/line check without treating poison as one.
                     attack_collision=collision.plain()
@@ -1980,6 +2044,11 @@ class SessionRelay(QuestRelay):
             received = self.inventory.entities.get(row['entity_id'], {})
             row['body_state'] = received.get('body_state',0)
             row['health_state'] = received.get('health_state',0)
+            if row.get('kind','monster') == 'monster':
+                # Lowest-HP focus: the species' maximum HP the game showed, when known.
+                known = received.get('max_hp') or (getattr(self,'monsters_seen',{}).get(row.get('species_id')) or {}).get('max_hp')
+                if type(known) is int and known > 0:
+                    row['species_max_hp'] = known
         combat = self.active_map_combat()
         if combat and combat.config.get('idle_summon'):
             from .map_monsters import is_confirmed_monster
@@ -1989,8 +2058,12 @@ class SessionRelay(QuestRelay):
                 for e in self.inventory.entities.values() if e.get('present_last_observation') and not e.get('dead')
                 and is_confirmed_monster(e,self.tracker.observer.player_id)]
             state.update(idle_summon_skill_id=combat.config['idle_summon']['skill_id'],idle_summon_clear=combat.idle_clear(state))
-        state['map_combat'] = {'active':combat is not None,'reason':combat.reason if combat else None}
-        state['toxic_ground']={'blocked_cells':len(self.ground_hazards(time.monotonic())),
+        state['map_combat'] = {'active':combat is not None,'reason':combat.reason if combat else None,
+                               'area_sleep':combat.area.snapshot() if combat and combat.area else None}
+        hazard_cells=self.ground_hazards(time.monotonic())
+        # Map behavior: a target standing on an area skill is fought from outside (throws only).
+        state['ground_hazard_cells']=[list(c) for c in hazard_cells]
+        state['toxic_ground']={'blocked_cells':len(hazard_cells),
             'predicted_casts':len(self.toxic_ground.forecasts)}
         state['player_focus'] = self.player_focus()
         if state['player_focus']:
@@ -2508,6 +2581,8 @@ class SessionRelay(QuestRelay):
             self.hunt.pause('entrou num portal sem querer; confira o mapa e inicie de novo')
         return True
 
+    PORTAL_EDGE = 1  # cells around a portal area the hunt neither walks to nor stays on
+
     def leave_portal_area(self, now):
         """Standing in or next to a portal's area (arrival, a fight pushed us there): the first
         move goes away from it, never towards it, before anything else is planned. Returns the move
@@ -2523,7 +2598,7 @@ class SessionRelay(QuestRelay):
         # Inside or right at the edge of a portal's area (its learned size, made larger by any
         # accidental warp there): a diagonal first step from gl_sew02 [31,275] went back through it.
         near = [(cell, margin) for cell, margin in self.portals.portals(name)
-                if cell not in inner and chebyshev(position, cell) <= margin+1]
+                if cell not in inner and chebyshev(position, cell) <= margin+self.PORTAL_EDGE]
         if not near:
             return None
         def clearance(point):
@@ -2532,18 +2607,64 @@ class SessionRelay(QuestRelay):
             x, y = point
             return 0 <= x < collision.width-1 and 0 <= y < collision.height-1 and bool(collision.cells[y*collision.width+x])
         start = tuple(position)
-        seen, queue = {start}, [start]
+        floor = min(clearance(start), 1)
+        from .map_navigation import server_line
+        def safe_line(point):
+            # The server walks its own direct line (diagonal first), not the path found here: from
+            # gl_sew02 [31,275] the escape to [28,271] stepped first onto [30,274], inside the portal
+            # 29,275, and the character went in and out of it again and again (2026-11-10).
+            previous = start
+            for cell in server_line(start, point):
+                if not ground(cell) or clearance(cell) < floor:
+                    return False
+                if cell[0] != previous[0] and cell[1] != previous[1] and not (
+                        ground((cell[0], previous[1])) and ground((previous[0], cell[1]))):
+                    return False  # cut corner: the server would search another way around
+                previous = cell
+            return True
+        def first_leg(goal, parent):
+            # Only the farthest point of the path the server reaches without touching the portal
+            # is sent; the next leg goes once this one is walked (step_out_of_portal).
+            path = [goal]
+            while parent[path[-1]] is not None:
+                path.append(parent[path[-1]])
+            path.reverse()
+            for point in reversed(path[1:]):
+                if safe_line(point):
+                    return point
+            return path[1] if len(path) > 1 else None
+        parent = {start: None}
+        queue = [start]
         for point in queue:
             if clearance(point) >= 3 and ground(point):
-                return point
+                return first_leg(point, parent)
             if max(abs(point[i]-start[i]) for i in (0, 1)) >= 8:
                 continue
             for dx in (-1, 0, 1):
                 for dy in (-1, 0, 1):
                     other = (point[0]+dx, point[1]+dy)
-                    # Every step farther from the portal: straight out, never along its edge.
-                    if other not in seen and ground(other) and clearance(other) > clearance(point):
-                        seen.add(other)
+                    # Every step farther from the portal: straight out, never along its edge. Inside
+                    # the area a step that keeps the distance is allowed: landing in it inside a narrow
+                    # corridor (alde_dun02 41,23, portal 43,23) had no strictly farther first step,
+                    # and the character stood there for minutes (2026-11-09).
+                    if other in parent or not ground(other):
+                        continue
+                    if clearance(other) > clearance(point) or clearance(point) <= 0 and clearance(other) == clearance(point):
+                        parent[other] = point
+                        queue.append(other)
+        # Behind the portal in a dead end: farther out of reach that way, never closer to it.
+        parent = {start: None}
+        queue = [start]
+        for point in queue:
+            if clearance(point) >= 3 and ground(point):
+                return first_leg(point, parent)
+            if max(abs(point[i]-start[i]) for i in (0, 1)) >= 16:
+                continue
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    other = (point[0]+dx, point[1]+dy)
+                    if other not in parent and ground(other) and clearance(other) >= min(clearance(point), 1):
+                        parent[other] = point
                         queue.append(other)
         return None
 
@@ -2862,6 +2983,7 @@ class SessionRelay(QuestRelay):
         if found:
             import uuid
             self.chat_alert = dict(id=uuid.uuid4().hex, detections=found[-4:], count=len(found))
+            self.stop_for_observation(found)
 
     def load_watchlist(self):
         from . import watchlist
@@ -3180,16 +3302,25 @@ class SessionRelay(QuestRelay):
         self.emergency_current = current  # someone who left stops the bot again on return
         if not new:
             return
-        first = new[0]
+        self.stop_for_observation(found, first=new[0])
+
+    def stop_for_observation(self, found, first=None):
+        """Latch the stop for both presence and watched chat, including the quest queue."""
+        first = first or found[0]
         who = first['name'] or f"ID {first['entity_id']}"
         reason = ('jogador da lista de observacao' if first['watched'] else 'GM/staff' if first['kind'] == 'gm' else 'personagem em @hide')+f": {who} {first['text']}"
         self.emergency = {'id': (self.emergency or {}).get('id', 0)+1, 'reason': reason,
                           'detections': found, 'at': datetime.now().isoformat(timespec='seconds')}
         self.record_hunt({'kind': 'emergency_stop', 'reason': reason, 'detections': found})
         print(f'[PARADA] Bot parado ate voce iniciar novamente: {reason}.')
+        pause_reason = f'PARADO: {reason}; inicie novamente pelo painel'
+        if self.quests.active:
+            self.quest_stop(pause_reason)
+        self.hunt_revive = None
+        self.bg_attempt = None
         self.commands_blocked = True
         if self.hunt is not None:
-            self.hunt.pause(f'PARADO: {reason}; inicie novamente pelo painel')
+            self.hunt.pause(pause_reason)
         try:
             asyncio.get_running_loop().create_task(self.stop_walking())
         except RuntimeError:
@@ -3480,6 +3611,59 @@ class SessionRelay(QuestRelay):
         self.record_hunt({'kind': 'homunculus_feed_sent', 'hunger': self.own_summons.hunger})
         return True
 
+    SLOW_TICK = .4  # s: a relay cycle this long freezes the game traffic too; it is logged by parts
+
+    def tick_begin(self):
+        """Closes the previous cycle's timing: a slow one is recorded with how long each part took."""
+        now = time.perf_counter()
+        marks = getattr(self, 'tick_marks', None)
+        if marks and now-marks[0][1] > self.SLOW_TICK:
+            parts, previous = [], marks[0][1]
+            for label, at in marks[1:]+[('resto', now)]:
+                parts.append(f'{label}={1000*(at-previous):.0f}ms')
+                previous = at
+            self.record_hunt({'kind': 'relay_slow_tick', 'ms': round(1000*(now-marks[0][1])), 'parts': parts,
+                              'map': self.tracker.observer.map_name})
+        self.tick_marks = [('inicio', now)]
+
+    def tick_mark(self, label):
+        marks = getattr(self, 'tick_marks', None)
+        if marks is not None:
+            marks.append((label, time.perf_counter()))
+
+    async def update_low_hp_sit(self, now):
+        """Map behavior recovery: HP very low and the summon not ready -> sit; ready or HP back -> stand.
+        True while this keeps the hunt and the rotation still."""
+        combat = self.active_map_combat()
+        want = False
+        if (combat is not None and self.rotation is not None and combat.config.get('idle_summon') and self.tracker.observer.player_alive
+                and (combat.recovering or self.recover_sitting)):  # a full status/decision only when it can matter
+            state = self.status()
+            if state.get('player_position'):
+                intent = self.map_combat_intent(combat, state, now)
+                want = bool(intent and intent['mode'] == 'recover')
+        if want:
+            if not self.recover_sitting and not self.sitting and not self.walking_now():
+                if await self.send_body_action(SIT):
+                    self.recover_sitting = True
+                    self.record_hunt({'kind': 'low_hp_sit', 'hp': self.tracker.observer.hp, 'max_hp': self.tracker.observer.max_hp})
+                    print('HP muito baixo: sentado ate a invocacao ficar pronta.')
+            if self.hunt is not None:
+                self.hunt.pending = None
+                self.hunt.reason = 'HP muito baixo: sentado ate a invocacao ficar pronta'
+            return True
+        if self.recover_sitting:
+            if not await self.send_body_action(STAND):
+                return True
+            self.recover_sitting = False
+            self.record_hunt({'kind': 'low_hp_stand', 'hp': self.tracker.observer.hp, 'max_hp': self.tracker.observer.max_hp})
+            print('Levantando para invocar / HP recuperado.')
+            if self.hunt is not None:
+                self.hunt.ready_at = max(self.hunt.ready_at, now+.6)  # time to stand up
+            self.rotation.next_send = max(self.rotation.next_send, now+.6)
+            return True
+        return False
+
     async def send_body_action(self, action):
         """Sit or stand up; False when the connection or the native stream is not ready."""
         if self.upstream is None or not self.allow_commands or self.commands_blocked:
@@ -3580,7 +3764,8 @@ class SessionRelay(QuestRelay):
                 destination = action['destination']
                 positions=observer.combat_positions(time.monotonic())
                 safe_origin=positions[0] if positions else player
-                if self.crosses_ground_hazard(safe_origin,destination,time.monotonic()):
+                crossing = bool(action.get('cross_hazards'))  # no way around the areas: walking across
+                if not crossing and self.crosses_ground_hazard(safe_origin,destination,time.monotonic()):
                     raise HuntTargetChanged('Nevoa toxica no caminho; recalculando')
                 if action.get('origin', player) != player:
                     raise HuntTargetChanged('Posição própria corrigida antes do envio; recalculando')
@@ -3594,7 +3779,7 @@ class SessionRelay(QuestRelay):
                         expected = self.group.plan_follow(state,leader,self.settings,collision,blocked,observer.walk_speed_ms)
                         if expected != action:
                             raise HuntTargetChanged('Lider mudou de posicao; recalculando seguimento')
-                    if not collision.segment(player, destination, blocked, max_steps=move_limit):
+                    if not (collision.plain() if crossing else collision).segment(player, destination, blocked, max_steps=move_limit):
                         raise HuntTargetChanged('Rota mudou ou segmento cruza obstáculo')
                 elif action.get('collision_route'):
                     raise HuntTargetChanged('Mapa da rota ficou indisponível')
@@ -3734,6 +3919,7 @@ async def run(args):
         last_heartbeat = 0
         while True:
             await asyncio.sleep(.02)
+            relay.tick_begin()
             if hunt_mode:
                 controls.movement_input(relay.game_peer, relay.game_local)
                 relay.process_control(lambda: controls.connected(relay.game_peer, relay.game_local))
@@ -3797,7 +3983,9 @@ async def run(args):
                     try:
                         was_route = relay.observation_suspended_for_route()
                         toxic_hold = False if loading else await relay.avoid_toxic_ground(lambda: controls.connected(relay.game_peer,relay.game_local))
+                        relay.tick_mark('area_no_chao')
                         route_travel = loading or toxic_hold or await relay.quest_tick(lambda: controls.connected(relay.game_peer,relay.game_local))
+                        relay.tick_mark('rota')
                     except (asyncio.CancelledError, KeyboardInterrupt):
                         raise
                     except Exception as exc:  # the queue stops; the connection stays up
@@ -3819,16 +4007,20 @@ async def run(args):
                             relay.hunt.pause('conexão do jogo indisponível')
                             print(f'Caça pausada: conexão do jogo indisponível. {relay.hunt_key_name} retoma.')
                         elif (relay.manual_control(time.monotonic()) or await relay.update_presence_hold()
-                              or await relay.step_out_of_portal(time.monotonic())):
+                              or await relay.step_out_of_portal(time.monotonic())
+                              or await relay.update_low_hp_sit(time.monotonic())):
                             pass
                         else:
                             try:
+                                relay.tick_mark('antes_da_caca')
                                 state = relay.status()
+                                relay.tick_mark('estado')
                                 if relay.pvp_registered and state.get('player_position') is not None:
                                     state = relay.prioritize_pvp(state)
                                 if relay.rotation is not None:
                                     state['engagement_range'] = relay.rotation.navigation_range(state, time.monotonic(), relay.hunt.target)
                                 action = relay.plan_group_or_hunt(state, time.monotonic(), relay.tracker.observer.walk_speed_ms, relay.collision_map())
+                                relay.tick_mark('plano_da_caca')
                                 homun_sent = (relay.group_combat_allowed()
                                               and await relay.keep_homunculus_alive(time.monotonic()))
                                 if homun_sent and action is not None and action['kind'] != 'move':

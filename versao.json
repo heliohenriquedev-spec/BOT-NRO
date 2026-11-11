@@ -1,6 +1,6 @@
 {
- "version": "2026.11.08.2",
- "published_at": "2026-11-08T20:12:16",
+ "version": "2026.11.10.1",
+ "published_at": "2026-11-10T22:31:14",
  "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
@@ -82,6 +82,7 @@
   "data/monstros_base/sprites/1831.png",
   "data/monstros_base/sprites/1917.png",
   "data/monstros_base/sprites/1983.png",
+  "data/monstros_base/sprites/1984.png",
   "data/monstros_base/sprites/20571.png",
   "data/monstros_base/sprites/20619.png",
   "data/monstros_base/sprites/2194.png",
@@ -1456,6 +1457,7 @@
   "docs/exemplo_x1.json",
   "exemplos/comportamentos/moc_fild01.json",
   "exemplos/comportamentos/ra_fild03.json",
+  "exemplos/comportamentos/yuno_fild07.json",
   "instalar.bat",
   "nrobot/__init__.py",
   "nrobot/ammo.py",
@@ -1490,6 +1492,7 @@
   "nrobot/kuchiyose_dialog.py",
   "nrobot/lua_tables.py",
   "nrobot/manual_skill_diagnostic.py",
+  "nrobot/map_area_sleep.py",
   "nrobot/map_behavior.py",
   "nrobot/map_behavior_panel.py",
   "nrobot/map_combat.py",
@@ -1569,6 +1572,7 @@
   "nrobot/watchlist.py",
   "nrobot/x1_panel.py",
   "nrobot/x1_scripts.py",
+  "p.out",
   "requirements.txt",
   "third_party/rathena/LICENCE",
   "third_party/rathena/README.md",
@@ -2159,5 +2163,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "d4229ee17722"
+ "files_digest": "7898fc2ca165"
 }

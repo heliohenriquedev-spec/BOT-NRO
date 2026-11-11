@@ -353,6 +353,19 @@ Ninja [217,86] → Esconderijo do Cla Kamizuru Nivel 2 → anthell01 → portal 
 → anthell02. Falta gravar o portal do hospital e as etapas reais dos dialogos;
 o rascunho exige essa gravacao antes de executar.
 
+## Reparo de equipamento quebrado
+
+Em Rotas > opcoes: **Gravar reparo (Reparador)**, va ate o Reparador e faca o conserto no jogo, depois **Salvar reparo**
+(gravado neste PC: hospital2 -> portal [103,3] -> areia -> Teleportador - Suna [174,160] "- Equipamentos" -> portal
+[96,234] -> ama_in01 -> Reparador [102,28] "- Sim"). Marque **Se a arma ou outro equipamento quebrar**.
+
+Quando o servidor informa um equipamento danificado (aviso de quebra 02BB ou o campo de dano da lista de equipamentos,
+vestido ou nao, inclusive um que ja estava quebrado ao entrar), durante a caca comum, a caca pela database ou a fila:
+para, vai ate o inicio do reparo pelas rotas conhecidas (sem caminho a partir do mapa de caca, usa o @voltar
+aprendido ate o ponto salvo), repete a conversa gravada, volta ao mapa onde estava, recoloca o item que quebrou (e os
+do Switch) e continua cacando. Os itens quebrados aparecem na linha de status das opcoes. Se o item continuar quebrado
+depois de um reparo, nova viagem so 10 minutos depois.
+
 ## @voltar e montaria
 
 Em **Fila de rotas → Ao terminar a caca e na locomocao**:

@@ -467,7 +467,7 @@
   "delivery_steps": [],
   "pickup_confirmation": "",
   "delivery_confirmation": "",
-  "ignore_finished": false,
+  "ignore_finished": true,
   "always_attack": [],
   "chain_next": false,
   "attack_priority": {}
@@ -598,7 +598,7 @@
   ],
   "target_map": "gld_dun03.gat",
   "lifecycle_enabled": true,
-  "ignore_finished": false,
+  "ignore_finished": true,
   "always_attack": [],
   "chain_next": false,
   "mission_ids": [

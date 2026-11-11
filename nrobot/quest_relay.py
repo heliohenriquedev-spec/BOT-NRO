@@ -1,4 +1,5 @@
 """Quest itinerary integration: exclusive travel, guarded sends and normal combat at arrival."""
+import json
 import copy
 import struct
 import time
@@ -13,6 +14,7 @@ from .database_hunt import DATABASE_HUNT, database_hunt_route, goal_reached
 class QuestRelay(SharedQuestRelay):
     def init_quests(self):
         self.quests=QuestRoutes();self.quest_base_settings=None;self.quest_hunt_id=None
+        self.quests.async_paths=True  # long route searches off the relay's loop (no frozen game)
 
     def quest_stop(self,reason):
         was_database_hunt = bool(self.quests.route and self.quests.route.get('id') == DATABASE_HUNT)
@@ -70,7 +72,7 @@ class QuestRelay(SharedQuestRelay):
             self.map_route_control(command,request,game_gate)
         elif command.startswith('quest_bg_'):
             self.bg_control(command,request,game_gate)
-        elif command.startswith('quest_heal_'):
+        elif command.startswith('quest_heal_') or command.startswith('quest_repair_'):
             self.heal_control(command,request)
         elif command=='quest_test_stage_route':
             if self.quests.active or self.quests.recording:raise ValueError('Pause a fila e encerre a gravacao antes de testar')
@@ -291,40 +293,49 @@ class QuestRelay(SharedQuestRelay):
             self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
         else:raise ValueError('Comando de rota de mapa desconhecido')
 
+    RECORDED_TALKS={  # scope -> what is recorded once and replayed: the healer and the repairer
+        'heal':dict(steps='heal_steps',map='heal_map',label='Cura na Curandeira',noun='cura',npc='a Curandeira',save='Salvar cura'),
+        'repair':dict(steps='repair_steps',map='repair_map',label='Reparo no Reparador',noun='reparo',npc='o Reparador',save='Salvar reparo')}
+
     def heal_control(self,command,request):
-        """Record once the talk with the healer at the save point (Curandeira), used after a death."""
+        """Record once the talk with the healer at the save point (Curandeira), used after a death,
+        or with the repairer (Reparador), used when an equipment breaks."""
         from . import bg_entry, quest_extras
         q=self.quests;o=self.tracker.observer
-        if command=='quest_heal_record':
+        scope='repair' if command.startswith('quest_repair_') else 'heal'
+        talk=self.RECORDED_TALKS[scope];action=command.split('_')[-1]
+        if action=='record':
             if q.active or q.recording:raise ValueError('Pause a fila e encerre a gravacao anterior')
             if self.upstream is None or not o.player_position_valid(time.monotonic()) or not o.map_name:
                 raise ValueError('Entre no personagem e aguarde a posicao antes de gravar')
-            self.quest_stop('Gravando a cura');q.record('heal','travel')
-            q.recording.update(scope='heal',label='Cura na Curandeira')
+            self.quest_stop('Gravando '+talk['noun']);q.record(scope,'travel')
+            q.recording.update(scope=scope,label=talk['label'])
             q.map=o.map_name;q.append(dict(kind='walk',map=o.map_name,position=list(o.player)))
-            q.reason='Gravando a cura: va ate a Curandeira, fale com ela, passe as falas e clique em Salvar cura'
-        elif command=='quest_heal_save':
+            q.reason=f"Gravando {talk['noun']}: va ate {talk['npc']}, fale com ele(a), passe as falas e clique em {talk['save']}"
+        elif action=='save':
             recording=q.recording
-            if not recording or recording.get('scope')!='heal':raise ValueError('Nenhuma cura sendo gravada')
+            if not recording or recording.get('scope')!=scope:raise ValueError('Nenhum(a) '+talk['noun']+' sendo gravado(a)')
             if recording.get('error') or self.native_frames.error:raise ValueError(recording.get('error') or self.native_frames.error)
             entry=bg_entry.recorded_entry(recording['steps'],o.map_name,o.player)
-            config=quest_extras.load();config.update(heal_steps=entry['steps'],heal_map=PortalGuard.key(o.map_name))
+            if scope=='repair' and not any(s['kind']=='npc' for s in entry['steps']):
+                raise ValueError('Fale com o Reparador antes de salvar: a conversa nao foi gravada')
+            config=quest_extras.load();config.update({talk['steps']:entry['steps'],talk['map']:PortalGuard.key(o.map_name)})
             quest_extras.save(config)
-            q.recording=None;q.reason='Cura gravada ('+o.map_name+')'
-        elif command=='quest_heal_test':
-            heal=quest_extras.load().get('heal_steps') or []
-            if not heal:raise ValueError('Grave a cura antes de testar')
+            q.recording=None;q.reason=talk['noun'].capitalize()+' gravado(a) ('+o.map_name+')'
+        elif action=='test':
+            steps=quest_extras.load().get(talk['steps']) or []
+            if not steps:raise ValueError('Grave '+talk['noun']+' antes de testar')
             if q.active or q.recording:raise ValueError('Pause a fila e encerre a gravacao antes de testar')
             if self.upstream is None or not o.map_name:raise ValueError('Entre no personagem antes de testar')
             from . import map_routes
             entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
-            q.start_validation(heal,heal[-1]['map'],time.monotonic(),mode='travel',label='Teste da cura',map_routes=entries,
-                               connect_from=o.map_name,known_routes=map_routes.apply(load(),entries))
-            if self.hunt:self.hunt.pause('Testando a cura')
+            q.start_validation(steps,steps[-1]['map'],time.monotonic(),mode='travel',label='Teste d'+('a cura' if scope=='heal' else 'o reparo'),
+                               map_routes=entries,connect_from=o.map_name,known_routes=map_routes.apply(load(),entries))
+            if self.hunt:self.hunt.pause('Testando '+talk['noun'])
             self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
-        elif command=='quest_heal_cancel':
-            if q.recording and q.recording.get('scope')=='heal':q.recording=None;q.reason='Gravacao da cura descartada'
-        else:raise ValueError('Comando de cura desconhecido')
+        elif action=='cancel':
+            if q.recording and q.recording.get('scope')==scope:q.recording=None;q.reason='Gravacao d'+('a cura' if scope=='heal' else 'o reparo')+' descartada'
+        else:raise ValueError('Comando de '+talk['noun']+' desconhecido')
 
     REVIVE_RETRY=8.0  # s: "return to the save point" sent again while still dead
     REVIVE_TRIES=4
@@ -377,6 +388,8 @@ class QuestRelay(SharedQuestRelay):
             cached=self.extras_cache=(stamp,quest_extras.load())
         return cached[1]
 
+    ROUTE_CHAIN_SECONDS=.3  # s before the end of a route leg when the next one is sent
+
     async def hunt_death_watch(self,now,game_gate):
         """Hunting without the queue (Iniciar): on death, back to the save point, the healer and the map
         where it died, then the same hunt again. True while this owns the character."""
@@ -397,6 +410,9 @@ class QuestRelay(SharedQuestRelay):
                 except OSError:heal=[]
                 entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
                 start=heal or [dict(kind='walk',map=o.map_name,position=list(o.player))]
+                # The character's mount/items before the trip starts: the travel queues the mount
+                # only from these (the way back was walked on foot, 2026-11-09).
+                q.extras=quest_extras.for_character(config,(self.own_look or {}).get('name'));q.errands=[]
                 q.start_validation(start,pending['map'],now,mode='travel',label='Voltar a '+pending['map'],map_routes=entries,
                                    known_routes=map_routes.apply(load(),entries))
                 try:
@@ -421,11 +437,115 @@ class QuestRelay(SharedQuestRelay):
                 if sent:pending['tries']+=1;pending['sent_at']=now
             return True
         if q.active:return False  # the trip runs as a normal quest travel
+        if pending['stage']=='trip':
+            if not (q.phase=='done' and q.validation and q.validation.get('completed')):
+                self.hunt_revive=None;return False
+            # Back on the map: the combat items (or what the mount took off) go on before hunting,
+            # as on arriving with the queue. The trip was made mounted (2026-11-09).
+            q.extras=quest_extras.for_character(config,(self.own_look or {}).get('name'))
+            q.errands=[e for e in q.errands if e.kind=='gear'];q.queue('gear',now)
+            pending['stage']='gear'
+        if pending['stage']=='gear':
+            if not o.player_alive:
+                q.errands=[];pending.update(stage='dead',tries=0,sent_at=-1e9);return True  # died again meanwhile
+            if q.errands and not self.commands_blocked and self.upstream is not None and game_gate():
+                return await self.quest_errand(now,game_gate)
+            q.errands=[]
         self.hunt_revive=None
-        if q.phase=='done' and q.validation and q.validation.get('completed'):
-            self.apply_settings(pending['settings']);self.hunt.start()
-            print('[ROTA] De volta a '+pending['map']+': caca retomada')
+        self.apply_settings(pending['settings']);self.hunt.start()
+        print('[ROTA] De volta a '+pending['map']+': caca retomada')
         return False
+
+    def item_label(self,item_id):
+        names=getattr(self,'item_names_cache',None)
+        if names is None:
+            try:names=json.loads((Path(__file__).resolve().parents[1]/'data/recursos/itens.json').read_text(encoding='utf-8'))
+            except (OSError,ValueError):names={}
+            self.item_names_cache=names
+        return names.get(str(item_id)) or f'item {item_id}'
+
+    @staticmethod
+    def repair_join(q,here,steps):
+        """Way to the recorded repair, entering it as far along as it can be reached: the repairer's
+        own map first, then the maps before it (areia), the recording's start (hospital2) last. Going
+        for the start first sent the character around half the world, into an event room (2026-11-09)."""
+        key=PortalGuard.key
+        starts={}
+        for index,step in enumerate(steps):
+            if step['kind']=='wait_map':continue
+            starts.setdefault(key(step['map']),index)
+        error=None
+        for name,index in sorted(starts.items(),key=lambda item:-item[1]):
+            if name==here:return copy.deepcopy(steps[index:])
+            try:return q.connection(here,name)+copy.deepcopy(steps[index:])
+            except ValueError as exc:error=exc
+        raise error or ValueError('Reparo gravado sem etapas')
+
+    REPAIR_RETRY=600.0
+    REPAIR_WALK_MAPS=2  # more maps than this on foot to the repair: @voltar to the save point instead  # s before another trip to the repairer for items still listed broken
+
+    def repair_watch(self,now):
+        """An equipment broke while hunting: to the recorded repairer (Reparador), then back to the
+        map and the same hunt, the item put on again. True when the trip was started."""
+        from . import quest_extras, map_routes
+        q=self.quests;o=self.tracker.observer
+        broken=getattr(q.body,'broken',None)
+        if not broken or not o.player_alive or not o.map_name or q.recording:return False
+        hunting_queue=q.active and q.phase=='hunt'  # the queue's hunt or "Ir ao mapa e cacar"
+        plain=(not q.active and self.hunt is not None and self.hunt.enabled
+               and getattr(self,'hunt_revive',None) is None)
+        if not (hunting_queue or plain):return False  # on a trip: handled once hunting again
+        try:config=self.extras_config()
+        except OSError:return False
+        steps=config.get('repair_steps') or []
+        q.body.broken=None
+        if now-getattr(self,'repair_started_at',-1e9)<self.REPAIR_RETRY:
+            return False  # a repair just ran and the item is still listed broken: no trip loop
+        name=(broken.get('item_id') and self.item_label(broken['item_id'])) or 'equipamento'
+        if not config.get('repair_enabled') or not steps:
+            print(f'[ROTA] {name} quebrou; o reparo automatico esta desligado ou nao foi gravado (Rotas > opcoes)')
+            return False
+        if broken.get('item_id'):q.reequip=list(dict.fromkeys(list(getattr(q,'reequip',None) or [])+[broken['item_id']]))
+        key=PortalGuard.key;here=key(o.map_name);first=key(steps[0]['map']);back=o.map_name
+        if plain:
+            entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
+            q.extras=quest_extras.for_character(config,(self.own_look or {}).get('name'));q.errands=[]
+            q.start_validation(copy.deepcopy(steps),back,now,mode='travel',label='Reparo e volta a '+back,map_routes=entries,
+                               known_routes=map_routes.apply(load(),entries))
+        voltar=False
+        try:
+            try:
+                path=self.repair_join(q,here,steps)
+                walked=sum(1 for st in path[:len(path)-len(steps)] if st['kind']=='wait_map') if len(path)>len(steps) else 0
+                if walked>self.REPAIR_WALK_MAPS and config.get('voltar_frame'):
+                    raise ValueError('caminho longo: @voltar e mais rapido')
+            except ValueError:
+                # No way out of the hunting map (no portal back): @voltar to the save point, where the
+                # repair was recorded from (hospital2 -> areia -> ama_in01, 2026-11-09).
+                if not config.get('voltar_frame'):raise
+                path=copy.deepcopy(steps);voltar=True
+            end=key(steps[-1]['map'])
+            path+=q.itinerary(steps[-1]['map']) if hunting_queue else (q.connection(end,key(back)) if end!=key(back) else [])
+        except ValueError as exc:
+            if plain:q.stop('Equipamento quebrou, mas sem caminho ate o Reparador: '+str(exc))
+            print('[ROTA] Equipamento quebrou, mas sem caminho ate o Reparador: '+str(exc))
+            return False
+        self.repair_started_at=now
+        if hunting_queue:
+            q.enter_stage('travel',now)
+            q.reason=f"{name.capitalize()} quebrou: consertando no Reparador e voltando: {q.route['name']}"
+        else:
+            self.hunt_revive=dict(map=back,tries=0,sent_at=-1e9,stage='trip',settings=copy.deepcopy(self.settings))
+            self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
+            q.reason=f'{name.capitalize()} quebrou: consertando no Reparador e voltando a {back}'
+        q.steps=path
+        if voltar:
+            q.queue('voltar',now,force=True)
+            q.errands.sort(key=lambda e:e.kind!='voltar')  # @voltar first, the mount after it
+            q.reason+=' (usando @voltar ate o ponto salvo)'
+        if self.hunt is not None:self.hunt.pause(q.reason)
+        print('[ROTA] '+q.reason)
+        return True
 
     def resume_after_revive(self,now):
         """Alive again at the save point: the recorded healer talk, then the way back to the hunt."""
@@ -804,7 +924,9 @@ class QuestRelay(SharedQuestRelay):
         await self.close_bg_result_dialog(game_gate)
         self.bg_tick(time.monotonic())
         if getattr(self,'bg_dialog_close',None):return True
-        if await self.hunt_death_watch(time.monotonic(),game_gate):return True
+        death=await self.hunt_death_watch(time.monotonic(),game_gate) or self.repair_watch(time.monotonic())
+        getattr(self,'tick_mark',lambda label:None)('rota_volta_apos_morte')
+        if death:return True
         if not q.active and q.resume and self.tracker.observer.map_name and q.resume_after_move(self.tracker.observer.map_name,time.monotonic()):
             self.quest_base_settings=copy.deepcopy(self.settings);self.commands_blocked=False
         if not q.active:
@@ -830,7 +952,7 @@ class QuestRelay(SharedQuestRelay):
             return True
         q.position_lost_at=None
         if getattr(self,'revive',None) is not None and observer.player_alive:
-            self.resume_after_revive(now);return True
+            self.resume_after_revive(now);getattr(self,'tick_mark',lambda label:None)('rota_reviver');return True
         if self.manual_control(now):
             q.progress_at=now;return True
         if q.phase=='hunt' and not q.errands:
@@ -874,12 +996,18 @@ class QuestRelay(SharedQuestRelay):
             return False
         # Only this executor may move while traveling. Combat resumes after destination confirmation.
         if self.hunt.enabled:self.hunt.pause('Percorrendo rota de quest')
-        if self.walking_now():return True
+        if self.walking_now():
+            # The next leg goes out just before this one ends: waiting for the stop made the character
+            # walk 8 cells, stand, walk again, which looked like lag on every trip (2026-11-09).
+            motion=observer.player_motion
+            if motion['at']+motion['duration']-now>self.ROUTE_CHAIN_SECONDS:return True
         positions=observer.combat_positions(now)
         position=positions[0] if positions else observer.player
         collision=self.collision_map()
         q.route_collision=self.map_repository.get if self.map_repository else None
+        getattr(self,'tick_mark',lambda label:None)('rota_antes_do_plano')
         action=q.plan(observer.map_name,position,collision,self.portals,now)
+        getattr(self,'tick_mark',lambda label:None)('rota_plano')
         self.flush_daily()
         if q.phase=='paused':
             print('[ROTA] Parada: '+q.reason);self.quest_stop(q.reason);return True
@@ -891,11 +1019,9 @@ class QuestRelay(SharedQuestRelay):
             if (not q.active or planned!=(observer.map_name,q.phase,q.step,q.index)
                 or not self.native_frames.ready or self.commands_blocked or not game_gate() or self.upstream is None):return True
             if action['kind']=='move':
-                hazards=getattr(self,'toxic_ground',None)
-                crosses=getattr(self,'crosses_ground_hazard',None)
-                if hazards and crosses and crosses(position,action['position'],time.monotonic()):
-                    q.path_cache=None;q.pending=None;q.reason='Nevoa toxica no caminho; recalculando'
-                    return True
+                # Skill areas on the floor are handled by the route step itself (a detour when one
+                # exists, crossing otherwise); throwing the whole path away here searched the map
+                # again on every tick while traveling.
                 payload=move(*action['position'])
             elif action['kind']=='npc':payload=struct.pack('<HIB',0x90,action['entity_id'],1)
             elif action['kind'] in ('select','cancel'):payload=struct.pack('<HIB',0xb8,action['entity_id'],action['choice'])

@@ -334,6 +334,35 @@ def test_arriving_next_to_a_portal_steps_straight_away_first(tmp_path):
     assert destination[0] > 31  # straight away from it, not along its edge
 
 
+def test_stepping_out_of_a_portal_in_a_narrow_corridor_never_crosses_it(tmp_path):
+    """gl_sew02: arrival 31,275 in a corridor x 28..31 closed at y 276, portal 29,275. The escape
+    to [28,271] made the server walk diagonally first onto [30,274], into the portal, and the
+    character went in and out of it again and again (2026-11-10)."""
+    from nrobot.map_navigation import CollisionMap, server_line
+    from nrobot.portals import chebyshev
+    r = relay(tmp_path)
+    r.hunt.start()
+    o = r.tracker.observer
+    o.map_name, o.player = 'gl_sew02.gat', [31, 275]
+    r.portals.known = {'gl_sew02': {'29,275': 1}}
+    r.portals.widened = {}
+    cells = [int(28 <= x <= 31 and 240 <= y <= 275) for y in range(300) for x in range(300)]
+    collision = CollisionMap(300, 300, cells)
+    r.collision_map = lambda: collision
+    position = (31, 275)
+    for _ in range(10):
+        destination = r.leave_portal_area(0)
+        if destination is None:
+            break
+        for cell in server_line(position, tuple(destination)):  # the walk the server really does
+            assert chebyshev(cell, (29, 275)) > 1, (position, destination, cell)
+        position = tuple(destination)
+        o.player = list(position)
+    else:
+        raise AssertionError('never left the portal area')
+    assert chebyshev(position, (29, 275)) >= 3
+
+
 def test_stepping_into_a_portal_by_accident_widens_it_and_is_no_recall(tmp_path):
     r = relay(tmp_path)
     r.hunt.start()
@@ -607,3 +636,50 @@ def test_showmobs_runs_early_without_a_target_but_not_near_the_scheduled_scan():
     scan.queue.clear(); scan.round_open = False
     assert not scan.start('field', [1002], 49.0, idle=True, early=True)  # throttle repeated no-target scans
     assert scan.start('field', [1002], 54.0, idle=True, early=True)  # retry after 10 s without a target
+
+
+def test_the_ring_the_hunt_steps_out_of_is_never_a_walking_goal(tmp_path):
+    """alde_dun02: the patrol went to the edge of the arrival portal area and the step out
+    pulled it back, over and over (2026-11-09)."""
+    from nrobot.map_navigation import CollisionMap
+    r = relay(tmp_path)
+    r.hunt.start()
+    o = r.tracker.observer
+    o.map_name = 'alde_dun02.gat'
+    r.portals.known = {'alde_dun02': {'43,23': 3}}
+    r.portals.widened = {}
+    collision = CollisionMap(100, 100, [1]*10000)
+    r.map_repository = type('Repo', (), {'get': lambda self, name: collision, 'sources': {}, 'errors': {}})()
+    forbidden = r.collision_map().forbidden
+    assert (42, 27) in forbidden and (47, 25) in forbidden  # the edge where the step out begins
+    assert (40, 29) not in forbidden
+    o.player = [42, 27]
+    destination = r.leave_portal_area(0)
+    assert destination and tuple(destination) not in forbidden
+    o.player = list(destination)
+    assert r.leave_portal_area(0) is None  # out: nothing pulls it back
+
+
+def test_landing_inside_a_portal_area_in_a_narrow_corridor_still_steps_out(tmp_path):
+    """alde_dun02: gl_sew02 lands the character at 41,23, inside the area of portal 43,23, in a
+    corridor x 40..47 (2026-11-09). No first step was strictly farther: it stood there for minutes."""
+    from nrobot.map_navigation import CollisionMap
+    r = relay(tmp_path)
+    r.hunt.start()
+    o = r.tracker.observer
+    o.map_name = 'alde_dun02.gat'
+    r.portals.known = {'alde_dun02': {'43,23': 3}}
+    r.portals.widened = {}
+    cells = [int(40 <= x <= 47 and 18 <= y <= 90) for y in range(100) for x in range(100)]
+    collision = CollisionMap(100, 100, cells)
+    r.collision_map = lambda: collision
+    for start in ([41, 23], [46, 20]):
+        o.player = start
+        destination = r.leave_portal_area(0)
+        assert destination, start
+        legs = 0
+        while destination is not None and legs < 10:  # walked in safe legs, each one sent after the last
+            position, legs = destination, legs+1
+            o.player = list(position)
+            destination = r.leave_portal_area(0)
+        assert max(abs(position[0]-43), abs(position[1]-23)) >= 6, start

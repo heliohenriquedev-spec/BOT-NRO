@@ -246,11 +246,13 @@ class PortalGuard:
                  for cell, margin in self.known.get(self.key(map_name), {}).items()]
         return known+[(cell, MARGIN) for cell in self.temporary.values()]
 
-    def cells(self, map_name):
-        """Cells never to walk on: portals to other maps. Inner portals stay free to use."""
+    def cells(self, map_name, edge=0):
+        """Cells never to walk on: portals to other maps. Inner portals stay free to use.
+        edge: cells beyond the area too (the ring the hunt steps out of, session_relay.leave_portal_area)."""
         inner = {cell for cell, _ in self.links(map_name)}
         result = set()
         for (x, y), margin in self.portals(map_name):
+            margin += edge
             if (x, y) in inner:
                 continue
             result.update((x+dx, y+dy) for dx in range(-margin, margin+1) for dy in range(-margin, margin+1))
