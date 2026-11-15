@@ -1,0 +1,37 @@
+{
+  "save_map": "hospital2",
+  "salto_ninja": {
+    "ativo": true,
+    "economia_minima": 40,
+    "custo": 30
+  },
+  "stages": [
+    {
+      "name": "Mamute Nevoa",
+      "map": "gef_fild04",
+      "species": 1083
+    },
+    {
+      "name": "Mamute Konoha",
+      "map": "prt_fild02",
+      "species": 1079
+    },
+    {
+      "name": "Mamute Nuvem",
+      "map": "yuno_fild08",
+      "species": 1081
+    },
+    {
+      "name": "Vila Areia -> moc_fild01",
+      "map": "moc_fild01",
+      "species": 1078,
+      "portal": {
+        "map": "areia",
+        "position": [
+          153,
+          21
+        ]
+      }
+    }
+  ]
+}

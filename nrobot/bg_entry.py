@@ -25,9 +25,9 @@ import re
 from pathlib import Path
 import uuid
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QLabel, QPushButton, QDoubleSpinBox, QVBoxLayout,
-                               QWidget)
+                               QWidget, QTableWidget, QTableWidgetItem, QHeaderView, QAbstractItemView)
 
 FILE = Path(__file__).resolve().parents[1]/'data'/'rede'/'bg_entradas.json'
 MODES = ('5x5', '4x4', '3x3')
@@ -263,7 +263,23 @@ class BgPanel(QWidget):
         self.status = QLabel()
         self.status.setWordWrap(True)
         layout.addWidget(self.status)
-        layout.addStretch(1)
+        damage_help = QLabel('50 maiores danos recebidos na BG • registro automático por golpe, do maior para o menor. '
+                             'O histórico é salvo por personagem e continua disponível ao sair da BG ou reabrir o bot.')
+        damage_help.setWordWrap(True)
+        layout.addWidget(damage_help)
+        self.damage_status = QLabel('Aguardando entrar no mapa da BG.')
+        layout.addWidget(self.damage_status)
+        self.damage_table = QTableWidget(0, 6)
+        self.damage_table.setHorizontalHeaderLabels(['Posição', 'Dano', 'Habilidade', 'Quem usou', 'Mapa', 'Data e hora'])
+        self.damage_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.damage_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.damage_table.setMinimumHeight(200)
+        self.damage_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.damage_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        layout.addWidget(self.damage_table, 1)
+        self.damage_signature = None
+        from .bg_damage import skill_names
+        self.damage_skill_names = skill_names()
         self.recording = False
         self.refresh()
 
@@ -309,6 +325,36 @@ class BgPanel(QWidget):
         self.cancel.setEnabled(self.recording)
 
     def update_state(self, state):
+        state = state or {}
+        damage = state.get('bg_damage') or {}
+        rows = damage.get('rows') or []
+        self.damage_status.setText(('Registrando danos neste mapa da BG.' if damage.get('active')
+                                   else 'Fora do mapa da BG; histórico preservado.') + f' {len(rows)}/50 golpes.')
+        names = dict(self.damage_skill_names)
+        for skill in state.get('learned_skills') or []:
+            if skill.get('name') and skill['skill_id'] not in names:
+                names[skill['skill_id']] = skill['name']
+        signature = (rows, names)
+        if signature != self.damage_signature:
+            self.damage_signature = signature
+            self.damage_table.setRowCount(len(rows))
+            for index, hit in enumerate(rows):
+                identity = hit.get('skill_id', 0)
+                ability = names.get(identity, f'Habilidade #{identity}') if identity else 'Ataque básico'
+                if hit.get('level'):
+                    ability += f" (Nv. {hit['level']})"
+                source = hit.get('source_name') or f"Nome não recebido (ID {hit.get('source_id')})"
+                values = [str(index+1), f"{hit['damage']:,}".replace(',', '.'), ability,
+                          source, hit.get('map', ''), hit.get('at', '').replace('T', ' ')]
+                for column, value in enumerate(values):
+                    item = QTableWidgetItem(value)
+                    if column in (0, 1):
+                        item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                    if column == 2:
+                        item.setToolTip(f'ID da habilidade: {identity}')
+                    elif column == 3:
+                        item.setToolTip(f"ID do atacante: {hit.get('source_id')}")
+                    self.damage_table.setItem(index, column, item)
         q = (state or {}).get('quests') or {}
         recording = q.get('recording_scope') == 'bg'
         if recording != self.recording:

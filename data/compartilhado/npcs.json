@@ -87,6 +87,10 @@
   "158,239": {
    "name": "Teleportador - Suna",
    "sprite": 991
+  },
+  "213,104": {
+   "name": "Resetadora",
+   "sprite": 59
   }
  },
  "ra_in01": {
@@ -405,7 +409,7 @@
    "sprite": 745
   },
   "76,93": {
-   "name": "",
+   "name": "Bingo Book (Local)",
    "sprite": 837
   },
   "65,74": {
@@ -415,6 +419,26 @@
   "65,63": {
    "name": "",
    "sprite": 55
+  },
+  "81,93": {
+   "name": "Recompensas Akatsuki",
+   "sprite": 64
+  },
+  "84,140": {
+   "name": "Entrada - Bikouchuu",
+   "sprite": 715
+  },
+  "71,93": {
+   "name": "Ranking de Mestres",
+   "sprite": 73
+  },
+  "68,93": {
+   "name": "Recrutar Genins",
+   "sprite": 74
+  },
+  "65,93": {
+   "name": "",
+   "sprite": 76
   }
  },
  "hospital2": {
@@ -823,6 +847,14 @@
   "259,358": {
    "name": "",
    "sprite": 119
+  },
+  "330,295": {
+   "name": "",
+   "sprite": 423
+  },
+  "116,279": {
+   "name": "",
+   "sprite": 70
   }
  },
  "nevoa": {
@@ -865,6 +897,34 @@
   "214,269": {
    "name": "Tsunade",
    "sprite": 423
+  },
+  "194,276": {
+   "name": "",
+   "sprite": 23
+  },
+  "198,282": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "215,350": {
+   "name": "",
+   "sprite": 23
+  },
+  "214,355": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "214,362": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "213,363": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "217,359": {
+   "name": "Uadaweu2",
+   "sprite": 23
   }
  },
  "payon_in03": {
@@ -873,7 +933,7 @@
    "sprite": 837
   },
   "24,66": {
-   "name": "",
+   "name": "Kit Iniciante",
    "sprite": 121
   },
   "12,70": {
@@ -943,6 +1003,42 @@
   "117,129": {
    "name": "",
    "sprite": 106
+  },
+  "121,123": {
+   "name": "",
+   "sprite": 882
+  },
+  "130,131": {
+   "name": "",
+   "sprite": 445
+  },
+  "123,131": {
+   "name": "",
+   "sprite": 69
+  },
+  "123,116": {
+   "name": "",
+   "sprite": 423
+  },
+  "130,116": {
+   "name": "",
+   "sprite": 70
+  },
+  "68,131": {
+   "name": "",
+   "sprite": 99
+  },
+  "77,129": {
+   "name": "",
+   "sprite": 96
+  },
+  "71,119": {
+   "name": "Estudante",
+   "sprite": 96
+  },
+  "63,124": {
+   "name": "Instrutor Kekkei Genkai",
+   "sprite": 882
   }
  },
  "yuno_in03": {
@@ -989,7 +1085,7 @@
  },
  "moc_fild13": {
   "99,299": {
-   "name": "",
+   "name": "Medicina Intermediário",
    "sprite": 831
   },
   "70,236": {
@@ -1253,7 +1349,7 @@
    "sprite": 14
   },
   "144,285": {
-   "name": "",
+   "name": "Night Star",
    "sprite": 14
   },
   "146,286": {
@@ -1269,6 +1365,266 @@
    "sprite": 14
   },
   "150,285": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "142,302": {
+   "name": "",
+   "sprite": 14
+  },
+  "140,302": {
+   "name": "",
+   "sprite": 14
+  },
+  "139,302": {
+   "name": "",
+   "sprite": 14
+  },
+  "140,301": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "140,295": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "139,297": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "140,298": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "148,284": {
+   "name": "",
+   "sprite": 14
+  },
+  "147,283": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "145,285": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "143,283": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "141,285": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "143,284": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "139,285": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "141,284": {
+   "name": "",
+   "sprite": 14
+  },
+  "140,283": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "140,282": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "137,284": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "139,283": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "136,284": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "135,286": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "153,287": {
+   "name": "",
+   "sprite": 14
+  },
+  "151,287": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "152,287": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "151,286": {
+   "name": "",
+   "sprite": 14
+  },
+  "147,285": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "149,289": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "135,289": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "137,290": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "135,291": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "134,291": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "136,290": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "134,290": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "142,283": {
+   "name": "",
+   "sprite": 14
+  },
+  "142,285": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "141,289": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "142,291": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "144,292": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "143,292": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "143,291": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "143,293": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "144,294": {
+   "name": "",
+   "sprite": 14
+  },
+  "136,300": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "134,299": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "140,299": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "149,291": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "136,295": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "146,294": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "139,300": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "147,293": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "137,292": {
+   "name": "",
+   "sprite": 14
+  },
+  "134,292": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "134,293": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "136,305": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "136,304": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "135,284": {
+   "name": "",
+   "sprite": 14
+  },
+  "138,289": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "132,291": {
+   "name": "",
+   "sprite": 14
+  },
+  "137,285": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "136,286": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "142,288": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "143,288": {
+   "name": "Night Star",
+   "sprite": 14
+  },
+  "153,288": {
+   "name": "",
+   "sprite": 14
+  },
+  "144,288": {
+   "name": "",
+   "sprite": 14
+  },
+  "148,290": {
    "name": "Night Star",
    "sprite": 14
   }
@@ -1311,7 +1667,7 @@
    "sprite": 843
   },
   "11,27": {
-   "name": "",
+   "name": "Comprar Jutsus",
    "sprite": 843
   }
  },
@@ -1393,7 +1749,7 @@
    "sprite": 49
   },
   "91,59": {
-   "name": "",
+   "name": "Removedores",
    "sprite": 940
   },
   "84,63": {
@@ -1417,7 +1773,7 @@
    "sprite": 940
   },
   "91,66": {
-   "name": "",
+   "name": "Visual Armas",
    "sprite": 940
   },
   "88,69": {
@@ -1467,6 +1823,126 @@
   "9,195": {
    "name": "Mestre",
    "sprite": 55
+  }
+ },
+ "nif_in": {
+  "14,91": {
+   "name": "Voltar",
+   "sprite": 505
+  },
+  "25,74": {
+   "name": "",
+   "sprite": 931
+  },
+  "26,101": {
+   "name": "",
+   "sprite": 931
+  }
+ },
+ "prt_fild02": {
+  "44,312": {
+   "name": "",
+   "sprite": 70
+  },
+  "178,375": {
+   "name": "",
+   "sprite": 119
+  },
+  "156,158": {
+   "name": "",
+   "sprite": 423
+  },
+  "163,305": {
+   "name": "",
+   "sprite": 843
+  },
+  "321,299": {
+   "name": "Jiraya",
+   "sprite": 69
+  },
+  "163,104": {
+   "name": "",
+   "sprite": 445
+  }
+ },
+ "yuno_fild08": {
+  "345,51": {
+   "name": "",
+   "sprite": 843
+  },
+  "227,171": {
+   "name": "",
+   "sprite": 423
+  },
+  "90,199": {
+   "name": "",
+   "sprite": 69
+  },
+  "159,307": {
+   "name": "",
+   "sprite": 445
+  }
+ },
+ "bibli_02": {
+  "61,36": {
+   "name": "Pesquisador",
+   "sprite": 402
+  }
+ },
+ "pvp_n_1-1": {
+  "95,179": {
+   "name": "Instrutor de Combate",
+   "sprite": 882
+  },
+  "89,168": {
+   "name": "",
+   "sprite": 703
+  },
+  "107,179": {
+   "name": "",
+   "sprite": 106
+  },
+  "107,175": {
+   "name": "",
+   "sprite": 703
+  }
+ },
+ "floresta": {
+  "220,326": {
+   "name": "",
+   "sprite": 766
+  },
+  "208,327": {
+   "name": "Velho andarilho",
+   "sprite": 57
+  },
+  "199,331": {
+   "name": "Retorno",
+   "sprite": 706
+  },
+  "188,348": {
+   "name": "Médico andarilho",
+   "sprite": 83
+  }
+ },
+ "pvp_n_8-5": {
+  "64,102": {
+   "name": "Inscrição AS",
+   "sprite": 882
+  },
+  "99,107": {
+   "name": "Suporte AS",
+   "sprite": 882
+  },
+  "80,119": {
+   "name": "Anbu Shiken",
+   "sprite": 882
+  }
+ },
+ "lhz_dun03": {
+  "154,134": {
+   "name": "Túmulo",
+   "sprite": 72
   }
  }
 }

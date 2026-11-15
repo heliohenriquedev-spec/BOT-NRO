@@ -1,0 +1,208 @@
+{
+ "queue_ids": [
+  "c0fcbb10a5ca402f983b27e0f9a8e3ef",
+  "f34b6d975e754badb572924e8c79ff46",
+  "885929802c114e3e83cb9b19055d9283",
+  "e56bee673198469489ddeee384cd0195",
+  "aef2d2b459794c6aa1b7e676be324456",
+  "b3e10b47b4da468f8fb31e0102edb4d0",
+  "8b4d3445c4a04595a99019640833abbd",
+  "a4a1be608cdf4fd1a87b292e850c6e69",
+  "a789a119895b4244a084a08c9ea2af06"
+ ],
+ "repeat_completed_route": false,
+ "replay_completed": true,
+ "route_id": "f34b6d975e754badb572924e8c79ff46",
+ "route_name": "Kami 1 - Andar 2",
+ "index": 1,
+ "phase": "delivery",
+ "mission_index": 1,
+ "stage": "delivery",
+ "step": 3,
+ "map": "ra_in01.gat",
+ "target_map": "um_dun02.gat",
+ "mission_ids": [
+  "368aac0c3dc145b89c6d4f255ebb0c94",
+  "9bda4c50f6f14ef08fea6986867c1ce7",
+  "3bd1257e4ddb4b26ae8ecf59fc9a45e8",
+  "c02e9e1a6132472eb9bda61c6815723e"
+ ],
+ "kill_targets": [
+  {
+   "name": "Abelha",
+   "count": 50,
+   "species": [
+    1114
+   ]
+  },
+  {
+   "name": "Abelha Macho",
+   "count": 50,
+   "species": [
+    1201
+   ]
+  }
+ ],
+ "species": [
+  1114,
+  1201
+ ],
+ "kill_counts": {},
+ "name_counts": {
+  "abelha macho": 50,
+  "abelha": 50
+ },
+ "kills": 100,
+ "completed_missions": {
+  "pickup": [
+   "368aac0c3dc145b89c6d4f255ebb0c94",
+   "9bda4c50f6f14ef08fea6986867c1ce7",
+   "3bd1257e4ddb4b26ae8ecf59fc9a45e8",
+   "c02e9e1a6132472eb9bda61c6815723e"
+  ],
+  "delivery": [
+   "368aac0c3dc145b89c6d4f255ebb0c94"
+  ]
+ },
+ "skipped": [
+  "Rank S-6: ja feita hoje por Uadaweu2",
+  "Rank S-4: ja completada (o quadro mostra Status: Completa)",
+  "Rank S-5: ja completada (o quadro mostra Status: Completa)"
+ ],
+ "skipped_ids": [
+  "7fcf23d1865541dd8d4ea4d252571d04",
+  "8009bf2ca08443879b2834f617a40a29",
+  "adcf477fdf7243e2bd58779e3eb0a4b2"
+ ],
+ "prefetched": {},
+ "aggressors": [
+  1059,
+  1114,
+  1201
+ ],
+ "chain": {
+  "indices": [
+   0,
+   1,
+   2
+  ],
+  "own": {
+   "0": [
+    "368aac0c3dc145b89c6d4f255ebb0c94",
+    "9bda4c50f6f14ef08fea6986867c1ce7"
+   ],
+   "1": [
+    "3bd1257e4ddb4b26ae8ecf59fc9a45e8",
+    "c02e9e1a6132472eb9bda61c6815723e"
+   ],
+   "2": [
+    "7fcf23d1865541dd8d4ea4d252571d04",
+    "8009bf2ca08443879b2834f617a40a29",
+    "adcf477fdf7243e2bd58779e3eb0a4b2"
+   ]
+  },
+  "picked": [
+   "368aac0c3dc145b89c6d4f255ebb0c94",
+   "9bda4c50f6f14ef08fea6986867c1ce7",
+   "3bd1257e4ddb4b26ae8ecf59fc9a45e8",
+   "c02e9e1a6132472eb9bda61c6815723e"
+  ],
+  "hunting": [
+   0,
+   1
+  ]
+ },
+ "chain_routes": {
+  "0": {
+   "mission_ids": [
+    "368aac0c3dc145b89c6d4f255ebb0c94",
+    "9bda4c50f6f14ef08fea6986867c1ce7"
+   ],
+   "kill_targets": [
+    {
+     "name": "Besouro-Rei",
+     "count": 50,
+     "species": [
+      1494
+     ]
+    },
+    {
+     "name": "Borboleta",
+     "count": 50,
+     "species": [
+      1018
+     ]
+    }
+   ],
+   "species": [
+    1018,
+    1494
+   ]
+  },
+  "1": {
+   "mission_ids": [
+    "368aac0c3dc145b89c6d4f255ebb0c94",
+    "9bda4c50f6f14ef08fea6986867c1ce7",
+    "3bd1257e4ddb4b26ae8ecf59fc9a45e8",
+    "c02e9e1a6132472eb9bda61c6815723e"
+   ],
+   "kill_targets": [
+    {
+     "name": "Abelha",
+     "count": 50,
+     "species": [
+      1114
+     ]
+    },
+    {
+     "name": "Abelha Macho",
+     "count": 50,
+     "species": [
+      1201
+     ]
+    }
+   ],
+   "species": [
+    1114,
+    1201
+   ]
+  },
+  "2": {
+   "mission_ids": [
+    "7fcf23d1865541dd8d4ea4d252571d04",
+    "8009bf2ca08443879b2834f617a40a29",
+    "adcf477fdf7243e2bd58779e3eb0a4b2"
+   ],
+   "kill_targets": [
+    {
+     "name": "Lavadeira",
+     "count": 50,
+     "species": [
+      1321
+     ]
+    },
+    {
+     "name": "Besouro",
+     "count": 50,
+     "species": [
+      1128
+     ]
+    },
+    {
+     "name": "Borboleta Macho",
+     "count": 50,
+     "species": [
+      1293
+     ]
+    }
+   ],
+   "species": [
+    1128,
+    1293,
+    1321
+   ]
+  }
+ },
+ "character": "Uadaweu2",
+ "saved_at": "2026-11-12T18:46:10"
+}

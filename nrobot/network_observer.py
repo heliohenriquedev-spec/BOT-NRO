@@ -264,6 +264,11 @@ class Observer:
         if collision is None:
             from .server_path import OpenGround
             collision = OpenGround  # exact on free ground; maps without collision data
+        elif hasattr(collision, 'plain'):
+            # Portals and skill areas restrict our choices, not the walk already
+            # confirmed by the server. Treating them as walls loses the real path
+            # and falls back to interpolating through corners near warp entrances.
+            collision = collision.plain()
         path = server_path(collision, tuple(origin), tuple(destination))
         return tuple(path) if path and len(path) > 1 else None
 

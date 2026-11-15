@@ -222,6 +222,9 @@ class PacketPanel(QMainWindow):
         from .map_behavior_panel import MapBehaviorPanel
         self.map_behavior_panel = MapBehaviorPanel()
         tabs.addTab(self.map_behavior_panel, 'Comportamento por mapa')
+        from .showmobs_cycle_panel import ShowmobsCyclePanel
+        self.showmobs_cycle_panel = ShowmobsCyclePanel()
+        tabs.addTab(self.showmobs_cycle_panel, 'Ciclo @showmobs')
         from .rcx_panel import RcxPanel
         self.rcx_panel = RcxPanel()
         tabs.addTab(self.rcx_panel, 'RCX')

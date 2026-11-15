@@ -25,6 +25,9 @@ def isolated_monster_data(tmp_path, monkeypatch):
     from nrobot import monster_db
     from nrobot import drop_db
     from nrobot import quest_progress
+    from nrobot import quest_daily
+    monkeypatch.setattr(quest_daily, "FILE", tmp_path/"rede"/"missoes_concluidas.json")
+    monkeypatch.setattr(quest_daily, "CHARACTER", None)
     from nrobot import quest_routes
     monkeypatch.setattr(quest_routes, "FILE", tmp_path/"rede"/"rotas_quests.json")
     from nrobot import watchlist

@@ -35,6 +35,7 @@ def mark_key(npc_id, mark_id, serial=0):
 class MobScan:
     AUTOMATIC_ENABLED = False  # temporarily suspended: use the normal continuous patrol
     INTERVAL = 60.0  # s between two searches of the same hunt
+    CYCLE_INTERVAL = 30.0  # s: Ciclo @showmobs, monster not respawned yet: ask again this often
     GAP = 4.0  # s between two @showmobs
     LISTEN = 3.0  # s in which marks are taken as the answer to the last @showmobs
     FIELD_SIZE = 50
@@ -51,6 +52,9 @@ class MobScan:
         self.silent = 0
         self.suspended = False
         self.failed_maps = set()
+        # Ciclo @showmobs: one monster per map; asked again every CYCLE_INTERVAL until it is
+        # alive, and walked to wherever it is (no FAR_SINGLE limit).
+        self.cycle = False
 
     def reset_failures(self):
         """Hunt or queue started again: @showmobs is tried again on every map."""
@@ -67,6 +71,12 @@ class MobScan:
         from .portals import PortalGuard
         if self.map:
             self.failed_maps.add(PortalGuard.key(self.map))
+        if self.cycle and self.goal is not None:
+            # Ciclo: a mark taken from the minimap (cycle_mark_goal) is still the monster's spot;
+            # a round that closed without its own marks must not erase it (2026-11-11: the plant
+            # at prt_fild02 357,246 was marked every 30 s and the character never left its place).
+            self.failed_maps.discard(PortalGuard.key(self.map))
+            return
         self.goal = None
 
     def reset(self):
@@ -108,7 +118,10 @@ class MobScan:
                 return None
             if job['generation'] != self._generation:
                 return None
+            keep = self.cycle and worker.goal is None and self.goal is not None  # set while it ran
             for field in ('goal', 'goal_until', 'round_open', 'silent', 'suspended', 'failed_maps'):
+                if keep and field in ('goal', 'goal_until', 'failed_maps'):
+                    continue
                 setattr(self, field, getattr(worker, field))
             self.last_calculation_ms = elapsed
             self.calculation_error = None
@@ -167,8 +180,8 @@ class MobScan:
             self.suspended = False
         if self.queue or self.round_open:
             return False
-        due = idle and now-self.round_at >= self.INTERVAL
-        early_due = (early and self.seconds_to_next(now) > self.EARLY_GUARD
+        due = idle and now-self.round_at >= (self.CYCLE_INTERVAL if self.cycle else self.INTERVAL)
+        early_due = (early and not self.cycle and self.seconds_to_next(now) > self.EARLY_GUARD
                      and now-self.last_early_at >= self.EARLY_INTERVAL)
         if not due and not early_due:
             return False
@@ -307,7 +320,7 @@ class MobScan:
         if kept and best[0] <= kept[0]*self.KEEP_MARGIN:
             best=kept
         _score,(field,members,spot,center),path,cells=best
-        if len(members)<2 and cells>self.FAR_SINGLE:
+        if len(members)<2 and cells>self.FAR_SINGLE and not self.cycle:
             # One monster on the other side of the map is not worth the walk: keep patrolling.
             self.goal=None
             return None

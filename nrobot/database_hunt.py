@@ -15,6 +15,13 @@ import re
 from .portals import PortalGuard
 
 DATABASE_HUNT = 'database_hunt'
+def is_database_hunt(route_or_id):
+    """The temporary hunt route ("database_hunt"), including each stage of the Ciclo @showmobs
+    ("database_hunt#1", "database_hunt#2"...): a queue needs a different id per route."""
+    value = route_or_id.get('id') if isinstance(route_or_id, dict) else route_or_id
+    return isinstance(value, str) and (value == DATABASE_HUNT or value.startswith(DATABASE_HUNT+'#'))
+
+
 ENDLESS = 100000  # "until stopped": the largest kill count a quest accepts
 
 

@@ -141,6 +141,72 @@ def test_board_counting_fewer_kills_takes_its_numbers_and_hunts_again(engine):
     assert q.name_counts['shinobi prisioneiro']==50 and not q.hunt_complete()
 
 
+@pytest.mark.parametrize('earlier_map',[False,True])
+def test_refused_delivery_is_recovered_before_deferring_slot_check(engine,earlier_map):
+    import copy
+    import json
+    q,p=engine
+    beetle=dict(name='Besouro-Rei',count=50,species=[1034])
+    bee=dict(name='Abelha',count=50,species=[1035])
+    q.route['kill_targets']=[beetle]
+    if earlier_map:
+        first=q.route;first['mission_ids']=['D4'];first['target_map']='beetles'
+        last=copy.deepcopy(first);last.update(id='last',target_map='bees',mission_ids=['D4','D5'],kill_targets=[bee])
+        q.routes.append(last);q.index=1
+        q.chain=dict(indices=[0,1],hunting=[0,1],own={'0':['D4'],'1':['D5']},picked=['D4','D5'])
+        q.name_counts={'abelha':50}
+    else:q.name_counts={'besouro rei':50}
+    q.kills=50;q.completed_missions['pickup']=['D4','D5']
+    q.enter_stage('delivery',0)
+    q.steps=effective_steps(q.library,q.current_mission,'delivery')
+    q.step=next(i for i,s in enumerate(q.steps) if s.get('verify_start'))
+    q.slot_number=1
+    q.npc_texts=['Monstros : Besouro-Rei [48/50]','Você precisa matar todos os monstros da lista']
+    assert q.next_on_same_board()
+    assert q.plan('ra_in01',[219,95],None,p,2) is None
+    assert q.phase=='travel' and q.index==0 and not q.deferred_check
+    assert q.progress()[0]['done']==48
+    assert q.completed_missions['delivery']==[] and not q.daily_marks
+    if earlier_map:
+        assert q.route['target_map']=='beetles'
+        # Recovery survives JSON persistence, including integer sprite keys.
+        q.chain=json.loads(json.dumps(q.chain))
+        q.name_counts={'besouro rei':50};q.kills=50
+        q.finish_hunt(3)
+        assert q.phase=='delivery' and q.index==1
+        assert q.current_mission['id']=='D4' and q.name_counts=={'abelha':50}
+        assert 'delivery_retry' not in q.chain
+
+
+def test_refusal_without_usable_counts_is_not_marked_delivered(engine):
+    q,p=engine;q.enter_stage('delivery',0)
+    q.steps=effective_steps(q.library,q.current_mission,'delivery')
+    q.step=next(i for i,s in enumerate(q.steps) if s.get('verify_start'))
+    q.slot_number=1;q.npc_texts=['Você precisa matar todos os monstros da lista']
+    q.plan('ra_in01',[219,95],None,p,2)
+    assert not q.stage_confirmed and not q.deferred_check
+    assert not q.completed_missions['delivery'] and not q.daily_marks
+
+
+@pytest.mark.parametrize('still_present',[False,True])
+def test_deferred_delivery_is_saved_only_after_slot_confirmation(engine,still_present):
+    q,p=engine;q.enter_stage('delivery',0)
+    q.steps=effective_steps(q.library,q.current_mission,'delivery')
+    q.step=next(i for i,s in enumerate(q.steps) if s.get('verify_start'))
+    q.slot_number=1
+    q.plan('ra_in01',[219,95],None,p,1)
+    assert q.deferred_check and q.stage_confirmed
+    q.plan('ra_in01',[219,95],None,p,2)
+    assert q.current_mission['id']=='D5'
+    assert q.progress_state()['completed_missions']['delivery']==[]
+    put_menu(q,'select_mission_slot',['#1 Rank D-4' if still_present else '#1 Vázio','#2 Rank D-5'])
+    q.plan('ra_in01',[219,95],None,p,3)
+    if still_present:
+        assert q.phase=='paused' and not q.completed_missions['delivery'] and not q.daily_marks
+    else:
+        assert q.completed_missions['delivery']==['D4'] and len(q.daily_marks)==1
+
+
 def test_return_recording_survives_npc_disappearance_and_late_close(tmp_path,monkeypatch):
     from nrobot.session_relay import SessionRelay
     monkeypatch.setattr(lib,'FILE',tmp_path/'library.json')

@@ -6,7 +6,8 @@
     179,
     162
    ],
-   "confirmed": true
+   "confirmed": true,
+   "varies": true
   }
  },
  "areia": {
@@ -72,6 +73,14 @@
    "arrival": [
     31,
     8
+   ],
+   "confirmed": true
+  },
+  "149,94": {
+   "map": "bibli_02",
+   "arrival": [
+    52,
+    41
    ],
    "confirmed": true
   }
@@ -388,10 +397,10 @@
   "36,63": {
    "map": "um_dun02",
    "arrival": [
-    55,
-    18
+    53,
+    22
    ],
-   "confirmed": false
+   "confirmed": true
   },
   "134,55": {
    "map": "hospital2",
@@ -478,12 +487,13 @@
  },
  "ra_fild03": {
   "373,171": {
-   "map": "ve_fild04",
+   "map": "hospital2",
    "arrival": [
-    47,
-    250
+    25,
+    92
    ],
-   "confirmed": true
+   "confirmed": true,
+   "varies": true
   },
   "23,293": {
    "map": "ve_fild03",
@@ -527,7 +537,16 @@
     35,
     188
    ],
-   "confirmed": true
+   "confirmed": true,
+   "varies": true
+  },
+  "2,19": {
+   "map": "pvp_n_1-1",
+   "arrival": [
+    100,
+    182
+   ],
+   "confirmed": false
   }
  },
  "yuno_in03": {
@@ -565,7 +584,8 @@
     112,
     62
    ],
-   "confirmed": true
+   "confirmed": true,
+   "varies": true
   }
  },
  "hospital4": {
@@ -638,6 +658,14 @@
    "arrival": [
     158,
     380
+   ],
+   "confirmed": true
+  },
+  "30,235": {
+   "map": "mjolnir_07",
+   "arrival": [
+    380,
+    232
    ],
    "confirmed": true
   }
@@ -748,6 +776,14 @@
     351
    ],
    "confirmed": false
+  },
+  "26,276": {
+   "map": "yuno_fild08",
+   "arrival": [
+    372,
+    194
+   ],
+   "confirmed": true
   }
  },
  "salakage": {
@@ -828,6 +864,14 @@
     134
    ],
    "confirmed": true
+  },
+  "262,58": {
+   "map": "kakashi",
+   "arrival": [
+    120,
+    135
+   ],
+   "confirmed": true
   }
  },
  "moc_fild17": {
@@ -846,6 +890,177 @@
     311
    ],
    "confirmed": true
+  }
+ },
+ "pay_fild10": {
+  "16,291": {
+   "map": "um_fild01",
+   "arrival": [
+    365,
+    276
+   ],
+   "confirmed": true
+  }
+ },
+ "um_fild01": {
+  "369,274": {
+   "map": "pay_fild10",
+   "arrival": [
+    16,
+    291
+   ],
+   "confirmed": false
+  },
+  "32,275": {
+   "map": "gef_fild04",
+   "arrival": [
+    358,
+    323
+   ],
+   "confirmed": true
+  }
+ },
+ "gef_fild04": {
+  "361,323": {
+   "map": "um_fild01",
+   "arrival": [
+    35,
+    275
+   ],
+   "confirmed": true,
+   "varies": true
+  }
+ },
+ "mjolnir_07": {
+  "383,232": {
+   "map": "mjolnir_08",
+   "arrival": [
+    30,
+    235
+   ],
+   "confirmed": false
+  },
+  "214,382": {
+   "map": "moc_fild03",
+   "arrival": [
+    180,
+    19
+   ],
+   "confirmed": true
+  }
+ },
+ "moc_fild03": {
+  "180,16": {
+   "map": "mjolnir_07",
+   "arrival": [
+    214,
+    382
+   ],
+   "confirmed": false
+  },
+  "244,320": {
+   "map": "prt_fild01",
+   "arrival": [
+    200,
+    25
+   ],
+   "confirmed": true
+  }
+ },
+ "prt_fild01": {
+  "200,22": {
+   "map": "moc_fild03",
+   "arrival": [
+    244,
+    320
+   ],
+   "confirmed": false
+  },
+  "382,304": {
+   "map": "prt_fild02",
+   "arrival": [
+    20,
+    303
+   ],
+   "confirmed": true
+  }
+ },
+ "prt_fild02": {
+  "17,303": {
+   "map": "hospital2",
+   "arrival": [
+    25,
+    92
+   ],
+   "confirmed": true
+  }
+ },
+ "yuno_fild08": {
+  "375,194": {
+   "map": "ein_fild08",
+   "arrival": [
+    26,
+    276
+   ],
+   "confirmed": false
+  }
+ },
+ "bibli_02": {
+  "52,37": {
+   "map": "pvp_n_1-1",
+   "arrival": [
+    100,
+    179
+   ],
+   "confirmed": true
+  }
+ },
+ "pvp_n_1-1": {
+  "100,182": {
+   "map": "payon_in03",
+   "arrival": [
+    4,
+    19
+   ],
+   "confirmed": true
+  }
+ },
+ "orochimaru": {
+  "197,67": {
+   "map": "gef_fild10",
+   "arrival": [
+    30,
+    219
+   ],
+   "confirmed": true
+  },
+  "80,144": {
+   "map": "ayo_dun01",
+   "arrival": [
+    8,
+    148
+   ],
+   "confirmed": true
+  }
+ },
+ "gef_fild10": {
+  "26,219": {
+   "map": "orochimaru",
+   "arrival": [
+    197,
+    63
+   ],
+   "confirmed": true
+  }
+ },
+ "ayo_dun01": {
+  "6,148": {
+   "map": "orochimaru",
+   "arrival": [
+    80,
+    144
+   ],
+   "confirmed": false
   }
  }
 }

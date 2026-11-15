@@ -84,8 +84,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-4",
    "arrival": [
-    282,
-    184
+    81,
+    294
    ]
   },
   "161,25>um_dun01>Esconderijo do Clã Kamizuru": {
@@ -346,8 +346,8 @@
    "to": "pay_fild10",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    244,
-    85
+    134,
+    59
    ]
   },
   "217,86>ve_fild04>Mamutes da Suna": {
@@ -398,8 +398,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    263,
-    269
+    226,
+    93
    ]
   },
   "217,86>anthell01>Esconderijo do Clã Kamizuru Nível 2": {
@@ -450,8 +450,8 @@
    "to": "anthell01",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    184,
-    38
+    181,
+    74
    ]
   },
   "217,86>um_dun01>Esconderijo do Clã Kamizuru": {
@@ -642,8 +642,8 @@
    "to": "mjolnir_08",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    320,
-    258
+    220,
+    259
    ]
   },
   "213,80>hospital4>Sim": {
@@ -730,8 +730,8 @@
    "to": "ein_fild01",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    278,
-    299
+    62,
+    157
    ]
   }
  },
@@ -1036,8 +1036,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    67,
-    3
+    26,
+    38
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [3] |Sim": {
@@ -1077,8 +1077,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    62,
-    47
+    51,
+    59
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [5] |Sim": {
@@ -1118,8 +1118,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    69,
-    35
+    52,
+    15
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [1] |Sim": {
@@ -1159,8 +1159,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    33,
-    49
+    32,
+    19
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [4] |Sim": {
@@ -1200,8 +1200,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    62,
-    7
+    19,
+    54
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [6] |Sim": {
@@ -1241,8 +1241,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    57,
-    34
+    77,
+    5
    ]
   },
   "78,121>new_4-2>- Sim": {
@@ -1354,8 +1354,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    47,
-    56
+    31,
+    60
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [7] |Sim": {
@@ -1395,8 +1395,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    44,
-    4
+    23,
+    14
    ]
   },
   "115,140>arug_cas03>- Sim, quero lutar": {
@@ -1463,8 +1463,8 @@
    "to": "poring_c01",
    "name": "Dojo",
    "arrival": [
-    106,
-    114
+    111,
+    106
    ]
   },
   "92,127>que_moc_16>- Sim, claro": {
@@ -1533,6 +1533,119 @@
    "arrival": [
     55,
     143
+   ]
+  },
+  "90,143>nif_in>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      90,
+      143
+     ],
+     "name": "Comércio Shinobi"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "nif_in.gat"
+    }
+   ],
+   "to": "nif_in",
+   "name": "Comércio Shinobi",
+   "arrival": [
+    12,
+    87
+   ]
+  },
+  "100,146>chunin>^9A32CDArena Chunin^000000 [10] |Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Chunin^000000 [10] "
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "chunin.gat"
+    }
+   ],
+   "to": "chunin",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    44,
+    21
+   ]
+  },
+  "100,146>chunin>^9A32CDArena Chunin^000000 [9] |Sim": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      100,
+      146
+     ],
+     "name": "Arenas de Guerra#3"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "^9A32CDArena Chunin^000000 [9] "
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Sim"
+    },
+    {
+     "kind": "wait_map",
+     "map": "chunin.gat"
+    }
+   ],
+   "to": "chunin",
+   "name": "Arenas de Guerra#3",
+   "arrival": [
+    78,
+    46
    ]
   }
  },
@@ -1875,6 +1988,47 @@
     35,
     188
    ]
+  },
+  "7,29>bat_c03>- Avançado|Yubi": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "payon_in03.gat",
+     "position": [
+      7,
+      29
+     ],
+     "name": "Genjutsu"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "- Avançado"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "select",
+     "map": "payon_in03.gat",
+     "option": "Yubi"
+    },
+    {
+     "kind": "next",
+     "map": "payon_in03.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "bat_c03.gat"
+    }
+   ],
+   "to": "bat_c03",
+   "name": "Genjutsu",
+   "arrival": [
+    146,
+    55
+   ]
   }
  },
  "new_4-2": {
@@ -2077,8 +2231,8 @@
    "to": "bat_c03",
    "name": "Battleground 4x4",
    "arrival": [
-    53,
-    127
+    146,
+    53
    ]
   },
   "115,114>bat_c03>Ok": {
@@ -2210,7 +2364,8 @@
  "_descartados": {
   "hospital2": {
    "35,76>areia>": "curandeira: nao troca de mapa",
-   "25,70>areia>": "curandeira: nao troca de mapa"
+   "25,70>areia>": "curandeira: nao troca de mapa",
+   "25,70>kakashi>": "nao trocou de mapa"
   }
  },
  "poring_w01": {},
@@ -2239,8 +2394,8 @@
    "to": "kakashi",
    "name": "Juiz#DJ",
    "arrival": [
-    148,
-    152
+    103,
+    139
    ]
   }
  },
@@ -2319,6 +2474,106 @@
    "arrival": [
     9,
     195
+   ]
+  }
+ },
+ "nif_in": {
+  "14,91>kakashi>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "nif_in.gat",
+     "position": [
+      14,
+      91
+     ],
+     "name": "Voltar"
+    },
+    {
+     "kind": "wait_map",
+     "map": "kakashi.gat"
+    }
+   ],
+   "to": "kakashi",
+   "name": "Voltar",
+   "arrival": [
+    90,
+    106
+   ]
+  }
+ },
+ "bibli_02": {
+  "61,36>pvp_n_1-1>- Kibaku Nendo|- Sim. Eu sou deste clã": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "bibli_02.gat",
+     "position": [
+      61,
+      36
+     ],
+     "name": "Pesquisador#11"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "select",
+     "map": "bibli_02.gat",
+     "option": "- Kibaku Nendo"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "select",
+     "map": "bibli_02.gat",
+     "option": "- Sim. Eu sou deste clã"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "pvp_n_1-1.gat"
+    }
+   ],
+   "to": "pvp_n_1-1",
+   "name": "Pesquisador#11",
+   "arrival": [
+    100,
+    179
    ]
   }
  }

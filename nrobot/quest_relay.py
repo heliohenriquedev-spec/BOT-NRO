@@ -8,7 +8,7 @@ from .quest_routes import QuestRoutes, load, save, STAGE_FIELDS, text
 from .packet_encoder import move, STAND
 from .portals import PortalGuard
 from .quest_library_relay import SharedQuestRelay
-from .database_hunt import DATABASE_HUNT, database_hunt_route, goal_reached
+from .database_hunt import DATABASE_HUNT, database_hunt_route, goal_reached, is_database_hunt
 
 
 class QuestRelay(SharedQuestRelay):
@@ -17,7 +17,7 @@ class QuestRelay(SharedQuestRelay):
         self.quests.async_paths=True  # long route searches off the relay's loop (no frozen game)
 
     def quest_stop(self,reason):
-        was_database_hunt = bool(self.quests.route and self.quests.route.get('id') == DATABASE_HUNT)
+        was_database_hunt = bool(self.quests.route and is_database_hunt(self.quests.route))
         if self.quests.active:print('[ROTA] Parada: '+reason)
         if self.quests.active or self.quests.phase=='done':self.save_progress(time.monotonic(),force=True)
         if reason!=self.quests.reason:self.quests.resume=None  # paused by the player: stays paused
@@ -34,10 +34,10 @@ class QuestRelay(SharedQuestRelay):
         self.quests.route_position=self.tracker.observer.player
         self.quests.route_position_map=self.tracker.observer.map_name
         self.quests.route_collision=self.map_repository.get if self.map_repository else None
-        if command in ('quest_start','quest_resume','quest_hunt_database','quest_test_route','quest_test_stage_route',
+        if command in ('quest_start','quest_resume','quest_hunt_database','quest_showmobs_cycle','quest_test_route','quest_test_stage_route',
                        'quest_map_test','quest_record','quest_map_record','quest_bg_record'):
             self.bg_attempt=None  # another task takes over: no more BG retries afterwards
-        if command in ('quest_start','quest_resume','quest_hunt_database'):
+        if command in ('quest_start','quest_resume','quest_hunt_database','quest_showmobs_cycle'):
             self.mob_scan.reset_failures()  # started again: @showmobs is tried again on every map
         from . import map_routes, quest_daily, quest_extras
         try:self.quests.extras=quest_extras.for_character(quest_extras.load(),(self.own_look or {}).get('name'))
@@ -178,10 +178,215 @@ class QuestRelay(SharedQuestRelay):
             self.quests.slot_owner=quest_daily.load_slots()
             self.quest_base_settings=copy.deepcopy(getattr(self,'map_behavior_base',None) or self.settings);self.commands_blocked=False
             print(f"[ROTA] Caca pela database: {route['target_map']} ({len(route['species'])} monstros)")
+        elif command=='quest_showmobs_cycle':
+            # Ciclo @showmobs: each stage travels from the save point, kills 1 of its monster found by
+            # @showmobs, uses @voltar and only then goes on; after the last stage, the first again.
+            if self.quests.recording:raise ValueError('Salve ou descarte o trajeto antes do ciclo')
+            if not self.allow_commands:raise ValueError('Relay em modo somente observacao')
+            if self.upstream is None or not game_gate():raise ValueError('Entre no personagem antes de iniciar o ciclo')
+            if self.group_follower():raise ValueError('Desative o modo seguidor para o ciclo')
+            if not (self.quests.extras or {}).get('voltar_frame'):raise ValueError('Ensine o @voltar antes (Rotas > opcoes > Gravar @voltar)')
+            from . import showmobs_cycle
+            from .npc_transports import as_entries
+            config=showmobs_cycle.load()
+            entries=map_routes.adopt_inner_portals(map_routes.load(),self.portals)
+            routes=showmobs_cycle.build_routes(config,self.portals.destinations,entries+as_entries(self.npc_transports.known))
+            here=PortalGuard.key(self.tracker.observer.map_name or '')
+            now=time.monotonic()
+            # Etapa inicial: a escolhida no painel, ou (automatico) a do mapa onde o personagem ja
+            # esta; fora de qualquer mapa do ciclo, a primeira.
+            chosen=request.get('start_stage')
+            stage_here=next((i for i,s in enumerate(config['stages']) if s['map']==here),None)
+            if stage_here is None and here!=config['save_map']:
+                stage_here=showmobs_cycle.stage_on_the_way(routes,here)  # parou no meio do caminho de uma etapa
+            start=int(chosen) if type(chosen) is int and chosen>=0 else (stage_here or 0)
+            if not 0<=start<len(routes):raise ValueError('Etapa inicial invalida')
+            # Rota dinamica: do mapa onde o personagem esta ate a etapa, sem voltar ao ponto salvo.
+            continued=None
+            if here not in (config['save_map'],config['stages'][start]['map']):
+                continued=showmobs_cycle.steps_from_here(config['stages'][start],here,self.portals.destinations,
+                                                         entries+as_entries(self.npc_transports.known))
+                if continued:routes[start]=dict(routes[start],steps=continued)
+            routes=routes[start:]+routes[:start]
+            self.quest_stop('Preparando ciclo @showmobs')
+            self.know_quest_character()
+            q=self.quests
+            q.start(map_routes.apply(routes,entries),now,map_routes=entries)
+            q.cycle=True
+            q.slot_owner=quest_daily.load_slots()
+            if here==config['stages'][start]['map']:
+                # Ja no mapa do monstro: caca aqui mesmo, montado, sem @voltar nem viagem.
+                q.errands=[];q.phase='hunt';q.last_stage=('hunt',0);q.map=self.tracker.observer.map_name
+                q.reason='Cacando: '+q.route['name']+' (ja no mapa)'
+                print('[CICLO] Ja no mapa da etapa: cacando aqui em '+here)
+            elif continued:
+                print(f"[CICLO] Seguindo daqui ({here}) para {config['stages'][start]['map']}, sem @voltar")
+            elif here!=config['save_map']:
+                # Cada etapa sai do ponto salvo: desce da montaria e da @voltar antes; a montaria
+                # para a viagem vem depois (montado o @voltar nao sai).
+                q.errands=[e for e in q.errands if e.kind!='mount']
+                q.queue('gear',now,before_voltar=True);q.queue('voltar',now,force=True);q.queue('mount',now)
+            self.quest_base_settings=copy.deepcopy(getattr(self,'map_behavior_base',None) or self.settings);self.commands_blocked=False
+            print('[CICLO] Iniciado: '+' -> '.join(r['name'] for r in routes))
         elif command=='quest_stop':self.bg_attempt=None;self.quest_stop('Fila pausada pelo usuario')
         else:raise ValueError('Comando de rota desconhecido')
         if command in ('quest_start','quest_resume'):
             self.save_progress(time.monotonic(),force=True)
+
+    def high_jump_level(self,observer):
+        skill=next((v for v in (getattr(observer,'skills',None) or {}).values() if v.get('skill_id')==426),None)
+        return int(skill.get('level') or 0) if skill else 0
+
+    async def cycle_high_jump(self,now,observer,game_gate):
+        """Ciclo @showmobs: Salto Ninja por cima das paredes quando corta bastante caminho.
+
+        Em cada trecho de mapa (ate o portal ou NPC) o caminho com salto e calculado uma vez, em
+        segundo plano. Se valer a pena, entram na rota: andar ate a celula antes da decolagem, um
+        passo ate a decolagem (vira o personagem) e o salto: desce da montaria, salta, confere a
+        chegada (01FF) e monta de novo. Salto que nao sai do lugar fica proibido nesta sessao."""
+        import asyncio
+        from . import high_jump
+        q=self.quests
+        # steps is None until the trip's itinerary is built on the first plan of the stage.
+        if not q.steps or q.step>=len(q.steps) or q.errands:return False
+        step=q.steps[q.step];here=PortalGuard.key(observer.map_name or '')
+        if step['kind']=='jump':return await self.high_jump_execute(step,now,observer,game_gate)
+        options=q.route.get('high_jump') or {}
+        level=self.high_jump_level(observer)
+        if (not options.get('enabled') or level<1 or step.get('jump_plan') or step['kind'] not in ('walk','portal','npc')
+                or PortalGuard.key(step['map'])!=here or not observer.player):
+            return False
+        status,result=self.jump_plan_result((here,id(q.steps),q.step),step,step['position'],observer,options,level,now)
+        if status=='pending':return False  # keeps walking meanwhile; the jump is added when found
+        if result and not self.jump_still_ahead(result,observer):return False
+        if not result:return False
+        q.steps[q.step:q.step]=self.jump_steps(step['map'],result)
+        print(f"[CICLO] Salto Ninja em {here}: de {result['takeoff']} para {result['landing']} "
+              f"(caminho de {result['walk']} para {result['with_jump']} celulas)")
+        return False
+
+    def cycle_reroute(self,now,observer):
+        """Ciclo @showmobs: em um mapa fora do caminho previsto (portal errado, teleporte, morte),
+        recalcula o caminho daqui ate a etapa pelos portais e NPCs aprendidos, em vez de parar."""
+        q=self.quests;here=PortalGuard.key(observer.map_name or '')
+        if not q.steps or q.step>=len(q.steps) or q.errands or not here or not observer.player:return False
+        step=q.steps[q.step]
+        expected=PortalGuard.key(step.get('map') or '')
+        if expected==here or now-q.progress_at<5:return False  # wait_map: give the warp a moment
+        if any(PortalGuard.key(s.get('map') or '')==here for s in q.steps[q.step:q.step+2]):return False
+        if now-getattr(self,'cycle_reroute_at',-1e9)<10:return False
+        self.cycle_reroute_at=now
+        from . import showmobs_cycle
+        from .npc_transports import as_entries
+        from . import map_routes
+        target=PortalGuard.key(q.route['target_map'])
+        if here==target:
+            q.steps=[];q.step=0;q.progress_at=now  # already on the monster's map: the hunt starts here
+            print(f'[CICLO] Ja no mapa da etapa ({here}): cacando aqui');return True
+        stage=next((s for s in showmobs_cycle.load()['stages'] if s['map']==target),{'name':target,'map':target})
+        steps=showmobs_cycle.steps_from_here(stage,here,self.portals.destinations,map_routes.load()+as_entries(self.npc_transports.known))
+        if not steps:return False
+        q.steps=steps;q.step=0;q.progress_at=now
+        print(f'[CICLO] Fora do caminho previsto em {here}: novo caminho ate {target}')
+        return True
+
+    @staticmethod
+    def jump_still_ahead(result,observer):
+        """Calculated from where the walk was a moment ago: worth it only if the takeoff is not
+        already behind (the character walked on while it was calculated)."""
+        from .portals import chebyshev
+        here=tuple(observer.player or ());return bool(here) and chebyshev(here,result['takeoff'])<=result['with_jump']
+
+    @staticmethod
+    def jump_steps(map_gat,result):
+        """Cell before the takeoff, the takeoff (that last step turns the character) and the jump."""
+        return [dict(kind='walk',map=map_gat,position=result['prep'],exact=True,jump_plan=True),
+                dict(kind='walk',map=map_gat,position=result['takeoff'],exact=True,jump_plan=True),
+                dict(kind='jump',map=map_gat,position=result['takeoff'],landing=result['landing'],
+                     direction=result['direction'],jump_plan=True)]
+
+    def jump_plan_result(self,key,step,goal,observer,options,level,now):
+        """('pending', None) while calculating in the background; ('done', plan or None) once."""
+        import asyncio
+        from . import high_jump
+        q=self.quests
+        planned=self.__dict__.setdefault('jump_planned',set());banned=self.__dict__.setdefault('jump_banned',set())
+        if key in planned:return 'done',None
+        job=getattr(self,'jump_job',None)
+        if job is None or job['key']!=key:
+            collision=self.collision_map()
+            if collision is None:planned.add(key);return 'done',None
+            here=PortalGuard.key(observer.map_name or '')
+            nav=q.navigation(observer.map_name,collision,self.portals,step,hazards=False)
+            bans=frozenset((tuple(a),tuple(d)) for m,a,d in banned if m==here)
+            # Separate process: a long pure-Python search in a thread held the relay (and the walk).
+            task=high_jump.submit(asyncio.get_running_loop(),nav,observer.player,goal,reach=level*2,
+                jump_cost=float(options.get('cost',high_jump.JUMP_COST)),
+                min_saving=float(options.get('min_saving',high_jump.MIN_SAVING)),banned=bans)
+            self.jump_job={'key':key,'task':task}
+            return 'pending',None
+        if not job['task'].done():
+            return 'pending',None
+        self.jump_job=None;planned.add(key)
+        try:return 'done',job['task'].result()
+        except Exception as exc:
+            print(f'[CICLO] Calculo do Salto Ninja falhou: {type(exc).__name__}: {exc}');return 'done',None
+
+    async def cycle_hunt_jump(self,now,observer):
+        """Ciclo @showmobs, no mapa de caca: o monstro marcado pelo @showmobs esta longe e um Salto
+        Ninja encurta bastante o caminho. A caca vira uma viagem curta (decolagem, salto) e volta
+        a cacar de onde caiu; a contagem do monstro nao muda."""
+        q=self.quests;options=q.route.get('high_jump') or {}
+        level=self.high_jump_level(observer)
+        if not options.get('enabled') or level<1 or q.errands or not observer.player or self.hunt.target is not None:return False
+        goal=self.mob_scan.current_goal(observer.player,now)
+        if not goal:return False
+        here=PortalGuard.key(observer.map_name or '')
+        step=dict(kind='walk',map=q.route['target_map'],position=list(goal))
+        # One calculation per marked spot (not per cell walked): the walk toward it goes on meanwhile.
+        status,result=self.jump_plan_result((here,'showmobs',tuple(goal)),step,goal,observer,options,level,now)
+        if status=='pending':return False
+        if not result:return False
+        print(f"[CICLO] Salto Ninja ate o monstro em {here}: de {result['takeoff']} para {result['landing']} "
+              f"(caminho de {result['walk']} para {result['with_jump']} celulas)")
+        q.enter_stage('travel',now)
+        q.steps=self.jump_steps(q.route['target_map'],result)
+        self.hunt.pause('Indo saltar com o Salto Ninja');self.quest_hunt_id=None  # the hunt is set up again after the jump
+        return True
+
+    async def high_jump_execute(self,step,now,observer,game_gate):
+        q=self.quests;state=getattr(self,'jump_state',None)
+        if state is None or state['step'] is not step:
+            if list(observer.player or [])!=list(step['position']):
+                q.step=max(0,q.step-1);return True  # not on the takeoff cell: walk the last step again
+            # Off the mount first (combat items back on), like before @voltar.
+            q.queue('gear',now,before_voltar=True)
+            self.jump_state={'step':step,'stage':'cast','sent_at':None}
+            q.reason='Salto Ninja: descendo da montaria';q.progress_at=now
+            return True
+        if state['stage']=='cast':
+            from .packet_encoder import skill
+            level=self.high_jump_level(observer)
+            payload=skill(observer.player_id,426,level)
+            if self.native_frames.fallback().get(0x72)!=len(payload):
+                self.quest_stop('Pacote do Salto Ninja nao validado para este cliente');return True
+            async with self.send_lock:
+                if not self.native_frames.ready or self.commands_blocked or not game_gate() or self.upstream is None:return True
+                self.trace_map_send('bot',0x72,len(payload));self.upstream.write(payload);await self.upstream.drain()
+            state.update(stage='land',sent_at=now);q.reason='Salto Ninja: saltando';q.progress_at=now
+            return True
+        landed=list(observer.player or [])==list(step['landing'])
+        if landed or now-state['sent_at']>3.5:
+            if not landed:
+                banned=self.__dict__.setdefault('jump_banned',set())
+                banned.add((PortalGuard.key(step['map']),tuple(step['position']),tuple(step['direction'])))
+                print(f"[CICLO] Salto Ninja nao saiu de {step['position']} (chegada ocupada ou mapa nao permite); seguindo a pe")
+            else:
+                print(f"[CICLO] Salto Ninja: chegou em {step['landing']}")
+            self.jump_state=None;q.step+=1;q.progress_at=now
+            q.queue('mount',now)  # back on the mount for the rest of the trip
+            return True
+        return True
 
     async def quest_errand(self,now,game_gate):
         """@voltar, mount or combat equipment: kill what is around, wait out of combat, then act."""
@@ -197,7 +402,10 @@ class QuestRelay(SharedQuestRelay):
             if (e and e['present_last_observation'] and not is_player_id(identity) and now-hit_at<=15 and o.player
                 and chebyshev(e.get('destination') or e['position'],o.player)<=errand.config['clear_radius']*2):
                 near.append((identity,e['species_id']))
-        if errand.kind=='voltar' and o.player:
+        cycle=bool((q.route or {}).get('cycle'))
+        if errand.kind=='voltar' and o.player and not cycle:
+            # (Ciclo @showmobs: peaceful maps, the monsters around are left alone; only one that is
+            # actually hitting the character, listed above, is killed before @voltar.)
             # Before @voltar: any monster within the configured radius goes too, attacking yet or not,
             # hitting or missing, whatever species: nothing near may break the casting.
             from .presence_guard import monster_sprite
@@ -205,6 +413,12 @@ class QuestRelay(SharedQuestRelay):
             near+=[(i,e['species_id']) for i,e in self.inventory.entities.items() if i not in listed and e['present_last_observation']
                    and not is_player_id(i) and monster_sprite(e['species_id'])
                    and chebyshev(e.get('destination') or e['position'],o.player)<=errand.config['clear_radius']]
+        if (cycle and not near and errand.kind=='mount' and o.player and now-q.body.last_combat<5
+                and (errand.attempts>=1 or now-errand.started>8)):
+            # Ciclo @showmobs: the mount is refused while something hits the character and the
+            # attacker was not identified: kill the monsters right next to it, then mount.
+            near=[(i,e['species_id']) for i,e in self.inventory.entities.items() if e['present_last_observation']
+                  and not is_player_id(i) and i>=110000000 and chebyshev(e.get('destination') or e['position'],o.player)<=3]
         if not near and errand.kind!='gear' and now-errand.started>45 and now-q.body.last_combat<5 and o.player:
             # Still hit after 45 s and the attacker was not identified: clear what is right around.
             near=[(i,e['species_id']) for i,e in self.inventory.entities.items() if e['present_last_observation']
@@ -540,8 +754,12 @@ class QuestRelay(SharedQuestRelay):
             q.reason=f'{name.capitalize()} quebrou: consertando no Reparador e voltando a {back}'
         q.steps=path
         if voltar:
+            if (q.route or {}).get('cycle'):
+                q.queue('gear',now,before_voltar=True)
             q.queue('voltar',now,force=True)
-            q.errands.sort(key=lambda e:e.kind!='voltar')  # @voltar first, the mount after it
+            # The cycle hunts mounted: dismount before the return needed for a
+            # repair as well, then mount again for the trip to the repairer.
+            q.errands.sort(key=lambda e:0 if getattr(e,'before_voltar',False) else 1 if e.kind=='voltar' else 2)
             q.reason+=' (usando @voltar ate o ponto salvo)'
         if self.hunt is not None:self.hunt.pause(q.reason)
         print('[ROTA] '+q.reason)
@@ -853,7 +1071,7 @@ class QuestRelay(SharedQuestRelay):
         Normal: every counted monster (finished ones too) and whoever attacks. With "ignorar":
         only monsters still missing kills, plus the ones marked to always attack."""
         route=q.route
-        if route.get('id')==DATABASE_HUNT and q.phase=='hunt':
+        if is_database_hunt(route) and q.phase=='hunt':
             combat=self.active_map_combat()
             if combat:
                 species=sorted(combat.ranks)
@@ -872,7 +1090,7 @@ class QuestRelay(SharedQuestRelay):
         """Persist every changed counter/stage; unchanged packet batches do no disk writes."""
         from . import quest_progress
         q=self.quests
-        if any(r.get('id')==DATABASE_HUNT for r in q.routes or []):return  # keeps the queue's resume point
+        if any(is_database_hunt(r) for r in q.routes or []):return  # keeps the queue's resume point
         state=q.progress_state()
         if state:state['character']=(self.own_look or {}).get('name')
         if not force and state==getattr(self,'progress_saved_state',None):return
@@ -919,6 +1137,27 @@ class QuestRelay(SharedQuestRelay):
                                                   event={k:e[k] for k in keep if k in e}),ensure_ascii=False)+'\n')
             except OSError:pass
 
+    def trace_route_wait(self,reason,now):
+        """Explain a sustained route hold without changing packet or movement guards."""
+        q=self.quests;o=self.tracker.observer
+        if not q.active or q.phase=='hunt':return
+        key=(q.index,q.phase,q.step,o.map_name,tuple(o.player or ()),reason)
+        wait=getattr(self,'route_wait_trace',None)
+        if wait is None or wait['key']!=key:
+            self.route_wait_trace=dict(key=key,since=now,logged_at=None,reason=reason)
+            return
+        if now-wait['since']<5 or wait['logged_at'] is not None and now-wait['logged_at']<15:return
+        wait['logged_at']=now
+        step=q.steps[q.step] if q.steps and q.step<len(q.steps) else {}
+        motion=o.player_motion
+        self.record_hunt(dict(kind='quest_route_wait',reason=reason,seconds=round(now-wait['since'],1),
+            map=o.map_name,position=o.player,phase=q.phase,step=q.step+1,step_kind=step.get('kind'),
+            destination=step.get('position'),pending=copy.deepcopy(q.pending),
+            native_pending_bytes=len(self.native_frames.buffer),
+            walk_remaining=round(max(0,motion['at']+motion['duration']-now),2) if motion else 0,
+            path_jobs=sum(not j['done'] for j in q.path_jobs.values())))
+        print(f"[ROTA] Aguardando ha {now-wait['since']:.0f} s: {reason} (etapa {q.step+1}, mapa {o.map_name})")
+
     async def quest_tick(self,game_gate):
         q=self.quests
         await self.close_bg_result_dialog(game_gate)
@@ -941,6 +1180,7 @@ class QuestRelay(SharedQuestRelay):
             self.quest_stop(self.native_frames.error);return False
         now=time.monotonic();observer=self.tracker.observer
         if self.upstream is None or not game_gate() or not observer.player_position_valid(now):
+            self.trace_route_wait('conexao ou posicao indisponivel',now)
             # A moment without position (own character left the view, repositioned) is not a stop:
             # only 30 s in a row is. Measured from the last valid position, hunting included.
             lost=getattr(q,'position_lost_at',None)
@@ -954,6 +1194,7 @@ class QuestRelay(SharedQuestRelay):
         if getattr(self,'revive',None) is not None and observer.player_alive:
             self.resume_after_revive(now);getattr(self,'tick_mark',lambda label:None)('rota_reviver');return True
         if self.manual_control(now):
+            self.trace_route_wait('controle manual',now)
             q.progress_at=now;return True
         if q.phase=='hunt' and not q.errands:
             # Players around only matter while fighting; trips, mount and equipment switches carry on.
@@ -970,6 +1211,10 @@ class QuestRelay(SharedQuestRelay):
                 print('[ROTA] '+q.reason);return True
             species=self.quest_species(q)
             if not species:
+                if not q.hunt_complete():
+                    missing=', '.join(p['name'] for p in q.progress() if not p['complete'])
+                    self.quest_stop('Faltam identificadores dos monstros para cacar: '+missing+'; revise os monstros da quest')
+                    return True
                 self.hunt.pause('Todos os monstros da quest concluidos');q.finish_hunt(now);self.quest_hunt_id=None;return True
             key=(q.route['id'],tuple(species),tuple(t['name'] for t in self.quest_targets_open(q)))
             if self.quest_hunt_id!=key:
@@ -977,18 +1222,27 @@ class QuestRelay(SharedQuestRelay):
                     print('[ROTA] Monstros atacados agora: '+', '.join(map(str,species)))
                 settings=copy.deepcopy(self.settings)
                 settings.update(species=species,auto_map_targets=False,monster_name_choices=self.quest_name_choices(q),pvp_enabled=False,patrol=True)
-                map_combat=self.active_map_combat() if q.route['id']==DATABASE_HUNT else None
+                if q.route.get('cycle'):
+                    # Ciclo @showmobs: peaceful maps, one monster: basic attacks only, still mounted,
+                    # no skills or buffs, and no map profile with its own skill rules.
+                    settings.update(skills=False,auto_attacks=True)
+                map_combat=self.active_map_combat() if is_database_hunt(q.route) and not q.route.get('cycle') else None
                 self.apply_settings(settings,map_overlay=map_combat is not None);self.hunt.start();self.quest_hunt_id=key
                 priorities=map_combat.ranks if map_combat else (q.route.get('attack_priority') or {})
                 self.hunt.target_priority={int(k):v for k,v in priorities.items()}
             elif not self.hunt.enabled:
                 self.quest_stop('Caca interrompida: '+self.hunt.reason);return True
+            if q.route.get('cycle') and await self.cycle_hunt_jump(now,observer):return True
             goal=None
-            if q.route['id']==DATABASE_HUNT and now-getattr(self,'goal_checked_at',-1e9)>=.5:
+            if is_database_hunt(q.route) and now-getattr(self,'goal_checked_at',-1e9)>=.5:
                 self.goal_checked_at=now  # the inventory scan twice a second is plenty for a goal
                 goal=goal_reached(q.route,q.body.items(),now)
             if goal:print('[ROTA] Meta da caca concluida: '+goal)
             if goal or q.hunt_complete():
+                if q.route.get('cycle'):
+                    from .showmobs_cycle import record_kill
+                    before=record_kill(q.route['name'].split(': ',1)[-1],q.route['species'][0])
+                    print(f"[CICLO] {q.route['name']}: monstro morto"+(f' ({before} min depois da morte anterior)' if before is not None else '')+'; @voltar e proxima etapa')
                 self.hunt.pause('Meta da caca concluida: '+goal if goal else 'Objetivo da quest concluido');q.finish_hunt(now);self.quest_hunt_id=None
                 if q.phase=='done':
                     reason=q.reason;self.quest_stop(reason);q.phase='done'
@@ -996,28 +1250,40 @@ class QuestRelay(SharedQuestRelay):
             return False
         # Only this executor may move while traveling. Combat resumes after destination confirmation.
         if self.hunt.enabled:self.hunt.pause('Percorrendo rota de quest')
+        if q.route.get('cycle') and q.phase=='travel' and self.cycle_reroute(now,observer):
+            return True
+        if q.route.get('cycle') and q.phase=='travel' and await self.cycle_high_jump(now,observer,game_gate):
+            return True
         if self.walking_now():
             # The next leg goes out just before this one ends: waiting for the stop made the character
             # walk 8 cells, stand, walk again, which looked like lag on every trip (2026-11-09).
             motion=observer.player_motion
-            if motion['at']+motion['duration']-now>self.ROUTE_CHAIN_SECONDS:return True
+            if motion['at']+motion['duration']-now>self.ROUTE_CHAIN_SECONDS:
+                self.trace_route_wait('termino do movimento confirmado',now);return True
         positions=observer.combat_positions(now)
         position=positions[0] if positions else observer.player
         collision=self.collision_map()
         q.route_collision=self.map_repository.get if self.map_repository else None
         getattr(self,'tick_mark',lambda label:None)('rota_antes_do_plano')
-        action=q.plan(observer.map_name,position,collision,self.portals,now)
+        action=q.plan(observer.map_name,position,collision,self.portals,now,
+                      portal_escape=lambda point,step:self.leave_portal_area(now,travelling=True,position=point,
+                          allowed_portal=step['position'] if step['kind']=='portal' else None))
         getattr(self,'tick_mark',lambda label:None)('rota_plano')
         self.flush_daily()
         if q.phase=='paused':
             print('[ROTA] Parada: '+q.reason);self.quest_stop(q.reason);return True
         if q.phase=='done':
             reason=q.reason;self.quest_stop(reason);q.phase='done';return True
-        if action is None:return True
+        if action is None:
+            reason=('calculo do caminho' if any(not j['done'] for j in q.path_jobs.values()) else
+                    'confirmacao do trecho de caminhada' if q.pending else 'avanco da etapa ou resposta do NPC')
+            self.trace_route_wait(reason,now);return True
         planned=(observer.map_name,q.phase,q.step,q.index)
         async with self.send_lock:
             if (not q.active or planned!=(observer.map_name,q.phase,q.step,q.index)
-                or not self.native_frames.ready or self.commands_blocked or not game_gate() or self.upstream is None):return True
+                or not self.native_frames.ready or self.commands_blocked or not game_gate() or self.upstream is None):
+                reason='pacote do cliente incompleto' if not self.native_frames.ready else 'conexao ou estado da rota mudou antes do envio'
+                self.trace_route_wait(reason,now);return True
             if action['kind']=='move':
                 # Skill areas on the floor are handled by the route step itself (a detour when one
                 # exists, crossing otherwise); throwing the whole path away here searched the map
@@ -1036,4 +1302,8 @@ class QuestRelay(SharedQuestRelay):
                 print(f"[ROTA] {q.reason} • etapa {q.step+1}: {action['kind']} {detail} (NPC {action['entity_id']})".rstrip())
             q.sent(action,now)
             self.trace_map_send('bot',opcode,len(payload));self.upstream.write(payload);await self.upstream.drain()
+            self.route_wait_trace=None
+            if action['kind']=='move':
+                self.record_hunt(dict(kind='quest_route_move',map=observer.map_name,position=list(position),
+                    destination=list(action['position']),phase=q.phase,step=q.step+1))
         return True

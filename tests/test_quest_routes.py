@@ -191,6 +191,40 @@ def test_relay_does_not_inject_in_fragmented_native_frame(relay):
     assert not relay.upstream.packets
 
 
+def test_route_logs_long_wait_without_discarding_fragmented_client_packet(relay,monkeypatch):
+    events=[]
+    monkeypatch.setattr(relay,'record_hunt',events.append)
+    relay.native_frames.buffer.extend(b'\x90')
+    relay.trace_route_wait('pacote do cliente incompleto',10)
+    relay.trace_route_wait('pacote do cliente incompleto',14)
+    assert not events
+    relay.trace_route_wait('pacote do cliente incompleto',15)
+    assert len(events)==1 and events[0]['kind']=='quest_route_wait'
+    assert events[0]['native_pending_bytes']==1 and events[0]['seconds']==5
+    relay.trace_route_wait('pacote do cliente incompleto',16)
+    assert len(events)==1  # repeated ticks do not flood the log
+    assert relay.native_frames.buffer==b'\x90' and not relay.upstream.packets
+    relay.tracker.observer.player=[6,5]
+    relay.trace_route_wait('pacote do cliente incompleto',17)
+    assert relay.route_wait_trace['since']==17  # actual progress starts a new wait
+
+
+def test_route_move_trace_contains_the_sent_destination(relay,monkeypatch):
+    import asyncio
+    events=[]
+    monkeypatch.setattr(relay,'record_hunt',events.append)
+    asyncio.run(relay.quest_tick(lambda:True))
+    moves=[e for e in events if e['kind']=='quest_route_move']
+    assert len(moves)==1 and len(relay.upstream.packets)==1
+    assert moves[0]['destination']==relay.quests.pending['position']
+    assert moves[0]['position']==[5,5] and moves[0]['map']=='home'
+    snapshot=relay.quests.snapshot()
+    assert snapshot['pending']==relay.quests.pending
+    assert snapshot['current_step']==relay.quests.steps[relay.quests.step]
+    snapshot['pending']['position'][0]=-1
+    assert relay.quests.pending['position'][0]>=0
+
+
 def test_relay_queue_arrival_runs_combat_then_advances_on_goal(relay):
     import asyncio,time
     r=relay;r.tracker.observer.map_name='field';r.quest_base_settings=copy.deepcopy(r.settings)

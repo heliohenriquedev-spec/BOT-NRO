@@ -18,6 +18,7 @@ import sqlite3
 import struct
 import time
 
+from .database_hunt import is_database_hunt
 from .continuous_observer import ContinuousTracker
 from .packet_encoder import attack, skill, move, body_action, SIT, STAND
 from .packet_reader import position
@@ -147,6 +148,8 @@ class SessionRelay(QuestRelay):
         self.listeners = {}
         self.tasks = set()
         self.character_id = None
+        from .bg_damage import BgDamage
+        self.bg_damage = BgDamage(self.folder/'bg_danos.json')
         from .rcx_sides import Sides
         self.rcx_sides = Sides()  # RCX ally/enemy: battleground team, PvP map, party, guild, summons
         self.account = None
@@ -302,7 +305,7 @@ class SessionRelay(QuestRelay):
             profiles = map_behavior.load()
             route = getattr(self.quests, 'route', None)
             database_combat = bool(self.quests.active and getattr(self.quests,'phase',None) == 'hunt'
-                                   and route and route.get('id') == 'database_hunt')
+                                   and route and is_database_hunt(route) and not route.get('cycle'))
             effective, profile = map_behavior.effective(self.map_behavior_base, profiles,
                 self.tracker.observer.map_name, self.quests.active and not database_combat)
             config = profile.get('combat') if profile else None
@@ -507,6 +510,20 @@ class SessionRelay(QuestRelay):
         for opcode, frame in self.native_frames.frames:
             self.quests.native(opcode,frame,self.tracker.observer.map_name)
             self.npc_transports.client(opcode,frame,self.tracker.observer.map_name,self.quests.actors)
+            if opcode == 0xf3 and b'@showmobs' in frame.lower():
+                text = frame[4:].split(b'\0')[0].decode('cp1252', 'replace')
+                self.record_hunt({'kind': 'showmobs_client', 'text': text, 'map': self.tracker.observer.map_name})
+                print('@showmobs digitado no jogo: '+text)
+                from . import packet_reader
+                packet_reader.SERVER_TEXT_UNTIL = time.monotonic()+3.0
+            if opcode == 0x9b or (opcode == 0x72 and len(frame) == 25 and struct.unpack_from('<H', frame, 10)[0] == 426):
+                # Diagnostico do Salto Ninja: direcao enviada pelo cliente (/bangbang, /bingbing) e
+                # posicao de onde o salto saiu; a chegada vem no 01FF (evento 'position' high_jump).
+                observer = self.tracker.observer
+                self.record_hunt({'kind': 'client_direction' if opcode == 0x9b else 'high_jump_cast',
+                                  'map': observer.map_name, 'position': observer.player, 'hex': frame.hex()})
+                print(('Direcao enviada pelo cliente: ' if opcode == 0x9b else 'Salto Ninja saindo de ')
+                      + str(observer.player) + ' | ' + frame.hex())
             if opcode == 0x72 and len(frame) == 25:
                 if self.preview_rcx_self_skill(struct.unpack_from('<H',frame,10)[0],struct.unpack_from('<I',frame,21)[0],time.monotonic()):
                     self.publish_ground_cells()
@@ -812,7 +829,7 @@ class SessionRelay(QuestRelay):
         combat = getattr(self, 'map_combat', None)
         route = getattr(self.quests, 'route', None)
         database_combat = bool(self.quests.active and getattr(self.quests,'phase',None) == 'hunt'
-                                and route and route.get('id') == 'database_hunt')
+                                and route and is_database_hunt(route) and not route.get('cycle'))
         if combat is None or self.quests.active and not database_combat or self.group_follower():
             return None
         from .map_behavior import map_key
@@ -1806,7 +1823,7 @@ class SessionRelay(QuestRelay):
         """Monsters the quest still needs on its hunting map (finished counters left out)."""
         q = self.quests
         route = q.route or {}
-        if route.get('id') == 'database_hunt':
+        if is_database_hunt(route):
             return sorted(route.get('showmobs_species') or [])  # only the monsters marked "usar @showmobs"
         targets = route.get('kill_targets') or []
         if not targets:
@@ -1814,9 +1831,33 @@ class SessionRelay(QuestRelay):
         return sorted({s for target, progress in zip(targets, q.progress()) if not progress['complete']
                        for s in target['species']})
 
+    def cycle_mark_goal(self, now, observer):
+        """Ciclo @showmobs: a mark already on the minimap (the bot's @showmobs answered late, or the
+        player's own @showmobs) is walked to at once, without waiting for the next 30 s round."""
+        wanted = set(self.quest_missing_species())
+        used = self.__dict__.setdefault('cycle_marks_used', set())
+        live = [(key, m) for key, m in self.viewpoint_marks.items() if now-m['at'] <= self.VIEWPOINT_TTL
+                and (m.get('species') is None or m['species'] in wanted) and (key, m['at']) not in used]
+        if not live or not observer.player:
+            return
+        key, mark = min(live, key=lambda km: math.dist(km[1]['position'], observer.player))
+        used.add((key, mark['at']))
+        self.mob_scan.goal = list(mark['position'])
+        self.mob_scan.goal_until = now+self.mob_scan.GOAL_TIME
+        self.mob_scan_failed_note = None
+        self.record_hunt({'kind': 'showmobs_goal', 'source': 'marca no minimapa', 'position': mark['position'],
+                          'species': mark.get('species'), 'map': observer.map_name})
+        print(f"[CICLO] @showmobs: monstro marcado em {mark['position']}; indo ate ele")
+
+    def showmobs_cycle_active(self):
+        """Ciclo @showmobs running: @showmobs stays on for it even while suspended for other hunts."""
+        return bool(self.quests.active and (self.quests.route or {}).get('cycle'))
+
     async def send_mob_scan(self, *, game_gate):
         """From time to time in the quest hunt: @showmobs of each missing monster, then the densest spot."""
-        if not self.mob_scan.AUTOMATIC_ENABLED:
+        cycle = self.showmobs_cycle_active()
+        self.mob_scan.cycle = cycle
+        if not self.mob_scan.AUTOMATIC_ENABLED and not cycle:
             if not getattr(self,'automatic_scan_stopped',False):
                 self.mob_scan.reset()  # invalidates results from an already-running background job
                 self.automatic_scan_stopped=True
@@ -1842,20 +1883,29 @@ class SessionRelay(QuestRelay):
             self.scan_no_target_since = now
         early = (getattr(self, 'scan_no_target_since', None) is not None
                  and now-self.scan_no_target_since >= 10)
+        if cycle and self.mob_scan.current_goal(observer.player, now) is None:
+            self.cycle_mark_goal(now, observer)
         self.mob_scan.start(observer.map_name, self.quest_missing_species(), now, idle=True, early=early)
         self.mob_scan.include_cached(self.viewpoint_marks, now, self.VIEWPOINT_TTL,
                                      self.quest_missing_species())
         collision = self.collision_map()
         found = self.mob_scan.poll_finish(observer.player, now, collision=collision)
+        if cycle and not found and self.mob_scan.current_goal(observer.player, now) is None:
+            self.cycle_mark_goal(now, observer)  # a mark that arrived as this round closed
         if found:
             self.record_hunt({'kind': 'showmobs_goal', 'calculation_ms': self.mob_scan.last_calculation_ms, **found})
+            if cycle:self.mob_scan_failed_note=None  # it may die and be missing again on the next lap
             print(f"[ROTA] @showmobs: indo onde ha mais monstros da quest ({found['monsters']} de {found['total']} "
                   f"perto de {found['position']}, a {found.get('walk_cells')} celulas; soma por tipo: {found.get('species_counts',{})}).")
         elif self.mob_scan.map_failed(observer.map_name) and getattr(self, 'mob_scan_failed_note', None) != observer.map_name:
             self.mob_scan_failed_note = observer.map_name
             self.record_hunt({'kind': 'showmobs_failed', 'map': observer.map_name})
-            print(f'[ROTA] @showmobs sem resultado em {observer.map_name}: percorrendo o mapa inteiro em linha; '
-                  'continuarei consultando periodicamente para localizar a maior concentracao.')
+            if cycle:
+                print(f'[CICLO] @showmobs sem o monstro em {observer.map_name}: ainda nao renasceu; '
+                      f'perguntando de novo a cada {self.mob_scan.CYCLE_INTERVAL:.0f} s.')
+            else:
+                print(f'[ROTA] @showmobs sem resultado em {observer.map_name}: percorrendo o mapa inteiro em linha; '
+                      'continuarei consultando periodicamente para localizar a maior concentracao.')
         elif self.mob_scan.suspended and not getattr(self, 'mob_scan_warned', False):
             self.mob_scan_warned = True
             print('[ROTA] @showmobs ainda sem resposta apos 3 rodadas; continuarei tentando no intervalo normal e quando ficar sem alvo.')
@@ -1872,6 +1922,10 @@ class SessionRelay(QuestRelay):
             if not self.native_frames.ready or not game_gate() or self.upstream is None:
                 return
             self.mob_scan.sent(species, now)
+            if cycle:
+                from . import packet_reader
+                packet_reader.SERVER_TEXT_UNTIL = now+3.0  # keep the server's text answer to it
+                self.record_hunt({'kind': 'showmobs_sent', 'species': species, 'map': observer.map_name})
             self.trace_map_send('bot', 0xf3, len(payload))
             self.upstream.write(payload)
             await self.upstream.drain()
@@ -2080,6 +2134,7 @@ class SessionRelay(QuestRelay):
             'reason':self.group.reason, 'follow_only':bool(self.settings and self.settings['group_follow_only'])}
         state.update(stage=self.stage, relay_error=self.error, ammo=self.ammo.snapshot(time.monotonic()),
                      quests=self.quests.snapshot(),
+                     bg_damage=self.bg_damage.snapshot(self.character_id or observer.player_id),
                      observation_suspended_for_route=self.observation_suspended_for_route(),
                      presence=self.presence.snapshot(self.tracker.observer.player, time.monotonic()),
                      players_nearby=self.players_nearby(), captured_player=self.captured_player,
@@ -2097,6 +2152,7 @@ class SessionRelay(QuestRelay):
                      own_hidden=({'option': self.own_option & 0x4046, 'gm_invisible': bool(self.own_option & 0x40)}
                                  if self.own_option & 0x4046 else None),
                      native_frame_error=self.native_frames.error,
+                     native_frame_pending_bytes=len(self.native_frames.buffer),
                      client_vision=(self.client_vision.diagnostic() if getattr(self,'client_vision',None) else None),
                      map_monsters=list(self.discovered_monsters.values()),
                      map_monster_names=self.map_monster_names_cached(observer.player_id),
@@ -2109,10 +2165,14 @@ class SessionRelay(QuestRelay):
                      upstream_connected=self.upstream is not None,
                      updated_at=datetime.now().isoformat())
         if self.hunt is not None:
-            scan = self.mob_scan.current_goal(observer.player, time.monotonic()) if self.quests.active and self.mob_scan.AUTOMATIC_ENABLED else None
+            scan_on = self.mob_scan.AUTOMATIC_ENABLED or self.showmobs_cycle_active()
+            scan = self.mob_scan.current_goal(observer.player, time.monotonic()) if self.quests.active and scan_on else None
             state['showmobs_goal'] = {'position': scan} if scan else None
-            state['showmobs_failed'] = bool(self.mob_scan.AUTOMATIC_ENABLED and self.quests.active and self.mob_scan.map_failed(observer.map_name))
-            state['showmobs_suspended'] = not self.mob_scan.AUTOMATIC_ENABLED
+            state['showmobs_failed'] = bool(scan_on and self.quests.active and self.mob_scan.map_failed(observer.map_name))
+            state['showmobs_suspended'] = not scan_on
+            # Ciclo @showmobs: no mark to walk to = the monster is not alive (or not found yet): stand
+            # still and wait for the next @showmobs instead of patrolling the map.
+            state['showmobs_wait'] = bool(self.showmobs_cycle_active() and not scan)
             scan_job = getattr(self.mob_scan, '_finish_job', None)
             state['showmobs_calculation'] = {'running': bool(scan_job and not scan_job['task'].done()),
                 'last_ms': self.mob_scan.last_calculation_ms, 'error': self.mob_scan.calculation_error}
@@ -2233,6 +2293,9 @@ class SessionRelay(QuestRelay):
             rcx_changed=False
             rcx_now=time.monotonic()
             for event in events:
+                if event.get('high_jump') and event.get('entity_id')==self.tracker.observer.player_id:
+                    self.record_hunt({'kind':'high_jump_landing','map':self.tracker.observer.map_name,'position':event['position']})
+                    print('Salto Ninja chegou em '+str(event['position']))
                 ground_event=event
                 if event['kind']=='skill_cast' and event.get('source_id')!=self.tracker.observer.player_id and event.get('target_id')==event.get('source_id'):
                     track=self.player_tracks.get(event.get('source_id'))
@@ -2284,6 +2347,14 @@ class SessionRelay(QuestRelay):
             self.mob_info_observe(events, time.monotonic())
             self.mob_scan.observe(events, time.monotonic())
             self.observe_viewpoints(events, time.monotonic())
+            if self.showmobs_cycle_active():
+                for event in events:
+                    if event['kind'] == 'viewpoint':
+                        self.record_hunt({'kind': 'showmobs_mark', 'map': self.tracker.observer.map_name,
+                                          **{k: event.get(k) for k in ('npc_id', 'mark_type', 'mark_id', 'position')}})
+                    elif event['kind'] == 'server_text':
+                        self.record_hunt({'kind': 'showmobs_reply', 'text': event['text']})
+                        print('[CICLO] Servidor respondeu: '+event['text'])
             from .monster_origin import temporary_reason
             if getattr(self, 'origin_epoch', None) != self.inventory.epoch:
                 self.origin_epoch = self.inventory.epoch
@@ -2336,6 +2407,10 @@ class SessionRelay(QuestRelay):
             self.observe_chat_alerts(events)
             self.check_emergency()
             self.record_damage_taken(events)
+            self.bg_damage.observe(events, own, self.character_id or own,
+                                   lambda identity: self.player_names.get(identity)
+                                   or self.inventory.entities.get(identity, {}).get('name')
+                                   or self.registry.players.get(str(identity), {}).get('name'))
             for event in events:
                 if event['kind'] == 'stream_resync':
                     self.record_hunt(event)
@@ -2458,9 +2533,14 @@ class SessionRelay(QuestRelay):
             self.tracker.observer.clear()
             self.own_option = 0
             self.rcx_sides.reset()
+            self.bg_damage.select(identity)
         self.character_id = identity
 
     def begin_map_observation(self):
+        self.bg_damage.map_name = ''
+        self.bg_damage.bg_map = False
+        self.bg_damage.own_team = None
+        self.bg_damage.teams.clear()
         self.received_player_hp.rows.clear()
         self.ground_cells.reset()
         self.publish_ground_cells()
@@ -2583,14 +2663,14 @@ class SessionRelay(QuestRelay):
 
     PORTAL_EDGE = 1  # cells around a portal area the hunt neither walks to nor stays on
 
-    def leave_portal_area(self, now):
+    def leave_portal_area(self, now, *, travelling=False, position=None, allowed_portal=None):
         """Standing in or next to a portal's area (arrival, a fight pushed us there): the first
         move goes away from it, never towards it, before anything else is planned. Returns the move
         to send, or None."""
         collision = self.collision_map()
-        position = self.tracker.observer.player
-        if (collision is None or position is None or self.hunt is None or not self.hunt.enabled
-                or not getattr(self.hunt, 'auto_movement', True)):
+        position = self.tracker.observer.player if position is None else position
+        if (collision is None or position is None or (not travelling and
+                (self.hunt is None or not self.hunt.enabled or not getattr(self.hunt, 'auto_movement', True)))):
             return None
         from .portals import chebyshev
         name = self.tracker.observer.map_name
@@ -2598,7 +2678,8 @@ class SessionRelay(QuestRelay):
         # Inside or right at the edge of a portal's area (its learned size, made larger by any
         # accidental warp there): a diagonal first step from gl_sew02 [31,275] went back through it.
         near = [(cell, margin) for cell, margin in self.portals.portals(name)
-                if cell not in inner and chebyshev(position, cell) <= margin+self.PORTAL_EDGE]
+                if cell not in inner and chebyshev(position, cell) <= margin+self.PORTAL_EDGE
+                and (allowed_portal is None or chebyshev(allowed_portal, cell) > margin)]
         if not near:
             return None
         def clearance(point):

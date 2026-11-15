@@ -1,6 +1,6 @@
 {
- "version": "2026.11.10.1",
- "published_at": "2026-11-10T22:31:14",
+ "version": "2026.11.15.1",
+ "published_at": "2026-11-15T17:09:22",
  "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
@@ -259,6 +259,7 @@
   "data/monstros_base/sprites/3824.png",
   "data/monstros_base/sprites/3825.png",
   "data/recursos/colisoes.json",
+  "data/recursos/habilidades_ids.json",
   "data/recursos/itens.json",
   "data/recursos/municao.json",
   "data/recursos/prioridade.tsv",
@@ -1434,9 +1435,12 @@
   "data/recursos/sprites_por_nome/새해인형.png",
   "data/recursos/sprites_por_nome/워그.png",
   "data/rede/bg_entradas.json",
+  "data/rede/ciclo_showmobs.json",
+  "data/rede/ciclo_showmobs_mortes.json",
   "data/rede/especies_nro.json",
   "data/rede/habilidades_chao_validacao.json",
   "data/rede/identidades_cliente.json",
+  "data/rede/progresso_quests.antes_correcao_entrega_20261112.json",
   "data/rede/registro_pacotes.json",
   "data/rede/showmobs_monstros.json",
   "data/rede/tamanhos_cliente.json",
@@ -1462,6 +1466,7 @@
   "nrobot/__init__.py",
   "nrobot/ammo.py",
   "nrobot/auto_routes.py",
+  "nrobot/bg_damage.py",
   "nrobot/bg_entry.py",
   "nrobot/capture_guard.py",
   "nrobot/catalog.py",
@@ -1485,6 +1490,7 @@
   "nrobot/grf_header.py",
   "nrobot/ground_cells.py",
   "nrobot/group_hunt.py",
+  "nrobot/high_jump.py",
   "nrobot/hunt_dialog.py",
   "nrobot/hunt_share.py",
   "nrobot/immediate_monster_removal.py",
@@ -1562,6 +1568,8 @@
   "nrobot/server_path.py",
   "nrobot/session_relay.py",
   "nrobot/shared_data.py",
+  "nrobot/showmobs_cycle.py",
+  "nrobot/showmobs_cycle_panel.py",
   "nrobot/skill_panel.py",
   "nrobot/sprite_reader.py",
   "nrobot/summon_queue.py",
@@ -2163,5 +2171,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "7898fc2ca165"
+ "files_digest": "649fa01435e3"
 }

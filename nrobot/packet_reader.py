@@ -328,6 +328,9 @@ def decode(message: bytes) -> dict:
         event.update(kind='server_time', server_tick=u32(2))
     elif op == 0x88:
         event.update(kind='position', entity_id=u32(2), position=[u16(6), u16(8)])
+    elif op == 0x1ff and len(message) >= 10:
+        # ZC_HIGHJUMP: Salto Ninja (TK_HIGHJUMP) slid the unit to this cell, over walls.
+        event.update(kind='position', entity_id=u32(2), position=[u16(6), u16(8)], high_jump=True)
     elif op == 0x283:
         event.update(kind='own_identity', entity_id=u32(2))
     elif op == 0x2b9 and len(message) == 191:
@@ -419,10 +422,13 @@ def decode(message: bytes) -> dict:
         event.update(kind='skill_cast', source_id=u32(2), target_id=u32(6), skill_id=u16(14), duration_ms=u32(20), position=[u16(10),u16(12)])
     elif op == 0x8a:
         event.update(kind='normal_attack', source_id=u32(2), target_id=u32(6),
-                     damage_raw=u16(22), action_type=message[26], source_motion_ms=u32(14))
+                     damage_raw=u16(22), damage=struct.unpack_from('<h', message, 22)[0],
+                     damage_secondary=struct.unpack_from('<h', message, 27)[0],
+                     action_type=message[26], source_motion_ms=u32(14))
     elif op in (0x114, 0x1de):
         event.update(kind='skill_damage', skill_id=u16(2), source_id=u32(4), target_id=u32(8),
                        damage_raw=u16(24) if op == 0x114 else u32(24),
+                       damage=struct.unpack_from('<h' if op == 0x114 else '<i', message, 24)[0],
                        level=u16(26) if op == 0x114 else u16(28), source_motion_ms=u32(16))
     elif op in (0x119, 0x229):
         # Body/health state then option bits (hide, cloak, GM invisibility, ...).

@@ -212,3 +212,32 @@ def test_route_suspends_observation_without_changing_saved_preference(tmp_path):
     q.phase = 'hunt'
     r.check_emergency()
     assert r.commands_blocked  # patrolling: stops
+
+
+def test_missing_monster_ids_never_skip_an_unfinished_hunting_map(tmp_path):
+    route=counted_route(ignore_finished=True)
+    route['species']=[]
+    route['kill_targets']=[dict(name='Besouro-Rei',count=50,species=[])]
+    r,q=relay_with(tmp_path,route)
+    assert not q.hunt_complete() and r.quest_species(q)==[]
+    assert asyncio.run(r.quest_tick(lambda:True)) is True
+    assert q.phase=='paused' and q.index==0
+    assert 'identificadores' in q.reason and 'Besouro-Rei' in q.reason
+    assert q.kills==0 and not r.hunt.enabled
+
+
+def test_arriving_at_hunting_map_starts_combat_before_a_recorded_exit(tmp_path):
+    from nrobot.portals import PortalGuard
+    route=counted_route()
+    route['species']=[1037]
+    route['kill_targets']=[dict(name='Filhote de cobra',count=2,species=[1037])]
+    r,q=relay_with(tmp_path,route,phase='travel')
+    q.steps=[dict(kind='portal',map='field',position=[6,5]),
+             dict(kind='wait_map',map='other'),
+             dict(kind='portal',map='other',position=[8,8]),
+             dict(kind='wait_map',map='field')]
+    assert q.plan('field',[5,5],None,PortalGuard(),time.monotonic()) is None
+    assert q.phase=='hunt' and q.step==len(q.steps)
+    assert q.kills==0 and not q.hunt_complete()
+    assert asyncio.run(r.quest_tick(lambda:True)) is False
+    assert r.hunt.enabled and q.index==0

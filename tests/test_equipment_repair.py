@@ -2,6 +2,7 @@
 import asyncio
 import struct
 import time
+import pytest
 
 from nrobot import map_routes, quest_extras
 from nrobot.packet_reader import decode
@@ -139,3 +140,40 @@ def test_routes_ignore_finished_monsters_by_default():
     from nrobot.quest_routes import validate_routes
     route = validate_routes([dict(name='Nova', target_map='campo.gat', steps=[dict(kind='walk', map='campo.gat', position=[1, 1])])])[0]
     assert route['ignore_finished'] is True
+
+
+@pytest.mark.parametrize('cycle',[False,True])
+def test_cycle_dismounts_before_voltar_to_the_repairer(tmp_path,monkeypatch,cycle):
+    r=relay(tmp_path,monkeypatch);q=r.quests
+    config=quest_extras.save(dict(quest_extras.load(),repair_enabled=True,voltar_frame='00f3',
+        mount_enabled=True,mount={'item_id':2643},combat_items=[11484],
+        repair_steps=[dict(kind='portal',map='hospital2.gat',position=[103,3]),
+                      dict(kind='wait_map',map='areia.gat'),
+                      dict(kind='npc',map='areia.gat',position=[50,60],name='Reparador')]))
+    q.start([dict(id='plant',name='Planta da Nevoa',enabled=True,target_map='gef_fild04.gat',
+                  species=[1083],kills=1,cycle=cycle,
+                  steps=[dict(kind='portal',map='areia.gat',position=[10,10]),
+                         dict(kind='wait_map',map='gef_fild04.gat')])],0)
+    q.extras=dict(config,combat_items=[11484]);q.phase='hunt';q.errands=[]
+    o=r.tracker.observer;o.map_name='gef_fild04.gat';o.player=[40,40]
+    q.body.broken=dict(at=1,location=2,item_id=1201)
+    assert r.repair_watch(time.monotonic())
+    assert [e.kind for e in q.errands]==(['gear','voltar','mount'] if cycle else ['voltar','mount'])
+    if cycle:
+        assert q.errands[0].before_voltar and 11484 in q.errands[0].config['combat_items']
+
+
+def test_repair_on_hunting_map_is_not_skipped_on_arrival(tmp_path,monkeypatch):
+    r=relay(tmp_path,monkeypatch);q=r.quests
+    quest_extras.save(dict(quest_extras.load(),repair_enabled=True,
+        repair_steps=[dict(kind='npc',map='campo.gat',position=[50,60],name='Reparador'),
+                      dict(kind='close',map='campo.gat')]))
+    q.start([dict(id='field',name='Campo',enabled=True,target_map='campo.gat',species=[1083],kills=1,
+                  steps=[dict(kind='walk',map='campo.gat',position=[40,40])])],0)
+    q.phase='hunt';q.errands=[]
+    o=r.tracker.observer;o.map_name='campo.gat';o.player=[50,59]
+    q.body.broken=dict(at=1,location=2,item_id=1201)
+    assert r.repair_watch(time.monotonic())
+    q.actors[110000001]=dict(name='Reparador',position=[50,60])
+    action=q.plan(o.map_name,o.player,None,r.portals,time.monotonic())
+    assert q.phase=='travel' and action==dict(kind='npc',entity_id=110000001)

@@ -164,11 +164,15 @@ class PacketPatrol:
             self.straight_steps = self.straight_steps+1 if direction == self.last_direction else 1
             self.last_direction = direction
             self.steps += 1
-            self.recent_positions.append(tuple(position))
-            if len(self.recent_positions) == 10 and len(set(self.recent_positions)) <= 4:
-                self.escape_next = True
-                self.loop_escapes += 1
-                self.recent_positions.clear()
+            # Position observation and both movement acknowledgements can report
+            # the same arrival. Count that arrival once: otherwise four forward
+            # steps fill the loop window and discard a valid @showmobs route.
+            if not self.recent_positions or self.recent_positions[-1] != tuple(position):
+                self.recent_positions.append(tuple(position))
+                if len(self.recent_positions) == 10 and len(set(self.recent_positions)) <= 4:
+                    self.escape_next = True
+                    self.loop_escapes += 1
+                    self.recent_positions.clear()
 
     def observe_position(self, position, now, map_name=None):
         """Account for real progress during combat, quest travel or a different patrol goal."""
@@ -413,6 +417,20 @@ class PacketPatrol:
                 self.new_cycle(position)  # 30 minutes on this map: its coverage starts over
                 self.cycle_started_at = now
         self.reached(position,now=now)
+        if collision is not None and self.escape_next:
+            # The loop detector also runs on collision routes. Drop the cached leg and
+            # postpone its waypoint without marking it explored or restarting coverage.
+            if self.goal_block is not None:
+                self.deferred[self.goal_block] = now+60
+            if self.focus is not None:
+                self.focus_suppressed = tuple(self.focus)
+                self.focus_suppressed_until = now+self.FOCUS_RETRY_DELAY
+                self.focus = None
+                self.focus_key = self.focus_block = None
+            self.goal = self.goal_block = None
+            self.route_cache_key = self.route_cache = None
+            self.goal_distance = None
+            self.escape_next = False
         if self.focus is not None and max(abs(position[i]-self.focus[i]) for i in (0, 1)) <= 5:
             self.focus_reached = tuple(self.focus)
             self.focus_history.append(tuple(self.focus))

@@ -660,6 +660,9 @@ class PacketHunt:
                 # Everything in view was weighed and declined (behind a wall, behind the sweep, too far,
                 # put aside): the relay must not stop this patrol step for one of them.
                 self.passed_over = {e['entity_id'] for e in state['recent_entities']}
+                if state.get('showmobs_wait'):
+                    self.reason = 'parado: aguardando o @showmobs mostrar o monstro vivo'
+                    return None
                 if self.auto_movement and self.patrol is not None:
                     # @showmobs supplies a real monster coordinate; walk to that cell through the
                     # collision map, then resume the persistent coverage circuit.

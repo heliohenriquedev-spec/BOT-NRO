@@ -23,7 +23,7 @@ PATH_PENDING = _PathPending()
 from .npc_labels import clean
 
 FILE = Path(__file__).resolve().parents[1]/'data/rede/rotas_quests.json'
-KINDS = {'walk','portal','npc','next','select','close','cancel','wait_map','wait_transfer','select_free_slot','select_mission_slot','verify_slot','verify_slot_absent'}
+KINDS = {'walk','portal','npc','jump','next','select','close','cancel','wait_map','wait_transfer','select_free_slot','select_mission_slot','verify_slot','verify_slot_absent'}
 STAGES = {'pickup':'Pegar quests','travel':'Rota da quest','delivery':'Entregar quests','return':'Retornar ao ponto salvo'}
 STAGE_FIELDS = {'pickup':'pickup_steps','travel':'steps','delivery':'delivery_steps'}
 DIALOG = {'next':'next','select':'menu','cancel':'menu','close':'close','select_free_slot':'menu','select_mission_slot':'menu',
@@ -166,6 +166,7 @@ class QuestRoutes:
     def start(self,routes,now,library=None,map_routes=None,replay_completed=False):
         self.validation=None;self.borrow=None;self.prefetched={};self.voltar_fallback=None;self.resume=None;self.chain=None
         self.replay_completed=replay_completed
+        self.cycle=False  # Ciclo @showmobs: set by its command after start(); the queue then never ends
         self.map_routes=list(map_routes or [])
         self.known_routes=validate_routes(routes)
         self.routes=[copy.deepcopy(r) for r in self.known_routes if r['enabled']]
@@ -358,6 +359,14 @@ class QuestRoutes:
         self.enter_stage('travel',now)
 
     def finish_hunt(self,now):
+        retry=(self.chain or {}).pop('delivery_retry',None)
+        if retry:
+            # Only the refused mission's map needed more kills. Resume the joint
+            # delivery without replaying the other maps of the chain.
+            self.index=retry['index'];self.kills=retry['kills']
+            self.kill_counts={int(k):v for k,v in retry['kill_counts'].items()}
+            self.name_counts=dict(retry['name_counts'])
+            self.queue('voltar',now);self.enter_stage('delivery',now,self.pending_index('delivery',0));return
         if self.chain and 'hunting' in self.chain and self.index in self.chain['hunting']:
             following=self.chain['hunting'][self.chain['hunting'].index(self.index)+1:]
             if following:
@@ -369,14 +378,17 @@ class QuestRoutes:
             self.route['mission_ids']=self.chain_missions(self.chain['indices'][0])
             self.route['mission_ids']=[i for i in self.route['mission_ids'] if i in self.chain['picked']]
             self.completed_missions['pickup']=list(self.route['mission_ids'])
-        self.queue('voltar',now)  # leave the hunting map before anything else
+        # Ciclo @showmobs: off the mount (combat items back on) and @voltar after every stage, even
+        # with the queue's @voltar option off.
+        if self.route.get('cycle'):self.queue('gear',now,before_voltar=True)
+        self.queue('voltar',now,force=bool(self.route.get('cycle')))  # leave the hunting map before anything else
         if self.route['lifecycle_enabled']:self.enter_stage('delivery',now)
         else:self.advance(now)
 
     def stop(self,reason='Fila pausada'):
         self.phase='paused';self.pending=None;self.reason=reason;self.errands=[]
 
-    def queue(self,kind,now,force=False):
+    def queue(self,kind,now,force=False,before_voltar=False):
         """@voltar after the hunt, mount before trips, combat equipment before hunting (if set up)."""
         extras=self.extras or {}
         mount=extras.get('mount_enabled') and extras.get('mount')
@@ -385,12 +397,16 @@ class QuestRoutes:
         reequip=list(getattr(self,'reequip',None) or [])  # repaired items that broke while worn
         if kind=='gear' and not (mount or extras.get('combat_items') or reequip):return
         if any(e.kind==kind for e in self.errands):return
-        if kind=='mount':self.errands=[e for e in self.errands if e.kind!='gear']
+        if kind=='gear' and (self.route or {}).get('cycle') and not before_voltar:
+            return  # Ciclo @showmobs: kills mounted with basic attacks; the gear only before @voltar
+        # A mount for the next trip does not cancel the Ciclo's dismount before @voltar.
+        if kind=='mount':self.errands=[e for e in self.errands if e.kind!='gear' or getattr(e,'before_voltar',False)]
         from .quest_extras import Errand
         config=dict(extras,displaced=self.mount_displaced or (mount or {}).get('displaced') or [])
         if kind=='gear' and reequip:
             config['combat_items']=list(dict.fromkeys(list(extras.get('combat_items') or [])+reequip))
-        self.errands.append(Errand(kind,config,now))
+        errand=Errand(kind,config,now);errand.before_voltar=before_voltar
+        self.errands.append(errand)
 
     def errand_done(self):
         errand=self.errands.pop(0)
@@ -402,6 +418,9 @@ class QuestRoutes:
     def advance(self,now):
         self.chain=None
         self.index+=1
+        if self.route is None and getattr(self,'cycle',False) and self.routes:
+            self.index=0  # Ciclo @showmobs: after the last stage, the first one again
+            print('[CICLO] Volta completa; recomecando por '+self.routes[0]['name'])
         if self.route is None: self.phase='done';self.reason='Fila concluida';self.pending=None
         else: self.begin(now)
 
@@ -778,7 +797,7 @@ class QuestRoutes:
         try:return closest_connection(edges,origin,target,position,target_position,collision_for,self.learned_portals)
         except ValueError:raise ValueError('Sem caminho conhecido de '+origin+' para '+target+'. Entre uma vez nos portais ate la (o bot aprende) ou grave o trecho.')
 
-    def plan(self,map_name,position,collision,portals,now):
+    def plan(self,map_name,position,collision,portals,now,*,portal_escape=None):
         self.route_position=position;self.route_position_map=map_name
         self.route_current_collision=(PortalGuard.key(map_name or ''),collision)
         if self.phase not in STAGES: return None
@@ -800,6 +819,12 @@ class QuestRoutes:
                 self.stop(str(exc)+' (use @voltar ou leve o personagem ate um mapa com caminho gravado: a fila continua sozinha)')
                 return None
         if self.last_position!=list(position): self.last_position=list(position);self.progress_at=now
+        if (self.phase=='travel' and not self.validation
+            and PortalGuard.key(map_name)==PortalGuard.key(self.route['target_map'])
+            and all(s['kind'] in ('walk','portal','wait_map') for s in self.steps[self.step:])):
+            # A hunt ends its trip on arrival. A recording can still contain a portal
+            # out of this map and back; replaying that tail leaves monsters behind.
+            self.step=len(self.steps)
         if self.step>=len(self.steps):
             if self.phase=='return':
                 if not self.return_seen:
@@ -837,7 +862,10 @@ class QuestRoutes:
             # On the hunting map: the hunt finds the monsters, no need to walk the recorded tail.
             self.step=len(self.steps);return self.plan(map_name,position,collision,portals,now)
         step=self.steps[self.step];kind=step['kind']
-        if step.get('verify_start') and self.phase in ('pickup','delivery') and self.slot_number is not None and self.next_on_same_board():
+        from .npc_labels import plain
+        refused=self.phase=='delivery' and any('precisa matar' in plain(t) for t in self.npc_texts)
+        if step.get('verify_start') and refused and self.board_counts(now):return None
+        if step.get('verify_start') and not refused and self.phase in ('pickup','delivery') and self.slot_number is not None and self.next_on_same_board():
             # Reopening the board only to look at the slots: the next mission opens the same menu.
             check_kind='verify_slot' if self.phase=='pickup' else 'verify_slot_absent'
             wanted=next((s['option'] for s in self.steps[self.step:] if s['kind']==check_kind),None)
@@ -906,9 +934,21 @@ class QuestRoutes:
             # path away and search the whole map again, seconds of a frozen relay and game while
             # traveling (2026-11-09). A detour is searched only when the next leg crosses an area.
             c=self.navigation(map_name,collision,portals,step,hazards=False)
+            if tuple(position) in c.forbidden and portal_escape is not None:
+                escape=portal_escape(position,step)
+                if escape is not None:return dict(kind='move',position=list(escape))
             path=self.path_to(c,position,goal,kind!='npc',portals.links(map_name))
             if path is PATH_PENDING:
                 self.progress_at=now;return None  # still searching, without freezing the game
+            if (path and len(path)==1 and tuple(path[0])==tuple(position) and tuple(position)!=tuple(goal)
+                and any(tuple(source)==tuple(position) for source,arrival in portals.links(map_name))):
+                # The predicted walk can reach an inner warp before its map_change
+                # packet arrives. This is the end of one leg, not a blocked trip.
+                # Keep the stage and wait; from the confirmed landing path_to will
+                # search the next leg, including another inner warp if necessary.
+                if now-self.progress_at>15:
+                    self.stop(f'Portal interno nao confirmou teletransporte: {map_name} {list(position)}')
+                return None
             hazards=frozenset(getattr(collision,'hazard_cells',None) or ())
             failed=getattr(self,'detour_failed',None) or {}
             crosses=bool(path and len(path)>=2 and hazards and any(tuple(p) in hazards for p in path[1:10]))
@@ -923,7 +963,9 @@ class QuestRoutes:
                 # Enemy skills on the floor close every way to the portal/NPC: cross them instead of
                 # stopping the trip (yuno_fild11 2026-11-09). Walls and other portals still count.
                 self.hazards_ignored_until=now+3
-            if not path or len(path)<2:self.stop('Caminho bloqueado na etapa '+str(self.step+1));return None
+            if not path or len(path)<2:
+                self.stop(f'Caminho bloqueado na etapa {self.step+1}: {map_name} {list(position)} -> {list(goal)}')
+                return None
             if now-self.progress_at>15:self.stop('Movimento sem progresso; revise a etapa');return None
             end=path[1]
             for p in path[2:9]:
@@ -977,6 +1019,7 @@ class QuestRoutes:
                 check=self.deferred_check;self.deferred_check=None
                 if any(not s['empty'] and s['number']==check['slot'] and same_mission(s['mission'],check['option']) for _,s in slots):
                     self.stop(f"Entrega nao confirmada: {check['name']} continua no slot {check['slot']}"+check['said']);return None
+                self.completed_missions['delivery'].append(check['id'])
                 self.daily_marks.append((check['board_id'],check['label']));self.release_slot(check['slot'])
             if kind=='select_free_slot' and self.deferred_check:
                 check=self.deferred_check;self.deferred_check=None
@@ -1065,7 +1108,8 @@ class QuestRoutes:
         resume from the recorded point closest to where the character is, which also covers a
         random teleport inside the map."""
         key=PortalGuard.key;here=key(map_name);end=self.step
-        while end+1<len(self.steps) and self.steps[end]['kind']=='walk' and key(self.steps[end+1]['map'])==here and self.steps[end+1]['kind'] in ('walk','portal','npc'):
+        # Exact points (Salto Ninja: the cell before the takeoff, then the takeoff) are never skipped.
+        while end+1<len(self.steps) and self.steps[end]['kind']=='walk' and not self.steps[end].get('exact') and key(self.steps[end+1]['map'])==here and self.steps[end+1]['kind'] in ('walk','portal','npc'):
             end+=1
         if end==self.step:return None
         marker=(here,id(self.steps),end)
@@ -1130,16 +1174,21 @@ class QuestRoutes:
 
         After a teleport far away the search runs once (unreachable goals are refused at once
         through the connected area), instead of on every tick, which froze the relay and the game."""
-        here=tuple(position);key=(id(c),tuple(goal),exact)
+        # Keep the map alive and include its layout/links: evicted navigation maps
+        # can reuse an id, and newly learned inner portals can unlock a failed path.
+        links=tuple((tuple(source),tuple(arrival)) for source,arrival in links)
+        here=tuple(position);key=(c,c.forbidden,tuple(goal),exact,links,budget,flood)
         cached=(self.path_cache or {}).get(key)
         if cached:
             path=cached[0]
             if path is None and cached[1]==here:return None
             if path:
-                index=min(range(len(path)),key=lambda i:chebyshev(path[i],here))
-                if chebyshev(path[index],here)<=1:
+                candidates=[i for i,p in enumerate(path) if p==here or
+                            (c.start_ok(here) and c.edge(here,p))]
+                if candidates:
+                    index=min(candidates,key=lambda i:(chebyshev(path[i],here),-i))
                     rest=path[index:] if path[index]==here else [here]+path[index:]
-                    return rest if len(rest)>1 or tuple(goal)==here else None
+                    return rest  # a one-cell leg may be waiting for an inner warp
         goal=tuple(goal)
         def search():
             if not flood:return c.route(here,goal,exact=exact,max_nodes=budget,greed=1.2)  # local detour
@@ -1258,7 +1307,11 @@ class QuestRoutes:
             if b['pos']<len(b['ids']):self.enter_stage('pickup',now);return
             phase,next_index=b['then'];self.borrow=None
             self.leave_board(phase,next_index,m['board_id'],now);return
-        if not self.skip_current:self.learn_targets();self.completed_missions[self.phase].append(m['id'])
+        if not self.skip_current:
+            self.learn_targets()
+            # Moving to the next mission only defers the slot check; it is not
+            # proof of delivery and must not be saved as a completed mission.
+            if not (self.phase=='delivery' and self.deferred_check):self.completed_missions[self.phase].append(m['id'])
         else:self.skipped_ids.add(m['id'])
         next_index=self.pending_index(self.phase,self.mission_index+1)
         ids=self.route['mission_ids']
@@ -1332,12 +1385,25 @@ class QuestRoutes:
         its numbers replace ours and the character goes back to hunt what is missing. False when
         the texts show nothing the hunt can use (then the queue stops as before)."""
         from .npc_labels import plain
+        owner=self.index
+        if self.chain and self.current_mission:
+            owner=next((k for k in self.chain.get('hunting',[])
+                        if self.current_mission['id'] in self.chain['own'][str(k)]),self.index)
+        targets=self.routes[owner]['kill_targets']
         found={}
         for line in self.npc_texts:
             for name,done,_ in re.findall(r'([^:,\[\]]+?)\s*\[\s*(\d+)\s*/\s*(\d+)\s*\]',line):
-                key=self.target_named(name.strip())
+                key=next((plain(t['name']) for t in targets if plain(t['name'])==plain(name.strip())),None)
                 if key:found[key]=int(done)
-        if not found:return False
+        if not any(found.get(plain(t['name']),t['count'])<t['count'] for t in targets):return False
+        if owner!=self.index:
+            self.chain['delivery_retry']=dict(index=self.index,kills=self.kills,
+                                              kill_counts=dict(self.kill_counts),name_counts=dict(self.name_counts))
+            self.index=owner
+            # Earlier maps have already completed their hunt. The board supplies
+            # the correction; keep the other monsters complete.
+            self.name_counts={plain(t['name']):t['count'] for t in targets};self.kill_counts={}
+            self.killed.clear();self.hit.clear();self.aggressors=set()
         for t in self.route['kill_targets']:
             key=plain(t['name'])
             if key in found:
@@ -1346,6 +1412,7 @@ class QuestRoutes:
         self.kills=sum(self.name_counts.values())+sum(self.kill_counts.values())
         if self.hunt_complete():return False
         missing=', '.join(f"{p['name']} {p['done']}/{p['count']}" for p in self.progress() if not p['complete'])
+        self.deferred_check=None
         self.enter_stage('travel',now)
         self.reason='O quadro conta menos monstros ('+missing+'); voltando para cacar: '+self.route['name']
         print('[ROTA] '+self.reason)
@@ -1409,6 +1476,8 @@ class QuestRoutes:
                     recording_stage=self.recording.get('stage','travel') if self.recording else None,
                     last_npc_text=self.recording.get('last_npc_text','') if self.recording else self.last_npc_text,
                     stage_confirmed=self.stage_confirmed,
+                    pending=copy.deepcopy(self.pending),
+                    current_step=copy.deepcopy(self.steps[self.step]) if self.steps and self.step<len(self.steps) else None,
                     mission=self.current_mission['name'] if self.current_mission else None,
                     mission_index=self.mission_index+1,completed_missions=copy.deepcopy(self.completed_missions),
                     skipped_missions=list(self.skipped),kill_progress=self.progress(),
