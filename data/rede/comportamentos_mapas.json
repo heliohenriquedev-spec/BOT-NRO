@@ -147,7 +147,7 @@
     "name": "yuno_fild07 - silencio, Kemuri e menor HP",
     "map": "yuno_fild07",
     "description": "Mata um monstro por vez, sempre o de menor HP, indo corpo a corpo: ataque basico entre Kunai, Shuriken e Punhos Intensos. Ordem: todos os outros, depois Baru, por ultimo Anbu; Baru sem controle; Anbu so leva silencio antes de morrer. Mantem os outros a ate 4 celulas dormindo: um acordado leva Fukai Yasumi; dois ou mais acordados, ou dois ou mais batendo no personagem, Coelho 3 vezes para o servidor soltar a Fukai Kemuri. Os outros monstros dormindo nao levam stun nem silencio; o alvo a ser morto sempre recebe silencio antes do primeiro dano, mesmo dormindo. Sem Kemuri: stun, sono se falhar e silencio antes do dano; se o silencio nao entrar em 10 s, ataca assim mesmo. HP abaixo de 60%: Kuchiyose Namekuji antes do dano. HP abaixo de 20%: senta, levanta para invocar a Namekuji e fica nisso ate voltar a 60%. Alvo em cima de area de habilidade no chao: so Kunai e Shuriken de fora, em rajada, sem entrar na area. Mantem os buffs ativos, renovando-os tambem entre os controles. O silencio e usado a ate 2 celulas do monstro (aproxima antes).",
-    "enabled": true,
+    "enabled": false,
     "settings": {
       "skills": true,
       "auto_attacks": true,

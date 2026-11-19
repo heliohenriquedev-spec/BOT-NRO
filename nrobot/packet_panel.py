@@ -228,6 +228,9 @@ class PacketPanel(QMainWindow):
         from .rcx_panel import RcxPanel
         self.rcx_panel = RcxPanel()
         tabs.addTab(self.rcx_panel, 'RCX')
+        from .titan_panel import TitanPanel
+        self.titan_panel = TitanPanel()
+        tabs.addTab(self.titan_panel, 'Titan')
         pvp = QWidget()
         pvp_layout = QVBoxLayout(pvp)
         self.pvp_enabled = QCheckBox('Ativar PvP')

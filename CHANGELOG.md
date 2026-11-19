@@ -4,6 +4,16 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.19.1 (19/11/2026)
+
+- Titan (nova aba): muda, só no seu jogo, o tamanho e a cor de jogadores e monstros. Escolha o alvo entre quem está na tela, todos os jogadores que o bot já viu (lista da aba Jogadores) ou todos os monstros conhecidos; os nomes aparecem sem precisar passar o mouse. Depois escolha "Só este", "Todos com este nome" ou "Toda a espécie" e mexa na barra de tamanho (de 30% a 400%) ou na cor (vermelho, azul, cinza metálico, pedra, roxo ou escuro). "Todos com este nome" aumenta só o Bikouchuu certo num evento com vários Bikouchuu. Cada mudança pode ter uma tecla própria que a liga e desliga: por exemplo, 1 deixa o Ishida grande e 2 o Low Profile. O servidor e os outros jogadores não veem nada disso.
+
+- Titan: esconder com tecla, na hora em que a tecla é apertada: some e reaparece sem atraso e sem transição (nada de sumir aos poucos, efeito de teleporte ou de chegada). Cada atalho tem a sua tecla e esconde jogadores, monstros, invocações, NPCs ou tudo; já vêm prontos Jogadores (F9), Invocações (F10) e Monstros (F11), separados porque têm usos diferentes. Em cada atalho você marca quem conta, por ID (só aquele, por exemplo um único Bikouchuu entre vários com o mesmo nome) ou por nome (todos com aquele nome). O bot pede ao servidor o nome de cada monstro assim que ele aparece, sem precisar passar o mouse, e um monstro de nome ainda desconhecido fica escondido até o nome chegar: no evento de captura de Bikouchuu, os de nome errado não chegam a aparecer. Espécies marcadas como invocação aparecem listadas no bloco e podem ser desmarcadas. e escolhe o modo: "Todos menos os marcados" (por exemplo, todos os jogadores somem menos o seu amigo) ou "Só os marcados". Dá para ter vários atalhos, cada um com a sua tecla e a sua lista. As invocações são reconhecidas pelo próprio bot (as suas, pets, homúnculos e as criadas por outros jogadores com Kuchiyose), então dá para esconder só elas. O seu personagem nunca é escondido.
+
+- Titan: overlay lateral com os atalhos. Uma janela pequena, sempre por cima, mostra cada tecla do Titan, o que ela faz e se está ligada; dá para arrastar para fora do jogo e ligar/desligar na aba Titan. A posição fica salva.
+
+- RCX: invocações de outros jogadores passam a ser reconhecidas também pelas Kuchiyose do catálogo do jogo e pelas invocações marcadas nos perfis dos seus personagens, ficando do lado do dono.
+
 ## 2026.11.15.1 (15/11/2026)
 
 - Rotas: corrigida a retomada do caminho perto de paredes e portais em todos os mapas. A viagem agora sai com cuidado da area do portal de chegada quando necessario, inclusive nos esgotos, sem entrar nele novamente; os passos confirmados pelo servidor continuam sendo acompanhados ao atravessar portais. Novas passagens internas aprendidas passam a ser consideradas mesmo depois de uma tentativa sem caminho. Ao chegar a um portal interno, o personagem aguarda a confirmacao do teletransporte e segue da chegada, inclusive quando ha varios portais no mesmo mapa; antes a viagem podia pausar com "Caminho bloqueado" nesse intervalo.

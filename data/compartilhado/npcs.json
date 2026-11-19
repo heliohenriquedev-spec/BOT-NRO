@@ -91,6 +91,94 @@
   "213,104": {
    "name": "Resetadora",
    "sprite": 59
+  },
+  "179,162": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "179,164": {
+   "name": "",
+   "sprite": 23
+  },
+  "177,162": {
+   "name": "",
+   "sprite": 23
+  },
+  "178,161": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "178,164": {
+   "name": "",
+   "sprite": 23
+  },
+  "180,162": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "180,161": {
+   "name": "",
+   "sprite": 23
+  },
+  "180,163": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "178,163": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "180,164": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "179,163": {
+   "name": "",
+   "sprite": 23
+  },
+  "185,163": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "183,166": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "178,162": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "179,161": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "181,161": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "181,163": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "183,161": {
+   "name": "",
+   "sprite": 23
+  },
+  "177,161": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "177,163": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "185,155": {
+   "name": "Uadaweu2",
+   "sprite": 23
+  },
+  "189,163": {
+   "name": "",
+   "sprite": 23
   }
  },
  "ra_in01": {
@@ -439,6 +527,18 @@
   "65,93": {
    "name": "",
    "sprite": 76
+  },
+  "90,122": {
+   "name": "",
+   "sprite": 7
+  },
+  "92,118": {
+   "name": "",
+   "sprite": 7
+  },
+  "96,140": {
+   "name": "",
+   "sprite": 3
   }
  },
  "hospital2": {
@@ -489,6 +589,14 @@
   "101,176": {
    "name": "",
    "sprite": 931
+  },
+  "103,7": {
+   "name": "",
+   "sprite": 23
+  },
+  "103,8": {
+   "name": "",
+   "sprite": 23
   }
  },
  "yuno_fild07": {
@@ -1055,7 +1163,7 @@
    "sprite": 882
   },
   "62,176": {
-   "name": "",
+   "name": "Exame Final",
    "sprite": 402
   },
   "56,188": {
@@ -1115,7 +1223,7 @@
    "sprite": 91
   },
   "40,85": {
-   "name": "",
+   "name": "Anbu Shiken",
    "sprite": 882
   },
   "22,92": {
@@ -1659,16 +1767,20 @@
    "sprite": 843
   },
   "27,33": {
-   "name": "",
+   "name": "Investir na educação",
    "sprite": 843
   },
   "18,35": {
-   "name": "",
+   "name": "Comprar Benefícios",
    "sprite": 843
   },
   "11,27": {
    "name": "Comprar Jutsus",
    "sprite": 843
+  },
+  "38,38": {
+   "name": "",
+   "sprite": 807
   }
  },
  "poring_w01": {
@@ -1807,6 +1919,10 @@
   "247,87": {
    "name": "Medicina",
    "sprite": 63
+  },
+  "282,87": {
+   "name": "",
+   "sprite": 51
   }
  },
  "moc_fild06": {
@@ -1841,11 +1957,11 @@
  },
  "prt_fild02": {
   "44,312": {
-   "name": "",
+   "name": "Orochimaru",
    "sprite": 70
   },
   "178,375": {
-   "name": "",
+   "name": "Entrada Folha",
    "sprite": 119
   },
   "156,158": {
@@ -1943,6 +2059,244 @@
   "154,134": {
    "name": "Túmulo",
    "sprite": 72
+  }
+ },
+ "ein_dun01": {
+  "218,203": {
+   "name": "",
+   "sprite": 23
+  },
+  "218,204": {
+   "name": "",
+   "sprite": 23
+  },
+  "218,202": {
+   "name": "",
+   "sprite": 23
+  },
+  "219,203": {
+   "name": "",
+   "sprite": 23
+  },
+  "219,202": {
+   "name": "",
+   "sprite": 23
+  },
+  "130,164": {
+   "name": "",
+   "sprite": 23
+  },
+  "136,162": {
+   "name": "",
+   "sprite": 23
+  },
+  "141,153": {
+   "name": "John",
+   "sprite": 23
+  },
+  "139,157": {
+   "name": "John",
+   "sprite": 23
+  },
+  "142,155": {
+   "name": "John",
+   "sprite": 23
+  },
+  "138,155": {
+   "name": "John",
+   "sprite": 23
+  },
+  "136,167": {
+   "name": "",
+   "sprite": 23
+  },
+  "137,161": {
+   "name": "John",
+   "sprite": 23
+  },
+  "138,161": {
+   "name": "John",
+   "sprite": 23
+  },
+  "137,163": {
+   "name": "John",
+   "sprite": 23
+  },
+  "131,176": {
+   "name": "",
+   "sprite": 23
+  },
+  "132,164": {
+   "name": "",
+   "sprite": 23
+  },
+  "142,158": {
+   "name": "John",
+   "sprite": 23
+  },
+  "139,162": {
+   "name": "John",
+   "sprite": 23
+  },
+  "141,158": {
+   "name": "John",
+   "sprite": 23
+  },
+  "137,155": {
+   "name": "John",
+   "sprite": 23
+  },
+  "138,156": {
+   "name": "John",
+   "sprite": 23
+  },
+  "137,156": {
+   "name": "John",
+   "sprite": 23
+  },
+  "139,153": {
+   "name": "John",
+   "sprite": 23
+  },
+  "139,156": {
+   "name": "John",
+   "sprite": 23
+  },
+  "118,130": {
+   "name": "John",
+   "sprite": 23
+  },
+  "119,131": {
+   "name": "John",
+   "sprite": 23
+  },
+  "117,128": {
+   "name": "John",
+   "sprite": 23
+  },
+  "88,118": {
+   "name": "",
+   "sprite": 23
+  },
+  "74,116": {
+   "name": "",
+   "sprite": 23
+  },
+  "74,117": {
+   "name": "",
+   "sprite": 23
+  },
+  "74,118": {
+   "name": "John",
+   "sprite": 23
+  },
+  "74,115": {
+   "name": "",
+   "sprite": 23
+  },
+  "79,117": {
+   "name": "John",
+   "sprite": 23
+  },
+  "75,116": {
+   "name": "John",
+   "sprite": 23
+  },
+  "75,117": {
+   "name": "John",
+   "sprite": 23
+  }
+ },
+ "abyss_03": {
+  "98,105": {
+   "name": "Saida",
+   "sprite": 51
+  }
+ },
+ "ama_fild01": {
+  "330,137": {
+   "name": "",
+   "sprite": 70
+  }
+ },
+ "amatsu": {
+  "202,92": {
+   "name": "Kishi Killer",
+   "sprite": 407
+  }
+ },
+ "konoha3": {
+  "212,70": {
+   "name": "",
+   "sprite": 837
+  },
+  "217,78": {
+   "name": "Viajante Ninja",
+   "sprite": 706
+  },
+  "201,81": {
+   "name": "",
+   "sprite": 765
+  },
+  "231,117": {
+   "name": "",
+   "sprite": 23
+  },
+  "215,135": {
+   "name": "",
+   "sprite": 922
+  },
+  "212,111": {
+   "name": "",
+   "sprite": 23
+  },
+  "211,115": {
+   "name": "",
+   "sprite": 23
+  },
+  "210,116": {
+   "name": "",
+   "sprite": 23
+  },
+  "206,167": {
+   "name": "",
+   "sprite": 109
+  },
+  "166,196": {
+   "name": "",
+   "sprite": 806
+  },
+  "173,196": {
+   "name": "",
+   "sprite": 756
+  },
+  "110,254": {
+   "name": "",
+   "sprite": 806
+  },
+  "103,250": {
+   "name": "",
+   "sprite": 837
+  },
+  "145,229": {
+   "name": "",
+   "sprite": 837
+  },
+  "152,221": {
+   "name": "",
+   "sprite": 806
+  },
+  "153,126": {
+   "name": "",
+   "sprite": 828
+  },
+  "161,93": {
+   "name": "",
+   "sprite": 59
+  },
+  "236,150": {
+   "name": "",
+   "sprite": 715
   }
  }
 }

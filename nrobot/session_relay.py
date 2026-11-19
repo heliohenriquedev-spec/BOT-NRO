@@ -2154,6 +2154,7 @@ class SessionRelay(QuestRelay):
                      native_frame_error=self.native_frames.error,
                      native_frame_pending_bytes=len(self.native_frames.buffer),
                      client_vision=(self.client_vision.diagnostic() if getattr(self,'client_vision',None) else None),
+                     titan=(self.titan.diagnostic() if getattr(self,'titan',None) else None),
                      map_monsters=list(self.discovered_monsters.values()),
                      map_monster_names=self.map_monster_names_cached(observer.player_id),
                      buff_candidates=dict(self.buff_candidates), buff_learning_result=self.buff_learning_result,
@@ -2869,6 +2870,34 @@ class SessionRelay(QuestRelay):
                 from .client_vision import ClientVision, VisionConfig
                 vision=ClientVision.for_account(self.account,VisionConfig()) if stage=='map' else None
                 if vision is not None:self.client_vision=vision
+                titan = titan_ticker = None
+                if stage == 'map':
+                    # Titan: local size/colour/hide (the client's drawing only), last of the filters.
+                    from .titan import Titan, TitanConfig
+                    from .titan_settings import SCREEN_FILE
+
+                    def titan_summons():
+                        # The bot's own summon knowledge: own summons/homunculus, other players'
+                        # creatures (rcx_sides: created next to a player right after a summon skill),
+                        # and units the inventory or monster_origin already treat as summons.
+                        from .monster_origin import temporary_reason
+                        ids = set(self.own_summons.allies())
+                        ids.update(self.rcx_sides.owners)
+                        ids.update(k for k, v in self.inventory.entities.items() if temporary_reason(v))
+                        return ids
+                    titan = self.titan = Titan(self.account, TitanConfig(), titan_summons, SCREEN_FILE)
+
+                    async def titan_tick():
+                        try:
+                            while not client_writer.is_closing():
+                                await asyncio.sleep(.015)  # hide/show right after the key
+                                if (extra := titan.tick()):
+                                    client_writer.write(extra)
+                                    await client_writer.drain()
+                                await self.send_titan_name_requests(titan)
+                        except (OSError, ConnectionError) as exc:
+                            print(f'Titan parado nesta conexão: {exc}')
+                    titan_ticker = self.titan_ticker = asyncio.create_task(titan_tick())
                 removal = None
                 # Part of the bot for every user (instant death removal, multi-hit shown as one hit):
                 # on unless perfis/sem_remocao_visual exists. It used to need a file in perfis/, which
@@ -2894,6 +2923,7 @@ class SessionRelay(QuestRelay):
                         routed = await endpoints.feed(data)
                         visible = removal.feed(routed) if removal is not None else routed
                         visible = vision.feed(visible)
+                        visible = titan.feed(visible)
                         if visible:
                             client_writer.write(visible)
                             await client_writer.drain()
@@ -2923,14 +2953,18 @@ class SessionRelay(QuestRelay):
                     if time.monotonic()-self.last_saved > .5:
                         self.last_saved = time.monotonic()
                         self.status()
+                if titan_ticker is not None:
+                    titan_ticker.cancel()
                 if endpoints is not None and (remaining := endpoints.flush()):
                     remaining=removal.feed(remaining) if removal is not None else remaining
-                    client_writer.write(vision.feed(remaining))
+                    client_writer.write(titan.feed(vision.feed(remaining)))
                     await client_writer.drain()
                 if removal is not None and (remaining := removal.flush()):
-                    client_writer.write(vision.feed(remaining))
+                    client_writer.write(titan.feed(vision.feed(remaining)))
                     await client_writer.drain()
                 if vision is not None and (remaining := vision.flush()):
+                    client_writer.write(titan.feed(remaining));await client_writer.drain()
+                if titan is not None and (remaining := titan.flush()):
                     client_writer.write(remaining);await client_writer.drain()
                 if stage == 'map':
                     self.record_hunt({'kind': 'connection_eof', 'source': 'remote_server', 'recent_map_sends': list(self.recent_map_sends)})
@@ -2944,6 +2978,8 @@ class SessionRelay(QuestRelay):
             self.error = str(exc)
             print(f'Conexão {stage} interrompida: {exc}')
         finally:
+            if getattr(self, 'titan_ticker', None) is not None and stage == 'map':
+                self.titan_ticker.cancel()
             for task in jobs:
                 task.cancel()
             if jobs:
@@ -2968,6 +3004,22 @@ class SessionRelay(QuestRelay):
                     except OSError:
                         pass
             self.status()
+
+    async def send_titan_name_requests(self, titan):
+        """Titan decides by the server's name: ask it (0094) for new monsters right away, at most
+        8 every 15 ms, like the game does on mouse-over. Respects "Parar envios"."""
+        if (not titan.name_queue or not self.allow_commands or getattr(self, 'commands_blocked', False)
+                or self.upstream is None or self.login_phase != 'map' or not self.native_frames.ready):
+            return
+        from .packet_encoder import name_request
+        async with self.send_lock:
+            if self.upstream is None or not self.native_frames.ready:
+                return
+            for identity in titan.take_name_requests():
+                payload = name_request(identity)
+                self.trace_map_send('titan', 0x94, len(payload))
+                self.upstream.write(payload)
+            await self.upstream.drain()
 
     async def send_attack(self, target_id, *, game_gate):
         if not self.allow_commands:
@@ -3283,7 +3335,10 @@ class SessionRelay(QuestRelay):
         for key, row in (learned or {}).items():
             if isinstance(row, dict) and row.get('creature') and str(key).split(':')[0].isdigit():
                 skills.add(int(str(key).split(':')[0]))
-        return skills
+        if not hasattr(self, 'catalog_summon_skills'):
+            from .summon_queue import catalog_summon_skills
+            self.catalog_summon_skills = catalog_summon_skills()
+        return skills | self.catalog_summon_skills
 
     def observe_rcx_affiliation(self, events):
         """Battleground team, PvP map, party, own guild and other players' summons (rcx_sides)."""

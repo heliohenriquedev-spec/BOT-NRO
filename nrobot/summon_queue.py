@@ -27,6 +27,31 @@ def validated_learning(data):
     return result
 
 
+def catalog_summon_skills(root=None):
+    """Numeric ids of every summon skill in the game's catalog (Kuchiyose..., Invocar...), so a
+    creature another player summons is known even when this character never used that skill."""
+    import json
+    from pathlib import Path
+    root = Path(root or Path(__file__).resolve().parents[1])
+    try:
+        names = json.loads((root/'data/catalogo/catalogo.json').read_text(encoding='utf-8'))['habilidades']
+        ids = json.loads((root/'data/recursos/habilidades_ids.json').read_text(encoding='utf-8'))
+    except (OSError, ValueError, KeyError):
+        return set()
+    summons = {symbol for symbol, row in names.items()
+               if isinstance(row, dict) and any(word in str(row.get('nome', '')).casefold() for word in ('kuchiyose', 'invoca'))}
+    found = {int(number) for number, symbol in ids.items() if symbol in summons and str(number).isdigit()}
+    # NRO's own Kuchiyose are missing from the client table: every character profile marks them.
+    for path in (root/'data/rede/personagens').glob('*.json'):
+        try:
+            profiles = json.loads(path.read_text(encoding='utf-8')).get('skill_profiles') or []
+        except (OSError, ValueError, AttributeError):
+            continue
+        found.update(p['skill_id'] for p in profiles
+                     if isinstance(p, dict) and p.get('role') == 'summon' and isinstance(p.get('skill_id'), int))
+    return found
+
+
 class SummonQueue:
     def __init__(self):
         self.mode = 'cycle'

@@ -84,8 +84,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-4",
    "arrival": [
-    81,
-    294
+    213,
+    66
    ]
   },
   "161,25>um_dun01>Esconderijo do Clã Kamizuru": {
@@ -292,8 +292,8 @@
    "to": "mjolnir_08",
    "name": "Viajante Ninja#h2-4",
    "arrival": [
-    105,
-    290
+    147,
+    332
    ]
   }
  },
@@ -346,8 +346,8 @@
    "to": "pay_fild10",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    134,
-    59
+    171,
+    179
    ]
   },
   "217,86>ve_fild04>Mamutes da Suna": {
@@ -398,8 +398,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    226,
-    93
+    79,
+    140
    ]
   },
   "217,86>anthell01>Esconderijo do Clã Kamizuru Nível 2": {
@@ -995,8 +995,8 @@
    "to": "06guild_03",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    48,
-    80
+    45,
+    48
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [0] |Sim": {
@@ -1036,8 +1036,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    26,
-    38
+    50,
+    32
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [3] |Sim": {
@@ -1077,8 +1077,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    51,
-    59
+    43,
+    45
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [5] |Sim": {
@@ -1159,8 +1159,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    32,
-    19
+    19,
+    13
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [4] |Sim": {
@@ -1200,8 +1200,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    19,
-    54
+    30,
+    49
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [6] |Sim": {
@@ -1355,7 +1355,7 @@
    "name": "Arenas de Guerra#3",
    "arrival": [
     31,
-    60
+    30
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [7] |Sim": {
@@ -1646,6 +1646,61 @@
    "arrival": [
     78,
     46
+   ]
+  },
+  "78,113>abyss_03>Entrar": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      78,
+      113
+     ],
+     "name": "Treasure Hunt#1"
+    },
+    {
+     "kind": "next",
+     "map": "kakashi.gat"
+    },
+    {
+     "kind": "select",
+     "map": "kakashi.gat",
+     "option": "Entrar"
+    },
+    {
+     "kind": "wait_map",
+     "map": "abyss_03.gat"
+    }
+   ],
+   "to": "abyss_03",
+   "name": "Treasure Hunt#1",
+   "arrival": [
+    98,
+    105
+   ]
+  },
+  "78,133>amatsu>": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "kakashi.gat",
+     "position": [
+      78,
+      133
+     ],
+     "name": "Entrada - Gamakishi"
+    },
+    {
+     "kind": "wait_map",
+     "map": "amatsu.gat"
+    }
+   ],
+   "to": "amatsu",
+   "name": "Entrada - Gamakishi",
+   "arrival": [
+    197,
+    79
    ]
   }
  },

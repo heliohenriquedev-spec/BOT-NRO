@@ -39,5 +39,7 @@ perfis/painel_ui.json
 
 data/rede/invocacoes_aprendidas.json
 data/rede/invocacoes_aprendidas.tmp
+data/rede/titan.json
+data/rede/titan_tela.json
 
 /Arquivos_grf/

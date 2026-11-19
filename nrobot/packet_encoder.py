@@ -35,6 +35,14 @@ def attack(target_id: int, *, repeat=False, ticks=windows_tick) -> bytes:
             + filler(9, ticks) + bytes([7 if repeat else 0]))
 
 
+def name_request(entity_id: int, *, ticks=windows_tick) -> bytes:
+    """0094 as the NRO client builds it (mode message 0x3D, 0x58BA14): 14 bytes, unit id at 10;
+    the same request the game sends when the mouse goes over a unit."""
+    uint(entity_id, 32, positive=True)
+    return (struct.pack('<H', 0x94) + filler(5, ticks) + b'\0\0' + filler(1, ticks)
+            + struct.pack('<I', entity_id))
+
+
 SIT, STAND = 2, 3
 
 

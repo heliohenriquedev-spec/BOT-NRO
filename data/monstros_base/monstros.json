@@ -61,6 +61,20 @@
    ]
   }
  },
+ "23": {
+  "species_id": 23,
+  "maps": {
+   "ein_dun01": 0
+  },
+  "name": "John",
+  "max_hp": 3421046,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "ein_dun01": [
+    "John"
+   ]
+  }
+ },
  "1005": {
   "species_id": 1005,
   "maps": {
@@ -214,10 +228,15 @@
    "arug_cas03": 0,
    "poring_c01": 0,
    "arug_cas01": 0,
-   "um_fild01": 0
+   "um_fild01": 0,
+   "ein_dun01": 0,
+   "0012@cata": 0,
+   "ama_fild01": 0,
+   "areia": 0,
+   "bossnia_01": 0
   },
   "walk_speed_ms": 150,
-  "name": "Mula sem Cabesa",
+  "name": "Kaguya",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -242,6 +261,8 @@
     "Anos Voldigoad",
     "Apollo",
     "Deidara",
+    "Dohko",
+    "Galdra",
     "Kakashi",
     "Konan Uchiha",
     "Kuka Beludo",
@@ -273,9 +294,13 @@
     "Anos Voldigoad",
     "Arroz",
     "Asuma",
+    "Cheron Menezes",
+    "Chris Redfield",
     "Deca",
+    "Dohko",
     "Goku",
     "Gomen",
+    "Hozuki Suigetsu",
     "John",
     "Kaguya",
     "Kakashi",
@@ -291,6 +316,7 @@
     "Raluco",
     "Saga",
     "Sasori",
+    "Scorpion",
     "Souzou Saisei",
     "Tobirama Senju",
     "Vagnerock",
@@ -304,6 +330,7 @@
    "new_4-2": [
     "Aegon",
     "Asuma",
+    "Cheron Menezes",
     "Deca",
     "Goku",
     "Gomen",
@@ -317,6 +344,7 @@
     "Musashi",
     "Mymma Cetha",
     "Sasori",
+    "Scorpion",
     "Tobirama Senju",
     "Vagnerock",
     "Void",
@@ -341,6 +369,7 @@
     "Void",
     "Yoriichi",
     "iRooh",
+    "ifDestiny",
     "itachii"
    ],
    "bat_c01": [
@@ -415,10 +444,12 @@
     "Anos Voldigoad",
     "Asuma",
     "Black Over",
+    "Deca",
     "Elesta",
     "Goku",
     "Gomen",
     "Haiyashinin",
+    "Hozuki Suigetsu",
     "Kakashi",
     "Konan Araya",
     "Kuka Beludo",
@@ -427,6 +458,8 @@
     "Low profile",
     "Sabaku no Gaara",
     "Saga",
+    "Sakura",
+    "Souzou Saisei",
     "Vagnerock",
     "Void",
     "Xereca de Bode",
@@ -436,6 +469,26 @@
    ],
    "um_fild01": [
     "Namekuji"
+   ],
+   "ein_dun01": [
+    "John",
+    "Lost in Light",
+    "Raluco"
+   ],
+   "0012@cata": [
+    "Shura"
+   ],
+   "ama_fild01": [
+    "Raluco"
+   ],
+   "areia": [
+    "Anos Voldigoad",
+    "Hozuki Suigetsu",
+    "John",
+    "Kuri"
+   ],
+   "bossnia_01": [
+    "iRooh"
    ]
   }
  },
@@ -635,7 +688,8 @@
   "species_id": 1048,
   "maps": {
    "0022@cata": 0,
-   "0032@cata": 0
+   "0032@cata": 0,
+   "0012@cata": 0
   },
   "name": "Haku",
   "max_hp": 40000000,
@@ -647,6 +701,10 @@
    ],
    "0032@cata": [
     "Haku"
+   ],
+   "0012@cata": [
+    "Haku",
+    "Haku Bushin"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -907,7 +965,8 @@
    "mjolnir_07": 0,
    "prt_fild00": 0,
    "yuno_fild07": 0,
-   "um_fild01": 0
+   "um_fild01": 0,
+   "ama_fild01": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 2000,
@@ -964,6 +1023,12 @@
    ],
    "hu_fild07": [
     "Planta Medicinal "
+   ],
+   "pay_fild10": [
+    "Planta Medicinal "
+   ],
+   "ama_fild01": [
+    "Planta Medicinal "
    ]
   }
  },
@@ -982,13 +1047,29 @@
   },
   "sprite_source": "GRF prioritário"
  },
+ "1086": {
+  "species_id": 1086,
+  "maps": {
+   "ein_dun01": 0
+  },
+  "name": "Kyuubi",
+  "max_hp": 100000000,
+  "walk_speed_ms": 112,
+  "names_by_map": {
+   "ein_dun01": [
+    "Kyuubi"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1093": {
   "species_id": 1093,
   "maps": {
    "ve_fild04": 29,
    "ein_fild01": 8,
    "pay_fild10": 0,
-   "mjolnir_08": 0
+   "mjolnir_08": 0,
+   "abyss_03": 0
   },
   "walk_speed_ms": 200,
   "name": "Coelho",
@@ -1006,6 +1087,9 @@
    ],
    "ein_fild01": [
     "Coelho"
+   ],
+   "abyss_03": [
+    "[TH] Coelho"
    ]
   }
  },
@@ -1150,7 +1234,8 @@
   "species_id": 1152,
   "maps": {
    "0022@cata": 0,
-   "0032@cata": 0
+   "0032@cata": 0,
+   "0012@cata": 0
   },
   "name": "Nukenin Assassino",
   "max_hp": 1000000,
@@ -1160,6 +1245,9 @@
     "Nukenin Assassino"
    ],
    "0032@cata": [
+    "Nukenin Assassino"
+   ],
+   "0012@cata": [
     "Nukenin Assassino"
    ]
   },
@@ -1235,10 +1323,13 @@
    "new_4-2": 0,
    "arug_cas01": 0,
    "hospital2": 0,
-   "arug_cas03": 0
+   "arug_cas03": 0,
+   "ein_dun01": 0,
+   "kakashi": 0,
+   "ama_fild01": 0
   },
   "walk_speed_ms": 150,
-  "name": "Anko",
+  "name": "Ootsutsuki Kabuto",
   "max_hp": 2000000,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -1246,6 +1337,7 @@
     "Doki"
    ],
    "chunin": [
+    "Anko",
     "Kaguya",
     "Ootsutsuki Kabuto",
     "Zelda"
@@ -1272,13 +1364,23 @@
    ],
    "arug_cas01": [
     "Kaguya",
-    "Ootsutsuki Kabuto"
+    "Ootsutsuki Kabuto",
+    "Percival"
    ],
    "hospital2": [
     "Ginkaku"
    ],
    "arug_cas03": [
     "Hisoka"
+   ],
+   "ein_dun01": [
+    "Kedoui Agari"
+   ],
+   "kakashi": [
+    "Anko"
+   ],
+   "ama_fild01": [
+    "Doki"
    ]
   }
  },
@@ -1286,7 +1388,8 @@
   "species_id": 1178,
   "maps": {
    "0022@cata": 0,
-   "0032@cata": 0
+   "0032@cata": 0,
+   "0012@cata": 0
   },
   "name": "Bandido Assassino",
   "max_hp": 1000000,
@@ -1296,6 +1399,9 @@
     "Bandido Assassino"
    ],
    "0032@cata": [
+    "Bandido Assassino"
+   ],
+   "0012@cata": [
     "Bandido Assassino"
    ]
   },
@@ -1530,7 +1636,8 @@
   "species_id": 1276,
   "maps": {
    "0022@cata": 0,
-   "0032@cata": 0
+   "0032@cata": 0,
+   "0012@cata": 0
   },
   "name": "Shinobi Ladrão",
   "max_hp": 1000000,
@@ -1540,6 +1647,9 @@
     "Shinobi Ladrão"
    ],
    "0032@cata": [
+    "Shinobi Ladrão"
+   ],
+   "0012@cata": [
     "Shinobi Ladrão"
    ]
   },
@@ -1626,7 +1736,8 @@
   "species_id": 1297,
   "maps": {
    "0022@cata": 0,
-   "0032@cata": 0
+   "0032@cata": 0,
+   "0012@cata": 0
   },
   "name": "Nukenin Procurado",
   "max_hp": 1000000,
@@ -1636,6 +1747,9 @@
     "Nukenin Procurado"
    ],
    "0032@cata": [
+    "Nukenin Procurado"
+   ],
+   "0012@cata": [
     "Nukenin Procurado"
    ]
   },
@@ -1737,7 +1851,8 @@
   "maps": {
    "yuno_fild11": 17,
    "ra_fild03": 37,
-   "prt_fild00": 0
+   "prt_fild00": 0,
+   "ama_fild01": 0
   },
   "walk_speed_ms": 155,
   "name": "Ninkame",
@@ -1752,6 +1867,9 @@
     "Ninkame"
    ],
    "prt_fild00": [
+    "Ninkame"
+   ],
+   "ama_fild01": [
     "Ninkame"
    ]
   }
@@ -1816,7 +1934,8 @@
    "06guild_03": 0,
    "bat_c02": 0,
    "kakashi": 0,
-   "arug_cas01": 0
+   "arug_cas01": 0,
+   "ein_dun01": 0
   },
   "captured_sprite": true,
   "name": "Midoriya",
@@ -1837,7 +1956,11 @@
     "Gyomei"
    ],
    "arug_cas01": [
+    "Midoriya",
     "Rivore"
+   ],
+   "ein_dun01": [
+    "Vegeta"
    ]
   }
  },
@@ -1856,7 +1979,7 @@
   "captured_sprite": true,
   "name": "Midoriya",
   "max_hp": 2000000,
-  "walk_speed_ms": 600,
+  "walk_speed_ms": 225,
   "names_by_map": {
    "izlu2dun": [
     "Ritual"
@@ -1902,9 +2025,10 @@
    "bat_c02": 0,
    "bat_c03": 0,
    "new_4-2": 0,
-   "kakashi": 0
+   "kakashi": 0,
+   "arug_cas01": 0
   },
-  "name": "Chupa Charque",
+  "name": "Hitmonlee",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -1915,9 +2039,11 @@
     "Neji Hyuuga"
    ],
    "chunin": [
+    "Chupa Charque",
     "Mukai Kohinata"
    ],
    "bat_c02": [
+    "Hitmonlee",
     "Kazekage",
     "Vapt Vupt"
    ],
@@ -1929,6 +2055,9 @@
    ],
    "kakashi": [
     "Chupa Charque"
+   ],
+   "arug_cas01": [
+    "Hitmonlee"
    ]
   },
   "captured_sprite": true
@@ -1946,9 +2075,11 @@
    "kakashi": 0,
    "arug_cas03": 0,
    "arug_cas01": 0,
-   "poring_c01": 0
+   "poring_c01": 0,
+   "prt_fild02": 0,
+   "areia": 0
   },
-  "name": "KillaKween",
+  "name": "Yhwach",
   "max_hp": 2000000,
   "walk_speed_ms": 600,
   "names_by_map": {
@@ -1956,6 +2087,7 @@
     "Ishida",
     "KillaKween",
     "Macro",
+    "Massacrento",
     "Myka",
     "Portajanela",
     "Yhwach",
@@ -1979,7 +2111,8 @@
     "Myka",
     "Neji Hyuuga",
     "Portajanela",
-    "Zetsu"
+    "Zetsu",
+    "rage"
    ],
    "bat_c03": [
     "Ashura Otsutsuki",
@@ -2002,13 +2135,15 @@
     "KillaKween",
     "Macro",
     "Myka",
+    "Yhwach",
     "Zetsu"
    ],
    "kakashi": [
     "Macro",
     "Myka",
     "Portajanela",
-    "Zamasu"
+    "Zamasu",
+    "rage"
    ],
    "arug_cas03": [
     "Ashura Otsutsuki",
@@ -2030,11 +2165,20 @@
     "Macro",
     "Massacrento",
     "Myka",
-    "Portajanela"
+    "Portajanela",
+    "Yhwach",
+    "Zetsu",
+    "rage"
    ],
    "poring_c01": [
     "Ishida",
     "Macro"
+   ],
+   "prt_fild02": [
+    "Neji Hyuuga"
+   ],
+   "areia": [
+    "Massacrento"
    ]
   },
   "captured_sprite": true
@@ -2051,17 +2195,20 @@
    "arug_cas03": 0,
    "new_4-2": 0,
    "arug_cas01": 0,
-   "poring_c01": 0
+   "poring_c01": 0,
+   "konoha3": 0,
+   "areia": 0
   },
   "captured_sprite": true,
-  "name": "Ishida",
+  "name": "Yhwach",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
     "Ishida",
     "Macro",
-    "Neji Hyuuga"
+    "Neji Hyuuga",
+    "Yhwach"
    ],
    "kakashi": [
     "Ishida"
@@ -2078,7 +2225,8 @@
    "bat_c02": [
     "Ishida",
     "Macro",
-    "Neji Hyuuga"
+    "Neji Hyuuga",
+    "Yhwach"
    ],
    "hospital2": [
     "Macro",
@@ -2090,16 +2238,24 @@
     "Neji Hyuuga"
    ],
    "new_4-2": [
-    "Ishida"
+    "Ishida",
+    "Neji Hyuuga"
    ],
    "arug_cas01": [
     "Ishida",
     "Macro",
-    "Neji Hyuuga"
+    "Neji Hyuuga",
+    "Yhwach"
    ],
    "poring_c01": [
     "Ishida",
     "Macro"
+   ],
+   "konoha3": [
+    "Neji Hyuuga"
+   ],
+   "areia": [
+    "Ishida"
    ]
   }
  },
@@ -2132,7 +2288,7 @@
    "0012@cata": 0,
    "0032@cata": 0
   },
-  "name": "Bandido",
+  "name": "Bandido Assassino",
   "max_hp": 1000000,
   "walk_speed_ms": 165,
   "sprite_source": "GRF prioritário",
@@ -2242,10 +2398,11 @@
    "moc_fild13": 6,
    "yuno_fild05": 11,
    "um_fild01": 0,
-   "moc_fild03": 0
+   "moc_fild03": 0,
+   "amatsu": 0
   },
   "walk_speed_ms": 160,
-  "name": "Gama-Kichi",
+  "name": "Gamakichi",
   "max_hp": 36000,
   "sprite_source": "Gama_Kichi.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -2261,6 +2418,9 @@
    ],
    "um_fild01": [
     "Gama-Kichi"
+   ],
+   "amatsu": [
+    "Gamakichi"
    ]
   }
  },
@@ -2346,9 +2506,10 @@
    "chunin": 0,
    "bat_c02": 0,
    "arug_cas01": 0,
-   "arug_cas03": 0
+   "arug_cas03": 0,
+   "areia": 0
   },
-  "name": "Souzou Saisei",
+  "name": "Ghoul",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -2365,6 +2526,7 @@
     "Natsu Dragneel"
    ],
    "chunin": [
+    "Ghoul",
     "Izuna",
     "Natsu Dragneel"
    ],
@@ -2378,6 +2540,9 @@
    "arug_cas03": [
     "Sakura",
     "Souzou Saisei"
+   ],
+   "areia": [
+    "Ghoul"
    ]
   }
  },
@@ -2391,7 +2556,8 @@
    "arug_cas03": 0,
    "bat_c02": 0,
    "new_4-2": 0,
-   "arug_cas01": 0
+   "arug_cas01": 0,
+   "ein_dun01": 0
   },
   "names_by_map": {
    "arenaflo": [
@@ -2414,7 +2580,11 @@
     "Souzou Saisei"
    ],
    "arug_cas01": [
-    "Sakura"
+    "Sakura",
+    "Souzou Saisei"
+   ],
+   "ein_dun01": [
+    "Souzou Saisei"
    ]
   },
   "name": "Sakura",
@@ -2431,7 +2601,8 @@
    "chunin": 0,
    "arug_cas03": 0,
    "bat_c02": 0,
-   "arug_cas01": 0
+   "arug_cas01": 0,
+   "areia": 0
   },
   "names_by_map": {
    "0015@tower": [
@@ -2441,6 +2612,7 @@
     "Natsu Dragneel"
    ],
    "chunin": [
+    "Ghoul",
     "Izuna",
     "Natsu Dragneel",
     "Tenten"
@@ -2454,11 +2626,14 @@
    "arug_cas01": [
     "Sakura",
     "Souzou Saisei"
+   ],
+   "areia": [
+    "Ghoul"
    ]
   },
-  "name": "Sakura",
+  "name": "Ghoul",
   "max_hp": 2000000,
-  "walk_speed_ms": 150
+  "walk_speed_ms": 112
  },
  "1494": {
   "species_id": 1494,
@@ -2511,7 +2686,8 @@
    "ve_fild04": 35,
    "ein_fild01": 6,
    "pay_fild10": 0,
-   "mjolnir_08": 0
+   "mjolnir_08": 0,
+   "abyss_03": 0
   },
   "walk_speed_ms": 165,
   "name": "Sanjuu Kyodaireo",
@@ -2529,6 +2705,9 @@
    ],
    "ein_fild01": [
     "Sanjuu Kyodaireo"
+   ],
+   "abyss_03": [
+    "[TH] Sanjuu Kyodaireo"
    ]
   }
  },
@@ -2683,7 +2862,8 @@
    "0045@tower": 0,
    "mosk_que": 0,
    "prt_fild05": 0,
-   "prt_fild00": 0
+   "prt_fild00": 0,
+   "ama_fild01": 0
   },
   "walk_speed_ms": 170,
   "name": "Jounin",
@@ -2716,6 +2896,10 @@
    ],
    "lhz_fild02": [
     "Jounin"
+   ],
+   "ama_fild01": [
+    "Jounin",
+    "Líder Jounin"
    ]
   }
  },
@@ -2726,11 +2910,12 @@
    "0015@tower": 0,
    "0045@tower": 0,
    "yuno_fild07": 0,
-   "mjolnir_11": 0
+   "mjolnir_11": 0,
+   "bossnia_01": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 180,
-  "name": "Anbu",
+  "name": "ANBU",
   "max_hp": 1200000,
   "names_by_map": {
    "0015@tower": [
@@ -2747,6 +2932,9 @@
    ],
    "mjolnir_11": [
     "Anbu"
+   ],
+   "bossnia_01": [
+    "ANBU"
    ]
   }
  },
@@ -2823,14 +3011,18 @@
  "1664": {
   "species_id": 1664,
   "maps": {
-   "prt_fild00": 0
+   "prt_fild00": 0,
+   "chunin": 0
   },
-  "name": "Rampage",
+  "name": "Chupa Charque",
   "max_hp": 290000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "prt_fild00": [
     "Rampage"
+   ],
+   "chunin": [
+    "Chupa Charque"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -2937,13 +3129,15 @@
    "arug_cas03": 0,
    "new_4-2": 0,
    "bat_c03": 0,
-   "arug_cas01": 0
+   "arug_cas01": 0,
+   "ein_dun01": 0
   },
   "name": "Ootsutsuki Kabuto",
   "max_hp": 2000000,
-  "walk_speed_ms": 150,
+  "walk_speed_ms": 225,
   "names_by_map": {
    "chunin": [
+    "Anko",
     "Black Yugan",
     "Izuna",
     "Ootsutsuki Kabuto",
@@ -2989,6 +3183,9 @@
     "Gangetsu Hozuki",
     "Ootsutsuki Kabuto",
     "Yuta"
+   ],
+   "ein_dun01": [
+    "Gangetsu Hozuki"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3018,9 +3215,11 @@
    "arug_cas03": 0,
    "hospital2": 0,
    "bat_c03": 0,
-   "arug_cas01": 0
+   "arug_cas01": 0,
+   "ama_fild01": 0,
+   "areia": 0
   },
-  "name": "Kagura Hozuki",
+  "name": "Black Ass",
   "max_hp": 2100000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -3043,6 +3242,7 @@
     "Temari"
    ],
    "bat_c02": [
+    "Black Ass",
     "Black Yugan",
     "Gangetsu Hozuki",
     "Kagura Hozuki",
@@ -3066,6 +3266,12 @@
     "Gangetsu Hozuki",
     "Ootsutsuki Kabuto",
     "Yuta"
+   ],
+   "ama_fild01": [
+    "Kagura Hozuki"
+   ],
+   "areia": [
+    "Temari"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3113,9 +3319,10 @@
    "bat_c02": 0,
    "new_4-2": 0,
    "chunin": 0,
-   "kakashi": 0
+   "kakashi": 0,
+   "arug_cas01": 0
   },
-  "name": "Zuko",
+  "name": "Orochimahru",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -3137,6 +3344,9 @@
    ],
    "kakashi": [
     "Zuko"
+   ],
+   "arug_cas01": [
+    "Orochimahru"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3161,6 +3371,7 @@
   "names_by_map": {
    "bat_c02": [
     "Galdra",
+    "Goku",
     "Kakashi",
     "Kuka Beludo",
     "Low profile",
@@ -3216,6 +3427,7 @@
    ],
    "arug_cas01": [
     "Galdra",
+    "Goku",
     "Kakashi",
     "Kuka Beludo",
     "Low profile",
@@ -3223,9 +3435,9 @@
     "Vagnerock"
    ]
   },
-  "name": "Vagnerock",
+  "name": "Low profile",
   "max_hp": 2000000,
-  "walk_speed_ms": 112
+  "walk_speed_ms": 150
  },
  "1788": {
   "species_id": 1788,
@@ -3265,7 +3477,9 @@
    "0015@tower": 0,
    "arug_cas01": 0,
    "kakashi": 0,
-   "chunin": 0
+   "chunin": 0,
+   "hospital2": 0,
+   "areia": 0
   },
   "name": "O Pimposo",
   "max_hp": 2100000,
@@ -3297,6 +3511,12 @@
    ],
    "chunin": [
     "Natsu Dragneel"
+   ],
+   "hospital2": [
+    "O Pimposo"
+   ],
+   "areia": [
+    "O Pimposo"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3306,16 +3526,20 @@
   "symbol": "G_RAFFLESIA",
   "sprite_source": "dados do jogo",
   "maps": {
-   "chunin": 0
+   "chunin": 0,
+   "areia": 0
   },
   "names_by_map": {
    "chunin": [
     "Natsu Dragneel"
+   ],
+   "areia": [
+    "O Pimposo"
    ]
   },
-  "name": "Natsu Dragneel",
+  "name": "O Pimposo",
   "max_hp": 2000000,
-  "walk_speed_ms": 150
+  "walk_speed_ms": 225
  },
  "1796": {
   "species_id": 1796,
@@ -3390,10 +3614,11 @@
    "chunin": 0,
    "new_4-2": 0,
    "bat_c01": 0,
-   "arug_cas03": 0
+   "arug_cas03": 0,
+   "ama_fild01": 0
   },
-  "walk_speed_ms": 150,
-  "name": "Ashura Otsutsuki",
+  "walk_speed_ms": 160,
+  "name": "Camaleon",
   "max_hp": 2000000,
   "sprite_source": "Salamandra.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -3438,6 +3663,9 @@
     "Ashura Otsutsuki",
     "Mahoraga",
     "dzsete"
+   ],
+   "ama_fild01": [
+    "Camaleon"
    ]
   }
  },
@@ -3549,11 +3777,13 @@
    "chunin": 0,
    "arug_cas03": 0,
    "bat_c03": 0,
-   "bat_c01": 0
+   "bat_c01": 0,
+   "ein_dun01": 0,
+   "areia": 0
   },
-  "name": "Masashi Kishimoto",
+  "name": "John",
   "max_hp": 2300000,
-  "walk_speed_ms": 150,
+  "walk_speed_ms": 225,
   "names_by_map": {
    "0015@tower": [
     "Black Over",
@@ -3593,7 +3823,8 @@
     "Yondaime"
    ],
    "chunin": [
-    "Mula sem Cabesa"
+    "Mula sem Cabesa",
+    "Tdionysio"
    ],
    "arug_cas03": [
     "Konan Uchiha"
@@ -3603,6 +3834,13 @@
    ],
    "bat_c01": [
     "Masashi Kishimoto"
+   ],
+   "ein_dun01": [
+    "John",
+    "Lost in Light"
+   ],
+   "areia": [
+    "John"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3619,6 +3857,21 @@
   "names_by_map": {
    "tur_dun03": [
     "Polvo Gigante"
+   ]
+  }
+ },
+ "1972": {
+  "species_id": 1972,
+  "maps": {
+   "areia": 0
+  },
+  "captured_sprite": true,
+  "name": "[BOSS] Tobi",
+  "max_hp": 30000000,
+  "walk_speed_ms": 500,
+  "names_by_map": {
+   "areia": [
+    "[BOSS] Tobi"
    ]
   }
  },
@@ -3722,7 +3975,9 @@
   "maps": {
    "0015@tower": 0,
    "0045@tower": 0,
-   "0035@tower": 0
+   "0035@tower": 0,
+   "kakashi": 0,
+   "bossnia_01": 0
   },
   "name": "Capitão ANBU",
   "max_hp": 10000000,
@@ -3735,6 +3990,12 @@
     "Capitão ANBU"
    ],
    "0035@tower": [
+    "Capitão ANBU"
+   ],
+   "kakashi": [
+    "Capitão ANBU"
+   ],
+   "bossnia_01": [
     "Capitão ANBU"
    ]
   },
@@ -3751,9 +4012,10 @@
    "kakashi": 0,
    "arug_cas03": 0,
    "arug_cas01": 0,
-   "hospital2": 0
+   "hospital2": 0,
+   "ein_dun01": 0
   },
-  "name": "Anko",
+  "name": "Ootsutsuki Kabuto",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -3762,6 +4024,7 @@
     "Kaguya",
     "Massacrento",
     "Ootsutsuki Kabuto",
+    "Uzumaki Karin",
     "Zelda",
     "silas"
    ],
@@ -3794,11 +4057,17 @@
     "Kedoui Agari"
    ],
    "arug_cas01": [
+    "Ginkaku",
     "Kaguya",
-    "Ootsutsuki Kabuto"
+    "Ootsutsuki Kabuto",
+    "Percival"
    ],
    "hospital2": [
     "Ginkaku"
+   ],
+   "ein_dun01": [
+    "Hisoka",
+    "Kedoui Agari"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3814,9 +4083,10 @@
    "new_4-2": 0,
    "kakashi": 0,
    "arug_cas01": 0,
-   "hospital2": 0
+   "hospital2": 0,
+   "ein_dun01": 0
   },
-  "name": "Anko",
+  "name": "Ootsutsuki Kabuto",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -3825,6 +4095,7 @@
     "Kaguya",
     "Massacrento",
     "Ootsutsuki Kabuto",
+    "Uzumaki Karin",
     "Zelda"
    ],
    "bat_c02": [
@@ -3850,14 +4121,19 @@
     "Hisoka"
    ],
    "kakashi": [
-    "Hisoka"
+    "Hisoka",
+    "Ootsutsuki Kabuto"
    ],
    "arug_cas01": [
     "Kaguya",
-    "Ootsutsuki Kabuto"
+    "Ootsutsuki Kabuto",
+    "Percival"
    ],
    "hospital2": [
     "Ginkaku"
+   ],
+   "ein_dun01": [
+    "Kedoui Agari"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -5073,16 +5349,18 @@
    "bat_c02": 0,
    "chunin": 0,
    "new_4-2": 0,
-   "0015@tower": 0
+   "0015@tower": 0,
+   "ein_dun01": 0
   },
-  "name": "Mula sem Cabesa",
+  "name": "Macro",
   "max_hp": 4246922,
-  "walk_speed_ms": 150,
+  "walk_speed_ms": 600,
   "names_by_map": {
    "kakashi": [
     "Ishida"
    ],
    "bat_c02": [
+    "Macro",
     "Mula sem Cabesa"
    ],
    "chunin": [
@@ -5093,6 +5371,9 @@
    ],
    "0015@tower": [
     "Kuka Beludo"
+   ],
+   "ein_dun01": [
+    "Black Yugan"
    ]
   }
  },
@@ -5103,11 +5384,13 @@
    "0045@tower": 0,
    "0035@tower": 0,
    "hospital2": 0,
-   "bat_c02": 0
+   "bat_c02": 0,
+   "ein_dun01": 0,
+   "areia": 0
   },
-  "name": "Gomen",
+  "name": "O Pimposo",
   "max_hp": 4404601,
-  "walk_speed_ms": 150,
+  "walk_speed_ms": 225,
   "names_by_map": {
    "0015@tower": [
     "Black Over",
@@ -5124,10 +5407,23 @@
     "Deca"
    ],
    "hospital2": [
+    "John",
+    "O Pimposo",
     "Raluco"
    ],
    "bat_c02": [
     "Mula sem Cabesa"
+   ],
+   "ein_dun01": [
+    "Black Over",
+    "Gangetsu Hozuki",
+    "Jiraiya",
+    "Lost in Light",
+    "Vegeta"
+   ],
+   "areia": [
+    "John",
+    "O Pimposo"
    ]
   }
  },
@@ -5140,7 +5436,7 @@
    "prt_fild08": 0,
    "arug_cas01": 0
   },
-  "name": "Funkeiro",
+  "name": "Ashura Otsutsuki",
   "max_hp": 3783769,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -5158,7 +5454,22 @@
     "Elesta"
    ],
    "arug_cas01": [
+    "Ashura Otsutsuki",
     "Funkeiro"
+   ]
+  }
+ },
+ "4017": {
+  "species_id": 4017,
+  "maps": {
+   "ein_dun01": 0
+  },
+  "name": "Raluco",
+  "max_hp": 2933763,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "ein_dun01": [
+    "Raluco"
    ]
   }
  },
@@ -5167,11 +5478,12 @@
   "maps": {
    "0015@tower": 0,
    "chunin": 0,
-   "cmd_fild03": 0
+   "cmd_fild03": 0,
+   "ein_dun01": 0
   },
   "name": "Mula sem Cabesa",
-  "max_hp": 5120382,
-  "walk_speed_ms": 150,
+  "max_hp": 5289931,
+  "walk_speed_ms": 600,
   "names_by_map": {
    "0015@tower": [
     "Mula sem Cabesa"
@@ -5180,6 +5492,9 @@
     "Mula sem Cabesa"
    ],
    "cmd_fild03": [
+    "Mula sem Cabesa"
+   ],
+   "ein_dun01": [
     "Mula sem Cabesa"
    ]
   }

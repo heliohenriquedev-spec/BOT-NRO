@@ -872,6 +872,14 @@
     135
    ],
    "confirmed": true
+  },
+  "263,54": {
+   "map": "kakashi",
+   "arrival": [
+    119,
+    132
+   ],
+   "confirmed": true
   }
  },
  "moc_fild17": {
@@ -898,6 +906,14 @@
    "arrival": [
     365,
     276
+   ],
+   "confirmed": true
+  },
+  "112,381": {
+   "map": "ama_fild01",
+   "arrival": [
+    76,
+    32
    ],
    "confirmed": true
   }
@@ -993,6 +1009,14 @@
     92
    ],
    "confirmed": true
+  },
+  "174,382": {
+   "map": "konoha3",
+   "arrival": [
+    209,
+    55
+   ],
+   "confirmed": true
   }
  },
  "yuno_fild08": {
@@ -1059,6 +1083,46 @@
    "arrival": [
     80,
     144
+   ],
+   "confirmed": false
+  }
+ },
+ "que_job03": {
+  "78,82": {
+   "map": "bossnia_01",
+   "arrival": [
+    201,
+    200
+   ],
+   "confirmed": true
+  }
+ },
+ "bossnia_01": {
+  "203,203": {
+   "map": "que_job03",
+   "arrival": [
+    78,
+    82
+   ],
+   "confirmed": false
+  }
+ },
+ "ama_fild01": {
+  "76,29": {
+   "map": "pay_fild10",
+   "arrival": [
+    112,
+    381
+   ],
+   "confirmed": false
+  }
+ },
+ "konoha3": {
+  "209,52": {
+   "map": "prt_fild02",
+   "arrival": [
+    174,
+    382
    ],
    "confirmed": false
   }

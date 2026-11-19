@@ -20,6 +20,14 @@ def keep_qt_application_alive():
 
 
 @pytest.fixture(autouse=True)
+def isolated_titan_files(tmp_path, monkeypatch):
+    """Titan reads/writes data/rede/titan*.json: tests use their own copy, never the player's."""
+    from nrobot import titan_settings
+    monkeypatch.setattr(titan_settings, "FILE", tmp_path/"rede"/"titan.json")
+    monkeypatch.setattr(titan_settings, "SCREEN_FILE", tmp_path/"rede"/"titan_tela.json")
+
+
+@pytest.fixture(autouse=True)
 def isolated_monster_data(tmp_path, monkeypatch):
     """Tests never write the monsters learned on this PC (data/monstros)."""
     from nrobot import monster_db
