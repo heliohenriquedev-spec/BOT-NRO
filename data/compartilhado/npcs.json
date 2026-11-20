@@ -221,6 +221,10 @@
   "226,95": {
    "name": "FidelidadeV",
    "sprite": 47
+  },
+  "196,91": {
+   "name": "",
+   "sprite": 99
   }
  },
  "kakashi": {
@@ -539,6 +543,18 @@
   "96,140": {
    "name": "",
    "sprite": 3
+  },
+  "88,127": {
+   "name": "Passe Novembro",
+   "sprite": 831
+  },
+  "86,94": {
+   "name": "",
+   "sprite": 706
+  },
+  "90,137": {
+   "name": "john3",
+   "sprite": 7
   }
  },
  "hospital2": {
@@ -2015,11 +2031,11 @@
    "sprite": 703
   },
   "107,179": {
-   "name": "",
+   "name": "Estudante",
    "sprite": 106
   },
   "107,175": {
-   "name": "",
+   "name": "Estudante",
    "sprite": 703
   }
  },
@@ -2297,6 +2313,12 @@
   "236,150": {
    "name": "",
    "sprite": 715
+  }
+ },
+ "prt_fild05": {
+  "356,81": {
+   "name": "Túmulo",
+   "sprite": 72
   }
  }
 }

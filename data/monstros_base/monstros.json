@@ -966,7 +966,8 @@
    "prt_fild00": 0,
    "yuno_fild07": 0,
    "um_fild01": 0,
-   "ama_fild01": 0
+   "ama_fild01": 0,
+   "cmd_fild01": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 2000,
@@ -1028,6 +1029,9 @@
     "Planta Medicinal "
    ],
    "ama_fild01": [
+    "Planta Medicinal "
+   ],
+   "cmd_fild01": [
     "Planta Medicinal "
    ]
   }
@@ -1113,11 +1117,12 @@
   "maps": {
    "moc_fild08": 10,
    "hu_fild07": 13,
-   "mjolnir_07": 0
+   "mjolnir_07": 0,
+   "kakashi": 0
   },
-  "walk_speed_ms": 200,
-  "name": "Akamaru",
-  "max_hp": 69000,
+  "walk_speed_ms": 112,
+  "name": "John",
+  "max_hp": 4000000,
   "sprite_source": "Akamaru1.spr (Naruto Ultimate)",
   "captured_sprite": true,
   "names_by_map": {
@@ -1129,6 +1134,10 @@
    ],
    "hu_fild07": [
     "Akamaru"
+   ],
+   "kakashi": [
+    "John",
+    "cuzinho"
    ]
   }
  },
@@ -1196,6 +1205,21 @@
   "names_by_map": {
    "yggdrasil01": [
     "Besouro"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
+ "1132": {
+  "species_id": 1132,
+  "maps": {
+   "kakashi": 0
+  },
+  "name": "John",
+  "max_hp": 3000000,
+  "walk_speed_ms": 150,
+  "names_by_map": {
+   "kakashi": [
+    "John"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -1877,15 +1901,20 @@
  "1318": {
   "species_id": 1318,
   "maps": {
-   "tur_dun01": 122
+   "tur_dun01": 122,
+   "kakashi": 0
   },
-  "walk_speed_ms": 250,
-  "name": "Pequena Tartaruga",
-  "max_hp": 118000,
+  "walk_speed_ms": 225,
+  "name": "John",
+  "max_hp": 2011490,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
    "tur_dun01": [
     "Pequena Tartaruga"
+   ],
+   "kakashi": [
+    "John",
+    "cuzinho"
    ]
   }
  },
@@ -2865,8 +2894,8 @@
    "prt_fild00": 0,
    "ama_fild01": 0
   },
-  "walk_speed_ms": 170,
-  "name": "Jounin",
+  "walk_speed_ms": 200,
+  "name": "Medinin renegado",
   "max_hp": 30000000,
   "sprite_source": "Jounin.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -3673,7 +3702,8 @@
   "species_id": 1836,
   "maps": {
    "yuno_in01": 43,
-   "areia": 0
+   "areia": 0,
+   "kakashi": 0
   },
   "walk_speed_ms": 300,
   "name": "Boneco de Treino",
@@ -3684,6 +3714,9 @@
     "Boneco de Treino"
    ],
    "areia": [
+    "Boneco de Treino"
+   ],
+   "kakashi": [
     "Boneco de Treino"
    ]
   }
@@ -3970,6 +4003,21 @@
   },
   "sprite_source": "GRF prioritário"
  },
+ "1991": {
+  "species_id": 1991,
+  "maps": {
+   "kakashi": 0
+  },
+  "name": "Sasuke",
+  "max_hp": 30000000,
+  "walk_speed_ms": 190,
+  "names_by_map": {
+   "kakashi": [
+    "Sasuke"
+   ]
+  },
+  "sprite_source": "GRF prioritário"
+ },
  "1992": {
   "species_id": 1992,
   "maps": {
@@ -4015,7 +4063,7 @@
    "hospital2": 0,
    "ein_dun01": 0
   },
-  "name": "Ootsutsuki Kabuto",
+  "name": "Anko",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -5386,11 +5434,13 @@
    "hospital2": 0,
    "bat_c02": 0,
    "ein_dun01": 0,
-   "areia": 0
+   "areia": 0,
+   "chunin": 0,
+   "kakashi": 0
   },
-  "name": "O Pimposo",
+  "name": "Vegeta",
   "max_hp": 4404601,
-  "walk_speed_ms": 225,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "0015@tower": [
     "Black Over",
@@ -5424,6 +5474,12 @@
    "areia": [
     "John",
     "O Pimposo"
+   ],
+   "chunin": [
+    "Vegeta"
+   ],
+   "kakashi": [
+    "Vegeta"
    ]
   }
  },
@@ -5462,14 +5518,18 @@
  "4017": {
   "species_id": 4017,
   "maps": {
-   "ein_dun01": 0
+   "ein_dun01": 0,
+   "kakashi": 0
   },
-  "name": "Raluco",
-  "max_hp": 2933763,
+  "name": "Ashura Otsutsuki",
+  "max_hp": 5052957,
   "walk_speed_ms": 150,
   "names_by_map": {
    "ein_dun01": [
     "Raluco"
+   ],
+   "kakashi": [
+    "Ashura Otsutsuki"
    ]
   }
  },

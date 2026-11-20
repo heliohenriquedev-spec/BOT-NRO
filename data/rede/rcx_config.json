@@ -26,7 +26,7 @@
       "show_enemies": false
     },
     "142": {
-      "enabled": false,
+      "enabled": true,
       "fill": "#005500",
       "outline": "#303030",
       "opacity": 70,
@@ -42,8 +42,9 @@
       "preview_outline": null,
       "preview_symbol": null,
       "preview_opacity": null,
-      "show_allies": false,
-      "show_enemies": false
+      "show_allies": true,
+      "show_enemies": true,
+      "hide_native": true
     },
     "146": {
       "enabled": true,
@@ -252,9 +253,9 @@
       "preview_outline": null,
       "preview_symbol": null,
       "preview_opacity": null,
-      "show_allies": false,
+      "show_allies": true,
       "show_enemies": true,
-      "hide_native": true
+      "hide_native": false
     },
     "80": {
       "enabled": true,

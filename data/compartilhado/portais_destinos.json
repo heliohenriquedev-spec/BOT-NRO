@@ -335,6 +335,14 @@
     171
    ],
    "confirmed": true
+  },
+  "35,267": {
+   "map": "cmd_fild01",
+   "arrival": [
+    358,
+    261
+   ],
+   "confirmed": true
   }
  },
  "anthell02": {
@@ -999,6 +1007,22 @@
     303
    ],
    "confirmed": true
+  },
+  "261,372": {
+   "map": "cmd_fild01",
+   "arrival": [
+    222,
+    25
+   ],
+   "confirmed": false
+  },
+  "20,293": {
+   "map": "prt_fild05",
+   "arrival": [
+    370,
+    206
+   ],
+   "confirmed": true
   }
  },
  "prt_fild02": {
@@ -1123,6 +1147,34 @@
    "arrival": [
     174,
     382
+   ],
+   "confirmed": false
+  }
+ },
+ "cmd_fild01": {
+  "361,263": {
+   "map": "anthell01",
+   "arrival": [
+    35,
+    267
+   ],
+   "confirmed": false
+  },
+  "222,25": {
+   "map": "prt_fild01",
+   "arrival": [
+    261,
+    369
+   ],
+   "confirmed": true
+  }
+ },
+ "prt_fild05": {
+  "374,206": {
+   "map": "prt_fild01",
+   "arrival": [
+    20,
+    293
    ],
    "confirmed": false
   }
