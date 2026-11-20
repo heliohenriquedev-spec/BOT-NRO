@@ -34,7 +34,7 @@ if errorlevel 1 goto falha
 ".venv\Scripts\python.exe" -m nrobot.runtime_check
 if errorlevel 1 goto falha
 if exist "perfis\relay\instalacao.json" goto concluido
-call CONFIGURAR_CONEXAO_LOCAL.bat
+call ".\CONFIGURAR_CONEXAO_LOCAL.bat"
 if errorlevel 1 goto falha
 
 :concluido

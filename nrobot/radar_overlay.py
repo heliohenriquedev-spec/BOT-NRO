@@ -2,6 +2,7 @@
 import ctypes
 import os
 from ctypes import wintypes
+from .game_folder import is_game_executable
 
 GAME_TITLE = 'Naruto Redemption Online'
 GAME_EXECUTABLE = 'nro.exe'
@@ -81,7 +82,7 @@ def find_game_window():
             length = user32.GetWindowTextLengthW(hwnd)
             title = ctypes.create_unicode_buffer(length+1)
             user32.GetWindowTextW(hwnd, title, length+1)
-            if title.value.startswith(GAME_TITLE) or executable(hwnd) == GAME_EXECUTABLE:
+            if title.value.startswith(GAME_TITLE) or is_game_executable(executable(hwnd)):
                 found.append(hwnd)
                 return False
         return True

@@ -12,8 +12,9 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 @pytest.fixture
-def sandbox(tmp_path):
+def sandbox(tmp_path, monkeypatch):
     if os.name!='nt':pytest.skip('Windows batch scripts')
+    monkeypatch.setenv('NoDefaultCurrentDirectoryInExePath', '1')
     folder=tmp_path/'pasta com espacos'
     folder.mkdir()
     venv.EnvBuilder(with_pip=False).create(folder/'.venv')
@@ -26,7 +27,8 @@ def sandbox(tmp_path):
 
 
 def run(folder,command):
-    return subprocess.run(['cmd.exe','/d','/c',command],cwd=folder,input='\n',capture_output=True,text=True,timeout=30)
+    # Explicit current-directory path also works with NoDefaultCurrentDirectoryInExePath.
+    return subprocess.run(['cmd.exe','/d','/c','.\\'+command],cwd=folder,input='\n',capture_output=True,text=True,timeout=30)
 
 
 def test_complete_environment_starts_without_running_installer(sandbox):

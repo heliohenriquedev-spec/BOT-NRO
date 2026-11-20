@@ -4,6 +4,14 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.20.1 (20/11/2026)
+
+- Conexão: corrigido o bloqueio após a atualização do jogo que transformou o NRO.exe em iniciador. O bot reconhece os clientes de uma e três barras e confere a compatibilidade dos dois; os controles e a identificação da janela também reconhecem os novos nomes.
+
+- RCX e Titan: restaurada a compatibilidade do RCX e do ajuste de tamanho com os novos clientes de uma e três barras do jogo.
+
+- Inicialização: corrigida a chamada do instalador e da configuração de conexão em ambientes Windows que exigem o caminho explícito dos arquivos.
+
 ## 2026.11.19.1 (19/11/2026)
 
 - Titan (nova aba): muda, só no seu jogo, o tamanho e a cor de jogadores e monstros. Escolha o alvo entre quem está na tela, todos os jogadores que o bot já viu (lista da aba Jogadores) ou todos os monstros conhecidos; os nomes aparecem sem precisar passar o mouse. Depois escolha "Só este", "Todos com este nome" ou "Toda a espécie" e mexa na barra de tamanho (de 30% a 400%) ou na cor (vermelho, azul, cinza metálico, pedra, roxo ou escuro). "Todos com este nome" aumenta só o Bikouchuu certo num evento com vários Bikouchuu. Cada mudança pode ter uma tecla própria que a liga e desliga: por exemplo, 1 deixa o Ishida grande e 2 o Low Profile. O servidor e os outros jogadores não veem nada disso.

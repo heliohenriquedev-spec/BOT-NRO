@@ -116,11 +116,14 @@ class ZoomWriter:
         if pid is None:
             raise OSError('Jogo não encontrado.')
         memory = self.memory_for(pid)
-        if self.verify:
-            with open(memory.executable(), 'rb') as handle:
-                if hashlib.sha256(handle.read()).hexdigest() not in CLIENT_HASHES:
-                    memory.close()
-                    raise OSError('Esta versão do NRO.exe não tem o tamanho validado; só cor e esconder funcionam.')
+        try:
+            if self.verify:
+                with open(memory.executable(), 'rb') as handle:
+                    if hashlib.sha256(handle.read()).hexdigest() not in CLIENT_HASHES:
+                        raise OSError('Esta versão do NRO.exe não tem o tamanho validado; só cor e esconder funcionam.')
+        except Exception:
+            memory.close()
+            raise
         self.memory, self.pid = memory, pid
         self.touched.clear()
 

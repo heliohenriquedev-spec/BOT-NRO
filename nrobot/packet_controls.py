@@ -1,6 +1,6 @@
 """Consulta teclas/foco e dono da conexão; não simula entrada nem lê memória."""
 import ctypes as C
-from pathlib import PureWindowsPath
+from .game_folder import is_game_executable
 import socket
 import struct
 import time
@@ -117,6 +117,6 @@ class GameControls:
         try:
             path = C.create_unicode_buffer(32768)
             size = C.c_uint32(len(path))
-            return bool(kernel.QueryFullProcessImageNameW(handle, 0, path, C.byref(size))) and PureWindowsPath(path.value).name.lower() == 'nro.exe'
+            return bool(kernel.QueryFullProcessImageNameW(handle, 0, path, C.byref(size))) and is_game_executable(path.value)
         finally:
             kernel.CloseHandle(handle)

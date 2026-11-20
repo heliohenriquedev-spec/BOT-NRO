@@ -9,9 +9,14 @@ import hashlib
 import math
 from pathlib import Path
 import struct
+from .game_folder import is_game_executable
 
 CLIENT_HASHES = {'8a77adb20ce94fded406e4d132d969830cd7d6e3cf7359e684bf651871e3b538',
-                 '7af66a0d78c23f19ac95e096ca05e40e680d7207b75e2ff3e826016cf05b6b1f'}
+                 '7af66a0d78c23f19ac95e096ca05e40e680d7207b75e2ff3e826016cf05b6b1f',
+                 # November 20 clients: same camera/world/unit layout. Three-bar build
+                 # checked against the running client; one-bar build shares the layout.
+                 'e07645cc5245f93aa84af139c134c317f2420569b1f7a3d8533dbe4c586a8394',
+                 '056bc8264473b9573265df70b523cf317c5eb623fc0c8f055e4b3774080b46b0'}
 MODE_MANAGER = 0x7743f0
 RENDERER_GLOBAL = 0x7171d8
 
@@ -63,7 +68,7 @@ def inspect(pid):
     reader = Reader(pid)
     try:
         exe = reader.executable()
-        if exe.name.lower() != 'nro.exe' or hashlib.sha256(exe.read_bytes()).hexdigest() not in CLIENT_HASHES:
+        if not is_game_executable(exe) or hashlib.sha256(exe.read_bytes()).hexdigest() not in CLIENT_HASHES:
             raise ValueError('Este NRO.exe ainda nao tem camera/terreno validados para o RCX.')
         mode = reader.u32(MODE_MANAGER+4)
         if not mode or reader.u32(MODE_MANAGER+88) != 1:

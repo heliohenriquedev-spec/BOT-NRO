@@ -233,6 +233,22 @@ def test_zoom_writer_reports_missing_game():
     assert writer.step({MONSTER: 2.0}) == 0 and writer.error == 'Jogo não encontrado.'
 
 
+def test_zoom_verification_closes_memory_when_executable_is_unknown_or_missing(tmp_path):
+    exe = tmp_path/'NRO_3Barras.exe'
+    exe.write_bytes(b'unknown client')
+    memory = FakeMemory([(0x9000, MONSTER)])
+    closed = []
+    memory.executable = lambda: str(exe)
+    memory.close = lambda: closed.append(True)
+    writer = ZoomWriter(memory_for=lambda pid: memory, pid_finder=lambda: 1)
+    assert writer.step({MONSTER: 2.0}) == 0 and 'validado' in writer.error
+    assert writer.memory is None and closed == [True]
+    assert memory.zoom(0x9000) == 1.0
+    exe.unlink()
+    assert writer.step({MONSTER: 2.0}) == 0
+    assert writer.memory is None and closed == [True, True]
+
+
 # ---- panel and config file (regressions) ----
 
 def test_config_file_changes_are_seen_even_if_python_reuses_the_object(tmp_path):

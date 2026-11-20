@@ -14,6 +14,12 @@ ROOT = Path(__file__).resolve().parents[1]
 SETTINGS = ROOT/'perfis'/'jogo.json'
 DEFAULT = Path(r'C:\NRO - Jogo COMPLETO')
 NAME_HINTS = ('nro', 'naruto')
+GAME_EXECUTABLES = ('nro.exe', 'nro_1barra.exe', 'nro_3barras.exe')
+
+
+def is_game_executable(path):
+    from pathlib import PureWindowsPath
+    return PureWindowsPath(str(path)).name.lower() in GAME_EXECUTABLES
 
 
 def is_game_dir(path) -> bool:

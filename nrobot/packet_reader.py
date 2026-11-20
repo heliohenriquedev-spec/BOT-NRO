@@ -171,6 +171,8 @@ VARIABLE_MINIMUMS = {0x17f: 4, 0xd7: 17, 0xdf: 17,
 
 CLIENT_LENGTHS_FILE = Path(__file__).resolve().parents[1]/'data/rede/tamanhos_cliente.json'
 CLIENT_GAME_DIR = None
+# The November updater replaced NRO.exe with a launcher without a packet table.
+CLIENT_LAUNCHER_HASHES = {'ffdb7393329835cc0b8d370360ee3bcea0547eb10b76a9cc93a17fddc6a5439a'}
 
 
 def configure_client_game(game_dir):
@@ -195,14 +197,27 @@ def client_lengths():
     if not executable.exists():
         raise ValueError(f'NRO.exe nao encontrado em {executable}. Em Configuracao, escolha a pasta onde o jogo esta '
                          'instalado (a que tem o NRO.exe).')
-    if hashlib.sha256(executable.read_bytes()).hexdigest() not in accepted:
+    executables = [executable]
+    for name in ('NRO_1Barra.exe', 'NRO_3Barras.exe'):
+        variant = executable.with_name(name)
+        if variant.is_file():
+            executables.append(variant)
+    for executable in executables:
+        digest = hashlib.sha256(executable.read_bytes()).hexdigest()
+        if digest in CLIENT_LAUNCHER_HASHES:
+            if len(executables) == 1:
+                raise ValueError('O iniciador NRO.exe esta instalado, mas faltam NRO_1Barra.exe e NRO_3Barras.exe. '
+                                 'Conclua a atualizacao do jogo antes de conectar o bot.')
+            continue
+        if digest in accepted:
+            continue
         # Another build (e.g. updated by the game's own updater): accepted when its packet table is
         # the same one, byte for byte (client_table); a changed table still refuses it.
         from .client_table import check
         info = executable.stat()
         digest, same = check(str(executable), info.st_size, info.st_mtime_ns)
         if not same:
-            raise ValueError(f'Este NRO.exe ({digest[:12]}) tem uma tabela de pacotes diferente da que o bot conhece; '
+            raise ValueError(f'Este {executable.name} ({digest[:12]}) tem uma tabela de pacotes diferente da que o bot conhece; '
                              'o bot precisa ser atualizado para esta versao do jogo. Envie esse codigo ao desenvolvedor.')
     return {int(key, 16): value['length'] for key, value in data['entries'].items()
             if value['length'] == -1 or 2 <= value['length'] <= 32768}

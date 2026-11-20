@@ -9,7 +9,7 @@ goto iniciar
 
 :preparar
 echo Preparando ou reparando as dependencias do painel...
-call instalar.bat --from-launcher
+call ".\instalar.bat" --from-launcher
 if errorlevel 1 goto falha
 
 :iniciar

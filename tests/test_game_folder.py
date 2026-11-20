@@ -4,6 +4,13 @@ import pytest
 import nrobot.game_folder as game_folder
 
 
+@pytest.mark.parametrize('name', ['NRO.exe', 'NRO_1Barra.exe', 'NRO_3Barras.EXE'])
+def test_current_game_process_names_are_recognized(name):
+    assert game_folder.is_game_executable('C:\\Jogos\\NRO\\'+name)
+    assert not game_folder.is_game_executable('C:\\Jogos\\NRO\\NRO ATUALIZADOR.exe')
+    assert not game_folder.is_game_executable(name+'.old')
+
+
 def fake_game(folder):
     folder.mkdir(parents=True)
     (folder/'DATA.INI').write_text('[Data]\n0=data.grf\n')

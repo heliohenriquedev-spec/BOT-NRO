@@ -64,3 +64,25 @@ def test_connection_explains_a_missing_or_different_client(tmp_path, monkeypatch
             packet_reader.client_lengths()
     finally:
         packet_reader.configure_client_game(None)
+
+
+def test_launcher_validates_both_real_clients_and_refuses_a_changed_variant(tmp_path, monkeypatch):
+    import hashlib
+    from nrobot import packet_reader
+    launcher = b'launcher without a packet table'
+    monkeypatch.setattr(packet_reader, 'CLIENT_LAUNCHER_HASHES', {hashlib.sha256(launcher).hexdigest()})
+    (tmp_path/'NRO.exe').write_bytes(launcher)
+    packet_reader.configure_client_game(tmp_path)
+    try:
+        with pytest.raises(ValueError, match='Conclua a atualizacao'):
+            packet_reader.client_lengths()
+        _, region = reference()
+        for name in ('NRO_1Barra.exe', 'NRO_3Barras.exe'):
+            (tmp_path/name).write_bytes(fake_client(region))
+        assert packet_reader.client_lengths()[0x11f] == 16
+        (tmp_path/'NRO_3Barras.exe').write_bytes(b'unsupported game update')
+        packet_reader.client_lengths.cache_clear()
+        with pytest.raises(ValueError, match=r'NRO_3Barras.exe.*tabela de pacotes diferente'):
+            packet_reader.client_lengths()
+    finally:
+        packet_reader.configure_client_game(None)
