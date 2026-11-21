@@ -151,6 +151,12 @@ class PacketPanel(QMainWindow):
         self.predict_ground_effects = QCheckBox('Prever área perigosa quando começar uma conjuração')
         self.predict_ground_effects.setToolTip('Usa o modelo de área conhecido da habilidade assim que o servidor anuncia a conjuração. Independente do bloqueio de efeitos já ativos.')
         form.addRow(self.predict_ground_effects)
+        self.repair_enabled = QCheckBox('Voltar ao Reparador para consertar equipamento quebrado')
+        self.repair_enabled.setToolTip('Se a arma ou outro equipamento quebrar: vai até o Reparador (conversa gravada na aba '
+                                       'Rota de quests), conserta, volta ao mapa, recoloca o item e continua caçando.')
+        self.repair_enabled.toggled.connect(self.store_repair)
+        form.addRow(self.repair_enabled)
+        self.show_repair()
         explanation = QLabel('Sem colisão legível, os obstáculos são descobertos pelas respostas de movimento.')
         explanation.setWordWrap(True)
         form.addRow(explanation)
@@ -225,6 +231,9 @@ class PacketPanel(QMainWindow):
         from .showmobs_cycle_panel import ShowmobsCyclePanel
         self.showmobs_cycle_panel = ShowmobsCyclePanel()
         tabs.addTab(self.showmobs_cycle_panel, 'Ciclo @showmobs')
+        from .storage_panel import StoragePanel
+        self.storage_panel = StoragePanel()
+        tabs.addTab(self.storage_panel, 'Armazém')
         from .rcx_panel import RcxPanel
         self.rcx_panel = RcxPanel()
         tabs.addTab(self.rcx_panel, 'RCX')
@@ -615,6 +624,27 @@ class PacketPanel(QMainWindow):
         except (OSError, ValueError) as exc:
             self.notice.setText(str(exc))
 
+    def show_repair(self):
+        from . import quest_extras
+        try:
+            value = bool(quest_extras.load().get('repair_enabled'))
+        except (OSError, ValueError):
+            return
+        self.repair_enabled.blockSignals(True)
+        self.repair_enabled.setChecked(value)
+        self.repair_enabled.blockSignals(False)
+
+    def store_repair(self, checked):
+        from . import quest_extras
+        try:
+            config = quest_extras.load()
+            config['repair_enabled'] = bool(checked)
+            quest_extras.save(config)
+        except (OSError, ValueError) as exc:
+            self.notice.setText('Opção de reparo não salva: '+str(exc))
+            return
+        self.notice.setText('Reparo automático '+('ligado.' if checked else 'desligado.'))
+
     def command(self, command, **values):
         if self.process.state() == QProcess.NotRunning or self.session is None:
             self.notice.setText('Abra a conexão primeiro.')
@@ -743,6 +773,7 @@ class PacketPanel(QMainWindow):
                 self.skill_panel.update_catalog(state.get('learned_skills', []), state.get('own_effects', {}), state.get('buff_candidates', {}), state.get('rotation'))
             self.skill_panel.receive_buff_learning(state.get('buff_learning_result'))
             self.quest_panel.update_state(state)
+            self.storage_panel.update_state(state.get('storage'))
             self.bg_panel.update_state(state)
             self.rcx_panel.update_state(state)
             self.last_state = state

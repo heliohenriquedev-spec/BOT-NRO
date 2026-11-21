@@ -11,6 +11,7 @@ import os
 import struct
 import tempfile
 import time
+from collections import OrderedDict
 from pathlib import Path
 
 from .network_targets import is_player_id
@@ -22,6 +23,7 @@ SPAWNS = {0x78: 47, 0x7c: 37, 0x22a: 50, 0x22b: 50, 0x22c: 55}  # opcode -> posi
 WITHHELD = {0x86, 0x88, 0x9c, 0x119, 0x229, 0x28a, 0x1f3, 0xc3, 0x1d7, 0x196}  # dropped while hidden
 SUMMON_TYPES = {7, 8, 9, 10}  # pet, homunculus, mercenary, elemental
 NPC_TYPES = {1, 6}
+NAME_CACHE_LIMIT = 4096
 
 
 def encode_position(x, y, direction=0):
@@ -85,6 +87,8 @@ class Titan:
         self.summon_ids = summon_ids or (lambda: set())
         self.name_queue = []  # unit ids whose name the relay asks the server for (0094)
         self.name_asked = {}  # unit id -> time asked
+        self.departed_names = OrderedDict()  # confirmed names of units that left view, this map only
+        self.next_name_scan = 0
         self.screen_file = Path(screen_file) if screen_file else None
         self.pending = bytearray()
         self.started = self.passthrough = self.ready = False
@@ -152,13 +156,25 @@ class Titan:
             self.entities.clear()
             self.applied.clear()
             self.hidden.clear()
+            self.name_queue.clear()
+            self.name_asked.clear()
+            self.departed_names.clear()
+            self.next_name_scan = 0
             self.ready = op != 0x92
             return packet
         if op in SPAWNS:
             return self.spawn(op, packet)
         if op == 0x80:
             identity = struct.unpack_from('<I', packet, 2)[0]
-            self.entities.pop(identity, None)
+            entity = self.entities.pop(identity, None)
+            self.departed_names.pop(identity, None)
+            if packet[6] == 0 and entity and entity.get('name'):
+                self.departed_names[identity] = {key: entity.get(key) for key in
+                                                 ('species', 'type', 'name', 'name_packet')}
+                while len(self.departed_names) > NAME_CACHE_LIMIT:
+                    self.departed_names.popitem(last=False)
+            self.name_asked.pop(identity, None)
+            self.name_queue = [i for i in self.name_queue if i != identity]
             self.applied.pop(identity, None)
             if identity in self.hidden:
                 self.hidden.discard(identity)
@@ -169,6 +185,7 @@ class Titan:
             entity = self.entities.get(identity)
             if entity is not None:
                 name = packet[6:30].split(b'\0')[0].decode('cp1252', 'replace')
+                entity['name_packet'] = bytes(packet)
                 if name != entity.get('name'):
                     entity['name'] = name
                     return bytes(packet)+self.evaluate(entity)
@@ -211,6 +228,11 @@ class Titan:
             object_type, species = None, struct.unpack_from('<H', packet, 16)[0]
             opt1, opt2 = struct.unpack_from('<hh', packet, 8)
             option = struct.unpack_from('<I', packet, 12)[0]
+        cached = self.departed_names.pop(identity, None)
+        if not old and cached:
+            old = cached
+        if old.get('species') != species or old.get('type') != object_type:
+            old = {}
         at = SPAWNS[op]
         if op == 0x22c:
             position = decode_destination(packet[at:at+6])
@@ -224,7 +246,8 @@ class Titan:
             level = struct.unpack_from('<H', packet, level_at)[0] if len(packet) >= level_at+2 else 0
         entity = dict(id=identity, op=op, packet=bytes(packet), type=object_type, species=species,
                       position=position, direction=direction, opt1=opt1, opt2=opt2, option=option,
-                      opt3=old.get('opt3', 0), level=level, name=old.get('name'), looks=old.get('looks', {}))
+                      opt3=old.get('opt3', 0), level=level, name=old.get('name'),
+                      name_packet=old.get('name_packet'), looks=old.get('looks', {}))
         self.entities[identity] = entity
         self.applied.pop(identity, None)  # a new appearance: the client draws it as sent
         self.want_name(entity)
@@ -232,7 +255,7 @@ class Titan:
             self.hidden.add(identity)
             return b''
         self.hidden.discard(identity)
-        return bytes(packet)+self.apply(entity)
+        return bytes(packet)+(entity.get('name_packet') or b'')+self.apply(entity)
 
     def tint_state(self, entity, packet, op):
         colour = self.applied.get(entity['id'])
@@ -264,6 +287,9 @@ class Titan:
     def take_name_requests(self, limit=8):
         """Ids to ask now (at most `limit`), still on screen and still without a name."""
         taken = []
+        if not self.names_needed():
+            self.name_queue.clear()
+            return taken
         now = time.monotonic()
         while self.name_queue and len(taken) < limit:
             identity = self.name_queue.pop(0)
@@ -377,6 +403,8 @@ class Titan:
         out = bytearray(packet)
         for look in entity['looks'].values():
             out.extend(look)
+        if entity.get('name_packet'):
+            out.extend(entity['name_packet'])  # the client needs the name after the unit exists
         if entity['opt1'] or entity['opt2'] or entity['opt3']:
             out.extend(self.state_packets(entity, None))
         return bytes(out)
@@ -417,6 +445,11 @@ class Titan:
             for entity in list(self.entities.values()):
                 self.want_name(entity)
                 out.extend(self.evaluate(entity))
+        now = time.monotonic()
+        if now >= self.next_name_scan:
+            self.next_name_scan = now+.25
+            for entity in list(self.entities.values()):
+                self.want_name(entity)  # retry unanswered requests without toggling the shortcut
         self.write_screen()
         return bytes(out)
 

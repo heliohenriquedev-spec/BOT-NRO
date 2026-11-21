@@ -314,6 +314,92 @@ def test_names_are_not_asked_when_no_shortcut_uses_them():
     assert titan.take_name_requests() == []
 
 
+def test_unanswered_bikouchuu_name_is_retried_without_toggling(monkeypatch):
+    from nrobot import titan as module
+    clock = [100.0]
+    monkeypatch.setattr(module.time, 'monotonic', lambda: clock[0])
+    titan, _ = make(config(hide_groups=[hide('monsters', names=['Bikouchuu'])]))
+    assert titan.feed(spawn_78(MONSTER, 1051, 1, 1)) == b''
+    assert titan.take_name_requests() == [MONSTER]
+    clock[0] += 1
+    assert titan.tick() == b'' and titan.take_name_requests() == []
+    clock[0] += 2.1
+    assert titan.tick() == b'' and titan.take_name_requests() == [MONSTER]
+    out = ops(titan.feed(name_95(MONSTER, 'Bikouchuu')))
+    assert [op for op, _ in out] == [0x95, 0x78, 0x95]
+    clock[0] += 4
+    titan.tick()
+    assert titan.take_name_requests() == []
+
+
+def test_true_and_false_bikouchuu_keep_their_names_when_returning_to_view():
+    titan, _ = make(config(hide_groups=[hide('monsters', names=['Bikouchuu'])]))
+    right, wrong = MONSTER, MONSTER+1
+    titan.feed(spawn_78(right, 1051, 1, 1)+spawn_78(wrong, 1051, 2, 2))
+    titan.take_name_requests()
+    titan.feed(name_95(right, 'Bikouchuu')+name_95(wrong, 'Bikouchu'))
+    for _ in range(3):
+        out = ops(titan.feed(struct.pack('<HIB', 0x80, right, 0)+struct.pack('<HIB', 0x80, wrong, 0)))
+        assert [(op, struct.unpack_from('<I', p, 2)[0]) for op, p in out] == [(0x80, right)]
+        assert not titan.entities
+        out = titan.feed(spawn_78(right, 1051, 20, 21)+spawn_78(wrong, 1051, 22, 23))
+        assert ids(out) == [right]
+        assert [op for op, _ in ops(out)] == [0x78, 0x95]
+        assert titan.hidden == {wrong} and titan.take_name_requests() == []
+
+
+def test_unknown_monster_is_requested_again_immediately_after_returning():
+    titan, _ = make(config(hide_groups=[hide('monsters', names=['Bikouchuu'])]))
+    titan.feed(spawn_78(MONSTER, 1051, 1, 1))
+    assert titan.take_name_requests() == [MONSTER]
+    titan.feed(struct.pack('<HIB', 0x80, MONSTER, 0))
+    titan.feed(spawn_78(MONSTER, 1051, 2, 2))
+    assert titan.take_name_requests() == [MONSTER]
+
+
+def test_dead_or_reused_monster_never_inherits_a_previous_true_name():
+    titan, _ = make(config(hide_groups=[hide('monsters', names=['Bikouchuu'])]))
+    titan.feed(spawn_78(MONSTER, 1051, 1, 1)+name_95(MONSTER, 'Bikouchuu'))
+    titan.feed(struct.pack('<HIB', 0x80, MONSTER, 1))
+    assert titan.feed(spawn_78(MONSTER, 1051, 2, 2)) == b''
+    assert titan.take_name_requests() == [MONSTER]
+    titan.feed(name_95(MONSTER, 'Bikouchuu'))
+    titan.feed(struct.pack('<HIB', 0x80, MONSTER, 0))
+    assert titan.feed(spawn_78(MONSTER, 1500, 3, 3)) == b''
+    assert titan.entities[MONSTER]['name'] is None
+
+
+def test_map_change_clears_old_name_cache_and_request_queue():
+    titan, _ = make(config(hide_groups=[hide('monsters', names=['Bikouchuu'])]))
+    titan.feed(spawn_78(MONSTER, 1051, 1, 1)+name_95(MONSTER, 'Bikouchuu'))
+    titan.feed(struct.pack('<HIB', 0x80, MONSTER, 0))
+    titan.feed(spawn_78(MONSTER+1, 1051, 2, 2))
+    assert titan.departed_names and titan.name_queue
+    titan.feed(struct.pack('<HI3sBB', 0x73, 0, b'\0\0\0', 5, 5))
+    assert not titan.departed_names and not titan.name_queue and not titan.name_asked
+    assert titan.feed(spawn_78(MONSTER, 1051, 3, 3)) == b''
+    assert titan.take_name_requests() == [MONSTER]
+
+
+def test_disabling_name_filter_cancels_queued_requests():
+    titan, box = make(config(hide_groups=[hide('monsters', names=['Bikouchuu'])]))
+    titan.feed(spawn_78(MONSTER, 1051, 1, 1))
+    box['cfg'] = config(hide_groups=[hide('monsters', active=False, names=['Bikouchuu'])])
+    assert titan.take_name_requests() == [] and not titan.name_queue
+
+
+def test_departed_name_cache_is_bounded_and_evicted_names_are_requested(monkeypatch):
+    from nrobot import titan as module
+    monkeypatch.setattr(module, 'NAME_CACHE_LIMIT', 2)
+    titan, _ = make(config(hide_groups=[hide('monsters', names=['Bikouchuu'])]))
+    for identity in range(MONSTER, MONSTER+3):
+        titan.feed(spawn_78(identity, 1051, 1, 1)+name_95(identity, 'Bikouchuu'))
+        titan.feed(struct.pack('<HIB', 0x80, identity, 0))
+    assert list(titan.departed_names) == [MONSTER+1, MONSTER+2]
+    assert titan.feed(spawn_78(MONSTER, 1051, 2, 2)) == b''
+    assert titan.take_name_requests() == [MONSTER]
+
+
 def test_name_request_packet_matches_the_client_layout():
     from nrobot.packet_encoder import name_request
     packet = name_request(MONSTER, ticks=lambda: 0x1234)

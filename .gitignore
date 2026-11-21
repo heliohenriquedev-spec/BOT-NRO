@@ -21,6 +21,10 @@ data/rede/slots_missoes.json
 data/rede/quest_extras.json
 data/rede/progresso_quests.json
 data/rede/progresso_quests.json.bak
+data/rede/armazem.json
+data/rede/armazem_conteudo.json
+data/rede/armazem.tmp
+data/rede/armazem_conteudo.tmp
 third_party/simplerohook/
 data/recursos/rcx/*.pdb
 data/recursos/rcx/*.lib

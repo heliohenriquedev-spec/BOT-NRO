@@ -4,6 +4,20 @@ Novidades de cada atualização. O que ainda não foi publicado fica em "Próxim
 
 ## Próxima atualização
 
+## 2026.11.21.1 (21/11/2026)
+
+- RCX: corrigido o RCX que parava de esconder os efeitos das habilidades dos inimigos no meio da BG ou do PvP, o que fazia a tela voltar a tremer com as habilidades. Ao renascer ou se teletransportar dentro do mesmo mapa, o bot agora mantém a regra de aliados e inimigos (equipe da BG ou PvP), em vez de passar a tratar todos como aliados.
+
+- RCX: a tela não treme mais, nem por um instante, com habilidades como Chuva de Meteoros e Terremoto, de qualquer jogador ou monstro, nos dois clientes do jogo (uma e três barras). Vale desde que o RCX seja ligado, até fechar o jogo.
+
+- Armazém (nova aba): depósito automático, que dá para ligar e desligar. Quando o peso passa do limite escolhido (50% por padrão) durante a caça, o personagem usa @storage, guarda tudo das abas Item e Etc, fecha o armazém e volta a caçar. Um item que o servidor não aceita guardar é anotado na primeira vez e não é tentado de novo (o botão "Tentar de novo os recusados" limpa a lista), e dá para listar IDs que nunca devem ser guardados. Os pacotes do armazém já vêm aprendidos; os botões "Aprender" só são necessários se o jogo mudar. Enquanto o peso continuar acima do limite, o personagem volta a guardar sempre que houver itens que possam ser guardados, inclusive os colocados à mão depois de um depósito. Se o @storage não responder ou uma ida ao armazém travar, ela é abandonada, a caça é retomada e o depósito é tentado de novo.
+
+- Armazém: botão "Retirar itens do armazém..." abre uma janela com pesquisa por nome ou ID, onde dá para marcar vários itens e a quantidade de cada um (0 = tudo o que estiver guardado). O personagem abre o @storage, retira os itens e fecha o armazém.
+
+- Reparo de equipamentos: a opção de ligar ou desligar a volta ao Reparador quando um equipamento quebra agora fica na aba Configuração. A conversa com o Reparador continua sendo gravada na aba Rota de quests.
+
+- Titan: corrigido o filtro por nome no evento dos Bikouchuu. Consultas de nome sem resposta são repetidas automaticamente, sem precisar apertar o atalho várias vezes. Os nomes confirmados são preservados quando as criaturas saem da visão e usados ao reaparecer, mantendo os verdadeiros visíveis e os de nome errado escondidos.
+
 ## 2026.11.20.1 (20/11/2026)
 
 - Conexão: corrigido o bloqueio após a atualização do jogo que transformou o NRO.exe em iniciador. O bot reconhece os clientes de uma e três barras e confere a compatibilidade dos dois; os controles e a identificação da janela também reconhecem os novos nomes.

@@ -29,6 +29,7 @@ PROTECTED = ('.git', '.venv', 'logs', 'backups', 'perfis', 'data/mapas', 'data/m
              'data/rede/rotas_quests.json', 'data/rede/quadros_missoes.json',
              'data/rede/rotas_mapas.json', 'data/rede/missoes_concluidas.json',
              'data/rede/slots_missoes.json', 'data/rede/quest_extras.json',
+             'data/rede/armazem.json', 'data/rede/armazem_conteudo.json',
              'data/rede/progresso_quests.json', 'data/rede/progresso_quests.json.bak', 'data/x1',
              'data/rede/compartilhado_importado.json',
              'data/rede/alvos_importados.json', 'data/rede/personagens')

@@ -413,6 +413,26 @@ def decode(message: bytes) -> dict:
                 event.update(kind='inventory_list', stackable=stackable, items=items)
                 del event['length']
                 break
+    elif op in (0xa5, 0x1f0, 0x2ea, 0xa6, 0x2d1):
+        # Storage contents (@storage), same item layout as the inventory lists above.
+        stackable = op in (0xa5, 0x1f0, 0x2ea)
+        strides = {0xa5: (18,), 0x1f0: (18,), 0x2ea: (22,), 0xa6: (20,), 0x2d1: (28, 26, 24)}[op]
+        for stride in strides:
+            if (len(message)-4) % stride:
+                continue
+            items = [{'index': u16(offset), 'item_id': u16(offset+2),
+                      'amount': u16(offset+6) if stackable else 1} for offset in range(4, len(message), stride)]
+            if not any(item['item_id'] == 0 or item['amount'] <= 0 for item in items):
+                event.update(kind='storage_list', stackable=stackable, items=items)
+                break
+    elif op == 0xf2 and len(message) == 6:
+        event.update(kind='storage_opened', count=u16(2), capacity=u16(4))
+    elif op in (0xf4, 0x1c4) and len(message) in (21, 22):
+        event.update(kind='storage_added', index=u16(2), amount=u32(4), item_id=u16(8))
+    elif op == 0xf6 and len(message) == 8:
+        event.update(kind='storage_removed', index=u16(2), amount=u32(4))
+    elif op == 0xf8 and len(message) == 2:
+        event.update(kind='storage_closed')
     elif op == 0x2bb and len(message) == 8:
         # ZC_EQUIPITEM_DAMAGED: an equipment of the character broke (weapon, armor...).
         event.update(kind='equip_damaged', location=u16(2), account_id=u32(4))

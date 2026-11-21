@@ -148,7 +148,7 @@
       "preview_opacity": null,
       "show_allies": true,
       "show_enemies": true,
-      "hide_native": true
+      "hide_native": false
     }
   },
   "skill_styles": {
@@ -297,7 +297,7 @@
       "preview_opacity": null,
       "show_allies": true,
       "show_enemies": true,
-      "hide_native": true
+      "hide_native": false
     },
     "85": {
       "enabled": true,
@@ -319,6 +319,27 @@
       "show_allies": false,
       "show_enemies": true,
       "hide_native": true
+    },
+    "5010": {
+      "enabled": false,
+      "fill": "#ffffff",
+      "outline": "#ffffff",
+      "opacity": 100,
+      "symbol": "diagonal",
+      "radius": 0,
+      "shape": "point",
+      "skill_id": 5010,
+      "area_override": false,
+      "preview_appearance": true,
+      "selection_preview": true,
+      "cast_preview": true,
+      "preview_fill": null,
+      "preview_outline": null,
+      "preview_symbol": null,
+      "preview_opacity": null,
+      "show_allies": false,
+      "show_enemies": false,
+      "hide_native": false
     }
   },
   "sides_version": 2,

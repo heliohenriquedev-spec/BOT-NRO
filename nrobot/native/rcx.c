@@ -1,4 +1,5 @@
-/* NRO floor-cell renderer. No network/gameplay writes; only D3D render-state interception.
+/* NRO floor-cell renderer. No network/gameplay writes; only D3D render-state interception
+ * and disabling the camera's screen shake (CView::SetQuake).
  * Built for the SHA-pinned VC6 x86 client described in rcx_client.py.
  * Rendering model researched against SimpleROHook's DrawM2E (GPL-3.0).
  * This independent native component is distributed under GPL-3.0-or-later.
@@ -247,16 +248,44 @@ static void draw_cells(IDirect3DDevice7 *device) {
     s->drawn=SUCCEEDED(result)?(LONG)accepted:0;
     s->error=SUCCEEDED(result)?0:6;
 }
+/* Screen shake (Meteor Storm, Earthquake...): CView (mode+0xB8) keeps m_sideQuake/m_frontQuake/
+   m_latitudeQuake at +4..+0xC and m_isQuake at +0x14 (SimpleROHook map.h; m_viewMatrix at +0x98
+   matches the validated layout of both November clients). Cleared every frame, so the camera
+   never shakes; nothing else of the game is touched. */
+static void stop_quake(void) {
+    DWORD mode=word(shared->mode_manager+4),view=mode?word(mode+0xb8):0,flag=0;
+    if(!view || !copy_memory(view+0x14,&flag,4) || !flag) return;
+    MEMORY_BASIC_INFORMATION info;
+    if(!VirtualQuery((void*)(uintptr_t)view,&info,sizeof(info)) || info.State!=MEM_COMMIT
+       || !(info.Protect&(PAGE_READWRITE|PAGE_EXECUTE_READWRITE))) return;
+    float *quake=(float*)(uintptr_t)(view+4);quake[0]=quake[1]=quake[2]=0.0f;
+    *(volatile DWORD*)(uintptr_t)(view+0x14)=0;
+}
 static HRESULT WINAPI intercepted_state(IDirect3DDevice7 *device,D3DRENDERSTATETYPE type,DWORD value) {
     SetState original=NULL;
     for(LONG i=0;i<binding_count;i++) if(bindings[i].table==device->lpVtbl) {original=bindings[i].original;break;}
     if(!original) return E_FAIL;
     if(type==D3DRENDERSTATE_ZENABLE && value==FALSE && InterlockedCompareExchange(&in_draw,1,0)==0) {
-        if(shared) { shared->attached=1;shared->frames++;shared->status=3; }
+        if(shared) { shared->attached=1;shared->frames++;shared->status=3;stop_quake(); }
         draw_cells(device);
         InterlockedExchange(&in_draw,0);
     }
     return original(device,type,value);
+}
+/* CView::SetQuake (thiscall, 5 args, ret 0x14) at 0x50A920 in both November clients (one and
+   three bars, identical bytes): it starts the screen shake of Meteor Storm, Earthquake... Turned
+   into an immediate return, so the camera never shakes, not even for one frame. Only patched
+   when the original bytes match exactly. */
+static const BYTE quake_original[18]={0x55,0x8B,0xEC,0x8B,0x45,0x08,0x56,0x8B,0xF1,0x89,0x46,0x14,0xFF,0x15,0x34,0x94,0x6B,0x00};
+static void disable_quake(void) {
+    BYTE *code=(BYTE*)(uintptr_t)0x50A920,now[18];DWORD protection,ignored;
+    if(!copy_memory((uintptr_t)code,now,sizeof(now))) return;
+    if(now[0]==0xC2&&now[1]==0x14&&now[2]==0x00) return;
+    if(memcmp(now,quake_original,sizeof(now))) return;
+    if(!VirtualProtect(code,3,PAGE_EXECUTE_READWRITE,&protection)) return;
+    code[0]=0xC2;code[1]=0x14;code[2]=0x00;
+    VirtualProtect(code,3,protection,&ignored);
+    FlushInstructionCache(GetCurrentProcess(),code,3);
 }
 static DWORD WINAPI worker(void *unused) {
     char name[100]; snprintf(name,sizeof(name),"Local\\NroRcx1_%lu_" RCX_BUILD_ID,GetCurrentProcessId());
@@ -264,6 +293,7 @@ static DWORD WINAPI worker(void *unused) {
     if(!mapping) return 1;
     shared=(Shared*)MapViewOfFile(mapping,FILE_MAP_ALL_ACCESS,0,0,sizeof(Shared));
     if(!shared || shared->magic!=MAGIC || shared->version!=2 || shared->pid!=GetCurrentProcessId()) return 2;
+    disable_quake();
     for(;;) {
         if(shared->enabled && GetTickCount()-shared->last_feed<2500) {
             IDirect3DDevice7 *device=(IDirect3DDevice7*)(uintptr_t)word(word(shared->renderer_global)+0x7c);

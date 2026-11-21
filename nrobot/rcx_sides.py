@@ -34,6 +34,7 @@ class Sides:
         self.pvp = False
         self.bg_map = False  # map type packet (01D6) since the last map change: a battleground
         self.map_name = ''
+        self.current_map = ''  # map of the last map change seen (same-map changes keep the sides)
         self.party = set()  # real party members (account ids), from the party packets
         self.guild = {}  # own guild_id / guild name
         self.owners = {}  # summon id -> owner id, current map only
@@ -46,6 +47,12 @@ class Sides:
             kind = event['kind']
             identity = event.get('entity_id')
             if kind in ('map_change', 'map_transfer'):
+                target = str(event.get('map') or '').lower()
+                if target and target == self.current_map:
+                    # Respawn/teleport inside the same map (BG, PvP): the server does not resend
+                    # the map property or the teams, so the sides stay as they were.
+                    continue
+                self.current_map = target
                 changed |= bool(self.teams or self.pvp or self.owners)
                 self.teams.clear(); self.owners.clear(); self.summon_casts.clear()
                 self.pvp = self.bg_map = False

@@ -1,7 +1,7 @@
 {
- "version": "2026.11.20.2",
- "published_at": "2026-11-20T17:14:47",
- "notes": "a",
+ "version": "2026.11.21.1",
+ "published_at": "2026-11-21T04:11:33",
+ "notes": "changelog",
  "files": [
   "ABRIR_RCX.bat",
   "CHANGELOG.md",
@@ -259,6 +259,7 @@
   "data/monstros_base/sprites/3823.png",
   "data/monstros_base/sprites/3824.png",
   "data/monstros_base/sprites/3825.png",
+  "data/recursos/armazem_pacotes.json",
   "data/recursos/colisoes.json",
   "data/recursos/habilidades_ids.json",
   "data/recursos/itens.json",
@@ -267,6 +268,7 @@
   "data/recursos/rcx/config_enviada.json",
   "data/recursos/rcx/nro_rcx_0523d0bf3f4b.dll",
   "data/recursos/rcx/nro_rcx_07b58f0c8129.dll",
+  "data/recursos/rcx/nro_rcx_8c37c9b0d13b.dll",
   "data/recursos/rcx/nro_rcx_be4d5efec895.dll",
   "data/recursos/rcx/renderer.json",
   "data/recursos/rcx/skills.json",
@@ -1777,7 +1779,8 @@
   "graphify-out/cache/ast/v0.9.111-s47-g460503b3f2a4/fee84b0680f912830dfd362d1d87afbbad62fa04b196a0b8c2f396bd6b676482.json",
   "graphify-out/cache/ast/v0.9.111-s47-g460503b3f2a4/ff317e9c1113b59cb3b10dd7796e6af41549a4b3e2288237d99d60dd242a639e.json",
   "graphify-out/cache/ast/v0.9.111-s47-g460503b3f2a4/ff7251aecdd7c01dc6194482c165612e606a51964f6c5e7efafc34992e0442e7.json",
-  "graphify-out/cache/hook_sessions/626e4dc9-d4ce-448c-bcd0-1f22657c47d9.nudges",
+  "graphify-out/cache/hook_sessions/208b39b3-cca8-479c-ab52-970b0867e8b7.nudges",
+  "graphify-out/cache/hook_sessions/47846c30-744f-4011-9fee-ffd3f9e2438b.nudges",
   "graphify-out/cache/stat-index.json",
   "graphify-out/graph.html",
   "graphify-out/graph.json",
@@ -1891,6 +1894,8 @@
   "nrobot/showmobs_cycle_panel.py",
   "nrobot/skill_panel.py",
   "nrobot/sprite_reader.py",
+  "nrobot/storage.py",
+  "nrobot/storage_panel.py",
   "nrobot/summon_queue.py",
   "nrobot/titan.py",
   "nrobot/titan_overlay.py",
@@ -2495,5 +2500,5 @@
   "tmpczbv9467/third_party/rathena/grfio.cpp",
   "tmpczbv9467/versao.json"
  ],
- "files_digest": "043f0e5c8ef0"
+ "files_digest": "f8df6f493329"
 }

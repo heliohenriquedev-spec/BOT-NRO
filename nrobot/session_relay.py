@@ -180,6 +180,9 @@ class SessionRelay(QuestRelay):
         self.map_repository = None
         from .ammo import AmmoInventory
         self.ammo = AmmoInventory()
+        from .storage import Storage
+        self.storage = Storage()
+        self.storage_resume = False
         from .presence_guard import PresenceGuard
         self.presence = PresenceGuard()
         self.presence_hold = None
@@ -509,6 +512,7 @@ class SessionRelay(QuestRelay):
             self.map_loaded_at = time.monotonic()  # the client finished loading the map
         for opcode, frame in self.native_frames.frames:
             self.quests.native(opcode,frame,self.tracker.observer.map_name)
+            self.storage.client(opcode, frame, time.monotonic())
             self.npc_transports.client(opcode,frame,self.tracker.observer.map_name,self.quests.actors)
             if opcode == 0xf3 and b'@showmobs' in frame.lower():
                 text = frame[4:].split(b'\0')[0].decode('cp1252', 'replace')
@@ -1341,6 +1345,8 @@ class SessionRelay(QuestRelay):
             command = request['command']
             if command.startswith('quest_'):
                 self.quest_control(command,request,game_gate)
+            elif command.startswith('storage_'):
+                self.storage_control(command, request, game_gate)
             elif command == 'apply':
                 self.apply_settings(request['settings'])
                 if self.quests.active:
@@ -1798,6 +1804,91 @@ class SessionRelay(QuestRelay):
             await self.upstream.drain()
             print('[LOOT] Enviado: '+text)
 
+    def storage_control(self, command, request, game_gate):
+        """Aba Armazem: options, learning the three storage requests, withdrawing chosen items."""
+        from . import storage
+        st = self.storage
+        if command == 'storage_config':
+            values = {k: request[k] for k in ('auto_enabled', 'threshold', 'keep_ids', 'refused_ids') if k in request}
+            st.config = storage.save(values)
+            return
+        if command == 'storage_learn':
+            what = request.get('what')
+            if what not in ('store', 'take', 'close'):
+                raise ValueError('Aprendizado desconhecido')
+            if self.upstream is None:
+                raise ValueError('Entre no personagem antes')
+            st.learning = what
+            st.reason = {'store': 'Abra o @storage e guarde no jogo um item com quantidade 2 ou mais',
+                         'take': 'Com o @storage aberto, retire no jogo um item com quantidade 2 ou mais',
+                         'close': 'Com o @storage aberto, feche a janela do armazem no jogo'}[what]
+            return
+        if command == 'storage_learn_cancel':
+            st.learning = None
+            st.reason = 'Aprendizado cancelado'
+            return
+        if command == 'storage_withdraw':
+            wanted = [dict(item_id=int(i['item_id']), amount=max(0, int(i.get('amount') or 0)))
+                      for i in request.get('items') or []]
+            if not wanted:
+                raise ValueError('Selecione ao menos um item')
+            missing = [m for m in st.missing() if m != 'guardar']
+            if missing:
+                raise ValueError('Aprenda antes na aba Armazem: '+', '.join(missing))
+            if st.job is not None:
+                raise ValueError('O armazem ja esta em uso pelo bot')
+            if not self.allow_commands or self.upstream is None or not game_gate() or self.commands_blocked:
+                raise ValueError('Entre no personagem e libere os envios antes')
+            if self.hunt.enabled:
+                self.hunt.pause('retirando itens do armazem')
+                self.storage_resume = True
+            st.start_withdraw(wanted, time.monotonic())
+            print('[ARMAZEM] '+st.reason)
+            return
+        raise ValueError('Comando do armazem desconhecido')
+
+    async def storage_tick(self, *, game_gate):
+        """Heavy while hunting: @storage, the Item/Etc tabs in, close, hunt again."""
+        st = self.storage
+        now = time.monotonic()
+        name = (self.own_look or {}).get('name')
+        st.character = name or ''
+        if not name or not self.allow_commands or self.login_phase != 'map' or self.upstream is None:
+            return
+        q = self.quests
+        hunting = self.hunt.enabled or (self.storage_resume and st.job is None)
+        if (st.job is None and hunting and st.wants_auto(now, self.ammo.items) and not q.recording
+                and not (q.active and q.phase != 'hunt') and not self.commands_blocked):
+            self.hunt.pause('peso alto: guardando itens no armazem')
+            self.storage_resume = True
+            st.start_deposit(self.ammo.items, now)
+            print('[ARMAZEM] '+st.reason)
+        if st.job is None:
+            if self.storage_resume:
+                if self.commands_blocked:
+                    self.storage_resume = False  # stopped by the player: stays stopped
+                elif game_gate() and not self.hunt.enabled:
+                    # Kept until the hunt really starts again (a failed resume left it paused for good).
+                    self.storage_resume = False
+                    print('[ARMAZEM] '+st.reason+'; voltando a cacar')
+                    self.hunt.start()
+            return
+        if self.hunt.enabled:
+            self.hunt.pause('usando o armazem')
+            self.storage_resume = True
+        if not self.native_frames.ready or not game_gate():
+            return  # nothing is marked as sent while the game connection is busy
+        from .mob_info import chat_command
+        async with self.send_lock:
+            if not self.native_frames.ready or not game_gate() or self.upstream is None:
+                return
+            payload = st.step(now, lambda text: chat_command(text, name))
+            if payload is None:
+                return
+            self.trace_map_send('bot', struct.unpack_from('<H', payload)[0], len(payload))
+            self.upstream.write(payload)
+            await self.upstream.drain()
+
     async def send_mob_info(self, *, game_gate):
         now = time.monotonic()
         species = self.mob_info.due(now)
@@ -2133,6 +2224,7 @@ class SessionRelay(QuestRelay):
             'leader_id':self.group_leader_id() if self.group_follower() else None, 'target_id':self.group.target_id,
             'reason':self.group.reason, 'follow_only':bool(self.settings and self.settings['group_follow_only'])}
         state.update(stage=self.stage, relay_error=self.error, ammo=self.ammo.snapshot(time.monotonic()),
+                     storage=self.storage.snapshot(),
                      quests=self.quests.snapshot(),
                      bg_damage=self.bg_damage.snapshot(self.character_id or observer.player_id),
                      observation_suspended_for_route=self.observation_suspended_for_route(),
@@ -2371,6 +2463,7 @@ class SessionRelay(QuestRelay):
                     print(f'[INFO] {note} | ID {identity} | celula {entity.get("position")}')
             self.learn_monsters(events)
             self.ammo.observe(events, time.monotonic())
+            self.storage.observe(events, time.monotonic())
             self.presence.observe(events, self.tracker.observer.player_id, time.monotonic(),
                                   own_position=self.tracker.observer.player)
             self.track_players(events)
@@ -4135,6 +4228,7 @@ async def run(args):
                     if not loading:
                         await relay.send_mob_info(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                         await relay.send_loot_commands(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
+                        await relay.storage_tick(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                         await relay.send_mob_scan(game_gate=lambda: controls.connected(relay.game_peer, relay.game_local))
                     if relay.hunt.enabled and not route_travel:
                         if relay.waiting_hunt_transfer(controls.connected(relay.game_peer, relay.game_local)):

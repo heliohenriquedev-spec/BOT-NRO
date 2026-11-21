@@ -398,8 +398,8 @@
    "to": "ve_fild04",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    79,
-    140
+    254,
+    264
    ]
   },
   "217,86>anthell01>Esconderijo do Clã Kamizuru Nível 2": {
@@ -450,8 +450,8 @@
    "to": "anthell01",
    "name": "Viajante Ninja#h2-8",
    "arrival": [
-    177,
-    226
+    257,
+    237
    ]
   },
   "217,86>um_dun01>Esconderijo do Clã Kamizuru": {
@@ -1036,8 +1036,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    31,
-    45
+    78,
+    4
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [3] |Sim": {
@@ -1077,8 +1077,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    43,
-    45
+    16,
+    49
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [5] |Sim": {
@@ -1118,8 +1118,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    52,
-    15
+    43,
+    28
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [1] |Sim": {
@@ -1159,8 +1159,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    59,
-    9
+    79,
+    6
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [4] |Sim": {
@@ -1200,8 +1200,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    30,
-    49
+    59,
+    22
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [6] |Sim": {
@@ -1241,8 +1241,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    33,
-    47
+    32,
+    15
    ]
   },
   "78,121>new_4-2>- Sim": {
@@ -1354,8 +1354,8 @@
    "to": "chunin",
    "name": "Arenas de Guerra#3",
    "arrival": [
-    43,
-    7
+    49,
+    5
    ]
   },
   "100,146>chunin>^9A32CDArena Chunin^000000 [7] |Sim": {
@@ -2464,7 +2464,7 @@
       87,
       46
      ],
-     "name": "Retorno"
+     "name": ""
     },
     {
      "kind": "next",
@@ -2485,7 +2485,7 @@
     }
    ],
    "to": "kakashi",
-   "name": "Retorno",
+   "name": "",
    "arrival": [
     86,
     135
@@ -2525,6 +2525,44 @@
     }
    ],
    "to": "0012@caves",
+   "name": "Mestre das Marionetes#6",
+   "arrival": [
+    9,
+    195
+   ]
+  },
+  "196,364>0022@caves>Entrar na Dungeon|Entrar com grupo existente|Mestre das Marionetes    [0/1]": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "moc_fild06.gat",
+     "position": [
+      196,
+      364
+     ],
+     "name": "Mestre das Marionetes#6"
+    },
+    {
+     "kind": "select",
+     "map": "moc_fild06.gat",
+     "option": "Entrar na Dungeon"
+    },
+    {
+     "kind": "select",
+     "map": "moc_fild06.gat",
+     "option": "Entrar com grupo existente"
+    },
+    {
+     "kind": "select",
+     "map": "moc_fild06.gat",
+     "option": "Mestre das Marionetes    [0/1]"
+    },
+    {
+     "kind": "wait_map",
+     "map": "0022@caves.gat"
+    }
+   ],
+   "to": "0022@caves",
    "name": "Mestre das Marionetes#6",
    "arrival": [
     9,
@@ -2671,6 +2709,79 @@
      "kind": "select",
      "map": "bibli_02.gat",
      "option": "Escolher Inuzuka"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "wait_map",
+     "map": "pvp_n_1-1.gat"
+    }
+   ],
+   "to": "pvp_n_1-1",
+   "name": "Pesquisador#11",
+   "arrival": [
+    100,
+    179
+   ]
+  },
+  "61,36>pvp_n_1-1>- Kikaichu|- Sim. Eu sou deste clã": {
+   "steps": [
+    {
+     "kind": "npc",
+     "map": "bibli_02.gat",
+     "position": [
+      61,
+      36
+     ],
+     "name": "Pesquisador#11"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "select",
+     "map": "bibli_02.gat",
+     "option": "- Kikaichu"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
+    },
+    {
+     "kind": "select",
+     "map": "bibli_02.gat",
+     "option": "- Sim. Eu sou deste clã"
+    },
+    {
+     "kind": "next",
+     "map": "bibli_02.gat"
     },
     {
      "kind": "next",

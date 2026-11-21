@@ -943,7 +943,7 @@
    "sprite": 806
   },
   "115,114": {
-   "name": "Battleground 4x4",
+   "name": "Battleground 5x5",
    "sprite": 806
   }
  },
@@ -1175,7 +1175,7 @@
    "sprite": 99
   },
   "62,173": {
-   "name": "",
+   "name": "Instrutor de Geografia",
    "sprite": 882
   },
   "62,176": {
@@ -1897,7 +1897,7 @@
    "sprite": 940
   },
   "84,66": {
-   "name": "",
+   "name": "Vendedora de HATs",
    "sprite": 940
   },
   "91,66": {
@@ -2319,6 +2319,22 @@
   "356,81": {
    "name": "Túmulo",
    "sprite": 72
+  },
+  "346,293": {
+   "name": "Túmulo",
+   "sprite": 72
+  }
+ },
+ "0035@tower": {
+  "71,72": {
+   "name": "Assistente da Torre",
+   "sprite": 100
+  }
+ },
+ "0022@caves": {
+  "9,195": {
+   "name": "Mestre",
+   "sprite": 55
   }
  }
 }

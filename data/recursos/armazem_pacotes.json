@@ -1,0 +1,17 @@
+{
+  "take": {
+    "hex": "f700633762356136313163636300150061000c000000",
+    "index_offset": 14,
+    "amount_offset": 18,
+    "amount_size": 4
+  },
+  "close": {
+    "hex": "9301"
+  },
+  "store": {
+    "hex": "940038333534003a00000c000000",
+    "index_offset": 7,
+    "amount_offset": 10,
+    "amount_size": 4
+  }
+}

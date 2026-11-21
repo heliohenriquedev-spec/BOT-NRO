@@ -144,13 +144,17 @@
  "1023": {
   "species_id": 1023,
   "maps": {
-   "0012@caves": 0
+   "0012@caves": 0,
+   "0022@caves": 0
   },
   "name": "Nukenin Taijutsu",
   "max_hp": 300000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "0012@caves": [
+    "Nukenin Taijutsu"
+   ],
+   "0022@caves": [
     "Nukenin Taijutsu"
    ]
   },
@@ -236,7 +240,7 @@
    "bossnia_01": 0
   },
   "walk_speed_ms": 150,
-  "name": "Kaguya",
+  "name": "Mula sem Cabesa",
   "max_hp": 2300000,
   "sprite_source": "Namekuji.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -246,7 +250,8 @@
     "Gomen",
     "Kuka Beludo",
     "Lost in Light",
-    "Mula sem Cabesa"
+    "Mula sem Cabesa",
+    "Void"
    ],
    "0045@tower": [
     "Black Over",
@@ -281,7 +286,10 @@
    ],
    "0035@tower": [
     "Deca",
-    "Mula sem Cabesa"
+    "Haiyashinin",
+    "Kuka Beludo",
+    "Mula sem Cabesa",
+    "Void"
    ],
    "izlu2dun": [
     "Kanon"
@@ -307,9 +315,11 @@
     "Konan Araya",
     "Kuka Beludo",
     "Kuri",
+    "LeagueofSexo",
     "Lost in Light",
     "Low profile",
     "Macaco Mico Meu",
+    "Mangetsu",
     "Mula sem Cabesa",
     "Musashi",
     "Mymma Cetha",
@@ -338,6 +348,8 @@
     "Kakashi",
     "Kuka Beludo",
     "Kuri",
+    "LeagueofSexo",
+    "Lost in Light",
     "Low profile",
     "Macaco Mico Meu",
     "Mula sem Cabesa",
@@ -1118,10 +1130,13 @@
    "moc_fild08": 10,
    "hu_fild07": 13,
    "mjolnir_07": 0,
-   "kakashi": 0
+   "kakashi": 0,
+   "chunin": 0,
+   "bat_c02": 0,
+   "new_4-2": 0
   },
-  "walk_speed_ms": 112,
-  "name": "John",
+  "walk_speed_ms": 200,
+  "name": "Akamaru",
   "max_hp": 4000000,
   "sprite_source": "Akamaru1.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -1138,6 +1153,15 @@
    "kakashi": [
     "John",
     "cuzinho"
+   ],
+   "chunin": [
+    "Myka"
+   ],
+   "bat_c02": [
+    "Myka"
+   ],
+   "new_4-2": [
+    "Myka"
    ]
   }
  },
@@ -1212,14 +1236,26 @@
  "1132": {
   "species_id": 1132,
   "maps": {
-   "kakashi": 0
+   "kakashi": 0,
+   "chunin": 0,
+   "bat_c02": 0,
+   "new_4-2": 0
   },
-  "name": "John",
+  "name": "Myka",
   "max_hp": 3000000,
   "walk_speed_ms": 150,
   "names_by_map": {
    "kakashi": [
     "John"
+   ],
+   "chunin": [
+    "Myka"
+   ],
+   "bat_c02": [
+    "Myka"
+   ],
+   "new_4-2": [
+    "Myka"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -1353,7 +1389,7 @@
    "ama_fild01": 0
   },
   "walk_speed_ms": 150,
-  "name": "Ootsutsuki Kabuto",
+  "name": "Doki",
   "max_hp": 2000000,
   "sprite_source": "GRF prioritário",
   "names_by_map": {
@@ -1964,10 +2000,12 @@
    "bat_c02": 0,
    "kakashi": 0,
    "arug_cas01": 0,
-   "ein_dun01": 0
+   "ein_dun01": 0,
+   "0035@tower": 0,
+   "0015@tower": 0
   },
   "captured_sprite": true,
-  "name": "Midoriya",
+  "name": "Vegeta",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -1990,6 +2028,12 @@
    ],
    "ein_dun01": [
     "Vegeta"
+   ],
+   "0035@tower": [
+    "Vegeta"
+   ],
+   "0015@tower": [
+    "Vegeta"
    ]
   }
  },
@@ -2006,9 +2050,9 @@
    "arug_cas01": 0
   },
   "captured_sprite": true,
-  "name": "Midoriya",
+  "name": "dzsete",
   "max_hp": 2000000,
-  "walk_speed_ms": 225,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "izlu2dun": [
     "Ritual"
@@ -2057,7 +2101,7 @@
    "kakashi": 0,
    "arug_cas01": 0
   },
-  "name": "Hitmonlee",
+  "name": "ThePein",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -2083,7 +2127,8 @@
     "Kazekage"
    ],
    "kakashi": [
-    "Chupa Charque"
+    "Chupa Charque",
+    "ThePein"
    ],
    "arug_cas01": [
     "Hitmonlee"
@@ -2108,9 +2153,9 @@
    "prt_fild02": 0,
    "areia": 0
   },
-  "name": "Yhwach",
+  "name": "Myka",
   "max_hp": 2000000,
-  "walk_speed_ms": 600,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
     "Ishida",
@@ -2118,6 +2163,7 @@
     "Macro",
     "Massacrento",
     "Myka",
+    "Neji Hyuuga",
     "Portajanela",
     "Yhwach",
     "Zamasu"
@@ -2168,6 +2214,7 @@
     "Zetsu"
    ],
    "kakashi": [
+    "Ishida",
     "Macro",
     "Myka",
     "Portajanela",
@@ -2229,7 +2276,7 @@
    "areia": 0
   },
   "captured_sprite": true,
-  "name": "Yhwach",
+  "name": "Ishida",
   "max_hp": 2000000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -2315,9 +2362,11 @@
    "mosk_dun01": 0,
    "0022@cata": 0,
    "0012@cata": 0,
-   "0032@cata": 0
+   "0032@cata": 0,
+   "cmd_fild01": 0,
+   "0035@tower": 0
   },
-  "name": "Bandido Assassino",
+  "name": "Bandido",
   "max_hp": 1000000,
   "walk_speed_ms": 165,
   "sprite_source": "GRF prioritário",
@@ -2348,6 +2397,12 @@
    ],
    "0032@cata": [
     "Bandido Assassino"
+   ],
+   "cmd_fild01": [
+    "Bandido"
+   ],
+   "0035@tower": [
+    "Bandido"
    ]
   }
  },
@@ -2359,10 +2414,11 @@
    "0045@tower": 0,
    "yuno_fild07": 0,
    "spl_fild03": 0,
-   "mjolnir_11": 0
+   "mjolnir_11": 0,
+   "0035@tower": 0
   },
   "sprite_source": "GRF prioritário",
-  "walk_speed_ms": 660,
+  "walk_speed_ms": 165,
   "name": "Katsuyo",
   "max_hp": 2468000,
   "names_by_map": {
@@ -2380,19 +2436,26 @@
    ],
    "mjolnir_11": [
     "Katsuyo"
+   ],
+   "0035@tower": [
+    "Katsuyo"
    ]
   }
  },
  "1397": {
   "species_id": 1397,
   "maps": {
-   "0012@caves": 0
+   "0012@caves": 0,
+   "0022@caves": 0
   },
   "name": "Hiruko",
   "max_hp": 20000000,
   "walk_speed_ms": 100,
   "names_by_map": {
    "0012@caves": [
+    "Hiruko"
+   ],
+   "0022@caves": [
     "Hiruko"
    ]
   },
@@ -2403,11 +2466,12 @@
   "maps": {
    "alde_dun02": 0,
    "gl_prison": 0,
-   "0012@caves": 0
+   "0012@caves": 0,
+   "0022@caves": 0
   },
-  "name": "Nukenin Assassino ",
+  "name": "Nagamaru",
   "max_hp": 1611230,
-  "walk_speed_ms": 300,
+  "walk_speed_ms": 200,
   "names_by_map": {
    "alde_dun02": [
     "Nukenin Assassino "
@@ -2416,6 +2480,9 @@
     "Nukenin Assassino "
    ],
    "0012@caves": [
+    "Nagamaru"
+   ],
+   "0022@caves": [
     "Nagamaru"
    ]
   },
@@ -2502,10 +2569,11 @@
    "0015@tower": 0,
    "0045@tower": 0,
    "yuno_fild07": 0,
-   "mjolnir_11": 0
+   "mjolnir_11": 0,
+   "0035@tower": 0
   },
   "sprite_source": "GRF prioritário",
-  "walk_speed_ms": 250,
+  "walk_speed_ms": 800,
   "name": "Manda",
   "max_hp": 2468000,
   "names_by_map": {
@@ -2519,6 +2587,9 @@
     "Manda"
    ],
    "mjolnir_11": [
+    "Manda"
+   ],
+   "0035@tower": [
     "Manda"
    ]
   }
@@ -2602,6 +2673,7 @@
     "Sakura"
    ],
    "bat_c02": [
+    "Akasuna no Sasori",
     "Izuna",
     "Souzou Saisei"
    ],
@@ -2616,7 +2688,7 @@
     "Souzou Saisei"
    ]
   },
-  "name": "Sakura",
+  "name": "Akasuna no Sasori",
   "max_hp": 2000000,
   "walk_speed_ms": 150
  },
@@ -2650,6 +2722,7 @@
     "Sakura"
    ],
    "bat_c02": [
+    "Akasuna no Sasori",
     "Souzou Saisei"
    ],
    "arug_cas01": [
@@ -2660,9 +2733,9 @@
     "Ghoul"
    ]
   },
-  "name": "Ghoul",
+  "name": "Akasuna no Sasori",
   "max_hp": 2000000,
-  "walk_speed_ms": 112
+  "walk_speed_ms": 150
  },
  "1494": {
   "species_id": 1494,
@@ -2697,13 +2770,17 @@
  "1507": {
   "species_id": 1507,
   "maps": {
-   "0012@caves": 0
+   "0012@caves": 0,
+   "0022@caves": 0
   },
   "name": "Kenshin",
   "max_hp": 300000,
   "walk_speed_ms": 200,
   "names_by_map": {
    "0012@caves": [
+    "Kenshin"
+   ],
+   "0022@caves": [
     "Kenshin"
    ]
   },
@@ -2892,10 +2969,11 @@
    "mosk_que": 0,
    "prt_fild05": 0,
    "prt_fild00": 0,
-   "ama_fild01": 0
+   "ama_fild01": 0,
+   "0035@tower": 0
   },
-  "walk_speed_ms": 200,
-  "name": "Medinin renegado",
+  "walk_speed_ms": 170,
+  "name": "Jounin",
   "max_hp": 30000000,
   "sprite_source": "Jounin.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -2929,6 +3007,9 @@
    "ama_fild01": [
     "Jounin",
     "Líder Jounin"
+   ],
+   "0035@tower": [
+    "Jounin"
    ]
   }
  },
@@ -2940,11 +3021,12 @@
    "0045@tower": 0,
    "yuno_fild07": 0,
    "mjolnir_11": 0,
-   "bossnia_01": 0
+   "bossnia_01": 0,
+   "0035@tower": 0
   },
   "sprite_source": "GRF prioritário",
   "walk_speed_ms": 180,
-  "name": "ANBU",
+  "name": "Anbu",
   "max_hp": 1200000,
   "names_by_map": {
    "0015@tower": [
@@ -2964,6 +3046,9 @@
    ],
    "bossnia_01": [
     "ANBU"
+   ],
+   "0035@tower": [
+    "Anbu"
    ]
   }
  },
@@ -3018,7 +3103,7 @@
    "prt_fild01": 0
   },
   "walk_speed_ms": 100,
-  "name": "Genin",
+  "name": "Líder Genin",
   "max_hp": 36000,
   "sprite_source": "Genin.spr (Naruto Ultimate)",
   "captured_sprite": true,
@@ -3075,7 +3160,8 @@
   "species_id": 1737,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Ichibi",
   "max_hp": 25000000,
@@ -3086,6 +3172,9 @@
    ],
    "0045@tower": [
     "Ichibi"
+   ],
+   "0035@tower": [
+    "Ichibi"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3094,16 +3183,20 @@
   "species_id": 1738,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Hachibi",
   "max_hp": 42500000,
-  "walk_speed_ms": 150,
+  "walk_speed_ms": 112,
   "names_by_map": {
    "0015@tower": [
     "Hachibi"
    ],
    "0045@tower": [
+    "Hachibi"
+   ],
+   "0035@tower": [
     "Hachibi"
    ]
   },
@@ -3132,7 +3225,8 @@
   "species_id": 1771,
   "maps": {
    "gl_prison": 0,
-   "0012@caves": 0
+   "0012@caves": 0,
+   "0022@caves": 0
   },
   "name": "Nukenin",
   "max_hp": 1300000,
@@ -3142,6 +3236,9 @@
     "Nukenin"
    ],
    "0012@caves": [
+    "Nukenin"
+   ],
+   "0022@caves": [
     "Nukenin"
    ]
   },
@@ -3159,11 +3256,12 @@
    "new_4-2": 0,
    "bat_c03": 0,
    "arug_cas01": 0,
-   "ein_dun01": 0
+   "ein_dun01": 0,
+   "0015@tower": 0
   },
-  "name": "Ootsutsuki Kabuto",
+  "name": "Akasuna no Sasori",
   "max_hp": 2000000,
-  "walk_speed_ms": 225,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "chunin": [
     "Anko",
@@ -3215,6 +3313,9 @@
    ],
    "ein_dun01": [
     "Gangetsu Hozuki"
+   ],
+   "0015@tower": [
+    "Akasuna no Sasori"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3246,9 +3347,10 @@
    "bat_c03": 0,
    "arug_cas01": 0,
    "ama_fild01": 0,
-   "areia": 0
+   "areia": 0,
+   "0015@tower": 0
   },
-  "name": "Black Ass",
+  "name": "Akasuna no Sasori",
   "max_hp": 2100000,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -3271,11 +3373,13 @@
     "Temari"
    ],
    "bat_c02": [
+    "Akasuna no Sasori",
     "Black Ass",
     "Black Yugan",
     "Gangetsu Hozuki",
     "Kagura Hozuki",
     "Marlombrissimo Kid",
+    "Roseli",
     "Temari"
    ],
    "arug_cas03": [
@@ -3301,6 +3405,9 @@
    ],
    "areia": [
     "Temari"
+   ],
+   "0015@tower": [
+    "Akasuna no Sasori"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3395,7 +3502,8 @@
    "arug_cas03": 0,
    "poring_c01": 0,
    "0015@tower": 0,
-   "arug_cas01": 0
+   "arug_cas01": 0,
+   "0035@tower": 0
   },
   "names_by_map": {
    "bat_c02": [
@@ -3414,7 +3522,8 @@
    "chunin": [
     "Kakashi",
     "Kuka Beludo",
-    "Saga"
+    "Saga",
+    "Vagnerock"
    ],
    "tur_dun01": [
     "Saga"
@@ -3462,9 +3571,12 @@
     "Low profile",
     "Saga",
     "Vagnerock"
+   ],
+   "0035@tower": [
+    "Kuka Beludo"
    ]
   },
-  "name": "Low profile",
+  "name": "Kuka Beludo",
   "max_hp": 2000000,
   "walk_speed_ms": 150
  },
@@ -3573,13 +3685,17 @@
  "1796": {
   "species_id": 1796,
   "maps": {
-   "0012@caves": 0
+   "0012@caves": 0,
+   "0022@caves": 0
   },
   "name": "Marionete",
   "max_hp": 2000000,
   "walk_speed_ms": 100,
   "names_by_map": {
    "0012@caves": [
+    "Marionete"
+   ],
+   "0022@caves": [
     "Marionete"
    ]
   },
@@ -3739,13 +3855,17 @@
  "1840": {
   "species_id": 1840,
   "maps": {
-   "0012@caves": 0
+   "0012@caves": 0,
+   "0022@caves": 0
   },
   "name": "Marionete",
   "max_hp": 2000000,
   "walk_speed_ms": 100,
   "names_by_map": {
    "0012@caves": [
+    "Marionete"
+   ],
+   "0022@caves": [
     "Marionete"
    ]
   },
@@ -3769,13 +3889,17 @@
  "1879": {
   "species_id": 1879,
   "maps": {
-   "0012@caves": 0
+   "0012@caves": 0,
+   "0022@caves": 0
   },
   "name": "Marionete",
   "max_hp": 2000000,
   "walk_speed_ms": 100,
   "names_by_map": {
    "0012@caves": [
+    "Marionete"
+   ],
+   "0022@caves": [
     "Marionete"
    ]
   },
@@ -3812,9 +3936,10 @@
    "bat_c03": 0,
    "bat_c01": 0,
    "ein_dun01": 0,
-   "areia": 0
+   "areia": 0,
+   "new_4-2": 0
   },
-  "name": "John",
+  "name": "Mula sem Cabesa",
   "max_hp": 2300000,
   "walk_speed_ms": 225,
   "names_by_map": {
@@ -3823,7 +3948,8 @@
     "Deca",
     "Gomen",
     "Lost in Light",
-    "Mula sem Cabesa"
+    "Mula sem Cabesa",
+    "Void"
    ],
    "0045@tower": [
     "Black Over",
@@ -3831,7 +3957,9 @@
     "Mula sem Cabesa"
    ],
    "0035@tower": [
-    "Mula sem Cabesa"
+    "Kuka Beludo",
+    "Mula sem Cabesa",
+    "Void"
    ],
    "ve_fild03": [
     "Mula sem Cabesa"
@@ -3874,6 +4002,9 @@
    ],
    "areia": [
     "John"
+   ],
+   "new_4-2": [
+    "AburameTorune"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3913,16 +4044,20 @@
   "captured_sprite": true,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Shichibi",
   "max_hp": 40000000,
-  "walk_speed_ms": 285,
+  "walk_speed_ms": 190,
   "names_by_map": {
    "0015@tower": [
     "Shichibi"
    ],
    "0045@tower": [
+    "Shichibi"
+   ],
+   "0035@tower": [
     "Shichibi"
    ]
   }
@@ -3954,7 +4089,8 @@
   "species_id": 1985,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Rokubi",
   "max_hp": 37500000,
@@ -3965,6 +4101,9 @@
    ],
    "0045@tower": [
     "Rokubi"
+   ],
+   "0035@tower": [
+    "Rokubi"
    ]
   },
   "sprite_source": "GRF prioritário"
@@ -3973,7 +4112,8 @@
   "species_id": 1986,
   "maps": {
    "0015@tower": 0,
-   "0045@tower": 0
+   "0045@tower": 0,
+   "0035@tower": 0
   },
   "name": "Sanbi",
   "max_hp": 30000000,
@@ -3983,6 +4123,9 @@
     "Sanbi"
    ],
    "0045@tower": [
+    "Sanbi"
+   ],
+   "0035@tower": [
     "Sanbi"
    ]
   },
@@ -4065,7 +4208,7 @@
   },
   "name": "Anko",
   "max_hp": 2000000,
-  "walk_speed_ms": 150,
+  "walk_speed_ms": 226,
   "names_by_map": {
    "chunin": [
     "Anko",
@@ -4134,15 +4277,16 @@
    "hospital2": 0,
    "ein_dun01": 0
   },
-  "name": "Ootsutsuki Kabuto",
+  "name": "Anko",
   "max_hp": 2000000,
-  "walk_speed_ms": 150,
+  "walk_speed_ms": 600,
   "names_by_map": {
    "chunin": [
     "Anko",
     "Kaguya",
     "Massacrento",
     "Ootsutsuki Kabuto",
+    "Percival",
     "Uzumaki Karin",
     "Zelda"
    ],
@@ -5398,11 +5542,12 @@
    "chunin": 0,
    "new_4-2": 0,
    "0015@tower": 0,
-   "ein_dun01": 0
+   "ein_dun01": 0,
+   "0035@tower": 0
   },
-  "name": "Macro",
-  "max_hp": 4246922,
-  "walk_speed_ms": 600,
+  "name": "Kuka Beludo",
+  "max_hp": 4406581,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "kakashi": [
     "Ishida"
@@ -5422,6 +5567,9 @@
    ],
    "ein_dun01": [
     "Black Yugan"
+   ],
+   "0035@tower": [
+    "Kuka Beludo"
    ]
   }
  },
@@ -5439,14 +5587,15 @@
    "kakashi": 0
   },
   "name": "Vegeta",
-  "max_hp": 4404601,
+  "max_hp": 4578163,
   "walk_speed_ms": 150,
   "names_by_map": {
    "0015@tower": [
     "Black Over",
     "Deca",
     "Gomen",
-    "Lost in Light"
+    "Lost in Light",
+    "Vegeta"
    ],
    "0045@tower": [
     "Black Over",
@@ -5454,7 +5603,8 @@
     "Neji Hyuuga"
    ],
    "0035@tower": [
-    "Deca"
+    "Deca",
+    "Vegeta"
    ],
    "hospital2": [
     "John",
@@ -5490,9 +5640,11 @@
    "bat_c03": 0,
    "bat_c02": 0,
    "prt_fild08": 0,
-   "arug_cas01": 0
+   "arug_cas01": 0,
+   "0035@tower": 0,
+   "0015@tower": 0
   },
-  "name": "Ashura Otsutsuki",
+  "name": "Void",
   "max_hp": 3783769,
   "walk_speed_ms": 150,
   "names_by_map": {
@@ -5512,6 +5664,12 @@
    "arug_cas01": [
     "Ashura Otsutsuki",
     "Funkeiro"
+   ],
+   "0035@tower": [
+    "Void"
+   ],
+   "0015@tower": [
+    "Void"
    ]
   }
  },
@@ -5543,7 +5701,7 @@
   },
   "name": "Mula sem Cabesa",
   "max_hp": 5289931,
-  "walk_speed_ms": 600,
+  "walk_speed_ms": 150,
   "names_by_map": {
    "0015@tower": [
     "Mula sem Cabesa"

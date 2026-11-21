@@ -495,10 +495,10 @@
  },
  "ra_fild03": {
   "373,171": {
-   "map": "hospital2",
+   "map": "ve_fild04",
    "arrival": [
-    25,
-    92
+    47,
+    250
    ],
    "confirmed": true,
    "varies": true
@@ -856,12 +856,13 @@
  },
  "cmd_fild03": {
   "150,376": {
-   "map": "umbala",
+   "map": "hospital2",
    "arrival": [
-    130,
-    82
+    25,
+    92
    ],
-   "confirmed": true
+   "confirmed": true,
+   "varies": true
   }
  },
  "prt_fild08": {

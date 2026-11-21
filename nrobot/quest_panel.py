@@ -517,8 +517,8 @@ class ExtrasBox(QGroupBox):
                               ('Testar cura','quest_heal_test'),
                               ('Descartar gravacao da cura','quest_heal_cancel')):
             button=QPushButton(label);button.clicked.connect(lambda checked=False,c=command:self.request(c));heal.addWidget(button)
-        self.repair=WrappingCheckBox('Se a arma ou outro equipamento quebrar: ir ate o Reparador (conversa gravada), consertar, '
-                                     'voltar ao mapa onde estava, recolocar o item e continuar cacando')
+        self.repair=QLabel('Reparo de equipamento quebrado: grave a conversa com o Reparador aqui; '
+                           'ligue ou desligue na aba Configuração.');self.repair.setWordWrap(True)
         repair=FlowLayout()
         for label,command in (('Gravar reparo (Reparador)','quest_repair_record'),('Salvar reparo','quest_repair_save'),
                               ('Testar reparo','quest_repair_test'),
@@ -555,15 +555,14 @@ class ExtrasBox(QGroupBox):
         layout.addWidget(self.repair);layout.addLayout(repair)
         layout.addWidget(self.status)
         self.show_config()
-        for widget in (self.voltar,self.mount,self.revive,self.repair):widget.toggled.connect(self.store)
+        for widget in (self.voltar,self.mount,self.revive):widget.toggled.connect(self.store)
         for widget in (self.calm,self.radius,self.timeout,self.revive_attempts):widget.valueChanged.connect(self.store)
 
     def request(self,command,**values):self.command_requested.emit(command,values)
 
     def show_config(self):
         c=self.config
-        for widget,value in ((self.voltar,c['voltar_enabled']),(self.mount,c['mount_enabled']),(self.revive,c.get('revive_enabled')),
-                             (self.repair,c.get('repair_enabled'))):
+        for widget,value in ((self.voltar,c['voltar_enabled']),(self.mount,c['mount_enabled']),(self.revive,c.get('revive_enabled'))):
             widget.blockSignals(True);widget.setChecked(bool(value));widget.blockSignals(False)
         for widget,value in ((self.calm,c['calm_seconds']),(self.radius,c['clear_radius']),(self.timeout,c['cast_timeout']),
                              (self.revive_attempts,c.get('revive_attempts',4))):
@@ -618,7 +617,6 @@ class ExtrasBox(QGroupBox):
         try:
             self.config=quest_extras.load()
             self.config.update(voltar_enabled=self.voltar.isChecked(),mount_enabled=self.mount.isChecked(),revive_enabled=self.revive.isChecked(),
-                               repair_enabled=self.repair.isChecked(),
                                calm_seconds=self.calm.value(),clear_radius=self.radius.value(),cast_timeout=self.timeout.value(),
                                revive_attempts=self.revive_attempts.value())
             quest_extras.save(self.config)
